@@ -18,7 +18,7 @@ Last verified against local checkouts: 2026-09-18.
 | --- | --- | --- |
 | pezzottify | `pezzottify-server` | **Done** |
 | favzetto | `backend` | **Done** |
-| androidoscopy | `server` | Pending |
+| androidoscopy | `server` | **Done** |
 | crumbles | `crumbles`, `crumbles-integration` | Pending |
 | fausto | `server`; associated plugin API and plugins | Pending |
 | lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | Pending |
@@ -56,6 +56,14 @@ container health/readiness, frontend, and authentication smoke checks. Two API
 tests fail identically on the untouched baseline; existing formatting and
 strict Clippy failures also remain. Its `docs/06-simple-server-migration.md`
 records the evidence. The migration is committed locally, not deployed.
+
+Androidoscopy completed this step in commit `cbaf98a` on `master`, using the same
+pinned public `simple-server` revision and upgrading Axum 0.7.9 to 0.8.9.
+Validation passed 62 server tests (including UDP, WebSocket, and verified TLS
+registration), five E2E unit tests, and seven full-stack scenarios. Existing
+formatting and strict Clippy failures were confirmed against the unchanged
+baseline. Its `docs/simple-server-migration.md` records the results. The migration
+is committed locally, not deployed.
 
 ## Planned steps
 
