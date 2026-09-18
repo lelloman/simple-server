@@ -1,0 +1,11 @@
+[package]
+name = "simple-server"
+version = "0.1.0"
+edition = "2024"
+description = "A modular foundation for Axum-based Rust services"
+repository = "https://github.com/lelloman/simple-server"
+readme = "README.md"
+publish = false
+
+[lints.rust]
+unsafe_code = "forbid"
