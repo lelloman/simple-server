@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>simple-server · Migration matrix</title>
+  <style>
+    :root { color-scheme: light; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #23342e; background: #f5f6f2; }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    header { background: #173c31; color: #f8fbf7; padding: 36px 4vw 32px; }
+    .eyebrow { font-size: 12px; letter-spacing: .13em; text-transform: uppercase; color: #b9d5c8; font-weight: 650; }
+    h1 { font-size: clamp(28px, 4vw, 42px); letter-spacing: -.045em; margin: 10px 0; font-weight: 650; }
+    header p { color: #d1e2d8; max-width: 760px; line-height: 1.6; margin: 0; }
+    main { padding: 26px 4vw 40px; }
+    .summary { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 26px; }
+    .stat { background: white; border: 1px solid #dde3da; border-radius: 12px; padding: 17px 22px; min-width: 180px; flex: 1; }
+    .stat strong { font-size: 29px; letter-spacing: -.04em; display: block; margin-bottom: 3px; }
+    .stat span { font-size: 13px; color: #647369; }
+    .stat.complete { border-top: 3px solid #318469; }
+    .toolbar { display: flex; justify-content: space-between; align-items: end; gap: 18px; flex-wrap: wrap; margin-bottom: 16px; }
+    h2 { font-size: 19px; letter-spacing: -.02em; margin: 0 0 5px; }
+    .muted { color: #647369; font-size: 13px; line-height: 1.6; margin: 0; }
+    .filters { display: flex; gap: 10px; flex-wrap: wrap; }
+    label { display: flex; flex-direction: column; gap: 5px; font-size: 12px; font-weight: 600; }
+    input, select { font: inherit; font-size: 14px; background: white; color: #23342e; border: 1px solid #cbd5ca; border-radius: 7px; padding: 10px 12px; }
+    input { width: 230px; }
+    :focus-visible { outline: 3px solid #548cdd; outline-offset: 3px; }
+    .matrix { overflow: auto; max-height: 76vh; border: 1px solid #d6ded3; border-radius: 12px; background: white; }
+    table { border-collapse: separate; border-spacing: 0; width: 100%; min-width: 1630px; font-size: 13px; }
+    th, td { padding: 16px 12px; text-align: center; border-bottom: 1px solid #e8ece5; }
+    thead th { position: sticky; top: 0; z-index: 2; background: #edf1e9; height: 106px; vertical-align: top; width: 135px; }
+    thead th small { display: block; color: #71806d; font-size: 10px; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 7px; }
+    thead th .availability { display: block; font-size: 10px; font-weight: 500; color: #778273; margin-top: 8px; }
+    thead th.available { background: #e3efe7; }
+    th:first-child { position: sticky; left: 0; min-width: 280px; width: 280px; text-align: left; padding-left: 20px; border-right: 1px solid #dce3d7; }
+    thead th:first-child { z-index: 3; vertical-align: middle; }
+    tbody th { z-index: 1; background: white; font-weight: 650; }
+    tbody th small { font-size: 11px; color: #718071; display: block; font-weight: 400; margin-top: 5px; max-width: 240px; line-height: 1.45; }
+    tbody tr:hover td, tbody tr:hover th { background: #f8faf5; }
+    tbody tr:last-child > * { border-bottom: 0; }
+    .badge { display: inline-flex; align-items: center; white-space: nowrap; gap: 6px; border-radius: 6px; padding: 6px 9px; font-size: 11px; font-weight: 600; }
+    .done { background: #e1f2e8; color: #206342; }
+    .pending { background: #fff2d9; color: #846022; }
+    .planned { color: #7a8376; background: #f3f5f0; font-weight: 400; }
+    .next { color: #846022; background: #fff2d9; font-size: 9px; letter-spacing: .06em; margin-left: 8px; padding: 3px 6px; border-radius: 4px; vertical-align: middle; text-transform: uppercase; }
+    .below { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin: 14px 0 25px; }
+    .legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; align-items: center; color: #647369; }
+    .legend > span { display: inline-flex; align-items: center; gap: 6px; }
+    .note { border-left: 3px solid #91af97; padding: 2px 0 2px 17px; max-width: 950px; margin: 20px 0; font-size: 13px; line-height: 1.75; }
+    .note p { margin: 5px 0; }
+    code { font-size: 12px; background: #e9eee4; border-radius: 4px; padding: 2px 5px; }
+    a { color: #246848; text-underline-offset: 3px; }
+    footer { font-size: 12px; color: #74816e; border-top: 1px solid #dce3d5; padding-top: 18px; line-height: 1.8; }
+    #empty { display: none; padding: 25px; text-align: center; color: #647369; }
+    @media (max-width: 600px) { header { padding: 26px 20px; } main { padding: 20px 14px; } .stat { min-width: 135px; padding: 14px; } th:first-child { min-width: 205px; width: 205px; } tbody th small { max-width: 175px; } }
+    @media print { header { background: white; color: #173c31; padding: 0 0 20px; } header p, .eyebrow { color: #647369; } main { padding: 0; } .filters { display: none; } .matrix { max-height: none; overflow: visible; } table { min-width: 0; font-size: 8px; } th, td { padding: 7px 3px; } th:first-child { min-width: 130px; width: 130px; } thead th, th:first-child { position: static; } .badge { font-size: 8px; padding: 3px; } @page { size: landscape; margin: 10mm; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="eyebrow">simple-server / adoption tracker</div>
+    <h1>One foundation. Service by service.</h1>
+    <p>Every service on a row. Every migration step in a column. Adopt the building blocks each product needs, while keeping control of its application.</p>
+  </header>
+  <main>
+    <section class="summary" aria-label="Migration overview">
+      <div class="stat"><strong id="service-count">17</strong><span>Services in scope</span></div>
+      <div class="stat complete"><strong id="done-count">1 / 17</strong><span>Axum centralization complete</span></div>
+      <div class="stat"><strong>1 / 10</strong><span>Shared steps implemented</span></div>
+      <div class="stat"><strong>Favzetto</strong><span>Next service to migrate</span></div>
+    </section>
+    <div class="toolbar">
+      <div><h2>Migration matrix</h2><p class="muted">Scroll horizontally to explore all steps. Service names stay in view.</p></div>
+      <div class="filters">
+        <label>Find a service<input id="search" type="search" placeholder="Search services or components…"></label>
+        <label>Axum centralization<select id="filter"><option value="all">All services</option><option value="done">Complete</option><option value="pending">Pending</option></select></label>
+      </div>
+    </div>
+    <noscript><p>Enable JavaScript to display the matrix, or read the <a href="migration-status.md">Markdown status document</a>.</p></noscript>
+    <div class="matrix" tabindex="0" role="region" aria-label="Scrollable service migration matrix">
+      <table aria-label="Service adoption by migration step"><thead><tr id="columns"><th scope="col">Service / components</th></tr></thead><tbody id="services"></tbody></table>
+      <p id="empty">No services match these filters.</p>
+    </div>
+    <div class="below">
+      <div class="legend" aria-label="Status legend">
+        <span><span class="badge done">✓ Complete</span> Adopted and verified</span>
+        <span><span class="badge pending">Pending</span> Shared step available</span>
+        <span><span class="badge planned">Planned</span> Shared module not implemented yet</span>
+      </div>
+      <p id="result-count" class="muted" aria-live="polite"></p>
+    </div>
+    <section class="note" aria-label="Current migration notes">
+      <p><strong>Pezzottify is the first completed migration.</strong> Axum 0.8.9 through <code>simple_server::axum</code>; 1,374 Rust tests and 45 Docker E2E tests passed. Migration commit: <code>3e3c548f</code>.</p>
+      <p><strong>Favzetto is next, not complete yet.</strong> Its checked-out backend still has a direct Axum dependency.</p>
+      <p><strong>Planned does not mean mandatory.</strong> Future columns show the agreed building blocks. A service can adopt only what it needs; use “N/A” once a module is assessed as unnecessary. Beyond the next lifecycle step, the order remains flexible.</p>
+    </section>
+    <footer>
+      Verified against local checkouts on <time datetime="2026-09-18">18 September 2026</time>. Tracks implementation, not deployment or publication.<br>
+      <a href="migration-status.md">Migration details and verification notes</a> · <a href="design.md">Architecture outline</a>
+    </footer>
+  </main>
+  <script>
+    // Update adoption here and in migration-status.md when a service is verified.
+    // Status keys: done, pending, planned, partial, na.
+    const steps = [
+      ['Axum centralization', true], ['Lifecycle / main()', false],
+      ['HTTP support', false], ['Observability', false], ['Health', false],
+      ['Background tasks', false], ['Databases', false], ['Authentication', false],
+      ['Authorization', false], ['Rate limiting', false]
+    ];
+    const services = [
+      {name: 'pezzottify', components: 'pezzottify-server', axum: 'done'},
+      {name: 'favzetto', components: 'backend', axum: 'pending', next: true},
+      {name: 'androidoscopy', components: 'server', axum: 'pending'},
+      {name: 'crumbles', components: 'crumbles · crumbles-integration', axum: 'pending'},
+      {name: 'fausto', components: 'server · plugin API and plugins', axum: 'pending'},
+      {name: 'lello-auth', components: 'lello-auth-server · lello-auth-axum · examples', axum: 'pending'},
+      {name: 'lellostore', components: 'backend', axum: 'pending'},
+      {name: 'meteonesto', components: 'weather-api · weather-gateway · pipeline control API', axum: 'pending'},
+      {name: 'observo', components: 'observo-server', axum: 'pending'},
+      {name: 'paranza', components: 'apps/paranza-server', axum: 'pending'},
+      {name: 'peerlo', components: 'peerlo-api', axum: 'pending'},
+      {name: 'pezzottflix', components: 'pezzottflix-server', axum: 'pending'},
+      {name: 'pezzottify-downloader', components: 'Puppeteer API · downloader HTTP server', axum: 'pending'},
+      {name: 'quentin-torrentino', components: 'crates/server', axum: 'pending'},
+      {name: 'sct', components: 'sct-server', axum: 'pending'},
+      {name: 'simple-agents', components: 'simple-agents-service · coding test servers', axum: 'pending'},
+      {name: 'simple-ai', components: 'backend · inference-runner', axum: 'pending'}
+    ];
+    const labels = {done: '✓ Complete', pending: 'Pending', planned: 'Planned', partial: 'Partial', na: 'N/A'};
+    for (const [index, [name, available]] of steps.entries()) {
+      const cell = document.createElement('th');
+      cell.scope = 'col';
+      if (available) cell.className = 'available';
+      const number = document.createElement('small');
+      number.textContent = `Step ${String(index + 1).padStart(2, '0')}`;
+      const availability = document.createElement('span');
+      availability.className = 'availability';
+      availability.textContent = available ? 'Available' : 'Planned module';
+      cell.append(number, document.createTextNode(name), availability);
+      document.getElementById('columns').append(cell);
+    }
+    document.getElementById('service-count').textContent = services.length;
+    document.getElementById('done-count').textContent = `${services.filter(s => s.axum === 'done').length} / ${services.length}`;
+    function render() {
+      const query = document.getElementById('search').value.trim().toLowerCase();
+      const filter = document.getElementById('filter').value;
+      const visible = services.filter(s => `${s.name} ${s.components}`.toLowerCase().includes(query) && (filter === 'all' || s.axum === filter));
+      const body = document.getElementById('services');
+      body.replaceChildren();
+      for (const service of visible) {
+        const row = document.createElement('tr');
+        const name = document.createElement('th');
+        name.scope = 'row';
+        name.textContent = service.name;
+        if (service.next) {
+          const next = document.createElement('span');
+          next.className = 'next'; next.textContent = 'Next'; name.append(next);
+        }
+        const components = document.createElement('small');
+        components.textContent = service.components; name.append(components); row.append(name);
+        steps.forEach((step, index) => {
+          const status = index === 0 ? service.axum : 'planned';
+          const cell = document.createElement('td');
+          const badge = document.createElement('span');
+          badge.className = `badge ${status}`;
+          badge.textContent = labels[status];
+          cell.append(badge); row.append(cell);
+        });
+        body.append(row);
+      }
+      document.getElementById('empty').style.display = visible.length ? 'none' : 'block';
+      document.getElementById('result-count').textContent = `${visible.length} of ${services.length} services`;
+    }
+    document.getElementById('search').addEventListener('input', render);
+    document.getElementById('filter').addEventListener('change', render);
+    render();
+  </script>
+</body>
+</html>

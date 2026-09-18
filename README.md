@@ -9,7 +9,7 @@ the library's own interfaces.
 modules are not implemented yet. Publication to crates.io is disabled during
 this initial stage.
 
-See the [service migration table](docs/migration-status.md) for adoption status
+Open the [HTML migration matrix](docs/migration-status.html) in a browser for adoption status
 across all 17 planned consumer projects and the completed steps for each one.
 
 ## Axum centralization

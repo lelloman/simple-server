@@ -1,5 +1,8 @@
 # Service migration status
 
+Open the [HTML migration matrix](migration-status.html) for the visual table,
+with all services as rows and implemented and planned steps as columns.
+
 This table tracks adoption of implemented `simple-server` capabilities. Each row
 is a product; the component column identifies its Rust servers. Add a new step
 column when the corresponding shared capability is implemented, then update
@@ -49,12 +52,12 @@ this table tracks implementation, not deployment or remote publication.
 Favzetto is the second selected consumer, but its current `backend/Cargo.toml`
 still declares a direct `axum` dependency. Its first step remains pending.
 
-## Future columns
+## Planned steps
 
 The next planned step is lifecycle and entry-point setup. Further capabilities
 include HTTP support, observability, health, background tasks, database helpers,
-authentication, authorization, and rate limiting. Add columns as these become
-implemented migration steps; their exact grouping and order remain adjustable.
+authentication, authorization, and rate limiting. The HTML matrix already shows
+these columns as planned; their exact grouping and order remain adjustable.
 Hiding the transitional Axum API is incremental work across those steps.
 
 The initial scope is the 17 Axum-based products inventoried in this workspace.
