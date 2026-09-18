@@ -19,7 +19,7 @@ Last verified against local checkouts: 2026-09-18.
 | pezzottify | `pezzottify-server` | **Done** |
 | favzetto | `backend` | **Done** |
 | androidoscopy | `server` | **Done** |
-| crumbles | `crumbles`, `crumbles-integration` | Pending |
+| crumbles | `crumbles`, `crumbles-integration` | **Done (migration branch)** |
 | fausto | `server`; associated plugin API and plugins | Pending |
 | lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | Pending |
 | lellostore | `backend` | Pending |
@@ -64,6 +64,16 @@ registration), five E2E unit tests, and seven full-stack scenarios. Existing
 formatting and strict Clippy failures were confirmed against the unchanged
 baseline. Its `docs/simple-server-migration.md` records the results. The migration
 is committed locally, not deployed.
+
+Crumbles completed this step for both `crumbles` and `crumbles-integration` in
+commit `619aacd` on `simple-server-step01`, using the same pinned public Git
+dependency and retaining Axum 0.8.9. Validation passed 1,365 Rust tests (two
+intentional ignores), eight real-server Chromium E2E scenarios, formatting,
+strict Clippy, unchanged generated API contracts, and the Docker build and
+restart/persistence smoke test. See its `docs/SIMPLE_SERVER_MIGRATION.md`.
+This was verified in the isolated `crumbles-step01` worktree from `de8b700`;
+it is **not merged** into the main checkout, where dispatcher development
+continues. Newly added Axum imports must be migrated when integrating that work.
 
 ## Planned steps
 
