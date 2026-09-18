@@ -66,9 +66,9 @@
   <main>
     <section class="summary" aria-label="Migration overview">
       <div class="stat"><strong id="service-count">17</strong><span>Services in scope</span></div>
-      <div class="stat complete"><strong id="done-count">1 / 17</strong><span>Axum centralization complete</span></div>
+      <div class="stat complete"><strong id="done-count">2 / 17</strong><span>Axum centralization complete</span></div>
       <div class="stat"><strong>1 / 10</strong><span>Shared steps implemented</span></div>
-      <div class="stat"><strong>Favzetto</strong><span>Next service to migrate</span></div>
+      <div class="stat"><strong id="pending-count">15</strong><span>Awaiting Axum centralization</span></div>
     </section>
     <div class="toolbar">
       <div><h2>Migration matrix</h2><p class="muted">Scroll horizontally to explore all steps. Service names stay in view.</p></div>
@@ -92,7 +92,7 @@
     </div>
     <section class="note" aria-label="Current migration notes">
       <p><strong>Pezzottify is the first completed migration.</strong> Axum 0.8.9 through <code>simple_server::axum</code>; 1,374 Rust tests and 45 Docker E2E tests passed. Migration commit: <code>3e3c548f</code>.</p>
-      <p><strong>Favzetto is next, not complete yet.</strong> Its checked-out backend still has a direct Axum dependency.</p>
+      <p><strong>Favzetto has completed Step 01.</strong> Axum 0.8.9 through the pinned public <code>simple-server</code> dependency; 130 unit tests, 91 API tests, the Docker build, and container smoke checks passed. Two API failures reproduce on the unchanged baseline; existing formatting and Clippy failures remain. Migration commit: <code>382cc8f</code>.</p>
       <p><strong>Planned does not mean mandatory.</strong> Future columns show the agreed building blocks. A service can adopt only what it needs; use “N/A” once a module is assessed as unnecessary. Beyond the next lifecycle step, the order remains flexible.</p>
     </section>
     <footer>
@@ -111,7 +111,7 @@
     ];
     const services = [
       {name: 'pezzottify', components: 'pezzottify-server', axum: 'done'},
-      {name: 'favzetto', components: 'backend', axum: 'pending', next: true},
+      {name: 'favzetto', components: 'backend', axum: 'done'},
       {name: 'androidoscopy', components: 'server', axum: 'pending'},
       {name: 'crumbles', components: 'crumbles · crumbles-integration', axum: 'pending'},
       {name: 'fausto', components: 'server · plugin API and plugins', axum: 'pending'},
@@ -143,6 +143,7 @@
     }
     document.getElementById('service-count').textContent = services.length;
     document.getElementById('done-count').textContent = `${services.filter(s => s.axum === 'done').length} / ${services.length}`;
+    document.getElementById('pending-count').textContent = services.filter(s => s.axum === 'pending').length;
     function render() {
       const query = document.getElementById('search').value.trim().toLowerCase();
       const filter = document.getElementById('filter').value;

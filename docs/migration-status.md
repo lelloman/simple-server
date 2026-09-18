@@ -17,7 +17,7 @@ Last verified against local checkouts: 2026-09-18.
 | Project | Server components | 1. Axum centralization |
 | --- | --- | --- |
 | pezzottify | `pezzottify-server` | **Done** |
-| favzetto | `backend` | **Pending — next** |
+| favzetto | `backend` | **Done** |
 | androidoscopy | `server` | Pending |
 | crumbles | `crumbles`, `crumbles-integration` | Pending |
 | fausto | `server`; associated plugin API and plugins | Pending |
@@ -49,8 +49,13 @@ release build. Its `docs/simple-server-migration.md` records the detailed result
 and existing formatting/audit failures. The migration is committed locally;
 this table tracks implementation, not deployment or remote publication.
 
-Favzetto is the second selected consumer, but its current `backend/Cargo.toml`
-still declares a direct `axum` dependency. Its first step remains pending.
+Favzetto completed this step in commit `382cc8f` on `master`, using the same
+`simple-server` revision and Axum 0.8.9 via a pinned public Git dependency.
+Validation passed 130 unit tests, 91 API tests, the standalone Docker build, and
+container health/readiness, frontend, and authentication smoke checks. Two API
+tests fail identically on the untouched baseline; existing formatting and
+strict Clippy failures also remain. Its `docs/06-simple-server-migration.md`
+records the evidence. The migration is committed locally, not deployed.
 
 ## Planned steps
 
