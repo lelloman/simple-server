@@ -20,7 +20,7 @@ Last verified against local checkouts: 2026-09-18.
 | favzetto | `backend` | **Done** |
 | androidoscopy | `server` | **Done** |
 | crumbles | `crumbles`, `crumbles-integration` | **Done (migration branch)** |
-| fausto | `server`; associated plugin API and plugins | Pending |
+| fausto | `server`; associated plugin API and plugins | **Done** |
 | lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | Pending |
 | lellostore | `backend` | Pending |
 | meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | Pending |
@@ -74,6 +74,17 @@ restart/persistence smoke test. See its `docs/SIMPLE_SERVER_MIGRATION.md`.
 This was verified in the isolated `crumbles-step01` worktree from `de8b700`;
 it is **not merged** into the main checkout, where dispatcher development
 continues. Newly added Axum imports must be migrated when integrating that work.
+
+Fausto completed this step in commit `258c4ff` on `master`, migrating the
+server, plugin API, blog plugin, and runtime test-echo plugin to the same pinned
+public Git dependency and Axum 0.8.9. Validation passed 633 Rust tests, formatting,
+optional server feature compilation, and the locked Docker build. Clippy
+completed with warnings. All 380 Docker E2E outcomes match untouched baseline
+`086814d`: 349 passed, three skipped, seven expected failures, fourteen fixture
+errors, and seven failures (six strict XPASS markers and one fixture failure).
+The unchanged frontend has existing build errors; embedded UI Rust compilation
+used a temporary asset fixture. See `docs/simple-server-migration.md` for details.
+The migration is committed locally, not deployed.
 
 ## Planned steps
 
