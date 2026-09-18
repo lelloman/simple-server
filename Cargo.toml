@@ -7,5 +7,20 @@ repository = "https://github.com/lelloman/simple-server"
 readme = "README.md"
 publish = false
 
+[features]
+default = ["http"]
+http = ["dep:axum"]
+http2 = ["http", "axum/http2"]
+macros = ["http", "axum/macros"]
+multipart = ["http", "axum/multipart"]
+ws = ["http", "axum/ws"]
+
+[dependencies]
+axum = { version = "=0.8.9", optional = true }
+
+[dev-dependencies]
+tokio = { version = "1", features = ["macros", "rt"] }
+tower = { version = "0.5", features = ["util"] }
+
 [lints.rust]
 unsafe_code = "forbid"
