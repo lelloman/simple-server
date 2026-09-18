@@ -63,6 +63,9 @@ See [the design outline](docs/design.md) for boundaries and the adoption plan.
 
 ## Development
 
+Run the complete check sequence with `bash scripts/check`, or run individual
+checks:
+
 ```sh
 cargo fmt --check
 cargo clippy --all-targets --all-features -- -D warnings
