@@ -23,7 +23,7 @@ Last verified against local checkouts: 2026-09-19.
 | fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** |
 | lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** |
 | lellostore | `backend` | **Done** | **Done (local)** |
-| meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | Pending |
+| meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** |
 | observo | `observo-server` | **Done** | Pending |
 | paranza | `apps/paranza-server` | **Done** | Pending |
 | peerlo | `peerlo-api` | **Done** | Pending |
@@ -175,6 +175,17 @@ and Clippy completes with warnings. All 380 existing E2E outcomes match baseline
 (349 pass; 7 failures, 14 setup errors, 3 skips, 7 expected failures); the new
 WebSocket shutdown test also passes. See `docs/STEP_02_LIFECYCLE.md` in Fausto for
 shutdown limits, build setup, and baseline evidence.
+
+Meteonesto commit `fb8519e` coordinates Weather API HTTP/cache workers and final
+popularity persistence, gateway HTTP/JWKS refresh/SIGHUP policy reload, and the
+pipeline's existing ordered drain through database/watchdog cleanup. The pipeline
+snapshots its hot-reloaded grace at shutdown; API/gateway budgets apply on restart.
+All three component checks pass: 253 Rust tests, six Python tests, strict Clippy,
+formatting, builds, dependency policy, and applicable deployment checks. The
+gateway-to-API E2E passes through the production lifecycle path. Pipeline Docker
+build passes, but its representative E2E retains the documented 22-versus-24
+artifact fixture failure; later restore assertions are not reached. Details,
+rollback, and scoped guarantees are in `docs/step-02-lifecycle.md` in Meteonesto.
 
 Pezzottify has not been changed. Its integration requires explicit approval.
 
