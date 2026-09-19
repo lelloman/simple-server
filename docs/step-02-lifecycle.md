@@ -1,7 +1,9 @@
 # Step 02: lifecycle and entry-point setup
 
-Status: implementation committed at `c535907`, adopted locally by Favzetto,
-LelloStore, LelloAuth, Fausto, Meteonesto, Pezzottify, Observo, Paranza, Peerlo, and Simple AI.
+Status: implementation committed at `c535907`, adopted locally across all 17
+inventoried products with documented application scopes. Crumbles and SCT remain
+on their isolated migration branches, not merged into ongoing development.
+See the [migration status](migration-status.md) for commits and verification.
 This is the first capability extraction after Step 01 (Axum centralization).
 
 ## Outcome

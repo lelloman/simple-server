@@ -18,8 +18,8 @@ Last verified against local checkouts: 2026-09-19.
 | --- | --- | --- | --- |
 | pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** |
 | favzetto | `backend` | **Done** | **Done (local; scoped)** |
-| androidoscopy | `server` | **Done** | Pending |
-| crumbles | `crumbles`, `crumbles-integration` | **Done (migration branch)** | Pending |
+| androidoscopy | `server` | **Done** | **Done (local; scoped)** |
+| crumbles | `crumbles`, `crumbles-integration` | **Done (migration branch)** | **Done (migration branch; scoped)** |
 | fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** |
 | lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** |
 | lellostore | `backend` | **Done** | **Done (local)** |
@@ -27,11 +27,11 @@ Last verified against local checkouts: 2026-09-19.
 | observo | `observo-server` | **Done** | **Done (local; scoped)** |
 | paranza | `apps/paranza-server` | **Done** | **Done (local; scoped)** |
 | peerlo | `peerlo-api` | **Done** | **Done (local; scoped)** |
-| pezzottflix | `pezzottflix-server` | **Done** | Pending |
-| pezzottify-downloader | Puppeteer API and downloader HTTP server | **Done** | Pending |
-| quentin-torrentino | `crates/server` | **Done** | Pending |
-| sct | `sct-server` | **Done (migration branch)** | Pending |
-| simple-agents | `simple-agents-service`; associated coding test servers | **Done** | Pending |
+| pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** |
+| pezzottify-downloader | Puppeteer API and downloader HTTP server | **Done** | **Done (local; scoped)** |
+| quentin-torrentino | `crates/server` | **Done** | **Done (local; scoped)** |
+| sct | `sct-server` | **Done (migration branch)** | **Done (migration branch; scoped)** |
+| simple-agents | `simple-agents-service`; associated coding test servers | **Done** | **Done (local; scoped)** |
 | simple-ai | `backend`, `inference-runner` | **Done** | **Done (local; scoped)** |
 
 ## Step 1: Axum centralization
@@ -244,6 +244,87 @@ findings remain. CI and Docker builds use reviewed sibling source `c535907`;
 remote publication is still required for fresh checkouts. See Simple AI's
 `docs/step-02-lifecycle.md`. Both commits and validation are local; no deployment
 or push was performed.
+
+Simple Agents commit `0517053` coordinates HTTP, maintenance, execution dispatch,
+and optional host wake/keepalive, then closes SQLite under the existing configured
+budget (default 30 seconds). Active worker ticks finish cooperatively. External
+Runner jobs, upgraded transport sockets, and detached engine monitors retain their
+existing ownership/recovery semantics. Full `scripts/check` passes: 315 Rust
+tests, strict Clippy/formatting, JavaScript/Android checks, all three browser E2E
+scenarios, and repository consistency checks. Managed-handoff qualification,
+x86_64 musl packaging, and static-container readiness/restart/signal checks pass.
+The initial concurrent-build test deadline failure cleared on the full final run.
+Unrelated Android development files remain uncommitted and untouched. See
+`docs/step-02-lifecycle.md` in Simple Agents.
+
+SCT commits `0322d36` and `bd21716` coordinate HTTP and writer-lease renewal under
+one 30-second deadline, followed by writer release and catalog pool closure.
+Renewal continues until HTTP drains; lease loss returns a nonzero exit. The
+frontend scaffold also adopts shared HTTP shutdown. Full `scripts/check` passes,
+including PostgreSQL integration, strict checks, client packaging, 49 contract
+tests, frontend build, and three browser E2E scenarios (four existing future
+scenarios pending). New process tests cover both signals, an 8 MiB response drain,
+immediate database restart, and lease-loss failure. This remains on the isolated
+`simple-server-step01` branch in `sct-step01`, **not merged** into ongoing storage
+work. See SCT's `docs/step-02-lifecycle.md`.
+
+Androidoscopy commit `bb4033d` coordinates v2 controller HTTP, discovery/session
+workers, and tracked device/action/socket tasks; legacy HTTP, WS/TLS, and UDP
+also share signal-driven draining. Both modes use a 30-second deadline. CLI/MCP
+stdio and remote Android processes retain their ownership. Validation passes
+70 server tests, 12 full-stack tests, and six real-process signal cases spanning
+v2, legacy WebSocket, and legacy TLS, including a stalled outbound TLS handshake.
+Existing Clippy/formatting findings remain. See `docs/step-02-lifecycle.md`.
+
+Pezzottflix commit `d2902d8` coordinates both HTTP listeners, queue/scheduled jobs,
+tracked WebSockets and forwarding tasks, then SQLite cleanup. All phases now
+share 30 seconds, including localhost operation. Validation passes 531 Rust tests
+(three ignored), ten Docker backend E2E tests, both process signal/WebSocket-close
+cases, and release backend/frontend builds. Existing Clippy/formatting debt
+remains. Its `docs/step-02-lifecycle.md` records a corrected fixture-isolation
+incident: the first process test used the local database override; its fixture
+user/sessions were removed and verified absent. Final tests use isolated state.
+
+Pezzottify-downloader commit `7355728` coordinates parent HTTP, connection
+monitoring, status WebSockets/restart tasks, and child cleanup; the child Unix
+HTTP server also drains connections. Streaming HTTP finishes before child
+termination. Linux parent-death protection prevents an orphaned worker after a
+hard parent exit, while audio/librespot internals retain their process ownership.
+Validation passes 148 Rust tests, seven doctests (one ignored), 90 Python tests,
+release Docker build and isolated SIGINT/SIGTERM checks. New process coverage
+includes open upgraded sockets and hard parent death. Existing Clippy/formatting
+findings remain. Credential-dependent Spotify operations were not exercised.
+See `docs/step-02-lifecycle.md` in the downloader repository.
+
+Crumbles commit `47062ec` coordinates HTTP, scheduler/outbox workers, accepted
+WebSockets, and SQLite cleanup; the integration binary coordinates control HTTP
+and daemon settlement/host-lock release under its existing configured budget.
+Final outbox rows remain durable for replay, without guaranteed live publication,
+and socket cancellation does not promise a Close handshake. Validation passes
+1,367 Rust tests (two ignored), strict Clippy/formatting, unchanged generated
+contracts, eight real-server browser scenarios, both release Docker builds, and
+signal/drain/restart checks for both binaries and release containers. This remains
+on `simple-server-step01` in `crumbles-step01`, **not merged** into the original
+checkout's ongoing work. See `docs/STEP_02_LIFECYCLE.md` in that worktree.
+
+Quentin Torrentino commits `4cddf9d` and `7728402` coordinate HTTP, the V2
+orchestrator, accepted WebSockets, pipeline jobs, and final audit flushing under
+one 30-second deadline. Producer draining also runs after early audit-writer
+failure; explicit audit receiver closure avoids waiting on idle sender clones.
+External torrent services, FFmpeg and library internals retain their ownership.
+Workspace results: 741 passed, two existing failures, 14 ignored; HTTP E2E remains
+144/145. The recorded MusicBrainz mock mismatch and temporary-directory subtitle
+assumption remain. New pipeline/audit regressions and real-process signals with
+held WebSockets and durable final audit events pass. The original Rust 1.91
+Docker toolchain is preserved; release/dashboard builds and isolated container
+signal/audit checks pass. Existing Clippy/formatting findings remain. See
+`docs/step-02-lifecycle.md` in Torrentino.
+
+All 17 inventoried products now have locally verified, scoped Step 02 adoption.
+Crumbles and SCT remain on their isolated migration branches; neither is merged
+into its original checkout. The reviewed shared source remains `c535907`; no
+library implementation changed during these consumer migrations. No push or
+deployment was performed.
 
 ## Planned steps
 
