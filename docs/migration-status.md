@@ -25,7 +25,7 @@ Last verified against local checkouts: 2026-09-19.
 | lellostore | `backend` | **Done** |
 | meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** |
 | observo | `observo-server` | **Done** |
-| paranza | `apps/paranza-server` | Pending |
+| paranza | `apps/paranza-server` | **Done** |
 | peerlo | `peerlo-api` | Pending |
 | pezzottflix | `pezzottflix-server` | Pending |
 | pezzottify-downloader | Puppeteer API and downloader HTTP server | Pending |
@@ -117,6 +117,8 @@ artifacts, produced 24; later backup/restore checks are not reached. See
 `docs/simple-server-migration.md` in Meteonesto. No deployment was performed.
 
 observo completed Step 01 in commit `573050e`. Passed 87 Rust tests, formatting, the Docker build and container smoke checks. New real-binary authentication, CRUD and restart-persistence E2E coverage passed before and after migration; its baseline exposed and fixed a blocking-client startup panic (830e9b8). Five stale test fixtures were repaired. Strict Clippy retains the same 36 baseline findings. See docs/simple-server-migration.md in Observo.
+
+paranza completed Step 01 in commit `d4beb0e`. Passed 284 Rust tests, formatting and Docker release builds. All 28 Docker E2E scenarios ran: 25 passed; two multi-node certificate fixture failures and one freshness assertion failed identically on untouched baseline bec0460. Existing strict-Clippy findings were also confirmed on baseline. See docs/simple-server-migration.md in Paranza.
 
 ## Planned steps
 
