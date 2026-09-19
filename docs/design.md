@@ -2,6 +2,9 @@
 
 This document records the initial direction, not a finalized API specification.
 
+The [Step 02 lifecycle contract](step-02-lifecycle.md) defines the first capability
+extraction, its implemented API, shutdown contract, and pilot acceptance checks.
+
 ## Composition
 
 Axum remains the internal HTTP implementation. The long-term product API hides

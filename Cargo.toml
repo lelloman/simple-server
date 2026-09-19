@@ -9,7 +9,8 @@ publish = false
 
 [features]
 default = ["http"]
-http = ["dep:axum"]
+http = ["dep:axum", "dep:tower-service"]
+lifecycle = ["dep:tokio", "dep:futures-util"]
 http2 = ["http", "axum/http2"]
 macros = ["http", "axum/macros"]
 multipart = ["http", "axum/multipart"]
@@ -17,10 +18,21 @@ ws = ["http", "axum/ws"]
 
 [dependencies]
 axum = { version = "=0.8.9", optional = true }
+futures-util = { version = "0.3", default-features = false, features = ["alloc"], optional = true }
+tokio = { version = "1", features = ["macros", "net", "signal", "sync", "time"], optional = true }
+tower-service = { version = "0.3", optional = true }
 
 [dev-dependencies]
-tokio = { version = "1", features = ["macros", "rt"] }
+tokio = { version = "1", features = ["io-util", "macros", "process", "rt", "test-util"] }
 tower = { version = "0.5", features = ["util"] }
+
+[[example]]
+name = "lifecycle"
+required-features = ["lifecycle", "http"]
+
+[[example]]
+name = "signals"
+required-features = ["lifecycle"]
 
 [lints.rust]
 unsafe_code = "forbid"

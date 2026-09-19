@@ -14,25 +14,25 @@ Optional modules do not have to be adopted by every product.
 
 Last verified against local checkouts: 2026-09-19.
 
-| Project | Server components | 1. Axum centralization |
-| --- | --- | --- |
-| pezzottify | `pezzottify-server` | **Done** |
-| favzetto | `backend` | **Done** |
-| androidoscopy | `server` | **Done** |
-| crumbles | `crumbles`, `crumbles-integration` | **Done (migration branch)** |
-| fausto | `server`; associated plugin API and plugins | **Done** |
-| lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** |
-| lellostore | `backend` | **Done** |
-| meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** |
-| observo | `observo-server` | **Done** |
-| paranza | `apps/paranza-server` | **Done** |
-| peerlo | `peerlo-api` | **Done** |
-| pezzottflix | `pezzottflix-server` | **Done** |
-| pezzottify-downloader | Puppeteer API and downloader HTTP server | **Done** |
-| quentin-torrentino | `crates/server` | **Done** |
-| sct | `sct-server` | **Done (migration branch)** |
-| simple-agents | `simple-agents-service`; associated coding test servers | **Done** |
-| simple-ai | `backend`, `inference-runner` | **Done** |
+| Project | Server components | 1. Axum centralization | 2. Lifecycle / main() |
+| --- | --- | --- | --- |
+| pezzottify | `pezzottify-server` | **Done** | Pending approval |
+| favzetto | `backend` | **Done** | **Done (local; scoped)** |
+| androidoscopy | `server` | **Done** | Pending |
+| crumbles | `crumbles`, `crumbles-integration` | **Done (migration branch)** | Pending |
+| fausto | `server`; associated plugin API and plugins | **Done** | Pending |
+| lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | Pending |
+| lellostore | `backend` | **Done** | Pending |
+| meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | Pending |
+| observo | `observo-server` | **Done** | Pending |
+| paranza | `apps/paranza-server` | **Done** | Pending |
+| peerlo | `peerlo-api` | **Done** | Pending |
+| pezzottflix | `pezzottflix-server` | **Done** | Pending |
+| pezzottify-downloader | Puppeteer API and downloader HTTP server | **Done** | Pending |
+| quentin-torrentino | `crates/server` | **Done** | Pending |
+| sct | `sct-server` | **Done (migration branch)** | Pending |
+| simple-agents | `simple-agents-service`; associated coding test servers | **Done** | Pending |
+| simple-ai | `backend`, `inference-runner` | **Done** | Pending |
 
 ## Step 1: Axum centralization
 
@@ -134,9 +134,26 @@ simple-agents completed Step 01 in commit `5b13de6`. Full scripts/check passes b
 
 simple-ai completed Step 01 in commit `daf92bd`. Backend and inference runner migrated together. E2E-first commit 1eb5974 adds a real-runner HTTP test and repairs stale gateway protocol fixtures. All 440 Rust tests and four Docker gateway E2E groups pass before and after; Rust 1.91 Docker build passes. Existing formatting and three common-crate Clippy findings remain documented.
 
+## Step 2: lifecycle and entry-point setup
+
+The shared implementation is available through the opt-in `lifecycle` feature.
+Library checks pass for default, lifecycle-only, HTTP+lifecycle, all-features,
+and no-default-features configurations. Real HTTP, streaming, WebSocket, and
+child-process signal tests cover the shutdown contract.
+
+Favzetto adopts shared signals, HTTP draining, and its assistant worker with a
+configurable 30-second default budget. It uses the local sibling library while
+this implementation is under review. Its new lifecycle tests pass; two existing
+catalog-research failures reproduce before and after migration. Existing detached
+request jobs and upgraded WebSocket sessions remain outside coordinated draining;
+see Favzetto's `docs/07-lifecycle-migration.md` for the exact scope and build setup.
+This status describes that scoped adoption, not complete background-task ownership.
+
+Pezzottify has not been changed. Its integration requires explicit approval.
+
 ## Planned steps
 
-The next planned step is lifecycle and entry-point setup. Further capabilities
+Further capabilities
 include HTTP support, observability, health, background tasks, database helpers,
 authentication, authorization, and rate limiting. The HTML matrix already shows
 these columns as planned; their exact grouping and order remain adjustable.

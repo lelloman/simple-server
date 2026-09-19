@@ -6,5 +6,7 @@ cargo fmt --check
 cargo clippy --locked --all-targets --all-features -- -D warnings
 cargo test --locked
 cargo test --locked --all-features
+cargo test --locked --no-default-features --features lifecycle
+cargo test --locked --features lifecycle
 cargo check --locked --no-default-features
 RUSTDOCFLAGS="-D warnings" cargo doc --locked --no-deps --all-features
