@@ -12,7 +12,7 @@ each product independently as it adopts that capability.
 Partial = only some listed components migrated; N/A = deliberately not needed.
 Optional modules do not have to be adopted by every product.
 
-Last verified against local checkouts: 2026-09-18.
+Last verified against local checkouts: 2026-09-19.
 
 | Project | Server components | 1. Axum centralization |
 | --- | --- | --- |
@@ -21,7 +21,7 @@ Last verified against local checkouts: 2026-09-18.
 | androidoscopy | `server` | **Done** |
 | crumbles | `crumbles`, `crumbles-integration` | **Done (migration branch)** |
 | fausto | `server`; associated plugin API and plugins | **Done** |
-| lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | Pending |
+| lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** |
 | lellostore | `backend` | Pending |
 | meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | Pending |
 | observo | `observo-server` | Pending |
@@ -84,6 +84,18 @@ completed with warnings. All 380 Docker E2E outcomes match untouched baseline
 errors, and seven failures (six strict XPASS markers and one fixture failure).
 The unchanged frontend has existing build errors; embedded UI Rust compilation
 used a temporary asset fixture. See `docs/simple-server-migration.md` for details.
+The migration is committed locally, not deployed.
+
+Lello-auth completed this step in commit `5118c29` on `master`, migrating both
+server crates and all three standalone examples to the same public Git pin and
+Axum 0.8.9. The 0.7 migration updates route parameters, custom extractors,
+cookies, test support, and the Askama response adapter. Rust 1.88 validation
+passed 945 workspace tests (14 ignored), one doctest, strict Clippy, formatting,
+all example builds, the Docker build, and all 92 deployed E2E tests including
+Chromium and PostgreSQL. The initial SQLite contention test failure cleared on
+a complete rerun. The audit still flags pre-existing `rustls 0.23.43`
+(RUSTSEC-2026-0285) in workspace and helper lockfiles. See
+`docs/SIMPLE_SERVER_MIGRATION.md` for results and release-gate scope limits.
 The migration is committed locally, not deployed.
 
 ## Planned steps
