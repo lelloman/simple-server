@@ -28,7 +28,7 @@ Last verified against local checkouts: 2026-09-19.
 | paranza | `apps/paranza-server` | **Done** |
 | peerlo | `peerlo-api` | **Done** |
 | pezzottflix | `pezzottflix-server` | **Done** |
-| pezzottify-downloader | Puppeteer API and downloader HTTP server | Pending |
+| pezzottify-downloader | Puppeteer API and downloader HTTP server | **Done** |
 | quentin-torrentino | `crates/server` | Pending |
 | sct | `sct-server` | Pending |
 | simple-agents | `simple-agents-service`; associated coding test servers | Pending |
@@ -123,6 +123,8 @@ paranza completed Step 01 in commit `d4beb0e`. Passed 284 Rust tests, formatting
 peerlo completed Step 01 in commit `e5a50dc`. Passed 780 Rust tests (six intentional ignores), formatting, Docker release builds and all 49 Docker swarm E2E tests before and after migration, including load and node recovery. Strict Clippy retains the same 13 baseline findings. See docs/simple-server-migration.md in Peerlo.
 
 pezzottflix completed Step 01 in commit `a130c02`. Passed 529 Rust tests (three intentional ignores), Docker/frontend builds and all 10 backend E2E tests. New real WebSocket tests were committed first in f3c2ad1 and passed before migration. Rust tests needed a larger compiler stack; one cleanup assertion cleared on a full rerun. Existing formatting and strict-Clippy failures remain. Android TV protocol tests were outside scope. See docs/simple-server-migration.md in Pezzottflix.
+
+pezzottify-downloader completed Step 01 in commit `98cab3a`. Passed 146 Rust tests, seven doctests, 90 Python tests, Docker build and isolated container smoke/shutdown checks. Two real-binary credential-free E2E tests were committed first in a01480a and pass before and after migration, alongside existing HTTP-to-Unix-socket integration tests. Live Spotify downloads were outside scope. Existing formatting/Clippy findings remain. See docs/simple-server-migration.md in the downloader repository.
 
 ## Planned steps
 
