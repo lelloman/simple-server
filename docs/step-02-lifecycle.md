@@ -1,7 +1,7 @@
 # Step 02: lifecycle and entry-point setup
 
 Status: implementation committed at `c535907`, adopted locally by Favzetto,
-LelloStore, LelloAuth, Fausto, Meteonesto, and Pezzottify.
+LelloStore, LelloAuth, Fausto, Meteonesto, Pezzottify, Observo, Paranza, and Peerlo.
 This is the first capability extraction after Step 01 (Axum centralization).
 
 ## Outcome

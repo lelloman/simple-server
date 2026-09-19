@@ -24,9 +24,9 @@ Last verified against local checkouts: 2026-09-19.
 | lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** |
 | lellostore | `backend` | **Done** | **Done (local)** |
 | meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** |
-| observo | `observo-server` | **Done** | Pending |
-| paranza | `apps/paranza-server` | **Done** | Pending |
-| peerlo | `peerlo-api` | **Done** | Pending |
+| observo | `observo-server` | **Done** | **Done (local; scoped)** |
+| paranza | `apps/paranza-server` | **Done** | **Done (local; scoped)** |
+| peerlo | `peerlo-api` | **Done** | **Done (local; scoped)** |
 | pezzottflix | `pezzottflix-server` | **Done** | Pending |
 | pezzottify-downloader | Puppeteer API and downloader HTTP server | **Done** | Pending |
 | quentin-torrentino | `crates/server` | **Done** | Pending |
@@ -197,6 +197,38 @@ all-target checking, strict Clippy, formatting, database-boundary checks, Docker
 release/frontend builds, and Compose validation pass. Dependency audit passes
 with six existing allowed warnings. See `docs/step-02-lifecycle.md` in Pezzottify
 for shutdown scope and checkout details.
+
+Observo commit `365d0d5` coordinates HTTP, scheduler ticks, and the server-task
+runner, then drains tracked plugin webhooks under one 30-second deadline.
+In-flight claims finish and finalize before the runner stops. Separate Node
+workers and client-abandoned blocking route work retain their existing ownership.
+Validation: 88 Rust tests, real-binary CRUD/persistence and SIGINT/SIGTERM E2E,
+Docker release/container smoke checks, formatting, and Compose validation pass.
+Strict Clippy retains the baseline findings (36 production, 37 including tests).
+See `docs/step-02-lifecycle.md` in Observo.
+
+Paranza commit `ac3126c` coordinates HTTP, runner sessions, and PCM maintenance
+under one 30-second deadline. It interrupts active runner sockets and joins their
+sessions, including stalled TLS handshakes. Separate runner applications retain
+their own lifecycle. Validation: 283 Rust tests and both real-process signal
+cases pass; the obsolete signal-flag test was removed. Release builds, formatting,
+and Compose validation pass. All 28 Docker E2E scenarios ran: 25 pass, with the
+same two multi-node certificate fixtures and one freshness assertion failing as
+on the Step 01 baseline. Existing strict-Clippy findings remain. See
+`docs/step-02-lifecycle.md` in Paranza.
+
+Peerlo commit `c35c76d` drains HTTP and then runs ordered subsystem cleanup under
+one 30-second deadline, including configurations with HTTP disabled. API task
+failures are observable and shutdown joins the HTTP task. Internal subsystem
+ownership and API-triggered bootstrap tasks retain their existing scope.
+Validation: 782 Rust tests (six existing ignores), real-node SIGINT/SIGTERM
+checks, shell swarm checks, and all 49 Python Docker E2E tests pass. Release
+builds, formatting, and Compose validation pass; the 13 existing strict-Clippy
+findings remain. See `docs/step-02-lifecycle.md` in Peerlo.
+
+All three use the reviewed sibling source revision `c535907`, recorded in their
+revision files and Docker build contexts. These commits are local; no deployment
+or remote publication was performed.
 
 ## Planned steps
 
