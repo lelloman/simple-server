@@ -1,8 +1,8 @@
 # Step 02: lifecycle and entry-point setup
 
 Status: implementation committed at `c535907`, adopted locally across all 17
-inventoried products with documented application scopes. Crumbles and SCT remain
-on their isolated migration branches, not merged into ongoing development.
+inventoried products with documented application scopes. Crumbles and SCT now include the migrations on local `master`, rebased onto
+their migration branches while preserving subsequent development.
 See the [migration status](migration-status.md) for commits and verification.
 This is the first capability extraction after Step 01 (Axum centralization).
 

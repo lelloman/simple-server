@@ -19,7 +19,7 @@ Last verified against local checkouts: 2026-09-19.
 | pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** |
 | favzetto | `backend` | **Done** | **Done (local; scoped)** |
 | androidoscopy | `server` | **Done** | **Done (local; scoped)** |
-| crumbles | `crumbles`, `crumbles-integration` | **Done (migration branch)** | **Done (migration branch; scoped)** |
+| crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** |
 | fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** |
 | lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** |
 | lellostore | `backend` | **Done** | **Done (local)** |
@@ -30,7 +30,7 @@ Last verified against local checkouts: 2026-09-19.
 | pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** |
 | pezzottify-downloader | Puppeteer API and downloader HTTP server | **Done** | **Done (local; scoped)** |
 | quentin-torrentino | `crates/server` | **Done** | **Done (local; scoped)** |
-| sct | `sct-server` | **Done (migration branch)** | **Done (migration branch; scoped)** |
+| sct | `sct-server` | **Done** | **Done (scoped)** |
 | simple-agents | `simple-agents-service`; associated coding test servers | **Done** | **Done (local; scoped)** |
 | simple-ai | `backend`, `inference-runner` | **Done** | **Done (local; scoped)** |
 
@@ -72,8 +72,8 @@ intentional ignores), eight real-server Chromium E2E scenarios, formatting,
 strict Clippy, unchanged generated API contracts, and the Docker build and
 restart/persistence smoke test. See its `docs/SIMPLE_SERVER_MIGRATION.md`.
 This was verified in the isolated `crumbles-step01` worktree from `de8b700`;
-it is **not merged** into the main checkout, where dispatcher development
-continues. Newly added Axum imports must be migrated when integrating that work.
+local `master` was subsequently rebased onto the migration branch on 2026-09-19,
+preserving dispatcher development and adapting its newly added Axum imports.
 
 Fausto completed this step in commit `258c4ff` on `master`, migrating the
 server, plugin API, blog plugin, and runtime test-echo plugin to the same pinned
@@ -128,7 +128,7 @@ pezzottify-downloader completed Step 01 in commit `98cab3a`. Passed 146 Rust tes
 
 quentin-torrentino completed Step 01 in commit `a5cbfc6`. Upgraded all 145 E2E scenarios to real HTTP before migration (1be03ef). Full workspace results match untouched baseline a88e04c: 739 passed, two failed, 14 ignored; E2E is 144/145. Existing MusicBrainz mock and temporary-directory assumptions cause the failures. Repaired stale Docker workspace inputs; release/dashboard builds and container checks pass. Existing formatting/Clippy failures remain. See docs/simple-server-migration.md in Torrentino.
 
-sct completed Step 01 in commit `d577999`. Completed on isolated simple-server-step01 branch from 5cffda9; NOT MERGED into ongoing S3 work. Full scripts/check passes: 33 Rust/Postgres tests plus one doctest, strict Clippy/formatting, 49 contract tests, independent client packaging, frontend build and three real-server browser E2E scenarios. Four future milestone scenarios remain explicitly skipped. See docs/simple-server-migration.md in sct-step01.
+sct completed Step 01 in commit `d577999`. Originally completed on simple-server-step01 from 5cffda9; local master was subsequently rebased onto it, preserving newer storage and tree work. Full scripts/check passes: 33 Rust/Postgres tests plus one doctest, strict Clippy/formatting, 49 contract tests, independent client packaging, frontend build and three real-server browser E2E scenarios. Four future milestone scenarios remain explicitly skipped. See docs/simple-server-migration.md in sct-step01.
 
 simple-agents completed Step 01 in commit `5b13de6`. Full scripts/check passes before and after migration: 313 Rust tests, strict checks, seven JavaScript tests, 11 Android contract tests, three real-service browser E2E scenarios and repository consistency checks. Standalone managed-handoff qualification also passes against local Crumbles core; both lockfiles updated. See docs/simple-server-migration.md in Simple Agents.
 
@@ -264,9 +264,9 @@ frontend scaffold also adopts shared HTTP shutdown. Full `scripts/check` passes,
 including PostgreSQL integration, strict checks, client packaging, 49 contract
 tests, frontend build, and three browser E2E scenarios (four existing future
 scenarios pending). New process tests cover both signals, an 8 MiB response drain,
-immediate database restart, and lease-loss failure. This remains on the isolated
-`simple-server-step01` branch in `sct-step01`, **not merged** into ongoing storage
-work. See SCT's `docs/step-02-lifecycle.md`.
+immediate database restart, and lease-loss failure. Local `master` now includes the migration and subsequent storage/tree work,
+with transfer heartbeats retained alongside lease renewal and recovery stopped
+before writer release. The checks above describe the original migration. See SCT's `docs/step-02-lifecycle.md`.
 
 Androidoscopy commit `bb4033d` coordinates v2 controller HTTP, discovery/session
 workers, and tracked device/action/socket tasks; legacy HTTP, WS/TLS, and UDP
@@ -303,9 +303,9 @@ Final outbox rows remain durable for replay, without guaranteed live publication
 and socket cancellation does not promise a Close handshake. Validation passes
 1,367 Rust tests (two ignored), strict Clippy/formatting, unchanged generated
 contracts, eight real-server browser scenarios, both release Docker builds, and
-signal/drain/restart checks for both binaries and release containers. This remains
-on `simple-server-step01` in `crumbles-step01`, **not merged** into the original
-checkout's ongoing work. See `docs/STEP_02_LIFECYCLE.md` in that worktree.
+signal/drain/restart checks for both binaries and release containers. Local `master` now includes the migration and subsequent dispatcher work.
+Native dispatcher cleanup finishes before SQLite closure. The checks above
+describe the original migration. See Crumbles' `docs/STEP_02_LIFECYCLE.md`.
 
 Quentin Torrentino commits `4cddf9d` and `7728402` coordinate HTTP, the V2
 orchestrator, accepted WebSockets, pipeline jobs, and final audit flushing under
@@ -321,8 +321,8 @@ signal/audit checks pass. Existing Clippy/formatting findings remain. See
 `docs/step-02-lifecycle.md` in Torrentino.
 
 All 17 inventoried products now have locally verified, scoped Step 02 adoption.
-Crumbles and SCT remain on their isolated migration branches; neither is merged
-into its original checkout. The reviewed shared source remains `c535907`; no
+Crumbles and SCT local `master` branches have been rebased onto their migration
+branches, preserving their subsequent development. The reviewed shared source remains `c535907`; no
 library implementation changed during these consumer migrations. No push or
 deployment was performed.
 

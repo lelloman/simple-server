@@ -7,8 +7,7 @@ the library's own interfaces.
 
 **Status:** Axum dependency centralization and opt-in lifecycle helpers are
 implemented. All 17 inventoried products have adopted lifecycle helpers locally
-with documented application scopes. Crumbles and SCT remain on isolated migration
-branches. Publication to crates.io remains disabled.
+with documented application scopes. Crumbles and SCT include those migrations on local `master`. Publication to crates.io remains disabled.
 
 Open the [HTML migration matrix](docs/migration-status.html) in a browser for adoption status
 across all 17 planned consumer projects and the completed steps for each one.
