@@ -27,7 +27,7 @@ Last verified against local checkouts: 2026-09-19.
 | observo | `observo-server` | **Done** |
 | paranza | `apps/paranza-server` | **Done** |
 | peerlo | `peerlo-api` | **Done** |
-| pezzottflix | `pezzottflix-server` | Pending |
+| pezzottflix | `pezzottflix-server` | **Done** |
 | pezzottify-downloader | Puppeteer API and downloader HTTP server | Pending |
 | quentin-torrentino | `crates/server` | Pending |
 | sct | `sct-server` | Pending |
@@ -121,6 +121,8 @@ observo completed Step 01 in commit `573050e`. Passed 87 Rust tests, formatting,
 paranza completed Step 01 in commit `d4beb0e`. Passed 284 Rust tests, formatting and Docker release builds. All 28 Docker E2E scenarios ran: 25 passed; two multi-node certificate fixture failures and one freshness assertion failed identically on untouched baseline bec0460. Existing strict-Clippy findings were also confirmed on baseline. See docs/simple-server-migration.md in Paranza.
 
 peerlo completed Step 01 in commit `e5a50dc`. Passed 780 Rust tests (six intentional ignores), formatting, Docker release builds and all 49 Docker swarm E2E tests before and after migration, including load and node recovery. Strict Clippy retains the same 13 baseline findings. See docs/simple-server-migration.md in Peerlo.
+
+pezzottflix completed Step 01 in commit `a130c02`. Passed 529 Rust tests (three intentional ignores), Docker/frontend builds and all 10 backend E2E tests. New real WebSocket tests were committed first in f3c2ad1 and passed before migration. Rust tests needed a larger compiler stack; one cleanup assertion cleared on a full rerun. Existing formatting and strict-Clippy failures remain. Android TV protocol tests were outside scope. See docs/simple-server-migration.md in Pezzottflix.
 
 ## Planned steps
 
