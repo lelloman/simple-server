@@ -7,7 +7,7 @@ the library's own interfaces.
 
 **Status:** Axum dependency centralization and opt-in lifecycle helpers are
 implemented. Favzetto, LelloStore, LelloAuth, Fausto, Meteonesto, Pezzottify,
-Observo, Paranza, and Peerlo have adopted lifecycle helpers with documented application scopes. Publication to crates.io remains disabled.
+Observo, Paranza, Peerlo, and Simple AI have adopted lifecycle helpers with documented application scopes. Publication to crates.io remains disabled.
 
 Open the [HTML migration matrix](docs/migration-status.html) in a browser for adoption status
 across all 17 planned consumer projects and the completed steps for each one.

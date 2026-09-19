@@ -32,7 +32,7 @@ Last verified against local checkouts: 2026-09-19.
 | quentin-torrentino | `crates/server` | **Done** | Pending |
 | sct | `sct-server` | **Done (migration branch)** | Pending |
 | simple-agents | `simple-agents-service`; associated coding test servers | **Done** | Pending |
-| simple-ai | `backend`, `inference-runner` | **Done** | Pending |
+| simple-ai | `backend`, `inference-runner` | **Done** | **Done (local; scoped)** |
 
 ## Step 1: Axum centralization
 
@@ -229,6 +229,21 @@ findings remain. See `docs/step-02-lifecycle.md` in Peerlo.
 All three use the reviewed sibling source revision `c535907`, recorded in their
 revision files and Docker build contexts. These commits are local; no deployment
 or remote publication was performed.
+
+Simple AI commit `e55f18f` adopts shared signals and a 30-second deadline in both
+backend and inference runner. Backend HTTP drains before stopping affinity
+invalidation and batch dispatch; tracked dispatched requests are joined. Runner
+HTTP drains while its gateway connection/heartbeat work stops. Existing upgraded
+backend WebSockets, detached jobs, and engine-process ownership retain their
+scope. Validation: 441 Rust tests pass (one existing doctest ignored), including
+SIGINT/SIGTERM during real-runner inference and batch-drain coverage. All four
+Docker gateway E2E groups, the backend release build, and both release-container
+signal checks pass. Compose, shell syntax, entry-point formatting, and diff checks
+pass; existing workspace formatting differences and three common-crate Clippy
+findings remain. CI and Docker builds use reviewed sibling source `c535907`;
+remote publication is still required for fresh checkouts. See Simple AI's
+`docs/step-02-lifecycle.md`. Both commits and validation are local; no deployment
+or push was performed.
 
 ## Planned steps
 
