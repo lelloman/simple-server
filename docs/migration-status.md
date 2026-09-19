@@ -20,7 +20,7 @@ Last verified against local checkouts: 2026-09-19.
 | favzetto | `backend` | **Done** | **Done (local; scoped)** |
 | androidoscopy | `server` | **Done** | Pending |
 | crumbles | `crumbles`, `crumbles-integration` | **Done (migration branch)** | Pending |
-| fausto | `server`; associated plugin API and plugins | **Done** | Pending |
+| fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** |
 | lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** |
 | lellostore | `backend` | **Done** | **Done (local)** |
 | meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | Pending |
@@ -165,6 +165,16 @@ pass (14 existing ignores), 92 deployed E2E tests pass, strict Clippy/formatting
 19 workflow contracts, all three example builds, the doctest, Docker build, and
 Compose validation pass. See `docs/STEP_02_LIFECYCLE.md` in LelloAuth for scoped
 shutdown guarantees and the reviewed sibling-source requirement.
+
+Fausto commit `5a5e6e8` coordinates HTTP, tracked WebSockets, event distribution,
+triggers, cron/manual jobs, and rate-limit cleanup. Plugin shutdown follows their
+drain under the same configurable deadline. Auth last-seen updates and tasks
+spawned independently by plugins retain their existing ownership. Validation:
+642 Rust tests pass (4 existing ignores), formatting and locked Docker build pass,
+and Clippy completes with warnings. All 380 existing E2E outcomes match baseline
+(349 pass; 7 failures, 14 setup errors, 3 skips, 7 expected failures); the new
+WebSocket shutdown test also passes. See `docs/STEP_02_LIFECYCLE.md` in Fausto for
+shutdown limits, build setup, and baseline evidence.
 
 Pezzottify has not been changed. Its integration requires explicit approval.
 
