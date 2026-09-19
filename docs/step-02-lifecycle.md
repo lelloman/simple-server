@@ -1,7 +1,7 @@
 # Step 02: lifecycle and entry-point setup
 
-Status: implementation committed at `c535907`, adopted locally by Favzetto and
-LelloStore. Pezzottify integration awaits explicit approval.
+Status: implementation committed at `c535907`, adopted locally by Favzetto,
+LelloStore, and LelloAuth. Pezzottify integration awaits explicit approval.
 This is the first capability extraction after Step 01 (Axum centralization).
 
 ## Outcome

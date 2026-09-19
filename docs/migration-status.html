@@ -108,7 +108,7 @@
       <p><strong>simple-ai has completed Step 01.</strong> Backend and inference runner migrated together. E2E-first commit 1eb5974 adds a real-runner HTTP test and repairs stale gateway protocol fixtures. All 440 Rust tests and four Docker gateway E2E groups pass before and after; Rust 1.91 Docker build passes. Existing formatting and three common-crate Clippy findings remain documented. Commit: <code>daf92bd</code>.</p>
       <p><strong>Meteonesto has completed Step 01.</strong> All three components use the central Axum 0.8.9 dependency. Passed 251 Rust tests, two Python tests, strict checks and the new gateway-to-API E2E test, implemented before migration. Existing pipeline Docker E2E fails identically on baseline and migration (24 artifacts versus 22 expected); later backup/restore checks are not reached. Commit: <code>7cc0faa</code>.</p>
       <p><strong>LelloStore has completed Step 01.</strong> Backend and mock OIDC server use Axum 0.8.9 through <code>simple-server</code>. Passed 122 Rust tests, strict Clippy, formatting, frontend and Docker builds, and container smoke checks. The new authenticated WebSocket/upload E2E test passes. Commit: <code>eed1cff</code>.</p>
-      <p><strong>Planned does not mean mandatory.</strong> Future columns show the agreed building blocks. A service can adopt only what it needs; use “N/A” once a module is assessed as unnecessary. Lifecycle helpers are now available; subsequent steps remain flexible. Favzetto has local, scoped lifecycle adoption. LelloStore coordinates both listeners, its metrics updater, and catalog WebSockets. Pezzottify awaits approval.</p>
+      <p><strong>Planned does not mean mandatory.</strong> Future columns show the agreed building blocks. A service can adopt only what it needs; use “N/A” once a module is assessed as unnecessary. Lifecycle helpers are now available; subsequent steps remain flexible. Favzetto has local, scoped lifecycle adoption. LelloStore coordinates both listeners, its metrics updater, and catalog WebSockets. LelloAuth coordinates HTTP and maintenance; its delivery queues retain their existing shutdown behavior. Pezzottify awaits approval.</p>
     </section>
     <footer>
       Verified against local checkouts on <time datetime="2026-09-19">19 September 2026</time>. Tracks implementation, not deployment or publication.<br>
@@ -130,7 +130,7 @@
       {name: 'androidoscopy', components: 'server', axum: 'done'},
       {name: 'crumbles', components: 'crumbles · crumbles-integration (migration branch)', axum: 'done'},
       {name: 'fausto', components: 'server · plugin API and plugins', axum: 'done'},
-      {name: 'lello-auth', components: 'lello-auth-server · lello-auth-axum · examples', axum: 'done'},
+      {name: 'lello-auth', components: 'server · axum · examples (lifecycle: local, scoped adoption)', axum: 'done', lifecycle: 'done'},
       {name: 'lellostore', components: 'backend (lifecycle: local adoption)', axum: 'done', lifecycle: 'done'},
       {name: 'meteonesto', components: 'weather-api · weather-gateway · pipeline control API', axum: 'done'},
       {name: 'observo', components: 'observo-server', axum: 'done'},

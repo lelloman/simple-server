@@ -21,7 +21,7 @@ Last verified against local checkouts: 2026-09-19.
 | androidoscopy | `server` | **Done** | Pending |
 | crumbles | `crumbles`, `crumbles-integration` | **Done (migration branch)** | Pending |
 | fausto | `server`; associated plugin API and plugins | **Done** | Pending |
-| lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | Pending |
+| lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** |
 | lellostore | `backend` | **Done** | **Done (local)** |
 | meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | Pending |
 | observo | `observo-server` | **Done** | Pending |
@@ -157,6 +157,14 @@ All 128 backend tests, strict Clippy, formatting, 16 script tests, and the Docke
 release build pass. Its
 local path dependency, CI sibling checkout, Docker context, shutdown budget, and
 limits are documented in `docs/STEP_02_LIFECYCLE.md` in LelloStore.
+
+LelloAuth commit `40f1c65` adopts shared HTTP/maintenance shutdown and updates all three HTTP
+examples. It preserves connection information, CLI startup boundaries, and
+existing outbound alert/webhook queue behavior. Validation: 949 workspace tests
+pass (14 existing ignores), 92 deployed E2E tests pass, strict Clippy/formatting,
+19 workflow contracts, all three example builds, the doctest, Docker build, and
+Compose validation pass. See `docs/STEP_02_LIFECYCLE.md` in LelloAuth for scoped
+shutdown guarantees and the reviewed sibling-source requirement.
 
 Pezzottify has not been changed. Its integration requires explicit approval.
 
