@@ -30,7 +30,7 @@ Last verified against local checkouts: 2026-09-19.
 | pezzottflix | `pezzottflix-server` | **Done** |
 | pezzottify-downloader | Puppeteer API and downloader HTTP server | **Done** |
 | quentin-torrentino | `crates/server` | **Done** |
-| sct | `sct-server` | Pending |
+| sct | `sct-server` | **Done (migration branch)** |
 | simple-agents | `simple-agents-service`; associated coding test servers | Pending |
 | simple-ai | `backend`, `inference-runner` | Pending |
 
@@ -127,6 +127,8 @@ pezzottflix completed Step 01 in commit `a130c02`. Passed 529 Rust tests (three 
 pezzottify-downloader completed Step 01 in commit `98cab3a`. Passed 146 Rust tests, seven doctests, 90 Python tests, Docker build and isolated container smoke/shutdown checks. Two real-binary credential-free E2E tests were committed first in a01480a and pass before and after migration, alongside existing HTTP-to-Unix-socket integration tests. Live Spotify downloads were outside scope. Existing formatting/Clippy findings remain. See docs/simple-server-migration.md in the downloader repository.
 
 quentin-torrentino completed Step 01 in commit `a5cbfc6`. Upgraded all 145 E2E scenarios to real HTTP before migration (1be03ef). Full workspace results match untouched baseline a88e04c: 739 passed, two failed, 14 ignored; E2E is 144/145. Existing MusicBrainz mock and temporary-directory assumptions cause the failures. Repaired stale Docker workspace inputs; release/dashboard builds and container checks pass. Existing formatting/Clippy failures remain. See docs/simple-server-migration.md in Torrentino.
+
+sct completed Step 01 in commit `d577999`. Completed on isolated simple-server-step01 branch from 5cffda9; NOT MERGED into ongoing S3 work. Full scripts/check passes: 33 Rust/Postgres tests plus one doctest, strict Clippy/formatting, 49 contract tests, independent client packaging, frontend build and three real-server browser E2E scenarios. Four future milestone scenarios remain explicitly skipped. See docs/simple-server-migration.md in sct-step01.
 
 ## Planned steps
 
