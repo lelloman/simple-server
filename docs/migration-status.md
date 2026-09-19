@@ -22,7 +22,7 @@ Last verified against local checkouts: 2026-09-19.
 | crumbles | `crumbles`, `crumbles-integration` | **Done (migration branch)** |
 | fausto | `server`; associated plugin API and plugins | **Done** |
 | lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** |
-| lellostore | `backend` | Pending |
+| lellostore | `backend` | **Done** |
 | meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | Pending |
 | observo | `observo-server` | Pending |
 | paranza | `apps/paranza-server` | Pending |
@@ -97,6 +97,15 @@ a complete rerun. The audit still flags pre-existing `rustls 0.23.43`
 (RUSTSEC-2026-0285) in workspace and helper lockfiles. See
 `docs/SIMPLE_SERVER_MIGRATION.md` for results and release-gate scope limits.
 The migration is committed locally, not deployed.
+
+LelloStore completed this step in commit `eed1cff` on `master`, moving its
+backend, mock OIDC binary, and tests to the same public Git pin and Axum 0.8.9.
+The migration updates route parameters, authentication extractors, and WebSocket
+text messages. Validation passed 122 Rust tests (two ignored doctests), strict
+Clippy, formatting, the frontend and Docker builds, and container health,
+frontend, and fail-closed authentication checks. A new real-socket E2E test
+verifies authenticated WebSocket delivery after an admin upload. See
+`docs/SIMPLE_SERVER_MIGRATION.md`. The migration is committed locally, not deployed.
 
 ## Planned steps
 
