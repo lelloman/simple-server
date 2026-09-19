@@ -23,7 +23,7 @@ Last verified against local checkouts: 2026-09-19.
 | fausto | `server`; associated plugin API and plugins | **Done** |
 | lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** |
 | lellostore | `backend` | **Done** |
-| meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | Pending |
+| meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** |
 | observo | `observo-server` | Pending |
 | paranza | `apps/paranza-server` | Pending |
 | peerlo | `peerlo-api` | Pending |
@@ -106,6 +106,15 @@ Clippy, formatting, the frontend and Docker builds, and container health,
 frontend, and fail-closed authentication checks. A new real-socket E2E test
 verifies authenticated WebSocket delivery after an admin upload. See
 `docs/SIMPLE_SERVER_MIGRATION.md`. The migration is committed locally, not deployed.
+
+Meteonesto completed Step 01 in commit `7cc0faa` on `master`, retaining Axum
+0.8.9 through the same pinned public Git dependency in all three components.
+Validation passed 251 Rust tests, two Python tests, formatting, strict Clippy,
+builds, dependency policy checks and the new gateway-to-API real-socket E2E
+test (added and verified before migration in `140e923`). The existing pipeline
+Docker E2E suite fails identically before and after migration: expected 22
+artifacts, produced 24; later backup/restore checks are not reached. See
+`docs/simple-server-migration.md` in Meteonesto. No deployment was performed.
 
 ## Planned steps
 
