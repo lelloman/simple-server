@@ -66,9 +66,9 @@
   <main>
     <section class="summary" aria-label="Migration overview">
       <div class="stat"><strong id="service-count">17</strong><span>Services in scope</span></div>
-      <div class="stat complete"><strong id="done-count">16 / 17</strong><span>Axum centralization complete</span></div>
+      <div class="stat complete"><strong id="done-count">17 / 17</strong><span>Axum centralization complete</span></div>
       <div class="stat"><strong>1 / 10</strong><span>Shared steps implemented</span></div>
-      <div class="stat"><strong id="pending-count">1</strong><span>Awaiting Axum centralization</span></div>
+      <div class="stat"><strong id="pending-count">0</strong><span>Awaiting Axum centralization</span></div>
     </section>
     <div class="toolbar">
       <div><h2>Migration matrix</h2><p class="muted">Scroll horizontally to explore all steps. Service names stay in view.</p></div>
@@ -105,6 +105,7 @@
       <p><strong>quentin-torrentino has completed Step 01.</strong> Upgraded all 145 E2E scenarios to real HTTP before migration (1be03ef). Full workspace results match untouched baseline a88e04c: 739 passed, two failed, 14 ignored; E2E is 144/145. Existing MusicBrainz mock and temporary-directory assumptions cause the failures. Repaired stale Docker workspace inputs; release/dashboard builds and container checks pass. Existing formatting/Clippy failures remain. See docs/simple-server-migration.md in Torrentino. Commit: <code>a5cbfc6</code>.</p>
       <p><strong>sct has completed Step 01.</strong> Completed on isolated simple-server-step01 branch from 5cffda9; NOT MERGED into ongoing S3 work. Full scripts/check passes: 33 Rust/Postgres tests plus one doctest, strict Clippy/formatting, 49 contract tests, independent client packaging, frontend build and three real-server browser E2E scenarios. Four future milestone scenarios remain explicitly skipped. See docs/simple-server-migration.md in sct-step01. Commit: <code>d577999</code>.</p>
       <p><strong>simple-agents has completed Step 01.</strong> Full scripts/check passes before and after migration: 313 Rust tests, strict checks, seven JavaScript tests, 11 Android contract tests, three real-service browser E2E scenarios and repository consistency checks. Standalone managed-handoff qualification also passes against local Crumbles core; both lockfiles updated. See docs/simple-server-migration.md in Simple Agents. Commit: <code>5b13de6</code>.</p>
+      <p><strong>simple-ai has completed Step 01.</strong> Backend and inference runner migrated together. E2E-first commit 1eb5974 adds a real-runner HTTP test and repairs stale gateway protocol fixtures. All 440 Rust tests and four Docker gateway E2E groups pass before and after; Rust 1.91 Docker build passes. Existing formatting and three common-crate Clippy findings remain documented. Commit: <code>daf92bd</code>.</p>
       <p><strong>Meteonesto has completed Step 01.</strong> All three components use the central Axum 0.8.9 dependency. Passed 251 Rust tests, two Python tests, strict checks and the new gateway-to-API E2E test, implemented before migration. Existing pipeline Docker E2E fails identically on baseline and migration (24 artifacts versus 22 expected); later backup/restore checks are not reached. Commit: <code>7cc0faa</code>.</p>
       <p><strong>LelloStore has completed Step 01.</strong> Backend and mock OIDC server use Axum 0.8.9 through <code>simple-server</code>. Passed 122 Rust tests, strict Clippy, formatting, frontend and Docker builds, and container smoke checks. The new authenticated WebSocket/upload E2E test passes. Commit: <code>eed1cff</code>.</p>
       <p><strong>Planned does not mean mandatory.</strong> Future columns show the agreed building blocks. A service can adopt only what it needs; use “N/A” once a module is assessed as unnecessary. Beyond the next lifecycle step, the order remains flexible.</p>
@@ -140,7 +141,7 @@
       {name: 'quentin-torrentino', components: 'crates/server', axum: 'done'},
       {name: 'sct', components: 'sct-server', axum: 'done'},
       {name: 'simple-agents', components: 'simple-agents-service · coding test servers', axum: 'done'},
-      {name: 'simple-ai', components: 'backend · inference-runner', axum: 'pending'}
+      {name: 'simple-ai', components: 'backend · inference-runner', axum: 'done'}
     ];
     const labels = {done: '✓ Complete', pending: 'Pending', planned: 'Planned', partial: 'Partial', na: 'N/A'};
     for (const [index, [name, available]] of steps.entries()) {

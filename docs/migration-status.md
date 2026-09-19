@@ -32,7 +32,7 @@ Last verified against local checkouts: 2026-09-19.
 | quentin-torrentino | `crates/server` | **Done** |
 | sct | `sct-server` | **Done (migration branch)** |
 | simple-agents | `simple-agents-service`; associated coding test servers | **Done** |
-| simple-ai | `backend`, `inference-runner` | Pending |
+| simple-ai | `backend`, `inference-runner` | **Done** |
 
 ## Step 1: Axum centralization
 
@@ -131,6 +131,8 @@ quentin-torrentino completed Step 01 in commit `a5cbfc6`. Upgraded all 145 E2E s
 sct completed Step 01 in commit `d577999`. Completed on isolated simple-server-step01 branch from 5cffda9; NOT MERGED into ongoing S3 work. Full scripts/check passes: 33 Rust/Postgres tests plus one doctest, strict Clippy/formatting, 49 contract tests, independent client packaging, frontend build and three real-server browser E2E scenarios. Four future milestone scenarios remain explicitly skipped. See docs/simple-server-migration.md in sct-step01.
 
 simple-agents completed Step 01 in commit `5b13de6`. Full scripts/check passes before and after migration: 313 Rust tests, strict checks, seven JavaScript tests, 11 Android contract tests, three real-service browser E2E scenarios and repository consistency checks. Standalone managed-handoff qualification also passes against local Crumbles core; both lockfiles updated. See docs/simple-server-migration.md in Simple Agents.
+
+simple-ai completed Step 01 in commit `daf92bd`. Backend and inference runner migrated together. E2E-first commit 1eb5974 adds a real-runner HTTP test and repairs stale gateway protocol fixtures. All 440 Rust tests and four Docker gateway E2E groups pass before and after; Rust 1.91 Docker build passes. Existing formatting and three common-crate Clippy findings remain documented.
 
 ## Planned steps
 
