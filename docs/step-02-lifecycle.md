@@ -1,7 +1,7 @@
 # Step 02: lifecycle and entry-point setup
 
-Status: implemented in the local `simple-server` working tree, with Favzetto as
-the first consumer. Pezzottify integration awaits explicit approval.
+Status: implementation committed at `c535907`, adopted locally by Favzetto and
+LelloStore. Pezzottify integration awaits explicit approval.
 This is the first capability extraction after Step 01 (Axum centralization).
 
 ## Outcome
@@ -14,7 +14,8 @@ requests that they drain together, and bounds the wait with one explicit deadlin
 The first design consumers are Favzetto and Pezzottify. Favzetto validates the
 single-listener API and cooperative worker integration. Library tests validate
 multiple listeners and peer-address extraction; validation in Pezzottify itself
-remains pending before wider rollout.
+remains pending. LelloStore was subsequently authorized as another pilot and
+validates two listeners, an application worker, and tracked WebSocket draining.
 
 ## Evidence from the first consumers
 

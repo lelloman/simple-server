@@ -22,7 +22,7 @@ Last verified against local checkouts: 2026-09-19.
 | crumbles | `crumbles`, `crumbles-integration` | **Done (migration branch)** | Pending |
 | fausto | `server`; associated plugin API and plugins | **Done** | Pending |
 | lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | Pending |
-| lellostore | `backend` | **Done** | Pending |
+| lellostore | `backend` | **Done** | **Done (local)** |
 | meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | Pending |
 | observo | `observo-server` | **Done** | Pending |
 | paranza | `apps/paranza-server` | **Done** | Pending |
@@ -141,13 +141,22 @@ Library checks pass for default, lifecycle-only, HTTP+lifecycle, all-features,
 and no-default-features configurations. Real HTTP, streaming, WebSocket, and
 child-process signal tests cover the shutdown contract.
 
-Favzetto adopts shared signals, HTTP draining, and its assistant worker with a
+Favzetto adopts shared signals, HTTP draining, and its assistant worker in commit
+`ddce8e2`, with a
 configurable 30-second default budget. It uses the local sibling library while
 this implementation is under review. Its new lifecycle tests pass; two existing
 catalog-research failures reproduce before and after migration. Existing detached
 request jobs and upgraded WebSocket sessions remain outside coordinated draining;
 see Favzetto's `docs/07-lifecycle-migration.md` for the exact scope and build setup.
 This status describes that scoped adoption, not complete background-task ownership.
+
+LelloStore migration commit `a71ec9f` adopts the committed library (`c535907`) for
+both HTTP listeners, its
+metrics updater, and tracked catalog WebSockets, followed by SQLite pool cleanup.
+All 128 backend tests, strict Clippy, formatting, 16 script tests, and the Docker
+release build pass. Its
+local path dependency, CI sibling checkout, Docker context, shutdown budget, and
+limits are documented in `docs/STEP_02_LIFECYCLE.md` in LelloStore.
 
 Pezzottify has not been changed. Its integration requires explicit approval.
 
