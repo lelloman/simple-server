@@ -66,9 +66,9 @@
   <main>
     <section class="summary" aria-label="Migration overview">
       <div class="stat"><strong id="service-count">17</strong><span>Services in scope</span></div>
-      <div class="stat complete"><strong id="done-count">10 / 17</strong><span>Axum centralization complete</span></div>
+      <div class="stat complete"><strong id="done-count">11 / 17</strong><span>Axum centralization complete</span></div>
       <div class="stat"><strong>1 / 10</strong><span>Shared steps implemented</span></div>
-      <div class="stat"><strong id="pending-count">7</strong><span>Awaiting Axum centralization</span></div>
+      <div class="stat"><strong id="pending-count">6</strong><span>Awaiting Axum centralization</span></div>
     </section>
     <div class="toolbar">
       <div><h2>Migration matrix</h2><p class="muted">Scroll horizontally to explore all steps. Service names stay in view.</p></div>
@@ -99,6 +99,7 @@
       <p><strong>Lello-auth has completed Step 01.</strong> Both server crates and all three examples use Axum 0.8.9 through <code>simple-server</code>. On Rust 1.88: 945 workspace tests, one doctest, 92 deployed E2E tests, strict Clippy, formatting, example builds, and Docker passed. The existing rustls audit advisory remains; details and release-gate limits are documented. Commit: <code>5118c29</code>.</p>
       <p><strong>observo has completed Step 01.</strong> Passed 87 Rust tests, formatting, the Docker build and container smoke checks. New real-binary authentication, CRUD and restart-persistence E2E coverage passed before and after migration; its baseline exposed and fixed a blocking-client startup panic (830e9b8). Five stale test fixtures were repaired. Strict Clippy retains the same 36 baseline findings. See docs/simple-server-migration.md in Observo. Commit: <code>573050e</code>.</p>
       <p><strong>paranza has completed Step 01.</strong> Passed 284 Rust tests, formatting and Docker release builds. All 28 Docker E2E scenarios ran: 25 passed; two multi-node certificate fixture failures and one freshness assertion failed identically on untouched baseline bec0460. Existing strict-Clippy findings were also confirmed on baseline. See docs/simple-server-migration.md in Paranza. Commit: <code>d4beb0e</code>.</p>
+      <p><strong>peerlo has completed Step 01.</strong> Passed 780 Rust tests (six intentional ignores), formatting, Docker release builds and all 49 Docker swarm E2E tests before and after migration, including load and node recovery. Strict Clippy retains the same 13 baseline findings. See docs/simple-server-migration.md in Peerlo. Commit: <code>e5a50dc</code>.</p>
       <p><strong>Meteonesto has completed Step 01.</strong> All three components use the central Axum 0.8.9 dependency. Passed 251 Rust tests, two Python tests, strict checks and the new gateway-to-API E2E test, implemented before migration. Existing pipeline Docker E2E fails identically on baseline and migration (24 artifacts versus 22 expected); later backup/restore checks are not reached. Commit: <code>7cc0faa</code>.</p>
       <p><strong>LelloStore has completed Step 01.</strong> Backend and mock OIDC server use Axum 0.8.9 through <code>simple-server</code>. Passed 122 Rust tests, strict Clippy, formatting, frontend and Docker builds, and container smoke checks. The new authenticated WebSocket/upload E2E test passes. Commit: <code>eed1cff</code>.</p>
       <p><strong>Planned does not mean mandatory.</strong> Future columns show the agreed building blocks. A service can adopt only what it needs; use “N/A” once a module is assessed as unnecessary. Beyond the next lifecycle step, the order remains flexible.</p>
@@ -128,7 +129,7 @@
       {name: 'meteonesto', components: 'weather-api · weather-gateway · pipeline control API', axum: 'done'},
       {name: 'observo', components: 'observo-server', axum: 'done'},
       {name: 'paranza', components: 'apps/paranza-server', axum: 'done'},
-      {name: 'peerlo', components: 'peerlo-api', axum: 'pending'},
+      {name: 'peerlo', components: 'peerlo-api', axum: 'done'},
       {name: 'pezzottflix', components: 'pezzottflix-server', axum: 'pending'},
       {name: 'pezzottify-downloader', components: 'Puppeteer API · downloader HTTP server', axum: 'pending'},
       {name: 'quentin-torrentino', components: 'crates/server', axum: 'pending'},
