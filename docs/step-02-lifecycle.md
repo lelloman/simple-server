@@ -1,7 +1,7 @@
 # Step 02: lifecycle and entry-point setup
 
 Status: implementation committed at `c535907`, adopted locally by Favzetto,
-LelloStore, LelloAuth, Fausto, and Meteonesto. Pezzottify integration awaits explicit approval.
+LelloStore, LelloAuth, Fausto, Meteonesto, and Pezzottify.
 This is the first capability extraction after Step 01 (Axum centralization).
 
 ## Outcome
@@ -13,15 +13,15 @@ requests that they drain together, and bounds the wait with one explicit deadlin
 
 The first design consumers are Favzetto and Pezzottify. Favzetto validates the
 single-listener API and cooperative worker integration. Library tests validate
-multiple listeners and peer-address extraction; validation in Pezzottify itself
-remains pending. LelloStore was subsequently authorized as another pilot and
+multiple listeners and peer-address extraction; Pezzottify now coordinates both
+listeners, scheduler jobs, maintenance, and tracked application tasks. LelloStore was subsequently authorized as another pilot and
 validates two listeners, an application worker, and tracked WebSocket draining.
 
 ## Evidence from the first consumers
 
-Reviewed local checkouts: Favzetto `382cc8f`, Pezzottify `e3e69de7`.
+Historical design evidence, before migration. Reviewed local checkouts: Favzetto `382cc8f`, Pezzottify `e3e69de7`.
 
-| Consumer | Current behavior | Requirement |
+| Consumer | Pre-migration behavior | Requirement |
 | --- | --- | --- |
 | Favzetto `backend/src/main.rs` | Owns config, logging, migrations, database, storage, routes, and an assistant worker; one HTTP listener uses graceful shutdown without a deadline | Preserve the migrate command and startup sequence; replace signal duplication and bound draining |
 | Pezzottify `pezzottify-server/src/main.rs` and `src/server/bootstrap.rs` | Owns application startup, a cancellable scheduler, API and metrics listeners; nested `select!` blocks drop sibling serving futures on exit | Coordinate both listeners and keep the scheduler future polled during shutdown; preserve peer-address connection information |
@@ -205,6 +205,5 @@ scope and known baseline failures are recorded in its migration documentation.
   no-default-features builds. Run the existing library checks and each consumer's
   required checks, including real-server shutdown tests.
 
-Completion of the full pilot phase requires both consumer integrations. Library
-implementation and Favzetto adoption can be reviewed independently while
-Pezzottify awaits approval; adoption across all products is tracked separately.
+Both original pilot integrations are implemented. Each consumer documents its
+shutdown scope and validation; adoption across all products is tracked separately.

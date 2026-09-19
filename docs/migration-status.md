@@ -16,7 +16,7 @@ Last verified against local checkouts: 2026-09-19.
 
 | Project | Server components | 1. Axum centralization | 2. Lifecycle / main() |
 | --- | --- | --- | --- |
-| pezzottify | `pezzottify-server` | **Done** | Pending approval |
+| pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** |
 | favzetto | `backend` | **Done** | **Done (local; scoped)** |
 | androidoscopy | `server` | **Done** | Pending |
 | crumbles | `crumbles`, `crumbles-integration` | **Done (migration branch)** | Pending |
@@ -187,7 +187,16 @@ build passes, but its representative E2E retains the documented 22-versus-24
 artifact fixture failure; later restore assertions are not reached. Details,
 rollback, and scoped guarantees are in `docs/step-02-lifecycle.md` in Meteonesto.
 
-Pezzottify has not been changed. Its integration requires explicit approval.
+Pezzottify commit `aea97788` coordinates both HTTP listeners, scheduler jobs, event/storage/WAL
+maintenance, playback/media recovery, sync/MCP WebSockets, and tracked search/
+ingestion work under one 30-second deadline. Admin reboot uses the same graceful
+path. The resumable OS-thread search-index build remains outside that scope.
+Validation: 1,396 Rust tests pass (36 existing ignores), including four binary
+lifecycle tests and two tracker tests; all 45 Docker E2E tests pass. Locked
+all-target checking, strict Clippy, formatting, database-boundary checks, Docker
+release/frontend builds, and Compose validation pass. Dependency audit passes
+with six existing allowed warnings. See `docs/step-02-lifecycle.md` in Pezzottify
+for shutdown scope and checkout details.
 
 ## Planned steps
 
