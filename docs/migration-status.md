@@ -362,7 +362,7 @@ record and the HTML matrix must be updated. Current rollout library source is
 
 - **Paranza — N/A:** `apps/paranza-server/src/main.rs` emits explicit
   `println!`/`eprintln!` diagnostics; the production workspace has no logging
-  subscriber/logger or tracing/log dependencies. No unused initializer is added.
+  subscriber/logger or direct tracing/log dependencies. No unused initializer is added.
 - **SCT — N/A:** `crates/sct-server/src/main.rs` uses explicit stdout/stderr
   diagnostics without a tracing subscriber or logger. Its active inspection work
   remains untouched. Existing error request IDs are not logging setup adoption.

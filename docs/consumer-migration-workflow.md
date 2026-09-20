@@ -53,12 +53,20 @@ Document intentionally unmigrated binaries and custom behavior.
 
 Use meaningful before/after or contract tests for behavior at risk. For 03a,
 compare filtering, output destination/format, ANSI, span context, and log bridges
-in fresh processes. Exercise real startup/shutdown where relevant. Run the
+in fresh processes. Use the application's actual configuration parser in those
+comparisons: for example, `EnvFilter::new("")` and
+`EnvFilter::try_from_default_env()` with an empty variable do not have the same
+semantics. Normalize an empty accepted directive set to explicit `off` when the
+shared initializer requires a nonempty filter. Verify that child probes really
+ran and that startup smoke tests reach the production initializer; `--help` can
+exit before initialization. Exercise real startup/shutdown where relevant. Run the
 repository's applicable tests, formatting, lint and build checks; record
 pre-existing failures and checks not rerun without claiming a fully green suite.
 
 Inspect the final diff and dependency graph. Commit only migration changes and
-their documentation on the temporary branch. Report the migration commit,
+their documentation on the temporary branch. Update active CI checkout pins and
+build revision files to the reviewed shared-library source; preserve historical
+revision references in earlier migration records. Report the migration commit,
 baseline and final results, scope, and any remaining limits.
 
 ## 4. Integrate into the development branch
