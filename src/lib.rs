@@ -24,5 +24,9 @@ pub mod lifecycle;
 #[cfg(feature = "logging")]
 pub mod logging;
 
+/// Optional request identifiers, independent of logging initialization.
+#[cfg(feature = "correlation")]
+pub mod correlation;
+
 #[cfg(all(feature = "lifecycle", feature = "http"))]
 pub mod http;

@@ -5,7 +5,7 @@ The first stage centralizes Axum versions through a transitional re-export.
 Subsequent stages will extract shared capabilities and gradually hide Axum behind
 the library's own interfaces.
 
-**Status:** Axum dependency centralization, opt-in lifecycle and logging helpers are
+**Status:** Axum dependency centralization, opt-in lifecycle, logging and correlation helpers are
 implemented. All 17 inventoried products have adopted lifecycle helpers locally
 with documented application scopes. Crumbles and SCT include those migrations on local `master`. Publication to crates.io remains disabled.
 
@@ -53,13 +53,14 @@ versions. Exact Axum uniformity requires the same pin across the adopted
 
 ## Initial scope
 
-Lifecycle and logging helpers are available now; correlation and HTTP tracing remain planned.
+Lifecycle, logging and request correlation helpers are available now; HTTP tracing remains planned.
 
 [Step 03: observability](docs/step-03-observability.md) is split into independently
 adoptable logging setup (03a), request correlation (03b), and HTTP tracing (03c).
 [03a: logging setup](docs/step-03a-logging.md) is implemented, with verified
 adoption and compatibility exceptions in the [migration matrix](docs/migration-status.html).
-Modules 03b and 03c remain planned.
+[03b: request correlation](docs/step-03b-correlation.md) is implemented;
+03c remains planned. Consumer adoption is tracked separately for each module.
 
 - Listener setup, shutdown signals, graceful shutdown, and shutdown deadlines.
 - Structured logging, request IDs, and HTTP tracing.
@@ -138,6 +139,14 @@ design consumers; dependency centralization proceeds service by service.
 
 Fucina is the canonical repository. This project's public GitHub repository is
 a one-way publication mirror; development changes are integrated in Fucina.
+
+## Request correlation (Step 03b)
+
+Enable the optional `correlation` feature for generated request IDs, validated
+caller IDs by explicit opt-in, request extensions, scoped access, and response
+headers. It does not require shared logging or lifecycle setup. Applications
+retain error bodies, tracing spans and audit policy. See the
+[correlation contract and usage](docs/step-03b-correlation.md).
 
 ## Logging (Step 03a)
 
