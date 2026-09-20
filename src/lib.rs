@@ -20,5 +20,9 @@ pub use axum;
 #[cfg(feature = "lifecycle")]
 pub mod lifecycle;
 
+/// Explicit process-wide logging setup, independent of HTTP and lifecycle.
+#[cfg(feature = "logging")]
+pub mod logging;
+
 #[cfg(all(feature = "lifecycle", feature = "http"))]
 pub mod http;

@@ -12,27 +12,27 @@ each product independently as it adopts that capability.
 Partial = only some listed components migrated; N/A = deliberately not needed.
 Optional modules do not have to be adopted by every product.
 
-Last verified against local checkouts: 2026-09-19.
+Step 03a pilot verified: 2026-09-20. Earlier adoption evidence retains its original dates.
 
-| Project | Server components | 1. Axum centralization | 2. Lifecycle / main() |
-| --- | --- | --- | --- |
-| pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** |
-| favzetto | `backend` | **Done** | **Done (local; scoped)** |
-| androidoscopy | `server` | **Done** | **Done (local; scoped)** |
-| crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** |
-| fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** |
-| lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** |
-| lellostore | `backend` | **Done** | **Done (local)** |
-| meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** |
-| observo | `observo-server` | **Done** | **Done (local; scoped)** |
-| paranza | `apps/paranza-server` | **Done** | **Done (local; scoped)** |
-| peerlo | `peerlo-api` | **Done** | **Done (local; scoped)** |
-| pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** |
-| pezzottify-downloader | Puppeteer API and downloader HTTP server | **Done** | **Done (local; scoped)** |
-| quentin-torrentino | `crates/server` | **Done** | **Done (local; scoped)** |
-| sct | `sct-server` | **Done** | **Done (scoped)** |
-| simple-agents | `simple-agents-service`; associated coding test servers | **Done** | **Done (local; scoped)** |
-| simple-ai | `backend`, `inference-runner` | **Done** | **Done (local; scoped)** |
+| Project | Server components | 1. Axum centralization | 2. Lifecycle / main() | 03a. Logging |
+| --- | --- | --- | --- | --- |
+| pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | Pending |
+| favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** |
+| androidoscopy | `server` | **Done** | **Done (local; scoped)** | Pending |
+| crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | Pending |
+| fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | Pending |
+| lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | Pending |
+| lellostore | `backend` | **Done** | **Done (local)** | Pending |
+| meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** | Pending |
+| observo | `observo-server` | **Done** | **Done (local; scoped)** | Pending |
+| paranza | `apps/paranza-server` | **Done** | **Done (local; scoped)** | Pending |
+| peerlo | `peerlo-api` | **Done** | **Done (local; scoped)** | Pending |
+| pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** | Pending |
+| pezzottify-downloader | Puppeteer API and downloader HTTP server | **Done** | **Done (local; scoped)** | Pending |
+| quentin-torrentino | `crates/server` | **Done** | **Done (local; scoped)** | Pending |
+| sct | `sct-server` | **Done** | **Done (scoped)** | Pending |
+| simple-agents | `simple-agents-service`; associated coding test servers | **Done** | **Done (local; scoped)** | Pending |
+| simple-ai | `backend`, `inference-runner` | **Done** | **Done (local; scoped)** | Pending |
 
 ## Step 1: Axum centralization
 
@@ -328,8 +328,12 @@ deployment was performed.
 
 ## Planned steps
 
-Further capabilities
-include HTTP support, observability, health, background tasks, database helpers,
+[Step 03: observability](step-03-observability.md) contains three independently
+adoptable modules: **03a logging setup**, **03b request correlation**, and
+**03c HTTP tracing**. 03a is implemented and locally adopted by Favzetto; 03b and 03c remain planned.
+The [03a contract](step-03a-logging.md) records the API and pilot compatibility. Completion of one module does not imply completion of Step 03.
+
+Further capabilities include HTTP support, health, background tasks, database helpers,
 authentication, authorization, and rate limiting. The HTML matrix already shows
 these columns as planned; their exact grouping and order remain adjustable.
 Hiding the transitional Axum API is incremental work across those steps.

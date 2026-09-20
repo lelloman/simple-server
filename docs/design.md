@@ -5,6 +5,11 @@ This document records the initial direction, not a finalized API specification.
 The [Step 02 lifecycle contract](step-02-lifecycle.md) defines the first capability
 extraction, its implemented API, shutdown contract, and pilot acceptance checks.
 
+[Step 03: observability](step-03-observability.md) follows with three independent
+modules: logging setup (03a), request correlation (03b), and HTTP tracing (03c).
+The [03a contract](step-03a-logging.md) describes the implemented logging module and
+Favzetto pilot; 03b and 03c contracts will follow separately.
+
 ## Composition
 
 Axum remains the internal HTTP implementation. The long-term product API hides
@@ -49,8 +54,9 @@ such as uploads, streaming responses, and WebSockets.
    a SQLx SQLite pool and API-key authentication.
 3. Extract lifecycle and entry-point setup, retaining product ownership of
    `main()`. Apply each shared capability incrementally across services.
-4. Follow with HTTP support, observability, health, background tasks, databases,
-   authentication, authorization, and rate limiting as requirements are validated.
+4. Adopt observability through 03a, 03b, and 03c independently, then follow with
+   further HTTP support, health, background tasks, databases, authentication,
+   authorization, and rate limiting as requirements are validated.
 5. Replace transitional Axum usage with product-facing interfaces over time.
 
 Version the library so each product can upgrade independently. Repository

@@ -11,6 +11,7 @@ publish = false
 default = ["http"]
 http = ["dep:axum", "dep:tower-service"]
 lifecycle = ["dep:tokio", "dep:futures-util"]
+logging = ["dep:tracing", "dep:tracing-subscriber"]
 http2 = ["http", "axum/http2"]
 macros = ["http", "axum/macros"]
 multipart = ["http", "axum/multipart"]
@@ -21,10 +22,14 @@ axum = { version = "=0.8.9", optional = true }
 futures-util = { version = "0.3", default-features = false, features = ["alloc"], optional = true }
 tokio = { version = "1", features = ["macros", "net", "signal", "sync", "time"], optional = true }
 tower-service = { version = "0.3", optional = true }
+tracing = { version = "0.1", default-features = false, features = ["std"], optional = true }
+tracing-subscriber = { version = "0.3", default-features = false, features = ["fmt", "env-filter", "ansi", "json"], optional = true }
 
 [dev-dependencies]
 tokio = { version = "1", features = ["io-util", "macros", "process", "rt", "test-util"] }
 tower = { version = "0.5", features = ["util"] }
+serde_json = "1"
+log = "0.4"
 
 [[example]]
 name = "lifecycle"
@@ -33,6 +38,10 @@ required-features = ["lifecycle", "http"]
 [[example]]
 name = "signals"
 required-features = ["lifecycle"]
+
+[[example]]
+name = "logging"
+required-features = ["logging"]
 
 [lints.rust]
 unsafe_code = "forbid"

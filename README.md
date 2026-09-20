@@ -50,7 +50,12 @@ versions. Exact Axum uniformity requires the same pin across the adopted
 
 ## Initial scope
 
-Lifecycle helpers are available now; the remaining items below are planned.
+Lifecycle and logging helpers are available now; correlation and HTTP tracing remain planned.
+
+[Step 03: observability](docs/step-03-observability.md) is split into independently
+adoptable logging setup (03a), request correlation (03b), and HTTP tracing (03c).
+[03a: logging setup](docs/step-03a-logging.md) is implemented with a local
+Favzetto pilot. Modules 03b and 03c remain planned.
 
 - Listener setup, shutdown signals, graceful shutdown, and shutdown deadlines.
 - Structured logging, request IDs, and HTTP tracing.
@@ -129,3 +134,22 @@ design consumers; dependency centralization proceeds service by service.
 
 Fucina is the canonical repository. This project's public GitHub repository is
 a one-way publication mirror; development changes are integrated in Fucina.
+
+## Logging (Step 03a)
+
+Enable `logging` explicitly; it works without default features or a runtime.
+Applications supply configuration and call the initializer during startup:
+
+```rust
+use simple_server::logging::{LogFormat, LoggingOptions, try_init};
+
+let mut options = LoggingOptions::new("info,my_service=debug");
+options.format = LogFormat::Json;
+try_init(options)?;
+```
+
+Defaults are text on stderr, automatic terminal styling, and visible targets.
+Invalid filters and repeated global initialization return errors. The module
+neither installs a `log` facade bridge nor reads configuration from the environment.
+See the [03a contract](docs/step-03a-logging.md) and
+[standalone example](examples/logging.rs) for output and compatibility details.

@@ -67,7 +67,7 @@
     <section class="summary" aria-label="Migration overview">
       <div class="stat"><strong id="service-count">17</strong><span>Services in scope</span></div>
       <div class="stat complete"><strong id="done-count">17 / 17</strong><span>Axum centralization complete</span></div>
-      <div class="stat"><strong>1 / 10</strong><span>Shared steps implemented</span></div>
+      <div class="stat"><strong>3 / 12</strong><span>Shared modules implemented</span></div>
       <div class="stat"><strong id="pending-count">0</strong><span>Awaiting Axum centralization</span></div>
     </section>
     <div class="toolbar">
@@ -120,6 +120,7 @@
       <p><strong>Pezzottify-downloader has completed Step 02.</strong> Parent HTTP, monitoring, status sockets/restarts, child cleanup, and child Unix HTTP drain use shared lifecycle coordination. Linux parent-death protection prevents orphan workers. Passed 148 Rust tests, seven doctests (one ignored), 90 Python tests, release build, and signal/parent-death checks. Existing lint/formatting debt and credential-dependent Spotify scope remain documented. Commit: <code>7355728</code>.</p>
       <p><strong>Crumbles has completed Step 02 on local master.</strong> HTTP, workers, tracked WebSockets, SQLite cleanup, and the separate integration daemon/control server adopt shared coordination. Passed 1,367 Rust tests (two ignored), strict checks, contracts, eight browser scenarios, both release images, and signal/drain/restart tests. Final outbox publication and WebSocket Close handshakes remain outside the guarantee. Commit: <code>47062ec</code>; local master has been rebased onto the migration branch, retaining native dispatcher cleanup.</p>
       <p><strong>Quentin Torrentino has completed Step 02.</strong> HTTP, orchestrator, accepted sockets, pipeline work, and audit flushing share 30 seconds. Passed 741 Rust tests; two recorded baseline failures remain (HTTP E2E144/145), with 14 ignores. New drain/audit and signal checks pass. Original Rust1.91 release/dashboard builds and container checks pass; existing lint/formatting findings remain. Commits: <code>4cddf9d</code>, <code>7728402</code>.</p>
+      <p><strong>Step 03a logging is implemented, with Favzetto as the local pilot.</strong> Text/JSON output, explicit filters, and fallible initialization are available without HTTP or Tokio. Favzetto preserves its logging policy; baseline API-test and Clippy failures remain documented. Request correlation (03b) and HTTP tracing (03c) remain planned. See <a href="step-03a-logging.md">the logging contract</a>.</p>
       <p><strong>Planned does not mean mandatory.</strong> Future columns show the agreed building blocks; each product can adopt what it needs. All 17 products now have local, scoped Step 02 adoption. Crumbles and SCT local master branches now incorporate the migrations and subsequent development. Their validation counts above record the original migrations. See the entries above for shutdown boundaries and validation limits. The shared source remains <code>c535907</code>; nothing was pushed or deployed.</p>
     </section>
     <footer>
@@ -132,13 +133,14 @@
     // Status keys: done, pending, planned, partial, na.
     const steps = [
       ['Axum centralization', true], ['Lifecycle / main()', true],
-      ['HTTP support', false], ['Observability', false], ['Health', false],
+      ['Logging setup', true], ['Request correlation', false], ['HTTP tracing', false],
+      ['HTTP support', false], ['Health', false],
       ['Background tasks', false], ['Databases', false], ['Authentication', false],
       ['Authorization', false], ['Rate limiting', false]
     ];
     const services = [
       {name: 'pezzottify', components: 'API/metrics · scheduler · tracked application work', axum: 'done', lifecycle: 'done'},
-      {name: 'favzetto', components: 'backend (lifecycle: local, scoped adoption)', axum: 'done', lifecycle: 'done'},
+      {name: 'favzetto', logging: 'done', components: 'backend (lifecycle: local, scoped adoption)', axum: 'done', lifecycle: 'done'},
       {name: 'androidoscopy', components: 'v2 controller · legacy HTTP/WS/TLS (scoped)', axum: 'done', lifecycle: 'done'},
       {name: 'crumbles', components: 'HTTP/workers/WebSockets · integration daemon', axum: 'done', lifecycle: 'done'},
       {name: 'fausto', components: 'server · HTTP, WebSockets, event workers, jobs and plugin cleanup', axum: 'done', lifecycle: 'done'},
@@ -161,7 +163,7 @@
       cell.scope = 'col';
       if (available) cell.className = 'available';
       const number = document.createElement('small');
-      number.textContent = `Step ${String(index + 1).padStart(2, '0')}`;
+      number.textContent = `Step ${['01', '02', '03a', '03b', '03c', '04', '05', '06', '07', '08', '09', '10'][index]}`;
       const availability = document.createElement('span');
       availability.className = 'availability';
       availability.textContent = available ? 'Available' : 'Planned module';
@@ -189,7 +191,7 @@
         const components = document.createElement('small');
         components.textContent = service.components; name.append(components); row.append(name);
         steps.forEach((step, index) => {
-          const status = index === 0 ? service.axum : index === 1 ? (service.lifecycle || 'pending') : 'planned';
+          const status = index === 0 ? service.axum : index === 1 ? (service.lifecycle || 'pending') : index === 2 ? (service.logging || 'pending') : 'planned';
           const cell = document.createElement('td');
           const badge = document.createElement('span');
           badge.className = `badge ${status}`;
