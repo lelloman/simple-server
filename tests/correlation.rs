@@ -14,6 +14,184 @@ use simple_server::{
 };
 use tower::ServiceExt;
 
+#[tokio::test]
+async fn selected_insert_if_missing_retains_repeated_headers() {
+    use simple_server::{
+        axum::http::HeaderValue,
+        correlation::{HeaderRequestId, Propagation, RequestHeader, ResponseHeader},
+    };
+    for present in [false, true] {
+        let mut req = request(None);
+        if present {
+            req.headers_mut()
+                .append("x-request-id", HeaderValue::from_static("first"));
+            req.headers_mut()
+                .append("x-request-id", HeaderValue::from_static("second"));
+        }
+        let response = Correlation::default()
+            .run_selected(
+                req,
+                HeaderRequestId::new(HeaderValue::from_static("selected")),
+                Propagation {
+                    request_header: RequestHeader::IfMissing,
+                    response_header: ResponseHeader::Preserve,
+                },
+                |req| async move {
+                    let values: Vec<_> = req
+                        .headers()
+                        .get_all("x-request-id")
+                        .iter()
+                        .map(|v| v.to_str().unwrap())
+                        .collect();
+                    assert_eq!(
+                        values,
+                        if present {
+                            vec!["first", "second"]
+                        } else {
+                            vec!["selected"]
+                        }
+                    );
+                    let mut response = Response::new(Body::empty());
+                    response
+                        .headers_mut()
+                        .append("x-request-id", HeaderValue::from_static("override1"));
+                    response
+                        .headers_mut()
+                        .append("x-request-id", HeaderValue::from_static("override2"));
+                    response
+                },
+            )
+            .await;
+        assert_eq!(response.headers().get_all("x-request-id").iter().count(), 2);
+        assert_eq!(
+            response
+                .extensions()
+                .get::<HeaderRequestId>()
+                .unwrap()
+                .as_header_value(),
+            "override1"
+        );
+    }
+}
+
+#[tokio::test]
+async fn selected_ids_preserve_application_policy_and_opaque_bytes() {
+    use simple_server::{
+        axum::http::HeaderValue,
+        correlation::{HeaderRequestId, Propagation, current_header_id},
+    };
+    for value in [
+        HeaderValue::from_static(""),
+        HeaderValue::from_static("legacy value"),
+        HeaderValue::from_static("b12871fb-a9c6-4aac-8c48-82ecdc1ea7e4"),
+        HeaderValue::from_str(&"x".repeat(128)).unwrap(),
+        HeaderValue::from_bytes(&[0xff]).unwrap(),
+    ] {
+        let selected = HeaderRequestId::new(value.clone());
+        let response = Correlation::default()
+            .run_selected(
+                request(Some("untouched")),
+                selected.clone(),
+                Propagation::default(),
+                |request| {
+                    // Synchronous callback construction also executes inside the scope.
+                    assert_eq!(current_header_id(), Some(selected.clone()));
+                    assert!(current_id().is_none());
+                    assert!(request.extensions().get::<RequestId>().is_none());
+                    assert_eq!(
+                        request.extensions().get::<HeaderRequestId>(),
+                        Some(&selected)
+                    );
+                    assert_eq!(request.headers()["x-request-id"], "untouched");
+                    async {
+                        Response::builder()
+                            .status(400)
+                            .header("x-request-id", "wrong")
+                            .body(Body::from("unchanged"))
+                            .unwrap()
+                    }
+                },
+            )
+            .await;
+        assert_eq!(response.headers()["x-request-id"], value);
+        assert_eq!(
+            response.extensions().get::<HeaderRequestId>(),
+            Some(&selected)
+        );
+        assert!(response.extensions().get::<RequestId>().is_none());
+        assert_eq!(
+            to_bytes(response.into_body(), 64).await.unwrap(),
+            "unchanged"
+        );
+        assert!(current_header_id().is_none());
+    }
+}
+
+#[tokio::test]
+async fn selected_propagation_preserves_response_overrides_and_restores_outer_scope() {
+    use simple_server::{
+        axum::http::HeaderValue,
+        correlation::{
+            HeaderRequestId, Propagation, RequestHeader, ResponseHeader, current_header_id,
+        },
+    };
+    let config = &Correlation::default();
+    config
+        .run(request(None), |outer| async move {
+            let outer_id = current_id().unwrap();
+            assert_eq!(
+                current_header_id().unwrap().as_header_value(),
+                outer_id.as_str()
+            );
+            for override_value in [None, Some("handler")] {
+                let selected = HeaderRequestId::new(HeaderValue::from_static("selected"));
+                let mut inner = request(Some("original"));
+                inner
+                    .extensions_mut()
+                    .insert(outer.extensions().get::<RequestId>().unwrap().clone());
+                let response = config
+                    .run_selected(
+                        inner,
+                        selected.clone(),
+                        Propagation {
+                            request_header: RequestHeader::Overwrite,
+                            response_header: ResponseHeader::Preserve,
+                        },
+                        |request| async move {
+                            assert!(current_id().is_none());
+                            assert_eq!(current_header_id(), Some(selected));
+                            assert_eq!(request.headers()["x-request-id"], "selected");
+                            assert!(request.extensions().get::<RequestId>().is_none());
+                            let mut response = Response::new(Body::empty());
+                            if let Some(value) = override_value {
+                                response
+                                    .headers_mut()
+                                    .insert("x-request-id", HeaderValue::from_static(value));
+                            }
+                            response
+                        },
+                    )
+                    .await;
+                assert_eq!(
+                    response.headers()["x-request-id"],
+                    override_value.unwrap_or("selected")
+                );
+                assert_eq!(
+                    response
+                        .extensions()
+                        .get::<HeaderRequestId>()
+                        .unwrap()
+                        .as_header_value(),
+                    &response.headers()["x-request-id"]
+                );
+                assert_eq!(current_id(), Some(outer_id.clone()));
+            }
+            Response::new(Body::empty())
+        })
+        .await;
+    assert!(current_header_id().is_none());
+}
+
 #[test]
 fn runs_without_runtime_and_restores_context_after_panic() {
     use futures_util::FutureExt;

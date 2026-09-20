@@ -16,7 +16,61 @@ use axum::{
 };
 
 tokio::task_local! {
-    static CURRENT: RequestId;
+    static CURRENT: Context;
+}
+
+#[derive(Clone)]
+struct Context {
+    validated: Option<RequestId>,
+    header: HeaderRequestId,
+}
+
+/// An application-selected ID. Unlike [`RequestId`], this preserves any legal
+/// HTTP header bytes. The application owns validation, trust and generation.
+/// Do not assume it is UTF-8, bounded to 64 bytes or safe to interpolate in logs.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct HeaderRequestId(HeaderValue);
+
+impl HeaderRequestId {
+    pub fn new(value: HeaderValue) -> Self {
+        Self(value)
+    }
+
+    pub fn as_header_value(&self) -> &HeaderValue {
+        &self.0
+    }
+}
+
+/// Current selected header ID, including IDs from the default validated path.
+pub fn current_header_id() -> Option<HeaderRequestId> {
+    CURRENT.try_with(|context| context.header.clone()).ok()
+}
+
+/// Whether an application-selected ID replaces an existing response header.
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub enum ResponseHeader {
+    #[default]
+    Overwrite,
+    /// Keep a downstream header when present. Response extensions reflect that
+    /// final header; the request scope retains the original selected ID.
+    Preserve,
+}
+
+/// Explicit compatibility policy for application-selected identifiers.
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub enum RequestHeader {
+    #[default]
+    Unchanged,
+    /// Set only when no header is present; retain repeated values.
+    IfMissing,
+    Overwrite,
+}
+
+/// Header propagation for application-selected identifiers.
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub struct Propagation {
+    pub request_header: RequestHeader,
+    pub response_header: ResponseHeader,
 }
 
 /// An identifier suitable for headers, logs and application error envelopes.
@@ -53,7 +107,10 @@ impl fmt::Display for RequestId {
 
 /// The current request's ID, or `None` outside the request future's scope.
 pub fn current_id() -> Option<RequestId> {
-    CURRENT.try_with(Clone::clone).ok()
+    CURRENT
+        .try_with(|context| context.validated.clone())
+        .ok()
+        .flatten()
 }
 
 /// Caller ID trust is opt-in. IDs are correlation labels, never authorization.
@@ -95,7 +152,7 @@ impl Correlation {
     /// Select one ID, set request extensions and scope the downstream future.
     /// Replace the response header and extension with the selected ID. Incoming
     /// request headers are unchanged. Bodies and status codes are untouched.
-    pub async fn run<F, Fut>(&self, mut request: Request, next: F) -> Response
+    pub async fn run<F, Fut>(&self, request: Request, next: F) -> Response
     where
         F: FnOnce(Request) -> Fut,
         Fut: Future<Output = Response>,
@@ -110,16 +167,96 @@ impl Correlation {
             None
         }
         .unwrap_or_else(RequestId::generate);
-        request.extensions_mut().insert(id.clone());
+        let header =
+            HeaderRequestId::new(HeaderValue::from_str(id.as_str()).expect("validated request ID"));
+        self.run_inner(
+            request,
+            Context {
+                validated: Some(id),
+                header,
+            },
+            Propagation::default(),
+            next,
+        )
+        .await
+    }
+
+    /// Run with an ID selected and validated by the application, bypassing
+    /// `IncomingIds` and the default generator. This supports legacy wire
+    /// contracts, strict rejection policies and custom ID formats.
+    ///
+    /// Sets [`HeaderRequestId`] extensions and [`current_header_id`]. It clears
+    /// the validated [`RequestId`] extension and makes [`current_id`] return
+    /// `None` within this scope: opaque values must not masquerade as validated
+    /// IDs. The callback may add the application's own extension or span.
+    pub async fn run_selected<F, Fut>(
+        &self,
+        request: Request,
+        id: HeaderRequestId,
+        propagation: Propagation,
+        next: F,
+    ) -> Response
+    where
+        F: FnOnce(Request) -> Fut,
+        Fut: Future<Output = Response>,
+    {
+        self.run_inner(
+            request,
+            Context {
+                validated: None,
+                header: id,
+            },
+            propagation,
+            next,
+        )
+        .await
+    }
+
+    async fn run_inner<F, Fut>(
+        &self,
+        mut request: Request,
+        context: Context,
+        propagation: Propagation,
+        next: F,
+    ) -> Response
+    where
+        F: FnOnce(Request) -> Fut,
+        Fut: Future<Output = Response>,
+    {
+        request.extensions_mut().remove::<RequestId>();
+        if let Some(id) = &context.validated {
+            request.extensions_mut().insert(id.clone());
+        }
+        request.extensions_mut().insert(context.header.clone());
+        if propagation.request_header == RequestHeader::Overwrite
+            || (propagation.request_header == RequestHeader::IfMissing
+                && !request.headers().contains_key(&self.header))
+        {
+            request
+                .headers_mut()
+                .insert(self.header.clone(), context.header.0.clone());
+        }
         // Invoke the callback inside the scope as well as polling its future.
         let mut response = CURRENT
-            .scope(id.clone(), async { next(request).await })
+            .scope(context.clone(), async { next(request).await })
             .await;
-        response.headers_mut().insert(
-            self.header.clone(),
-            HeaderValue::from_str(id.as_str()).expect("validated request ID"),
-        );
-        response.extensions_mut().insert(id);
+        let final_id = match (
+            propagation.response_header,
+            response.headers().get(&self.header),
+        ) {
+            (ResponseHeader::Preserve, Some(value)) => HeaderRequestId::new(value.clone()),
+            _ => {
+                response
+                    .headers_mut()
+                    .insert(self.header.clone(), context.header.0.clone());
+                context.header
+            }
+        };
+        response.extensions_mut().remove::<RequestId>();
+        if let Some(id) = context.validated {
+            response.extensions_mut().insert(id);
+        }
+        response.extensions_mut().insert(final_id);
         response
     }
 }

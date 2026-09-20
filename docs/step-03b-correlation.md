@@ -55,6 +55,33 @@ inside the ID scope without coupling their policies to simple-server.
 
 ## Qualification
 
+### Application-selected IDs
+
+Services with an established wire contract can use
+`Correlation::run_selected(request, HeaderRequestId::new(header_value), propagation, callback)`.
+This explicitly bypasses `IncomingIds` and shared generation/validation. The
+application owns selection, generator, validation bounds and rejection policy.
+`HeaderRequestId` retains any legal HTTP header bytes, including opaque bytes,
+empty strings and legacy lengths; it is not a validated `RequestId` and must
+not be assumed safe for string interpolation or authentication.
+
+`Propagation` selects `RequestHeader::{Unchanged, IfMissing, Overwrite}` and
+`ResponseHeader::{Overwrite, Preserve}`. Defaults leave incoming headers alone
+and overwrite the response. IfMissing/Preserve retain repeated header values.
+The request extension and `current_header_id()` hold the selected ID. The
+response extension reflects the final first header value, including an explicit
+downstream override in Preserve mode. This compatibility mode can therefore
+deliberately differ between the request ID and response ID.
+
+The raw selected scope clears the validated `RequestId` extension and makes
+`current_id()` return None, even when nested inside a validated request scope.
+Applications may retain their own extension types. Default `run` additionally
+provides HeaderRequestId/current_header_id alongside its validated API; all
+existing validation, generation and propagation defaults remain unchanged.
+Both paths share the same cancellation, nesting and deferred-body boundaries.
+
+### Checks
+
 Library tests cover generated-ID uniqueness samples, explicit trust, alphabet
 and size limits, repeated headers, response consistency, custom header names,
 handler extraction, 404/405/extractor errors, concurrent and nested requests,
