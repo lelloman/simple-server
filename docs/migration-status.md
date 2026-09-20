@@ -18,11 +18,11 @@ Step 03a canaries verified: 2026-09-20. Earlier adoption evidence retains its or
 | --- | --- | --- | --- | --- |
 | pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | Pending |
 | favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** |
-| androidoscopy | `server` | **Done** | **Done (local; scoped)** | Pending |
+| androidoscopy | `server` | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** |
 | crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** |
 | fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | Pending |
 | lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** |
-| lellostore | `backend` | **Done** | **Done (local)** | Pending |
+| lellostore | `backend` | **Done** | **Done (local)** | **Done (local)** |
 | meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** | Pending |
 | observo | `observo-server` | **Done** | **Done (local; scoped)** | Pending |
 | paranza | `apps/paranza-server` | **Done** | **Done (local; scoped)** | N/A (no logger) |
@@ -380,6 +380,24 @@ as the untouched branch; Docker/browser/provider checks were not repeated.
 CI pins use `71755b5`. Local `master` was rebased onto the tested migration;
 its temporary worktree/branch were removed and unrelated research files verified
 unchanged by hash. See LelloAuth's `docs/STEP_03A_LOGGING.md`.
+
+Androidoscopy `1caa8d5` migrates its existing legacy-server logger; v2 and MCP/CLI
+entry points had no subscriber and retain their behavior. Validation passes 72
+tests, 30 fresh-process policy combinations and six real-process signal/drain/
+restart cases. Changed-file formatting passes; existing Clippy/dead-code and
+unrelated formatting findings remain. Local `master` includes the tested tree,
+uses source `71755b5`, and its migration worktree/branch are removed. See its
+`docs/step-03a-logging.md`; Android/browser/container checks were not repeated.
+
+LelloStore `d810104` migrates its backend's existing logger, retaining permissive
+environment parsing, stdout, color, spans and log bridging. Its mock OIDC helper
+has no logger to migrate. Final validation passes 133 tests (two existing ignored
+doctests), strict Clippy and formatting; logging and lifecycle process tests pass
+again after integration. Local `master` also preserves a newer Android fix,
+replayed as `4eff608`; 47 unrelated WIP files were restored and verified by hash.
+The migration worktree/branch and temporary stash are removed; a recovery ref
+retains the pre-rebase tip. CI uses source `71755b5`. See its
+`docs/STEP_03A_LOGGING.md`; Android/browser/container checks were not repeated.
 
 Other rollout entries remain Pending until their migration is verified on their
 active development branch. Pezzottify uses `dev`, Simple Agents uses `main`, and
