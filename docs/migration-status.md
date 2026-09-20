@@ -16,23 +16,23 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 
 | Project | Server components | 1. Axum centralization | 2. Lifecycle / main() | 03a. Logging | 03b. Correlation |
 | --- | --- | --- | --- | --- | --- |
-| pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | **Done (local)** | Pending |
-| favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** | Pending |
-| androidoscopy | `server` | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | Pending |
+| pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) |
+| favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** | N/A (assessed) |
+| androidoscopy | `server` | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | N/A (assessed) |
 | crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** |
-| fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** | Pending |
-| lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** | Pending |
-| lellostore | `backend` | **Done** | **Done (local)** | **Done (local)** | Pending |
-| meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** | **Done (local)** | Pending |
-| observo | `observo-server`; standalone extractor logging | **Done** | **Done (local; scoped)** | **Done (local)** | Pending |
-| paranza | `apps/paranza-server` | **Done** | **Done (local; scoped)** | N/A (no logger) | Pending |
-| peerlo | `peerlo-api` | **Done** | **Done (local; scoped)** | **Done (local)** | Pending |
-| pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** | **Done (local)** | Pending |
-| pezzottify-downloader | Puppeteer API and downloader HTTP server | **Done** | **Done (local; scoped)** | **Done (local)** | Pending |
-| quentin-torrentino | `crates/server` | **Done** | **Done (local; scoped)** | **Done (local)** | Pending |
-| sct | `sct-server` | **Done** | **Done (scoped)** | N/A (no logger) | Pending |
-| simple-agents | `simple-agents-service`; runner-shell logging; associated coding test servers | **Done** | **Done (local; scoped)** | **Done (local)** | Pending |
-| simple-ai | `backend`, `inference-runner` | **Done** | **Done (local; scoped)** | **Done (local)** | Pending |
+| fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** |
+| lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) |
+| lellostore | `backend` | **Done** | **Done (local)** | **Done (local)** | N/A (assessed) |
+| meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; pipeline/gateway)** |
+| observo | `observo-server`; standalone extractor logging | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) |
+| paranza | `apps/paranza-server` | **Done** | **Done (local; scoped)** | N/A (no logger) | N/A (assessed) |
+| peerlo | `peerlo-api` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) |
+| pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** |
+| pezzottify-downloader | Puppeteer API and downloader HTTP server | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; Puppeteer)** |
+| quentin-torrentino | `crates/server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) |
+| sct | `sct-server` | **Done** | **Done (scoped)** | N/A (no logger) | **Done (local; storage-backed HTTP)** |
+| simple-agents | `simple-agents-service`; runner-shell logging; associated coding test servers | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) |
+| simple-ai | `backend`, `inference-runner` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) |
 
 ## Step 1: Axum centralization
 
@@ -559,16 +559,127 @@ were not repeated. See Crumbles' `docs/STEP_03B_CORRELATION.md`.
 
 Master was rebased onto the pilot branch, with identical tested tree and ancestry
 verified. The temporary worktree and branch were removed; pre-existing worktrees
-were preserved. No pushes or deployments. The other 16 products remain Pending
-for 03b until applicability and their existing contracts are assessed. 03a status
+were preserved. No pushes or deployments. The pilot initially left the other
+16 products Pending; the subsequent assessment is recorded below. 03a status
 is unchanged and 03c remains planned.
+
+## Step 03b rollout applicability
+
+Source `2740d5c` extends the default API with explicit application-selected
+`HeaderRequestId`, scoped access, optional request-header insertion and response
+overwrite/preserve policies. This permits existing UUID formats, validation and
+rejection policies, opaque header values and repeated headers to remain intact.
+It does not relax the default validated API. The full library `scripts/check`
+passes, including strict Clippy/docs, independent features and ten correlation
+tests. Applications retain their selection policy, error envelopes and tracing.
+Crumbles' seven correlation tests also pass against the extended library,
+including its original/shared middleware comparisons and error-header agreement;
+its consumer source pin remains the original pilot revision.
+
+The following eleven products do not currently need request-scoped correlation.
+N/A is based on production entrypoints, middleware, header and ID use, not merely
+dependencies. Existing source pins and executable behavior are unchanged.
+
+| Product | Applicability evidence | Assessment / preservation |
+| --- | --- | --- |
+| Favzetto | Optional `x-request-id` is read for legacy runtime bridge events; no ID selection, scope or response propagation. An existing `api_flow.rs` test checks the supplied marker. | Inspected master `eda9fc0`; no files changed. |
+| LelloAuth | Error-specific UUID incident references appear selectively in `x-error-id`, bodies and UI redirects. They are not a request-wide context; reauthentication IDs are durable business keys. | Inspected master `d5699c8`; three unrelated research documents preserved. |
+| LelloStore | Backend router installs authentication, metrics, TraceLayer and CORS, without HTTP ID selection or propagation. | Inspected master `22881b3`; existing Android edits preserved. |
+| Androidoscopy | Legacy/v2 HTTP routers have no correlation layer. Device call/cancel IDs bind protocol operations, not HTTP requests. | Assessment `f4461a8` integrated into master from `1caa8d5`. |
+| Quentin Torrentino | Production router/auth/metrics record method/path/status/latency; error envelopes contain messages without request IDs. Business/WebSocket identities are separate. | Assessment `e606414` integrated into master from `0a02cfa`. |
+| Pezzottify | `ApiError::new` creates per-error UUID references for log/body/header; no request-wide scope or handler extension. MCP/download IDs are domain identities. | Inspected dev `824f1dfb`; no files changed. |
+| Simple Agents | Auth/session error responses generate `request-<32hex>` incident references in bodies only. Workflow/session IDs are domain identities. | Inspected main `a3e11bc`; existing tracked/untracked work and worktrees preserved. |
+| Observo | Server router/auth and standalone extractor do not establish request ID headers/extensions or a correlation scope. | Assessment `fd16a9d` integrated into master from `a481ae7`. |
+| Paranza | Management router has no request IDs. Runner command correlation spans protocol sessions and remains application-owned. | Assessment `2bd528f` integrated into master from `ac3126c`. |
+| Peerlo | REST/Torznab router, metrics, TraceLayer, auth and rate limits do not select or propagate HTTP IDs. | Assessment `a142552` integrated into master from `6479504`. |
+| Simple AI | HTTP logger records method/path/status/duration. UUID inference records are durable database/queue/cancellation keys, not middleware request IDs. | Assessment `7a745da` integrated into master from `36c650d`; newer Android icons and semantic-tool script preserved. |
+
+The six documentation-only assessment commits used isolated worktrees, rebased
+the original development branches onto their dedicated branches, verified trees
+and ancestry, then removed those temporary worktrees/branches. Source inspection
+and diff checks cover these assessments; application tests were not rerun for
+unchanged executable code. Their `docs/step-03b-correlation.md` files hold details.
+The other five N/A assessments made no repository changes and are recorded here.
+
+Meteonesto `9a83f3e` adopts shared source `2740d5c` in its pipeline request envelope
+and gateway dispatch/readiness failures. Pipeline retains 128-byte IDs, its
+restricted alphabet and correlated 400 responses for malformed caller IDs.
+Gateway retains generated `wg-` IDs and its existing uncorrelated successful
+health/metrics responses. Weather API has no request correlation to migrate.
+Validation: pipeline 74 tests, gateway 31 (one existing ignored E2E), unchanged
+API 70: **175 passed**. Pipeline/gateway strict all-target Clippy and formatting
+pass; other pipeline integration suites were not repeated. Master was rebased
+from `32f16ba`, tested tree/ancestry verified, temporary worktree/branch removed.
+See Meteonesto's `docs/step-03b-correlation.md` for baseline and scope details.
+
+Pezzottify-downloader `d61b17d` replaces Puppeteer's request-ID layers with shared
+scope/propagation at `2740d5c`. It preserves raw header bytes, UUID v4 generation,
+repeated headers, tower extensions and downstream response overrides. The child
+downloader and login tool have no corresponding request-ID layer to migrate.
+Baseline: 157 Rust tests/doctests passed, one ignored; final: **159 passed**, one
+ignored. Thirty paired old/new cases and generation checks pass. Real-process
+HTTP 200/404/405 ID propagation, WebSockets and both shutdown signals pass.
+Clippy matches the existing 11 library/12 unit-target warnings; changed files
+are formatted and diff checks pass, while whole-repository formatting debt
+remains. External authentication, browser/container checks were not repeated.
+Master was rebased from `7960637`, exact tree/ancestry verified, temporary
+worktree/branch removed. See its `docs/step-03b-correlation.md`.
+
+Pezzottflix `39f6b51` adopts shared source `2740d5c` while retaining its local
+RequestId extension, permissive first-string-header acceptance, UUID v4 fallback,
+unchanged incoming headers and response-ID overwrite. Baseline: 533 tests pass,
+three ignored; final: **535 pass**, three ignored. Production-router cases cover
+legacy values, scope, repeated headers, overrides and 404/405. Real HTTP
+correlation plus metrics, upgraded WebSocket and worker drain checks pass for
+SIGINT and SIGTERM. All-target capped Clippy matches the 40 baseline warning
+entries; changed-module formatting/diff checks pass, global formatting debt
+remains. Browser/container checks were not repeated. Master was rebased from
+`1846e98`, exact tree/ancestry verified, temporary worktree/branch removed.
+See Pezzottflix's `docs/step-03b-correlation.md`.
+
+Fausto `300e884` adopts shared source `2740d5c` in the production router while
+preserving tower request/response extensions, arbitrary first-header values,
+UUID v4 generation, repeated headers and downstream overrides. Audit/events
+continue reading the existing request header. Baseline: 197 server tests pass;
+final: **199 pass**, including 40 paired tower/shared compatibility cases and
+generated-ID scope checks. Formatting passes. All-target Clippy completes with
+existing warnings and no new correlation-module findings. Active README and
+four CI checkout references use the reviewed source. Master was rebased from
+`0222a75`, exact tree/ancestry verified, temporary worktree/branch removed;
+checkout clean. See Fausto's `docs/step-03b-correlation.md` for verification scope.
+
+SCT migration `5180c42` adopts shared source `2740d5c` in storage-backed HTTP,
+preserving generated UUID v4 IDs in 32-hex form and ignoring caller IDs. Errors,
+response normalization and observability share the scoped value. Storage-free
+health/static responses retain their previous absence of an ID; API fallback
+errors retain generated IDs. Final integrated-tree workspace all-feature tests
+pass (31 tests, 65 qualification ignores, including the concurrent M4 addition).
+Two explicitly run disposable-DB HTTP foundation/observability tests also pass.
+Formatting and strict all-target, all-feature Clippy pass on the migration tree.
+The no-storage HTTP test also verifies the unchanged header boundary. Browser,
+S3, transfer-scale and complete container qualification were not repeated.
+
+While integrating SCT from `117734c`, concurrent developer commit `186096e`
+landed. Rebase preserved it as `2d1a921` on top of migration `5180c42`; range-diff
+confirms the developer patch is unchanged. Original master is clean at
+`2d1a921`; the dedicated worktree/branch are removed and pre-existing worktrees
+are retained. Recovery ref `backup/pre-step03b-correlation-20260920` retains the
+pre-rebase developer commit. See SCT's `docs/step-03b-correlation.md`.
+
+The 03b assessment is complete locally: **six adopted products**, **eleven N/A**,
+**none Pending**. All migration/assessment changes are committed and integrated;
+only their temporary worktrees and branches were removed. Unrelated work was
+preserved, including subsequently committed Pezzottify Android changes and
+Simple Agents runtime-assets work. Nothing was pushed or deployed. Each product's
+verification scope and existing limitations are recorded above; 03c remains planned.
 
 ## Planned steps
 
 [Step 03: observability](step-03-observability.md) contains three independently
 adoptable modules: **03a logging setup**, **03b request correlation**, and
 **03c HTTP tracing**. 03a is implemented; local adoption is recorded per service
-above. 03b is implemented with a Crumbles pilot; 03c remains planned.
+above. 03b rollout is complete with six adopted products and eleven N/A;
+03c remains planned.
 The [03a contract](step-03a-logging.md) records the API and pilot compatibility. Completion of one module does not imply completion of Step 03.
 
 Further capabilities include HTTP support, health, background tasks, database helpers,
