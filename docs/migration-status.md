@@ -326,6 +326,22 @@ branches, preserving their subsequent development. The reviewed shared source re
 library implementation changed during these consumer migrations. No push or
 deployment was performed.
 
+## Step 03a: logging setup
+
+Library implementation `57625c4` provides opt-in text/JSON logging, explicit
+filters, output and ANSI policies, and fallible process-wide initialization.
+It builds without HTTP or Tokio and installs no log-facade bridge. All-feature
+and logging-only tests, strict Clippy, formatting, and the standalone example pass.
+
+Favzetto pilot `eda9fc0` preserves stdout, target display, `NO_COLOR`, empty and
+invalid-filter behavior, and its explicit log-facade bridge. The old/new process
+comparison and lifecycle smoke tests pass. The backend retains its two baseline
+API failures (131 unit and 93 API tests pass) and existing strict-Clippy findings;
+Clippy completes with those findings capped at warnings. Browser and container
+builds were not repeated. See Favzetto's `docs/08-logging-migration.md` and the
+[logging contract](step-03a-logging.md). Both commits are local; no push or
+deployment was performed. Modules 03b and 03c remain planned.
+
 ## Planned steps
 
 [Step 03: observability](step-03-observability.md) contains three independently
