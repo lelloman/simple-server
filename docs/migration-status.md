@@ -12,14 +12,14 @@ each product independently as it adopts that capability.
 Partial = only some listed components migrated; N/A = deliberately not needed.
 Optional modules do not have to be adopted by every product.
 
-Step 03a pilot verified: 2026-09-20. Earlier adoption evidence retains its original dates.
+Step 03a canaries verified: 2026-09-20. Earlier adoption evidence retains its original dates.
 
 | Project | Server components | 1. Axum centralization | 2. Lifecycle / main() | 03a. Logging |
 | --- | --- | --- | --- | --- |
 | pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | Pending |
 | favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** |
 | androidoscopy | `server` | **Done** | **Done (local; scoped)** | Pending |
-| crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | Pending |
+| crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** |
 | fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | Pending |
 | lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | Pending |
 | lellostore | `backend` | **Done** | **Done (local)** | Pending |
@@ -342,11 +342,20 @@ builds were not repeated. See Favzetto's `docs/08-logging-migration.md` and the
 [logging contract](step-03a-logging.md). Both commits are local; no push or
 deployment was performed. Modules 03b and 03c remain planned.
 
+Crumbles canary `5bdd2b5` adopts the same library source in both the text
+server/CLI and JSON integration daemon. Its environment policies and log bridges
+are preserved; fresh-process comparisons include span-field filters, malformed
+input, and JSON context. The untouched baseline passed 1,425 tests; the final
+workspace passes 1,429 tests with two intentional ignores. Strict Clippy,
+formatting, both binary builds, and SIGINT/SIGTERM drain/restart checks pass.
+No library API change was needed. Browser/release-container checks were not
+repeated; nothing was pushed or deployed. See Crumbles' `docs/STEP_03A_LOGGING.md`.
+
 ## Planned steps
 
 [Step 03: observability](step-03-observability.md) contains three independently
 adoptable modules: **03a logging setup**, **03b request correlation**, and
-**03c HTTP tracing**. 03a is implemented and locally adopted by Favzetto; 03b and 03c remain planned.
+**03c HTTP tracing**. 03a is implemented and locally adopted by Favzetto and Crumbles; 03b and 03c remain planned.
 The [03a contract](step-03a-logging.md) records the API and pilot compatibility. Completion of one module does not imply completion of Step 03.
 
 Further capabilities include HTTP support, health, background tasks, database helpers,

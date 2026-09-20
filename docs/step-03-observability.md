@@ -1,6 +1,6 @@
 # Step 03: observability
 
-Status: 03a is implemented locally with Favzetto as its pilot. 03b and 03c
+Status: 03a is implemented locally with Favzetto and Crumbles as canaries. 03b and 03c
 remain planned. See the [migration status](migration-status.md) for verification.
 
 Step 03 contains three independently adoptable modules. Each has its own

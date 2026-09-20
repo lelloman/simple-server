@@ -1,6 +1,6 @@
 # Step 03a: logging setup
 
-Status: implemented locally, with a Favzetto pilot. Part of
+Status: implemented locally, with Favzetto and Crumbles canaries. Part of
 [Step 03: observability](step-03-observability.md).
 
 ## Outcome and ownership
@@ -148,3 +148,18 @@ targets, fields, invalid/empty filters, destination, ANSI, and log-facade record
   pass after the final adapter fixes.
 - Favzetto strict Clippy retains the documented 53 library / 55 test errors in
   existing code. No release image, browser suite, deployment, or push is claimed.
+
+## Second canary: Crumbles
+
+Both the text CLI/server and JSON integration daemon use the shared initializer.
+They retain their own `EnvFilter` parsing before passing normalized directives:
+lossy environment parsing with an added INFO directive for the main server, and
+strict parsing with an INFO fallback for the daemon. Both preserve stdout and
+explicit log bridges; the main server retains its `NO_COLOR` policy.
+
+Fresh-process comparisons against the former initializers cover global, target,
+and span-field filters, invalid and missing environment values, ANSI, structured
+fields, JSON span context, and stderr diagnostics. No shared API changes were
+needed. This confirms an application can retain its existing filter parser while
+adopting shared subscriber setup. See the [adoption record](migration-status.md)
+for the consumer revision and final verification.
