@@ -21,7 +21,7 @@ Step 03a canaries verified: 2026-09-20. Earlier adoption evidence retains its or
 | androidoscopy | `server` | **Done** | **Done (local; scoped)** | Pending |
 | crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** |
 | fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | Pending |
-| lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | Pending |
+| lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** |
 | lellostore | `backend` | **Done** | **Done (local)** | Pending |
 | meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** | Pending |
 | observo | `observo-server` | **Done** | **Done (local; scoped)** | Pending |
@@ -371,6 +371,16 @@ record and the HTML matrix must be updated. Current rollout library source is
   supports compact output and CLOSE span events. The 03a initializer cannot
   preserve that composition. The custom logger remains intact; this is not N/A.
 
+LelloAuth `ab38b81` adopts 03a in the server and all three runnable HTTP examples,
+preserving pretty/JSON/text output, environment filters, stdout, color policy,
+and explicit log bridging. Final validation passes 974 workspace tests (22
+existing ignores), all example checks, formatting, fresh-process comparisons,
+and real-binary startup/lifecycle checks. Clippy retains the same five findings
+as the untouched branch; Docker/browser/provider checks were not repeated.
+CI pins use `71755b5`. Local `master` was rebased onto the tested migration;
+its temporary worktree/branch were removed and unrelated research files verified
+unchanged by hash. See LelloAuth's `docs/STEP_03A_LOGGING.md`.
+
 Other rollout entries remain Pending until their migration is verified on their
 active development branch. Pezzottify uses `dev`, Simple Agents uses `main`, and
 other current targets use `master`; remote HEAD is not the branch-selection rule.
@@ -379,7 +389,8 @@ other current targets use `master`; remote HEAD is not the branch-selection rule
 
 [Step 03: observability](step-03-observability.md) contains three independently
 adoptable modules: **03a logging setup**, **03b request correlation**, and
-**03c HTTP tracing**. 03a is implemented and locally adopted by Favzetto and Crumbles; 03b and 03c remain planned.
+**03c HTTP tracing**. 03a is implemented; local adoption is recorded per service
+above. Modules 03b and 03c remain planned.
 The [03a contract](step-03a-logging.md) records the API and pilot compatibility. Completion of one module does not imply completion of Step 03.
 
 Further capabilities include HTTP support, health, background tasks, database helpers,
