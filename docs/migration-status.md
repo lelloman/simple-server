@@ -24,15 +24,15 @@ Step 03a canaries verified: 2026-09-20. Earlier adoption evidence retains its or
 | lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** |
 | lellostore | `backend` | **Done** | **Done (local)** | **Done (local)** |
 | meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** | Pending |
-| observo | `observo-server` | **Done** | **Done (local; scoped)** | Pending |
+| observo | `observo-server`; standalone extractor logging | **Done** | **Done (local; scoped)** | **Done (local)** |
 | paranza | `apps/paranza-server` | **Done** | **Done (local; scoped)** | N/A (no logger) |
 | peerlo | `peerlo-api` | **Done** | **Done (local; scoped)** | Pending |
 | pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** | **Done (local)** |
 | pezzottify-downloader | Puppeteer API and downloader HTTP server | **Done** | **Done (local; scoped)** | **Done (local)** |
-| quentin-torrentino | `crates/server` | **Done** | **Done (local; scoped)** | Pending |
+| quentin-torrentino | `crates/server` | **Done** | **Done (local; scoped)** | **Done (local)** |
 | sct | `sct-server` | **Done** | **Done (scoped)** | N/A (no logger) |
-| simple-agents | `simple-agents-service`; associated coding test servers | **Done** | **Done (local; scoped)** | **Done (local)** |
-| simple-ai | `backend`, `inference-runner` | **Done** | **Done (local; scoped)** | Pending |
+| simple-agents | `simple-agents-service`; runner-shell logging; associated coding test servers | **Done** | **Done (local; scoped)** | **Done (local)** |
+| simple-ai | `backend`, `inference-runner` | **Done** | **Done (local; scoped)** | **Done (local)** |
 
 ## Step 1: Axum centralization
 
@@ -441,10 +441,47 @@ branch removed. Subsequent Android commit `b6e2daf` retains the migration as an
 ancestor. See `docs/step-03a-logging.md`; Android/browser/container checks were
 not repeated.
 
+Quentin Torrentino `0a02cfa` migrates its production server logger while retaining
+the original filter/default, stdout, colors, spans and log bridge. The final
+serial workspace run passes 743 tests (14 ignored doctests), excluding two
+MusicBrainz-name tests including the confirmed baseline search failure. Audit
+startup timeouts under parallel load clear with all five cases passing serially.
+The 24-case logging comparison, binary build and both signal/durable-audit
+process checks pass. Existing formatting/Clippy findings remain. Source
+`71755b5` is pinned; local `master` matches the tested tree and the migration
+worktree/branch are removed. See `docs/step-03a-logging.md`; browser/container
+checks were not repeated.
+
+Observo `a481ae7` migrates the server's fixed-INFO stdout logger and the standalone
+extractor's CLI-controlled WARN/INFO/DEBUG stderr logger; neither begins reading
+`RUST_LOG`. The extractor enables only the shared logging feature, without HTTP
+or lifecycle; link-scorer has no logger to migrate. Final validation passes 91
+server tests, three extractor logging tests, 84 policy comparisons per adapter,
+both binary builds, real-server HTTP/signal/listener-release and extractor
+startup checks. The same three extractor library failures reproduce on the
+untouched baseline (16 passes); existing formatting/Clippy and extractor
+no-default-features compilation issues remain documented. Source `71755b5` is
+pinned; local `master` matches the tested tree, with temporary worktree/branch
+removed. See `docs/step-03a-logging.md`; browser/container checks were not repeated.
+
+SimpleAI `36c650d` migrates backend and runner startup while retaining their
+configured/INFO filter fallbacks, stdout text, colors, spans and log bridges.
+Workspace tests pass 445 cases (one existing ignored doctest), including both
+adapters' fresh-process comparisons; builds and changed-file formatting pass.
+Strict Clippy retains three unchanged common-crate findings. Isolated backend
+startup logs before expected loopback OIDC refusal; the runner starts with
+engines disabled and shuts down on SIGTERM. An existing ignored config fixture
+was needed for a compile-time parsing test and was not committed; no model or
+remote inference operation was performed. Source `71755b5` is pinned. Local
+`master` matches the tested tree and its temporary worktree/branch are removed.
+See `docs/step-03a-logging.md`; browser/container checks were not repeated.
+
 Final build-instruction review also corrected active README source references
 in Fausto `0222a75`, LelloAuth `bb82dd2`, and LelloStore `1c8ed91`, each through
 a separate documentation worktree. Their temporary branches/worktrees are
-removed; existing user documents and README edits were preserved. Newer
+removed; existing user documents and README edits were preserved. Pezzottify's
+quick-start now uses the revision-checking helper in `824f1dfb`, integrated into
+`dev` through a separate documentation worktree that was then removed. Newer
 concurrent Android/documentation edits remain in place.
 
 Other rollout entries remain Pending until their migration is verified on their

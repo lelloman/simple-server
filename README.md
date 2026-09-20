@@ -5,7 +5,7 @@ The first stage centralizes Axum versions through a transitional re-export.
 Subsequent stages will extract shared capabilities and gradually hide Axum behind
 the library's own interfaces.
 
-**Status:** Axum dependency centralization and opt-in lifecycle helpers are
+**Status:** Axum dependency centralization, opt-in lifecycle and logging helpers are
 implemented. All 17 inventoried products have adopted lifecycle helpers locally
 with documented application scopes. Crumbles and SCT include those migrations on local `master`. Publication to crates.io remains disabled.
 
@@ -57,8 +57,9 @@ Lifecycle and logging helpers are available now; correlation and HTTP tracing re
 
 [Step 03: observability](docs/step-03-observability.md) is split into independently
 adoptable logging setup (03a), request correlation (03b), and HTTP tracing (03c).
-[03a: logging setup](docs/step-03a-logging.md) is implemented with local
-Favzetto and Crumbles canaries. Modules 03b and 03c remain planned.
+[03a: logging setup](docs/step-03a-logging.md) is implemented, with verified
+adoption and compatibility exceptions in the [migration matrix](docs/migration-status.html).
+Modules 03b and 03c remain planned.
 
 - Listener setup, shutdown signals, graceful shutdown, and shutdown deadlines.
 - Structured logging, request IDs, and HTTP tracing.

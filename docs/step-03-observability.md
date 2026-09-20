@@ -1,14 +1,15 @@
 # Step 03: observability
 
-Status: 03a is implemented locally with Favzetto and Crumbles as canaries. 03b and 03c
-remain planned. See the [migration status](migration-status.md) for verification.
+Status: 03a is implemented locally and rolling out after the Favzetto and Crumbles
+canaries. Modules 03b and 03c remain planned. See the
+[migration status](migration-status.md) for verification and applicability.
 
 Step 03 contains three independently adoptable modules. Each has its own
 contract, tests, and consumer migration evidence.
 
 | Module | Responsibility | Dependency boundary |
 | --- | --- | --- |
-| 03a — Logging setup | Configure and explicitly install text or JSON logging | Usable without HTTP, lifecycle, or a Tokio runtime |
+| 03a — Logging setup | Configure and explicitly install text, pretty, or JSON logging | Usable without HTTP, lifecycle, or a Tokio runtime |
 | 03b — Request correlation | Generate or validate a request ID, expose it to application code, and propagate it in responses | HTTP integration without requiring the shared logging initializer |
 | 03c — HTTP tracing | Request spans, response status, and precisely defined timing | Works with an application-owned tracing subscriber; integrates with correlation when enabled |
 
