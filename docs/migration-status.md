@@ -12,7 +12,7 @@ each product independently as it adopts that capability.
 Partial = only some listed components migrated; N/A = deliberately not needed.
 Optional modules do not have to be adopted by every product.
 
-Step 03a canaries verified: 2026-09-20. Earlier adoption evidence retains its original dates.
+Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its original dates.
 
 | Project | Server components | 1. Axum centralization | 2. Lifecycle / main() | 03a. Logging |
 | --- | --- | --- | --- | --- |
@@ -23,7 +23,7 @@ Step 03a canaries verified: 2026-09-20. Earlier adoption evidence retains its or
 | fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** |
 | lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** |
 | lellostore | `backend` | **Done** | **Done (local)** | **Done (local)** |
-| meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** | Pending |
+| meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** | **Done (local)** |
 | observo | `observo-server`; standalone extractor logging | **Done** | **Done (local; scoped)** | **Done (local)** |
 | paranza | `apps/paranza-server` | **Done** | **Done (local; scoped)** | N/A (no logger) |
 | peerlo | `peerlo-api` | **Done** | **Done (local; scoped)** | Pending |
@@ -476,6 +476,19 @@ remote inference operation was performed. Source `71755b5` is pinned. Local
 `master` matches the tested tree and its temporary worktree/branch are removed.
 See `docs/step-03a-logging.md`; browser/container checks were not repeated.
 
+Meteonesto `32f16ba` migrates all three production initializers, preserving
+API/gateway JSON with permissive environment filters and the pipeline's strict
+configured text/JSON policy. Full suites pass 259 tests (one existing gateway
+ignore); all six logging tests pass again after a mechanical lint adjustment.
+All three builds, strict Clippy and formatting pass. Four existing API/pipeline
+process tests pass with isolated data, including signals, admin shutdown,
+database integrity and deadline/drain behavior. Gateway production startup
+emits valid JSON before expected loopback HTTPS discovery failure; this does
+not claim successful production health/shutdown without a trusted issuer.
+Source `71755b5` is recorded in all component build instructions. Local `master`
+matches the tested tree; migration worktree/branch removed. See
+`docs/step-03a-logging.md`; container/provider checks were not repeated.
+
 Final build-instruction review also corrected active README source references
 in Fausto `0222a75`, LelloAuth `bb82dd2`, and LelloStore `1c8ed91`, each through
 a separate documentation worktree. Their temporary branches/worktrees are
@@ -484,9 +497,14 @@ quick-start now uses the revision-checking helper in `824f1dfb`, integrated into
 `dev` through a separate documentation worktree that was then removed. Newer
 concurrent Android/documentation edits remain in place.
 
-Other rollout entries remain Pending until their migration is verified on their
-active development branch. Pezzottify uses `dev`, Simple Agents uses `main`, and
-other current targets use `master`; remote HEAD is not the branch-selection rule.
+The assessed rollout now has **14 locally adopted products**, **two N/A products**
+(Paranza and SCT), and **one Pending compatibility gap** (Peerlo). The totals
+include the two earlier canaries. All new migration commits are integrated and
+their temporary worktrees/branches removed. Pezzottify uses `dev`, Simple Agents
+uses `main`, and the other targets use `master`; remote HEAD is not the
+branch-selection rule. Unrelated work and subsequent commits were preserved.
+Nothing was pushed or deployed. Known baseline failures and verification
+limits are recorded above and in each consumer's migration notes.
 
 ## Planned steps
 

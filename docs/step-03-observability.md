@@ -1,7 +1,7 @@
 # Step 03: observability
 
-Status: 03a is implemented locally and rolling out after the Favzetto and Crumbles
-canaries. Modules 03b and 03c remain planned. See the
+Status: 03a is locally adopted by 14 products; two products are N/A and Peerlo
+retains a compatibility gap. Modules 03b and 03c remain planned. See the
 [migration status](migration-status.md) for verification and applicability.
 
 Step 03 contains three independently adoptable modules. Each has its own
