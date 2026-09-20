@@ -65,7 +65,8 @@ pre-existing failures and checks not rerun without claiming a fully green suite.
 
 Inspect the final diff and dependency graph. Commit only migration changes and
 their documentation on the temporary branch. Update active CI checkout pins and
-build revision files to the reviewed shared-library source; preserve historical
+build revision files and active README build instructions to the reviewed
+shared-library source; preserve historical
 revision references in earlier migration records. Report the migration commit,
 baseline and final results, scope, and any remaining limits.
 
@@ -87,6 +88,15 @@ work in migration commits. Avoid stashing files being actively edited by another
 agent without coordinating first. Prefer a clean linked worktree for branch
 integration when practical, but never force-update a branch checked out elsewhere.
 
+For a dirty checkout with unrelated active edits, a clean integration path is:
+commit the migration, detach the original checkout without changing its tree,
+switch the clean migration worktree to the development branch, and rebase there.
+Detach the clean worktree before switching the original checkout back to the
+development branch. Recheck branch tips before switching; stop and reconcile if
+concurrent commits appeared. If a changed migration file overlaps local edits,
+preserve only that file when possible and verify its restored content. Do not
+overwrite newer user edits to make an older hash snapshot match.
+
 Verify branch ancestry and integration results. An unchanged tested tree needs
 only ancestry/tree verification; new conflict resolutions or intervening changes
 require relevant checks. Restore the original user's working state. If restoration
@@ -97,6 +107,8 @@ Only after successful integration and verification, remove the temporary
 worktree with `git worktree remove` and delete its fully integrated branch with
 `git branch -d`. Do not force-delete unmerged branches or uncommitted work.
 Do not remove pre-existing worktrees, branches, or stashes belonging to others.
+Check each command's result before continuing a dependent mutation; failed
+verification must stop cleanup until the discrepancy is understood.
 
 Local history integration does not authorize publishing rewritten remote
 history. Pushes, deployment, and branch-protection changes require separate

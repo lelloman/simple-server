@@ -16,22 +16,22 @@ Step 03a canaries verified: 2026-09-20. Earlier adoption evidence retains its or
 
 | Project | Server components | 1. Axum centralization | 2. Lifecycle / main() | 03a. Logging |
 | --- | --- | --- | --- | --- |
-| pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | Pending |
+| pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | **Done (local)** |
 | favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** |
 | androidoscopy | `server` | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** |
 | crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** |
-| fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | Pending |
+| fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** |
 | lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** |
 | lellostore | `backend` | **Done** | **Done (local)** | **Done (local)** |
 | meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** | Pending |
 | observo | `observo-server` | **Done** | **Done (local; scoped)** | Pending |
 | paranza | `apps/paranza-server` | **Done** | **Done (local; scoped)** | N/A (no logger) |
 | peerlo | `peerlo-api` | **Done** | **Done (local; scoped)** | Pending |
-| pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** | Pending |
-| pezzottify-downloader | Puppeteer API and downloader HTTP server | **Done** | **Done (local; scoped)** | Pending |
+| pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** | **Done (local)** |
+| pezzottify-downloader | Puppeteer API and downloader HTTP server | **Done** | **Done (local; scoped)** | **Done (local)** |
 | quentin-torrentino | `crates/server` | **Done** | **Done (local; scoped)** | Pending |
 | sct | `sct-server` | **Done** | **Done (scoped)** | N/A (no logger) |
-| simple-agents | `simple-agents-service`; associated coding test servers | **Done** | **Done (local; scoped)** | Pending |
+| simple-agents | `simple-agents-service`; associated coding test servers | **Done** | **Done (local; scoped)** | **Done (local)** |
 | simple-ai | `backend`, `inference-runner` | **Done** | **Done (local; scoped)** | Pending |
 
 ## Step 1: Axum centralization
@@ -398,6 +398,54 @@ replayed as `4eff608`; 47 unrelated WIP files were restored and verified by hash
 The migration worktree/branch and temporary stash are removed; a recovery ref
 retains the pre-rebase tip. CI uses source `71755b5`. See its
 `docs/STEP_03A_LOGGING.md`; Android/browser/container checks were not repeated.
+
+Fausto `372d51e` migrates its production server logger with its original strict
+filter/default, stdout, color, spans and log bridge. Server unit/integration
+tests, 30 policy comparisons and three real-process lifecycle tests pass; one
+existing doctest is ignored. Changed-file formatting passes; strict Clippy stops
+on unchanged core findings. CI uses `71755b5`; local `master` contains the tested
+tree and temporary worktree/branch are removed. See `docs/STEP_03A_LOGGING.md`.
+
+Pezzottify-downloader `7960637` migrates both downloader and login startup.
+Final validation passes 157 tests (one existing ignored doctest), 24 process
+comparisons, and real-binary HTTP/WebSocket/shutdown/auth-failure checks.
+Existing formatting and Clippy findings remain; external Spotify authentication
+was not exercised. Source `71755b5` is pinned. Local `master` matches the tested
+tree; migration worktree/branch removed. See `docs/step-03a-logging.md`.
+
+Pezzottflix `1846e98` migrates its existing pretty/JSON logger while retaining
+configured fallback levels, stdout, color, spans and log bridging. Final tests
+pass 533 cases (three existing ignores), including 48 old/new policy comparisons.
+The binary builds and both isolated SIGINT/SIGTERM HTTP/metrics/WebSocket drain
+checks pass. New-file formatting passes; original formatting/Clippy findings
+remain. Source `71755b5` is pinned. Local `master` matches the tested tree;
+migration worktree/branch removed. See `docs/step-03a-logging.md`.
+Browser/release-container checks were not repeated for these three migrations.
+
+Pezzottify `c2d78c4e` migrates the production server and search-index builder,
+retaining their different environment parsers/defaults, output and log bridges.
+The full Rust suite passes 1,398 tests (36 existing ignores), including 60 policy
+comparisons and four real-server lifecycle cases; indexer startup also reaches
+its expected missing-catalog diagnostic. Changed-file formatting passes; one
+unchanged strict-Clippy finding remains. Source `71755b5` is pinned. Local `dev`
+matches the tested tree; migration worktree/branch removed. See its
+`docs/step-03a-logging.md`.
+
+Simple Agents `ce3b75e` migrates service text logging and runner-shell fixed-INFO
+JSON logging. The two package suites pass 132 tests, 48 policy comparisons,
+service signal/restart and real runner-shell startup checks. Full formatting
+and strict package/all-target Clippy pass. Source `71755b5` is pinned. The
+migration was integrated into `main` through a clean linked worktree; all 13
+concurrent Android WIP files were verified unchanged and temporary worktree/
+branch removed. Subsequent Android commit `b6e2daf` retains the migration as an
+ancestor. See `docs/step-03a-logging.md`; Android/browser/container checks were
+not repeated.
+
+Final build-instruction review also corrected active README source references
+in Fausto `0222a75`, LelloAuth `bb82dd2`, and LelloStore `1c8ed91`, each through
+a separate documentation worktree. Their temporary branches/worktrees are
+removed; existing user documents and README edits were preserved. Newer
+concurrent Android/documentation edits remain in place.
 
 Other rollout entries remain Pending until their migration is verified on their
 active development branch. Pezzottify uses `dev`, Simple Agents uses `main`, and

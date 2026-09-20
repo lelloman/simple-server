@@ -142,22 +142,22 @@
       ['Authorization', false], ['Rate limiting', false]
     ];
     const services = [
-      {name: 'pezzottify', components: 'API/metrics · scheduler · tracked application work', axum: 'done', lifecycle: 'done'},
+      {name: 'pezzottify', logging: 'done', components: 'API/metrics · scheduler · tracked application work', axum: 'done', lifecycle: 'done'},
       {name: 'favzetto', logging: 'done', components: 'backend (lifecycle: local, scoped adoption)', axum: 'done', lifecycle: 'done'},
       {name: 'androidoscopy', logging: 'done', components: 'v2 controller · legacy HTTP/WS/TLS (logging: legacy only)', axum: 'done', lifecycle: 'done'},
       {name: 'crumbles', logging: 'done', components: 'HTTP/workers/WebSockets · integration daemon', axum: 'done', lifecycle: 'done'},
-      {name: 'fausto', components: 'server · HTTP, WebSockets, event workers, jobs and plugin cleanup', axum: 'done', lifecycle: 'done'},
+      {name: 'fausto', logging: 'done', components: 'server · HTTP, WebSockets, event workers, jobs and plugin cleanup', axum: 'done', lifecycle: 'done'},
       {name: 'lello-auth', logging: 'done', components: 'server · axum · examples (lifecycle: local, scoped adoption)', axum: 'done', lifecycle: 'done'},
       {name: 'lellostore', logging: 'done', components: 'backend (lifecycle: local adoption)', axum: 'done', lifecycle: 'done'},
       {name: 'meteonesto', components: 'weather API/cache · gateway/refresh · ordered pipeline drain', axum: 'done', lifecycle: 'done'},
       {name: 'observo', components: 'HTTP · scheduler · server tasks · webhook drain', axum: 'done', lifecycle: 'done'},
       {name: 'paranza', logging: 'na', components: 'HTTP · runner sessions · PCM maintenance', axum: 'done', lifecycle: 'done'},
       {name: 'peerlo', components: 'HTTP · ordered subsystem cleanup', axum: 'done', lifecycle: 'done'},
-      {name: 'pezzottflix', components: 'HTTP/metrics · jobs · WebSockets · SQLite', axum: 'done', lifecycle: 'done'},
-      {name: 'pezzottify-downloader', components: 'parent HTTP/tasks · child Unix HTTP · process cleanup', axum: 'done', lifecycle: 'done'},
+      {name: 'pezzottflix', logging: 'done', components: 'HTTP/metrics · jobs · WebSockets · SQLite', axum: 'done', lifecycle: 'done'},
+      {name: 'pezzottify-downloader', logging: 'done', components: 'parent HTTP/tasks · child Unix HTTP · process cleanup', axum: 'done', lifecycle: 'done'},
       {name: 'quentin-torrentino', components: 'HTTP · orchestrator · pipeline · audit (scoped)', axum: 'done', lifecycle: 'done'},
       {name: 'sct', logging: 'na', components: 'HTTP · writer lease', axum: 'done', lifecycle: 'done'},
-      {name: 'simple-agents', components: 'HTTP · maintenance · dispatch · power (scoped)', axum: 'done', lifecycle: 'done'},
+      {name: 'simple-agents', logging: 'done', components: 'HTTP · maintenance · dispatch · power (scoped)', axum: 'done', lifecycle: 'done'},
       {name: 'simple-ai', components: 'backend HTTP/batches · runner HTTP/gateway', axum: 'done', lifecycle: 'done'}
     ];
     const labels = {done: '✓ Complete', pending: 'Pending', planned: 'Planned', partial: 'Partial', na: 'N/A'};
