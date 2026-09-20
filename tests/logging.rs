@@ -12,6 +12,7 @@ fn logging_child() {
     options.ansi = AnsiMode::Never;
     match mode.as_str() {
         "json" => options.format = LogFormat::Json,
+        "compact" => options.format = LogFormat::Compact,
         "pretty" | "pretty-ansi" | "pretty-no-target" => {
             options.format = LogFormat::Pretty;
             options.ansi = if mode == "pretty-ansi" {
@@ -117,6 +118,7 @@ fn filtering_destination_styling_and_initialization() {
         "pretty",
         "pretty-ansi",
         "pretty-no-target",
+        "compact",
     ] {
         let output = run(mode);
         let stdout = String::from_utf8(output.stdout).unwrap();

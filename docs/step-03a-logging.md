@@ -34,10 +34,13 @@ requires a filter; its other fields can be set explicitly before initialization.
 | Concept | Purpose |
 | --- | --- |
 | `LoggingOptions` | Explicit filter string, output format, destination, ANSI policy, and target display |
-| `LogFormat::{Text, Pretty, Json}` | Single-line text, multiline pretty text, or one JSON object per event |
+| `LogFormat::{Text, Pretty, Compact, Json}` | Text, multiline pretty text, compact context, or one JSON object per event |
+| `SpanEvents::{None, Close, Full}` | Optional synthetic span events; disabled by default |
 | `LogOutput::{Stdout, Stderr}` | Explicit output destination |
 | `AnsiMode::{Auto, Always, Never}` | Text styling policy; automatic mode checks the selected output stream |
 | `try_init(options)` | Validate options and install once, returning a structured error on failure |
+| `try_init_reloadable(options)` | Install once and return a cloneable runtime filter handle |
+| `ReloadHandle::{set_filter, current_filter}` | Atomically replace or inspect normalized directives |
 
 Require an explicit filter. Defaults for the other options are text,
 stderr, automatic ANSI, and visible targets. Consumer migrations must select
@@ -56,8 +59,13 @@ Filtering supports tracing target/level directives, including `off`.
 Malformed filter syntax returns `InvalidFilter` before installation. There is
 no hidden fallback and no implicit additional INFO directive. Applications can
 implement their existing fallback by handling that error and retrying with an
-explicit fallback filter. Empty input is rejected; callers must choose a level
-or `off` explicitly. Error messages must not echo the supplied filter string.
+explicit fallback filter. The one-shot initializer rejects empty input; callers
+must choose a level or `off` explicitly. The opt-in reloadable initializer and
+handle accept exactly empty directives as an empty/off filter, preserving
+runtime API round trips. Whitespace-only and malformed directives are rejected.
+Error messages must not echo the supplied filter string. Failed updates leave
+the current filter unchanged, and successful updates rebuild tracing callsite
+interest so previously disabled events can become enabled.
 
 ### Initialization and composition
 
@@ -71,16 +79,28 @@ decides whether an initialization error is fatal and can report it directly to
 stderr before logging exists.
 
 Applications with custom subscriber layers can keep their existing subscriber
-and later adopt 03b/03c independently. Arbitrary subscriber assembly, dynamic
-filter reload, and automatic bridging of the `log` facade are outside 03a.
+and later adopt 03b/03c independently. Arbitrary subscriber assembly and
+automatic bridging of the `log` facade remain outside 03a. Explicit filter reload
+is supported through the optional reloadable initializer; it does not change
+formatting or output destinations. Cloned handles share the installed filter;
+dropping handles does not disable the subscriber. Inspection/reload failures
+return `ReloadError::Unavailable` rather than panic.
 Implementation must avoid accidental global logger installation through helper
 defaults. Any consumer that already depends on a log bridge needs an explicit
 compatibility check before migration.
+
+The shared initializer never installs a log bridge. When consumers enable
+tracing-subscriber's `tracing-log` feature and install their own bridge, its reload
+implementation also updates the log facade's maximum level. Consumers must
+verify bridge records across runtime verbosity changes, not just startup.
 
 ### Output
 
 Text and JSON output include event level, timestamp, message, and event fields;
 pretty text additionally displays source locations and multiline span context.
+Compact output uses the upstream compact formatter. `span_events` defaults to
+`None`; `Close` adds final-drop events with busy/idle timing, while `Full` also
+adds new/enter/exit events. Timing values are inherently nondeterministic.
 target display follows `with_target`. Timestamps are UTC RFC 3339 with six
 fractional digits. JSON uses `timestamp`, `level`, optional `target`, and nested
 `fields` (including `message`); active context appears under `span` and the

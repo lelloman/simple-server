@@ -153,6 +153,10 @@ try_init(options)?;
 ```
 
 Defaults are text on stderr, automatic terminal styling, and visible targets.
+Compact formatting and optional close/full span events are also available.
+Use `try_init_reloadable(options)` when runtime filter changes are needed; its
+cloneable handle provides `set_filter` and `current_filter`. Formatting and output
+remain fixed, and invalid updates leave the active filter unchanged.
 Invalid filters and repeated global initialization return errors. The module
 neither installs a `log` facade bridge nor reads configuration from the environment.
 See the [03a contract](docs/step-03a-logging.md) and

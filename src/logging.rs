@@ -5,7 +5,10 @@
 
 use std::{fmt, io::IsTerminal};
 
-use tracing_subscriber::{EnvFilter, fmt::writer::BoxMakeWriter};
+use tracing_subscriber::{
+    EnvFilter, Registry, fmt::format::FmtSpan, fmt::writer::BoxMakeWriter, layer::SubscriberExt,
+    reload,
+};
 
 /// Event output encoding.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -15,6 +18,8 @@ pub enum LogFormat {
     Text,
     /// Multiline human-readable events with source locations and span context.
     Pretty,
+    /// Single-line events with compact span context.
+    Compact,
     /// One JSON object per event, with nested fields and span context.
     Json,
 }
@@ -41,12 +46,35 @@ pub enum AnsiMode {
     Never,
 }
 
+/// Synthetic events emitted for span lifecycle changes.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum SpanEvents {
+    /// Emit only application events (the default).
+    #[default]
+    None,
+    /// Emit an event when the final reference to a span is dropped.
+    Close,
+    /// Emit new, enter, exit, and close events.
+    Full,
+}
+
+impl SpanEvents {
+    fn formatter(self) -> FmtSpan {
+        match self {
+            Self::None => FmtSpan::NONE,
+            Self::Close => FmtSpan::CLOSE,
+            Self::Full => FmtSpan::FULL,
+        }
+    }
+}
+
 /// Explicit logging configuration. No environment-based policy is applied.
 #[derive(Debug, Clone)]
 pub struct LoggingOptions {
-    /// Tracing filter directives. Empty or malformed input is rejected.
+    /// Tracing filter directives. Malformed input is rejected; the one-shot
+    /// initializer additionally rejects empty input.
     pub filter: String,
-    /// Text, pretty text, or JSON event encoding.
+    /// Text, pretty, compact, or JSON event encoding.
     pub format: LogFormat,
     /// Destination for events.
     pub output: LogOutput,
@@ -54,6 +82,8 @@ pub struct LoggingOptions {
     pub ansi: AnsiMode,
     /// Include event targets in the output.
     pub with_target: bool,
+    /// Optional synthetic span events. Close events include busy/idle timing.
+    pub span_events: SpanEvents,
 }
 
 impl LoggingOptions {
@@ -65,6 +95,7 @@ impl LoggingOptions {
             output: LogOutput::Stderr,
             ansi: AnsiMode::Auto,
             with_target: true,
+            span_events: SpanEvents::None,
         }
     }
 }
@@ -101,7 +132,36 @@ impl std::error::Error for InitError {}
 /// No runtime, background writer, environment configuration, or log bridge is
 /// installed. ANSI settings override the formatter's environment-based default.
 pub fn try_init(options: LoggingOptions) -> Result<(), InitError> {
-    if options.filter.trim().is_empty() {
+    let (filter, writer, ansi) = prepare(&options, false)?;
+    let builder = tracing_subscriber::fmt()
+        .with_env_filter(filter)
+        .with_writer(writer)
+        .with_target(options.with_target)
+        .with_ansi(ansi)
+        .with_span_events(options.span_events.formatter());
+    // Avoid SubscriberInitExt: feature unification could otherwise install a
+    // global log bridge even when this crate did not request that capability.
+    match options.format {
+        LogFormat::Text => tracing::subscriber::set_global_default(builder.finish()),
+        LogFormat::Pretty => tracing::subscriber::set_global_default(builder.pretty().finish()),
+        LogFormat::Compact => tracing::subscriber::set_global_default(builder.compact().finish()),
+        LogFormat::Json => tracing::subscriber::set_global_default(
+            builder
+                .json()
+                .flatten_event(false)
+                .with_current_span(true)
+                .with_span_list(true)
+                .finish(),
+        ),
+    }
+    .map_err(|_| InitError::AlreadyInitialized)
+}
+
+fn prepare(
+    options: &LoggingOptions,
+    allow_empty: bool,
+) -> Result<(EnvFilter, BoxMakeWriter, bool), InitError> {
+    if !allow_empty && options.filter.trim().is_empty() {
         return Err(InitError::InvalidFilter);
     }
     let filter = EnvFilter::try_new(&options.filter).map_err(|_| InitError::InvalidFilter)?;
@@ -121,24 +181,88 @@ pub fn try_init(options: LoggingOptions) -> Result<(), InitError> {
         LogOutput::Stdout => BoxMakeWriter::new(std::io::stdout),
         LogOutput::Stderr => BoxMakeWriter::new(std::io::stderr),
     };
-    let builder = tracing_subscriber::fmt()
-        .with_env_filter(filter)
+    Ok((filter, writer, ansi))
+}
+
+/// A filter update or inspection failed. Supplied directives are never included.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ReloadError {
+    /// The proposed filter could not be parsed; the current filter is unchanged.
+    InvalidFilter,
+    /// The subscriber is unavailable or its filter lock is poisoned.
+    Unavailable,
+}
+
+impl fmt::Display for ReloadError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(match self {
+            Self::InvalidFilter => "invalid logging filter",
+            Self::Unavailable => "logging filter is unavailable",
+        })
+    }
+}
+
+impl std::error::Error for ReloadError {}
+
+/// Cloneable, thread-safe control of the installed subscriber's filter.
+///
+/// Dropping handles does not disable logging. Updates rebuild tracing callsite
+/// interest, including callsites previously disabled by the old filter.
+#[derive(Debug, Clone)]
+pub struct ReloadHandle {
+    inner: reload::Handle<EnvFilter, Registry>,
+}
+
+impl ReloadHandle {
+    /// Replace the filter atomically after strict parsing. Empty
+    /// directives disable events, matching `EnvFilter::try_new` semantics.
+    pub fn set_filter(&self, filter: &str) -> Result<(), ReloadError> {
+        let filter = EnvFilter::try_new(filter).map_err(|_| ReloadError::InvalidFilter)?;
+        self.inner
+            .reload(filter)
+            .map_err(|_| ReloadError::Unavailable)
+    }
+
+    /// Return the normalized active directives (empty for an empty filter).
+    pub fn current_filter(&self) -> Result<String, ReloadError> {
+        self.inner
+            .with_current(ToString::to_string)
+            .map_err(|_| ReloadError::Unavailable)
+    }
+}
+
+/// Install an explicitly reloadable global subscriber and return its handle.
+///
+/// Formatting, destination, and span-event settings are fixed at initialization.
+/// Unlike [`try_init`], this accepts empty directives as an explicit
+/// empty filter, enabling callers to round-trip that state through runtime APIs.
+/// Malformed directives are rejected. No log bridge is installed; applications
+/// that bridge `log` must retain their bridge's filter-update policy.
+pub fn try_init_reloadable(options: LoggingOptions) -> Result<ReloadHandle, InitError> {
+    let (filter, writer, ansi) = prepare(&options, true)?;
+    let (filter_layer, inner) = reload::Layer::new(filter);
+    let registry = Registry::default().with(filter_layer);
+    let layer = tracing_subscriber::fmt::layer()
         .with_writer(writer)
         .with_target(options.with_target)
-        .with_ansi(ansi);
-    // Avoid SubscriberInitExt: feature unification could otherwise install a
-    // global log bridge even when this crate did not request that capability.
+        .with_ansi(ansi)
+        .with_span_events(options.span_events.formatter());
     match options.format {
-        LogFormat::Text => tracing::subscriber::set_global_default(builder.finish()),
-        LogFormat::Pretty => tracing::subscriber::set_global_default(builder.pretty().finish()),
+        LogFormat::Text => tracing::subscriber::set_global_default(registry.with(layer)),
+        LogFormat::Pretty => tracing::subscriber::set_global_default(registry.with(layer.pretty())),
+        LogFormat::Compact => {
+            tracing::subscriber::set_global_default(registry.with(layer.compact()))
+        }
         LogFormat::Json => tracing::subscriber::set_global_default(
-            builder
-                .json()
-                .flatten_event(false)
-                .with_current_span(true)
-                .with_span_list(true)
-                .finish(),
+            registry.with(
+                layer
+                    .json()
+                    .flatten_event(false)
+                    .with_current_span(true)
+                    .with_span_list(true),
+            ),
         ),
     }
-    .map_err(|_| InitError::AlreadyInitialized)
+    .map_err(|_| InitError::AlreadyInitialized)?;
+    Ok(ReloadHandle { inner })
 }
