@@ -1,7 +1,7 @@
 # Step 03a: logging setup
 
-Status: implemented locally and adopted by 14 products, with applicability and
-compatibility exceptions in the [adoption record](migration-status.md). Part of
+Status: implemented locally and adopted by 15 products; two products are N/A,
+as documented in the [adoption record](migration-status.md). Part of
 [Step 03: observability](step-03-observability.md).
 
 ## Outcome and ownership

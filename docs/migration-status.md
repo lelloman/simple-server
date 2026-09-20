@@ -26,7 +26,7 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** | **Done (local)** |
 | observo | `observo-server`; standalone extractor logging | **Done** | **Done (local; scoped)** | **Done (local)** |
 | paranza | `apps/paranza-server` | **Done** | **Done (local; scoped)** | N/A (no logger) |
-| peerlo | `peerlo-api` | **Done** | **Done (local; scoped)** | Pending |
+| peerlo | `peerlo-api` | **Done** | **Done (local; scoped)** | **Done (local)** |
 | pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** | **Done (local)** |
 | pezzottify-downloader | Puppeteer API and downloader HTTP server | **Done** | **Done (local; scoped)** | **Done (local)** |
 | quentin-torrentino | `crates/server` | **Done** | **Done (local; scoped)** | **Done (local)** |
@@ -357,8 +357,10 @@ All rollout work follows the [consumer migration workflow](consumer-migration-wo
 verify capability use, work on a temporary branch/worktree from the active
 service branch, test and commit, rebase that branch onto the migration, verify
 integration, and remove only the integrated temporary branch/worktree. Both this
-record and the HTML matrix must be updated. Current rollout library source is
-`71755b5`, which adds pretty output while retaining the tested text/JSON API.
+record and the HTML matrix must be updated. The initial rollout uses library
+source `71755b5`, which adds pretty output while retaining the tested text/JSON
+API. Peerlo uses `9f83845`, adding reloadable filters, compact output and optional
+span events while preserving existing initializer defaults.
 
 - **Paranza — N/A:** `apps/paranza-server/src/main.rs` emits explicit
   `println!`/`eprintln!` diagnostics; the production workspace has no logging
@@ -366,10 +368,9 @@ record and the HTML matrix must be updated. Current rollout library source is
 - **SCT — N/A:** `crates/sct-server/src/main.rs` uses explicit stdout/stderr
   diagnostics without a tracing subscriber or logger. Its active inspection work
   remains untouched. Existing error request IDs are not logging setup adoption.
-- **Peerlo — Pending, compatibility gap:** `crates/peerlo/src/logging.rs`
-  installs a reloadable filter, exposes its handle through the runtime API, and
-  supports compact output and CLOSE span events. The 03a initializer cannot
-  preserve that composition. The custom logger remains intact; this is not N/A.
+- **Peerlo — Done locally:** production `crates/peerlo/src/logging.rs` now uses
+  the shared reloadable initializer. Its runtime API, compact output and CLOSE
+  span events are preserved by the shared-library extension described below.
 
 LelloAuth `ab38b81` adopts 03a in the server and all three runnable HTTP examples,
 preserving pretty/JSON/text output, environment filters, stdout, color policy,
@@ -497,8 +498,30 @@ quick-start now uses the revision-checking helper in `824f1dfb`, integrated into
 `dev` through a separate documentation worktree that was then removed. Newer
 concurrent Android/documentation edits remain in place.
 
-The assessed rollout now has **14 locally adopted products**, **two N/A products**
-(Paranza and SCT), and **one Pending compatibility gap** (Peerlo). The totals
+Peerlo `6479504` adopts shared reloadable logging using reviewed library source
+`9f83845`. Environment/configuration policy and API parser errors remain local;
+empty filters disable logging, while whitespace-only or malformed filters are
+rejected without changing the active filter. Its existing "pretty" name still
+means text with CLOSE span events; production main still selects that format.
+Compact/JSON output, ANSI, span context and log bridging match the original
+logger in 84 fresh-process combinations, each exercising repeated live updates.
+The untouched `c35c76d` baseline passes 782 workspace tests; final passes 784,
+both with six existing ignores. Formatting, binary build and real loopback HTTP
+filter-update/SIGTERM/SIGINT checks pass. Strict Clippy retains baseline findings;
+all-target warning-capped comparisons introduce no logging findings. Docker,
+full swarm and external-network checks were not repeated. Master was rebased
+onto the migration; identical tree and ancestry verified, temporary worktree
+and branch removed. See Peerlo's `docs/step-03a-logging.md`.
+
+The shared library's full `scripts/check` passes, including strict Clippy,
+feature combinations and reload/format/span process tests. LelloAuth `d5699c8`
+also updates its test-only formatter fallback to tolerate the new Compact enum
+variant: its three logging compatibility tests pass. That follow-up was
+integrated into master through its own worktree, then cleaned up; unrelated
+research documents were preserved and its production source pin is unchanged.
+
+The assessed rollout now has **15 locally adopted products**, **two N/A products**
+(Paranza and SCT), and **no Pending logging migrations**. The totals
 include the two earlier canaries. All new migration commits are integrated and
 their temporary worktrees/branches removed. Pezzottify uses `dev`, Simple Agents
 uses `main`, and the other targets use `master`; remote HEAD is not the
