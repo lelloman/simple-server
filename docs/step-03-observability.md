@@ -1,7 +1,8 @@
 # Step 03: observability
 
 Status: 03a is locally adopted by 15 products; two products are N/A.
-Modules 03b and 03c remain planned. See the
+Module [03b](step-03b-correlation.md) is implemented and piloted in Crumbles;
+the remaining services await individual assessment. Module 03c remains planned. See the
 [migration status](migration-status.md) for verification and applicability.
 
 Step 03 contains three independently adoptable modules. Each has its own
@@ -32,8 +33,8 @@ contracts must be examined during each migration, not replaced implicitly.
 
 ## Constraints for 03b and 03c
 
-These are design requirements; their public APIs and detailed contracts remain
-to be defined in their respective steps.
+The [03b contract](step-03b-correlation.md) defines its public API and boundaries.
+The following requirements also guide the remaining 03c design.
 
 - One request ID should agree across logs, response headers, and application
   error bodies. Applications provide the error-body integration.

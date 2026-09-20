@@ -14,25 +14,25 @@ Optional modules do not have to be adopted by every product.
 
 Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its original dates.
 
-| Project | Server components | 1. Axum centralization | 2. Lifecycle / main() | 03a. Logging |
-| --- | --- | --- | --- | --- |
-| pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | **Done (local)** |
-| favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** |
-| androidoscopy | `server` | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** |
-| crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** |
-| fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** |
-| lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** |
-| lellostore | `backend` | **Done** | **Done (local)** | **Done (local)** |
-| meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** | **Done (local)** |
-| observo | `observo-server`; standalone extractor logging | **Done** | **Done (local; scoped)** | **Done (local)** |
-| paranza | `apps/paranza-server` | **Done** | **Done (local; scoped)** | N/A (no logger) |
-| peerlo | `peerlo-api` | **Done** | **Done (local; scoped)** | **Done (local)** |
-| pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** | **Done (local)** |
-| pezzottify-downloader | Puppeteer API and downloader HTTP server | **Done** | **Done (local; scoped)** | **Done (local)** |
-| quentin-torrentino | `crates/server` | **Done** | **Done (local; scoped)** | **Done (local)** |
-| sct | `sct-server` | **Done** | **Done (scoped)** | N/A (no logger) |
-| simple-agents | `simple-agents-service`; runner-shell logging; associated coding test servers | **Done** | **Done (local; scoped)** | **Done (local)** |
-| simple-ai | `backend`, `inference-runner` | **Done** | **Done (local; scoped)** | **Done (local)** |
+| Project | Server components | 1. Axum centralization | 2. Lifecycle / main() | 03a. Logging | 03b. Correlation |
+| --- | --- | --- | --- | --- | --- |
+| pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | **Done (local)** | Pending |
+| favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** | Pending |
+| androidoscopy | `server` | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | Pending |
+| crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** |
+| fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** | Pending |
+| lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** | Pending |
+| lellostore | `backend` | **Done** | **Done (local)** | **Done (local)** | Pending |
+| meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** | **Done (local)** | Pending |
+| observo | `observo-server`; standalone extractor logging | **Done** | **Done (local; scoped)** | **Done (local)** | Pending |
+| paranza | `apps/paranza-server` | **Done** | **Done (local; scoped)** | N/A (no logger) | Pending |
+| peerlo | `peerlo-api` | **Done** | **Done (local; scoped)** | **Done (local)** | Pending |
+| pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** | **Done (local)** | Pending |
+| pezzottify-downloader | Puppeteer API and downloader HTTP server | **Done** | **Done (local; scoped)** | **Done (local)** | Pending |
+| quentin-torrentino | `crates/server` | **Done** | **Done (local; scoped)** | **Done (local)** | Pending |
+| sct | `sct-server` | **Done** | **Done (scoped)** | N/A (no logger) | Pending |
+| simple-agents | `simple-agents-service`; runner-shell logging; associated coding test servers | **Done** | **Done (local; scoped)** | **Done (local)** | Pending |
+| simple-ai | `backend`, `inference-runner` | **Done** | **Done (local; scoped)** | **Done (local)** | Pending |
 
 ## Step 1: Axum centralization
 
@@ -340,7 +340,7 @@ API failures (131 unit and 93 API tests pass) and existing strict-Clippy finding
 Clippy completes with those findings capped at warnings. Browser and container
 builds were not repeated. See Favzetto's `docs/08-logging-migration.md` and the
 [logging contract](step-03a-logging.md). Both commits are local; no push or
-deployment was performed. Modules 03b and 03c remain planned.
+deployment was performed. This pilot covered only 03a; 03b adoption is recorded separately below.
 
 Crumbles canary `5bdd2b5` adopts the same library source in both the text
 server/CLI and JSON integration daemon. Its environment policies and log bridges
@@ -529,12 +529,46 @@ branch-selection rule. Unrelated work and subsequent commits were preserved.
 Nothing was pushed or deployed. Known baseline failures and verification
 limits are recorded above and in each consumer's migration notes.
 
+## Step 03b: request correlation pilot
+
+Shared source `52e1922` implements optional request correlation with fresh IDs
+by default, explicit bounded caller-ID acceptance, configurable header names,
+request/response extensions and task-local access. It neither installs logging
+nor rewrites bodies. Scope ends at response creation; spawned tasks and deferred
+body/WebSocket work must capture the ID explicitly. The full library
+`scripts/check` passes: strict Clippy, docs, feature combinations and seven new
+correlation contract tests. See the [03b contract](step-03b-correlation.md).
+
+Crumbles `91a1cb8` pilots adoption in the main HTTP server. Its existing
+`x-correlation-id`, first-header validation, error envelopes, tracing span,
+application extension, service context and audit use are preserved. Generated
+IDs use the shared random generator, without the former counter fallback;
+entropy initialization can panic as documented in the contract. The integration
+daemon has no inbound correlation middleware to migrate; its existing outbound
+client and durable business correlation keys remain application-owned.
+
+Untouched master `5bdd2b5` passes 1,429 workspace tests with two ignores; final
+passes 1,431 with the same ignores. New tests compare 24 original/shared
+middleware cases and concurrent extension/context consistency. The same 15
+real HTTP rejection cases pass before and after migration, verifying response
+header/error-body agreement for valid, absent, empty, unsafe and oversized IDs,
+followed by clean SIGTERM. Strict workspace/all-target Clippy, formatting and
+diff checks pass. Existing frontend build assets were copied into the isolated
+worktree for RustEmbed; browser, release-container and broader lifecycle checks
+were not repeated. See Crumbles' `docs/STEP_03B_CORRELATION.md`.
+
+Master was rebased onto the pilot branch, with identical tested tree and ancestry
+verified. The temporary worktree and branch were removed; pre-existing worktrees
+were preserved. No pushes or deployments. The other 16 products remain Pending
+for 03b until applicability and their existing contracts are assessed. 03a status
+is unchanged and 03c remains planned.
+
 ## Planned steps
 
 [Step 03: observability](step-03-observability.md) contains three independently
 adoptable modules: **03a logging setup**, **03b request correlation**, and
 **03c HTTP tracing**. 03a is implemented; local adoption is recorded per service
-above. Modules 03b and 03c remain planned.
+above. 03b is implemented with a Crumbles pilot; 03c remains planned.
 The [03a contract](step-03a-logging.md) records the API and pilot compatibility. Completion of one module does not imply completion of Step 03.
 
 Further capabilities include HTTP support, health, background tasks, database helpers,

@@ -142,7 +142,8 @@ HTTP middleware, and domain/audit events are unchanged by this pilot.
 
 Record the reviewed library revision, consumer commit, verification results,
 and any compatibility limits before marking Favzetto's 03a adoption complete.
-The migration matrix must keep 03b and 03c pending even after 03a is implemented.
+The migration matrix tracks 03b and 03c independently; adopting 03a does not
+mark either module complete.
 
 ## Pilot compatibility details
 

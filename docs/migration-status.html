@@ -121,9 +121,10 @@
       <p><strong>Crumbles has completed Step 02 on local master.</strong> HTTP, workers, tracked WebSockets, SQLite cleanup, and the separate integration daemon/control server adopt shared coordination. Passed 1,367 Rust tests (two ignored), strict checks, contracts, eight browser scenarios, both release images, and signal/drain/restart tests. Final outbox publication and WebSocket Close handshakes remain outside the guarantee. Commit: <code>47062ec</code>; local master has been rebased onto the migration branch, retaining native dispatcher cleanup.</p>
       <p><strong>Quentin Torrentino has completed Step 02.</strong> HTTP, orchestrator, accepted sockets, pipeline work, and audit flushing share 30 seconds. Passed 741 Rust tests; two recorded baseline failures remain (HTTP E2E144/145), with 14 ignores. New drain/audit and signal checks pass. Original Rust1.91 release/dashboard builds and container checks pass; existing lint/formatting findings remain. Commits: <code>4cddf9d</code>, <code>7728402</code>.</p>
       <p><strong>Crumbles is the second local 03a canary.</strong> Both text server/CLI logging and JSON integration-daemon logging use the shared initializer, preserving their distinct RUST_LOG policies, stdout, and log bridges. Fresh-process comparisons cover span filters and malformed input. No shared API change was needed. See Crumbles’ docs/STEP_03A_LOGGING.md for verification.</p>
-      <p><strong>Step 03a logging is implemented, with Favzetto as the local pilot.</strong> Text/pretty/compact/JSON output, explicit filters, and fallible initialization are available without HTTP or Tokio. Pretty output was added for LelloAuth and Pezzottflix in <code>71755b5</code>; Peerlo uses <code>9f83845</code> for optional filter reload and span events. Service-specific baseline failures remain documented. Request correlation (03b) and HTTP tracing (03c) remain planned. See <a href="step-03a-logging.md">the logging contract</a>.</p>
+      <p><strong>Step 03a logging is implemented, with Favzetto as the local pilot.</strong> Text/pretty/compact/JSON output, explicit filters, and fallible initialization are available without HTTP or Tokio. Pretty output was added for LelloAuth and Pezzottflix in <code>71755b5</code>; Peerlo uses <code>9f83845</code> for optional filter reload and span events. Service-specific baseline failures remain documented. Request correlation (03b) is available separately; HTTP tracing (03c) remains planned. See <a href="step-03a-logging.md">the logging contract</a>.</p>
       <p><strong>03a rollout uses isolated migration worktrees.</strong> Verify actual capability use, branch from each service’s active development branch, test and commit, rebase that development branch onto the migration, then remove the integrated worktree and branch. Update this matrix and its Markdown record. See <a href="consumer-migration-workflow.md">the reusable workflow</a>.</p>
       <p><strong>03a rollout complete locally: 15 adopted, 2 N/A, 0 Pending.</strong> All migrations are committed, integrated into their active development branches, and their temporary worktrees/branches removed. Existing work is preserved. Paranza and SCT have no installed logger to migrate. Peerlo <code>6479504</code> preserves runtime filter reload, compact output and CLOSE span events: 784 tests pass (six existing ignores), 84 old/new process comparisons pass, and real HTTP filter-update and signal/shutdown checks pass. Existing Clippy findings remain; Docker/full-swarm checks were not repeated. LelloAuth <code>d5699c8</code> adapts its test formatter fallback for the new enum variant; all three compatibility tests pass. See <a href="migration-status.md">the detailed adoption record</a> for commits, tests and baseline limitations. No pushes or deployments were performed.</p>
+      <p><strong>03b is implemented and piloted in Crumbles.</strong> Shared source <code>52e1922</code> provides generated IDs, explicit validated caller-ID acceptance, configurable headers and scoped request context without requiring shared logging. Crumbles <code>91a1cb8</code> preserves its main HTTP server’s correlation/error/audit contract: 1,431 tests pass (two existing ignores), 24 old/new middleware comparisons and 15 real HTTP cases pass, along with strict Clippy and formatting. Master is rebased and the temporary worktree/branch removed. Other products remain Pending for individual applicability checks. Browser/container checks were not repeated. See <a href="step-03b-correlation.md">the 03b contract</a> and <a href="migration-status.md">verification details</a>. Nothing pushed or deployed.</p>
       <p><strong>Planned does not mean mandatory.</strong> Future columns show the agreed building blocks; each product can adopt what it needs. All 17 products now have local, scoped Step 02 adoption. Crumbles and SCT local master branches now incorporate the migrations and subsequent development. Their validation counts above record the original migrations. See the entries above for shutdown boundaries and validation limits. Step 02 used reviewed source <code>c535907</code>; the 03a rollout uses <code>71755b5</code>. Nothing was pushed or deployed.</p>
     </section>
     <footer>
@@ -136,7 +137,7 @@
     // Status keys: done, pending, planned, partial, na.
     const steps = [
       ['Axum centralization', true], ['Lifecycle / main()', true],
-      ['Logging setup', true], ['Request correlation', false], ['HTTP tracing', false],
+      ['Logging setup', true], ['Request correlation', true], ['HTTP tracing', false],
       ['HTTP support', false], ['Health', false],
       ['Background tasks', false], ['Databases', false], ['Authentication', false],
       ['Authorization', false], ['Rate limiting', false]
@@ -145,7 +146,7 @@
       {name: 'pezzottify', logging: 'done', components: 'API/metrics · scheduler · tracked application work', axum: 'done', lifecycle: 'done'},
       {name: 'favzetto', logging: 'done', components: 'backend (lifecycle: local, scoped adoption)', axum: 'done', lifecycle: 'done'},
       {name: 'androidoscopy', logging: 'done', components: 'v2 controller · legacy HTTP/WS/TLS (logging: legacy only)', axum: 'done', lifecycle: 'done'},
-      {name: 'crumbles', logging: 'done', components: 'HTTP/workers/WebSockets · integration daemon', axum: 'done', lifecycle: 'done'},
+      {name: 'crumbles', logging: 'done', correlation: 'done', components: 'HTTP/workers/WebSockets · integration daemon (03b: main HTTP server)', axum: 'done', lifecycle: 'done'},
       {name: 'fausto', logging: 'done', components: 'server · HTTP, WebSockets, event workers, jobs and plugin cleanup', axum: 'done', lifecycle: 'done'},
       {name: 'lello-auth', logging: 'done', components: 'server · axum · examples (lifecycle: local, scoped adoption)', axum: 'done', lifecycle: 'done'},
       {name: 'lellostore', logging: 'done', components: 'backend (lifecycle: local adoption)', axum: 'done', lifecycle: 'done'},
@@ -194,7 +195,7 @@
         const components = document.createElement('small');
         components.textContent = service.components; name.append(components); row.append(name);
         steps.forEach((step, index) => {
-          const status = index === 0 ? service.axum : index === 1 ? (service.lifecycle || 'pending') : index === 2 ? (service.logging || 'pending') : 'planned';
+          const status = index === 0 ? service.axum : index === 1 ? (service.lifecycle || 'pending') : index === 2 ? (service.logging || 'pending') : index === 3 ? (service.correlation || 'pending') : 'planned';
           const cell = document.createElement('td');
           const badge = document.createElement('span');
           badge.className = `badge ${status}`;
