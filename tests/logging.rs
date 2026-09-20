@@ -12,6 +12,15 @@ fn logging_child() {
     options.ansi = AnsiMode::Never;
     match mode.as_str() {
         "json" => options.format = LogFormat::Json,
+        "pretty" | "pretty-ansi" | "pretty-no-target" => {
+            options.format = LogFormat::Pretty;
+            options.ansi = if mode == "pretty-ansi" {
+                AnsiMode::Always
+            } else {
+                AnsiMode::Never
+            };
+            options.with_target = mode != "pretty-no-target";
+        }
         "stdout" => options.output = LogOutput::Stdout,
         "auto" => options.ansi = AnsiMode::Auto,
         "ansi" => options.ansi = AnsiMode::Always,
@@ -105,6 +114,9 @@ fn filtering_destination_styling_and_initialization() {
         "ansi",
         "no-target",
         "invalid-retry",
+        "pretty",
+        "pretty-ansi",
+        "pretty-no-target",
     ] {
         let output = run(mode);
         let stdout = String::from_utf8(output.stdout).unwrap();
@@ -117,9 +129,22 @@ fn filtering_destination_styling_and_initialization() {
         assert!(events.contains("visible-marker"), "{mode}: {events}");
         assert!(!other.contains("visible-marker"));
         assert!(!events.contains("hidden-"));
-        assert_eq!(events.contains("\x1b["), mode == "ansi");
-        assert_eq!(events.contains("pilot"), mode != "no-target");
+        assert_eq!(
+            events.contains("\x1b["),
+            matches!(mode, "ansi" | "pretty-ansi")
+        );
+        assert_eq!(
+            events.contains("pilot"),
+            !matches!(mode, "no-target" | "pretty-no-target")
+        );
         assert!(events.contains("outer") && events.contains("inner"));
+        if mode.starts_with("pretty") {
+            assert!(events.lines().count() > 1);
+            assert!(
+                events.contains("logging.rs:"),
+                "pretty source location missing: {events}"
+            );
+        }
     }
     for mode in ["off", "existing", "race"] {
         let output = run(mode);

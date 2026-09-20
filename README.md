@@ -12,6 +12,9 @@ with documented application scopes. Crumbles and SCT include those migrations on
 Open the [HTML migration matrix](docs/migration-status.html) in a browser for adoption status
 across all 17 planned consumer projects and the completed steps for each one.
 
+All consumer migrations follow the [reusable worktree and verification workflow](docs/consumer-migration-workflow.md),
+including applicability checks and updates to both adoption trackers.
+
 ## Axum centralization
 
 `simple-server` pins Axum to **0.8.9**. Consumers replace their direct `axum`

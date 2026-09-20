@@ -13,6 +13,8 @@ pub enum LogFormat {
     /// Human-readable tracing events.
     #[default]
     Text,
+    /// Multiline human-readable events with source locations and span context.
+    Pretty,
     /// One JSON object per event, with nested fields and span context.
     Json,
 }
@@ -44,7 +46,7 @@ pub enum AnsiMode {
 pub struct LoggingOptions {
     /// Tracing filter directives. Empty or malformed input is rejected.
     pub filter: String,
-    /// Text or JSON event encoding.
+    /// Text, pretty text, or JSON event encoding.
     pub format: LogFormat,
     /// Destination for events.
     pub output: LogOutput,
@@ -106,7 +108,7 @@ pub fn try_init(options: LoggingOptions) -> Result<(), InitError> {
     if options.format == LogFormat::Json && options.ansi == AnsiMode::Always {
         return Err(InitError::AnsiWithJson);
     }
-    let ansi = options.format == LogFormat::Text
+    let ansi = options.format != LogFormat::Json
         && match options.ansi {
             AnsiMode::Always => true,
             AnsiMode::Never => false,
@@ -128,6 +130,7 @@ pub fn try_init(options: LoggingOptions) -> Result<(), InitError> {
     // global log bridge even when this crate did not request that capability.
     match options.format {
         LogFormat::Text => tracing::subscriber::set_global_default(builder.finish()),
+        LogFormat::Pretty => tracing::subscriber::set_global_default(builder.pretty().finish()),
         LogFormat::Json => tracing::subscriber::set_global_default(
             builder
                 .json()

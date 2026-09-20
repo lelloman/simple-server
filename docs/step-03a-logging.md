@@ -33,7 +33,7 @@ requires a filter; its other fields can be set explicitly before initialization.
 | Concept | Purpose |
 | --- | --- |
 | `LoggingOptions` | Explicit filter string, output format, destination, ANSI policy, and target display |
-| `LogFormat::{Text, Json}` | Human-readable text or one JSON object per event |
+| `LogFormat::{Text, Pretty, Json}` | Single-line text, multiline pretty text, or one JSON object per event |
 | `LogOutput::{Stdout, Stderr}` | Explicit output destination |
 | `AnsiMode::{Auto, Always, Never}` | Text styling policy; automatic mode checks the selected output stream |
 | `try_init(options)` | Validate options and install once, returning a structured error on failure |
@@ -79,6 +79,7 @@ compatibility check before migration.
 ### Output
 
 Text and JSON output include event level, timestamp, message, and event fields;
+pretty text additionally displays source locations and multiline span context.
 target display follows `with_target`. Timestamps are UTC RFC 3339 with six
 fractional digits. JSON uses `timestamp`, `level`, optional `target`, and nested
 `fields` (including `message`); active context appears under `span` and the
@@ -163,3 +164,12 @@ fields, JSON span context, and stderr diagnostics. No shared API changes were
 needed. This confirms an application can retain its existing filter parser while
 adopting shared subscriber setup. See the [adoption record](migration-status.md)
 for the consumer revision and final verification.
+
+## Rollout compatibility: pretty output
+
+LelloAuth and Pezzottflix use tracing-subscriber's pretty formatter in production.
+The rollout adds `LogFormat::Pretty` to preserve those modes. It uses the same
+destination, target, and explicit ANSI controls as text; JSON and existing text
+defaults are unchanged. Library process tests exercise pretty output with and
+without ANSI and targets, including source locations and active span context.
+Consumer comparisons remain responsible for validating their former initializer.
