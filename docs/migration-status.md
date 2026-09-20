@@ -25,12 +25,12 @@ Step 03a canaries verified: 2026-09-20. Earlier adoption evidence retains its or
 | lellostore | `backend` | **Done** | **Done (local)** | Pending |
 | meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** | Pending |
 | observo | `observo-server` | **Done** | **Done (local; scoped)** | Pending |
-| paranza | `apps/paranza-server` | **Done** | **Done (local; scoped)** | Pending |
+| paranza | `apps/paranza-server` | **Done** | **Done (local; scoped)** | N/A (no logger) |
 | peerlo | `peerlo-api` | **Done** | **Done (local; scoped)** | Pending |
 | pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** | Pending |
 | pezzottify-downloader | Puppeteer API and downloader HTTP server | **Done** | **Done (local; scoped)** | Pending |
 | quentin-torrentino | `crates/server` | **Done** | **Done (local; scoped)** | Pending |
-| sct | `sct-server` | **Done** | **Done (scoped)** | Pending |
+| sct | `sct-server` | **Done** | **Done (scoped)** | N/A (no logger) |
 | simple-agents | `simple-agents-service`; associated coding test servers | **Done** | **Done (local; scoped)** | Pending |
 | simple-ai | `backend`, `inference-runner` | **Done** | **Done (local; scoped)** | Pending |
 
@@ -350,6 +350,30 @@ workspace passes 1,429 tests with two intentional ignores. Strict Clippy,
 formatting, both binary builds, and SIGINT/SIGTERM drain/restart checks pass.
 No library API change was needed. Browser/release-container checks were not
 repeated; nothing was pushed or deployed. See Crumbles' `docs/STEP_03A_LOGGING.md`.
+
+## Step 03a rollout applicability and workflow
+
+All rollout work follows the [consumer migration workflow](consumer-migration-workflow.md):
+verify capability use, work on a temporary branch/worktree from the active
+service branch, test and commit, rebase that branch onto the migration, verify
+integration, and remove only the integrated temporary branch/worktree. Both this
+record and the HTML matrix must be updated. Current rollout library source is
+`71755b5`, which adds pretty output while retaining the tested text/JSON API.
+
+- **Paranza — N/A:** `apps/paranza-server/src/main.rs` emits explicit
+  `println!`/`eprintln!` diagnostics; the production workspace has no logging
+  subscriber/logger or tracing/log dependencies. No unused initializer is added.
+- **SCT — N/A:** `crates/sct-server/src/main.rs` uses explicit stdout/stderr
+  diagnostics without a tracing subscriber or logger. Its active inspection work
+  remains untouched. Existing error request IDs are not logging setup adoption.
+- **Peerlo — Pending, compatibility gap:** `crates/peerlo/src/logging.rs`
+  installs a reloadable filter, exposes its handle through the runtime API, and
+  supports compact output and CLOSE span events. The 03a initializer cannot
+  preserve that composition. The custom logger remains intact; this is not N/A.
+
+Other rollout entries remain Pending until their migration is verified on their
+active development branch. Pezzottify uses `dev`, Simple Agents uses `main`, and
+other current targets use `master`; remote HEAD is not the branch-selection rule.
 
 ## Planned steps
 
