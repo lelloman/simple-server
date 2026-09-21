@@ -150,3 +150,38 @@ async fn router_owns_get_head_and_method_rejection() {
         );
     }
 }
+
+#[tokio::test]
+async fn value_checks_preserve_full_aggregate_reports_on_both_outcomes() {
+    #[derive(Debug, PartialEq)]
+    struct Report {
+        engines: Vec<bool>,
+    }
+    let healthy = Arc::new(AtomicBool::new(true));
+    let calls = Arc::new(std::sync::atomic::AtomicUsize::new(0));
+    let check = Check::new("engines", {
+        let healthy = healthy.clone();
+        let calls = calls.clone();
+        move || {
+            let healthy = healthy.clone();
+            let calls = calls.clone();
+            async move {
+                calls.fetch_add(1, Ordering::SeqCst);
+                let report = Report {
+                    engines: vec![false, healthy.load(Ordering::SeqCst), false],
+                };
+                if report.engines.iter().any(|ready| *ready) {
+                    Ok(report)
+                } else {
+                    Err(report)
+                }
+            }
+        }
+    });
+    assert_eq!(check.run().await.unwrap().engines, [false, true, false]);
+    healthy.store(false, Ordering::SeqCst);
+    let failure = check.clone().run().await.unwrap_err();
+    assert_eq!(&*failure.name, "engines");
+    assert_eq!(failure.error.engines, [false, false, false]);
+    assert_eq!(calls.load(Ordering::SeqCst), 2);
+}

@@ -31,6 +31,12 @@ HTTP and Tower types; no Axum types or trait bounds are exposed.
 - `Check::new(name, callback)` creates a fresh asynchronous check on every run.
   Checks run sequentially in registration order, stopping at the first error.
   Success means every registered check returned success for this invocation.
+- `Check<E, T = ()>::run()` retains a typed success payload `T` as well as
+  the original error. This supports detailed aggregate reports without polling
+  dependencies twice, caching across requests, or using mutable side channels.
+  The application owns aggregation (for example, probe every engine and require
+  at least one healthy engine), and maps the resulting payload to its response.
+  `Probe` continues to compose unit-valued checks sequentially.
 - `Probe::run()` returns `Result<(), CheckFailure<E>>`, retaining the failed
   check's name and the original application error. Nothing is cached, logged,
   serialized, or exposed to clients automatically.
@@ -81,3 +87,12 @@ Four new health regressions passed against both old and shared implementations.
 identically to baseline. See the [central evidence](migration-status.md#step-05-health-and-readiness)
 for scope, lint debt, integration, cleanup and checks not rerun. Other consumers
 remain Pending. No push or deployment.
+
+## Rollout extension: value-preserving checks
+
+Simple AI's inference runner requires an aggregate report on both healthy and
+unhealthy outcomes, including every engine's metadata. `Check<E, T = ()>::run()`
+now supports a typed success value without changing unit-valued `Probe` checks.
+A regression verifies complete reports on both outcomes, a non-Clone payload,
+and one fresh evaluation per invocation. The extended library passes 69
+all-feature tests/doctests, five minimal-feature health tests, and strict Clippy.

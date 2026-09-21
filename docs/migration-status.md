@@ -16,7 +16,7 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 
 | Project | Server components | 1. Axum centralization | 2. Lifecycle / main() | 03a. Logging | 03b. Correlation | 03c. HTTP tracing | 04a. Body limits | 04b. Response headers | 04c. CORS | 05. Health/readiness |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local canary)** | **Done (local; scoped canary)** | N/A (assessed) | Pending |
+| pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local canary)** | **Done (local; scoped canary)** | N/A (assessed) | N/A (no served probe) |
 | favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local canary)** |
 | androidoscopy | `server` | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | Pending |
 | crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | Pending |
@@ -1461,7 +1461,7 @@ establish adoption. Their application-owned browser/CSRF boundaries remain intac
 
 | Product | Inspected development branch / HEAD | Applicability evidence |
 | --- | --- | --- |
-| pezzottify | `dev` / `a25b0c3a` | `pezzottify-server/src/server/route_builder.rs` installs authentication, CSRF, rate limits, tracing and cache policy, but no CORS layer or allow-origin response policy. |
+| pezzottify | `dev` / `a25b0c3a` | `pezzottify-server/src/server/route_builder.rs` installs authentication, CSRF, rate limits, tracing and cache policy, but no CORS layer or allow-origin response policy. |N/A (no served probe) |
 | favzetto | `master` / `47c8fe67` | Backend production router has body/header/auth policy but no CORS middleware or Access-Control-Allow headers. |**Done (local canary)** |
 | androidoscopy | `master` / `f4461a81` | `server/src/main.rs` HTTP/WS router setup and legacy server have no CORS response policy. |
 | lello-auth | `master` / `b1827fdd` | CORS managed by Caddy; not migrated into Rust. `homelab/caddy/Caddyfile` permits selected application origins with credentials and OPTIONS 204. Server, integration crate and examples install no Rust CORS layer. Moving ownership needs coordinated proxy/application changes; live deployment not probed. |
@@ -1573,3 +1573,31 @@ no-feature compilation passes. Documentation links and HTML script syntax checke
   isolated temporary storage/databases and a separate build target; existing
   ignored frontend assets were copied for embedding. Full commands and evidence
   are in Favzetto's `docs/step-05-health.md`. No push or deployment.
+
+
+## Step 05 rollout
+
+Rollout in progress using three `gpt-5.6-sol` agents at low reasoning effort.
+The coordinator owns both central trackers; agents own disjoint repositories.
+Reviewed library: `44a9fa24c122f3ac93d930813b320abd099cbb79` (current
+`138325a` is a documentation-only descendant). Each applicable service uses an
+isolated migration worktree, commits and verifies adoption, then rebases its
+active development branch onto the migration and removes its own temporary
+worktree/branch. No push or deployment is authorized.
+
+### Pezzottify — N/A
+
+Active `dev` at `a25b0c3aa65c543f6ddc220f4f7105aafdfb365d`, original checkout
+clean. Source audit of production route composition and bootstrap finds no
+served liveness or readiness endpoint. `/metrics` is telemetry; outbound
+downloader health checks are client operations, not served health probes.
+No artificial endpoint or health feature added. No implementation, migration
+branch or tests required for this source-only assessment. Existing unrelated
+worktree preserved.
+
+### Shared extension during rollout
+
+Value-preserving `Check<E, T = ()>::run()` retains complete aggregate health
+reports on success and failure (required by Simple AI's runner). No change to
+existing unit-valued `Probe` behavior. Verified 69 all-feature tests/doctests,
+five minimal-feature tests, strict all-target/all-feature Clippy and formatting.

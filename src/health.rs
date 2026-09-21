@@ -15,15 +15,15 @@ use std::{
 };
 use tower_service::Service;
 
-type CheckFuture<E> = Pin<Box<dyn Future<Output = Result<(), E>> + Send>>;
+type CheckFuture<E, T> = Pin<Box<dyn Future<Output = Result<T, E>> + Send>>;
 
 /// A named application check. Wrap the callback in your own timeout if required.
-pub struct Check<E> {
+pub struct Check<E, T = ()> {
     name: Arc<str>,
-    run: Arc<dyn Fn() -> CheckFuture<E> + Send + Sync>,
+    run: Arc<dyn Fn() -> CheckFuture<E, T> + Send + Sync>,
 }
 
-impl<E> Clone for Check<E> {
+impl<E, T> Clone for Check<E, T> {
     fn clone(&self) -> Self {
         Self {
             name: self.name.clone(),
@@ -32,17 +32,27 @@ impl<E> Clone for Check<E> {
     }
 }
 
-impl<E> Check<E> {
+impl<E, T> Check<E, T> {
     /// The callback creates a fresh future on every probe invocation.
     pub fn new<F, Fut>(name: impl Into<Arc<str>>, check: F) -> Self
     where
         F: Fn() -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<(), E>> + Send + 'static,
+        Fut: Future<Output = Result<T, E>> + Send + 'static,
     {
         Self {
             name: name.into(),
             run: Arc::new(move || Box::pin(check())),
         }
+    }
+
+    /// Evaluate a named check while retaining its success payload. Useful for
+    /// aggregate health reports whose detailed body must survive either outcome.
+    /// No short-circuiting is imposed inside an application-owned aggregate check.
+    pub async fn run(&self) -> Result<T, CheckFailure<E>> {
+        (self.run)().await.map_err(|error| CheckFailure {
+            name: self.name.clone(),
+            error,
+        })
     }
 }
 
@@ -91,10 +101,7 @@ impl<E> Probe<E> {
     /// check; callbacks must manage any detached work or blocking operations themselves.
     pub async fn run(&self) -> Result<(), CheckFailure<E>> {
         for check in &self.checks {
-            (check.run)().await.map_err(|error| CheckFailure {
-                name: check.name.clone(),
-                error,
-            })?;
+            check.run().await?;
         }
         Ok(())
     }
