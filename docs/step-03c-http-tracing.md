@@ -67,6 +67,36 @@ change response status/headers/extensions, register global state, trace spawned
 tasks automatically, or implement metrics, exporters, audit events or sampling.
 Filters and subscriber span-close events remain application-owned.
 
+## Application-owned event policy
+
+`trace_with_observer(request, observer, callback)` retains the same safe request
+span, response timing, body pass-through and lifecycle tracking, but replaces the
+automatic events with an application-owned `Observer`. This supports an existing
+structured stderr sink or custom response fields/severity without installing a
+subscriber or duplicating shared HTTP events. `trace` remains equivalent to using
+`TracingObserver`; its default behavior is unchanged.
+
+`Observer: Send + 'static` has two default no-op methods:
+
+- `on_response(&mut self, &Span, &Response, Duration)`: called once when the
+  callback returns, inside the span. The duration is captured before the observer
+  runs. Headers and extensions are read-only; applications may use an approved
+  domain error code or content length. It does not expose body contents.
+- `on_finish(&mut self, &Span, Outcome, Phase, Duration)`: called once for the
+  terminal outcome, including future/body drops. `Outcome` is `Complete`,
+  `Upgraded`, `Error` or `Cancelled`; `Phase` is `Headers` or `Body`. Their
+  `as_str()` values match the default event fields. The callback may run after
+  the correlation task-local scope has ended; capture needed approved fields
+  when constructing the observer.
+
+An observer can delegate either callback to `TracingObserver` to retain just
+that part of the standard event policy. Application event schemas, privacy,
+labels, metric boundaries and output destinations remain application-owned.
+Callbacks run even without an enabled subscriber; default tracing events remain
+subject to filtering. They execute synchronously, including in Drop, must not
+panic or wait on asynchronous work, and should return promptly. These hooks do
+not authorize adding fields that the application would otherwise redact.
+
 ## Qualification
 
 Contract tests cover safe routes and fallback labels, statuses and method

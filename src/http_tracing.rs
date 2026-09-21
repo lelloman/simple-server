@@ -15,7 +15,7 @@ use std::{
     future::Future,
     pin::Pin,
     task::{Context, Poll},
-    time::Instant,
+    time::{Duration, Instant},
 };
 use tracing::{Instrument, Span};
 
@@ -35,6 +35,25 @@ pub async fn trace<F, Fut>(request: Request<Body>, next: F) -> Response
 where
     F: FnOnce(Request<Body>) -> Fut,
     Fut: Future<Output = Response>,
+{
+    trace_with_observer(request, TracingObserver, next).await
+}
+
+/// Trace with application-owned response and completion events.
+///
+/// Replaces automatic events, while retaining the same safe span, timing and
+/// body lifecycle. The observer can write to an existing sink without installing
+/// a tracing subscriber. Delegate to [`TracingObserver`] to retain selected
+/// default events. The callback placement rules of [`trace`] still apply.
+pub async fn trace_with_observer<F, Fut, O>(
+    request: Request<Body>,
+    observer: O,
+    next: F,
+) -> Response
+where
+    F: FnOnce(Request<Body>) -> Fut,
+    Fut: Future<Output = Response>,
+    O: Observer,
 {
     let started = Instant::now();
     let route = request
@@ -81,6 +100,7 @@ where
         started,
         finished: false,
         headers: false,
+        observer: Box::new(observer),
     };
     let response = async move { next(request).await }
         .instrument(span.clone())
@@ -88,13 +108,14 @@ where
     let status = response.status();
     span.record("status", status.as_u16());
     observation.headers = true;
-    if status.is_server_error() {
-        tracing::error!(parent: &span, status = status.as_u16(), header_latency_ms = elapsed_ms(started), "http.response_headers");
-    } else {
-        tracing::debug!(parent: &span, status = status.as_u16(), header_latency_ms = elapsed_ms(started), "http.response_headers");
+    {
+        let _entered = span.enter();
+        observation
+            .observer
+            .on_response(&span, &response, started.elapsed());
     }
     if status == StatusCode::SWITCHING_PROTOCOLS || (connect && status.is_success()) {
-        observation.finish("upgraded");
+        observation.finish(Outcome::Upgraded);
         return response;
     }
     // The HTTP stack discards these bodies by protocol, not cancellation.
@@ -104,12 +125,12 @@ where
         || status == StatusCode::NOT_MODIFIED
         || status.is_informational()
     {
-        observation.finish("complete");
+        observation.finish(Outcome::Complete);
         return response;
     }
     let (parts, body) = response.into_parts();
     if body.is_end_stream() {
-        observation.finish("complete");
+        observation.finish(Outcome::Complete);
         return Response::from_parts(parts, body);
     }
     Response::from_parts(
@@ -121,8 +142,90 @@ where
     )
 }
 
-fn elapsed_ms(started: Instant) -> f64 {
-    started.elapsed().as_secs_f64() * 1000.0
+/// Where the observed lifecycle ended.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Phase {
+    /// The callback had not returned a response.
+    Headers,
+    /// A response was returned, including protocol bodyless responses/upgrades.
+    Body,
+}
+impl Phase {
+    /// Stable field value used by default events.
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::Headers => "headers",
+            Self::Body => "body",
+        }
+    }
+}
+
+/// Terminal HTTP body outcome, independent of response status.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Outcome {
+    /// End of body, or a response with no protocol wire body.
+    Complete,
+    /// HTTP 101 or successful CONNECT handoff, not session completion.
+    Upgraded,
+    /// Body polling returned an error.
+    Error,
+    /// Future/body dropped before its terminal outcome was observed.
+    Cancelled,
+}
+impl Outcome {
+    /// Stable field value used by default events.
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::Complete => "complete",
+            Self::Upgraded => "upgraded",
+            Self::Error => "error",
+            Self::Cancelled => "cancelled",
+        }
+    }
+}
+
+/// Application-owned event policy. Methods default to no output.
+///
+/// Called synchronously inside the shared request span. `on_response` runs once
+/// after response creation, unless the future is cancelled before that point.
+/// `on_finish` runs exactly once after an observed terminal outcome, including
+/// from Drop. Callbacks must not panic or block waiting for asynchronous work;
+/// they execute synchronously and should return promptly.
+/// Observer state must outlive request handling because it may follow the body.
+/// Response headers/extensions are read-only; privacy of custom output remains
+/// the application's responsibility. No subscriber is required for callbacks.
+pub trait Observer: Send + 'static {
+    /// Response creation latency, measured before the observer executes.
+    fn on_response(&mut self, _span: &Span, _response: &Response, _latency: Duration) {}
+    /// Total elapsed time since tracing began (not client acknowledgment).
+    fn on_finish(&mut self, _span: &Span, _outcome: Outcome, _phase: Phase, _duration: Duration) {}
+}
+
+/// The default event policy used by [`trace`].
+#[derive(Debug, Default, Clone, Copy)]
+pub struct TracingObserver;
+impl Observer for TracingObserver {
+    fn on_response(&mut self, span: &Span, response: &Response, latency: Duration) {
+        let status = response.status().as_u16();
+        let header_latency_ms = latency.as_secs_f64() * 1000.0;
+        if response.status().is_server_error() {
+            tracing::error!(parent: span, status, header_latency_ms, "http.response_headers");
+        } else {
+            tracing::debug!(parent: span, status, header_latency_ms, "http.response_headers");
+        }
+    }
+    fn on_finish(&mut self, span: &Span, outcome: Outcome, phase: Phase, duration: Duration) {
+        let phase = phase.as_str();
+        let outcome = outcome.as_str();
+        let duration_ms = duration.as_secs_f64() * 1000.0;
+        match outcome {
+            "error" => tracing::error!(parent: span, outcome, phase, duration_ms, "http.finished"),
+            "cancelled" => {
+                tracing::warn!(parent: span, outcome, phase, duration_ms, "http.finished")
+            }
+            _ => tracing::info!(parent: span, outcome, phase, duration_ms, "http.finished"),
+        }
+    }
 }
 
 struct Observation {
@@ -130,26 +233,27 @@ struct Observation {
     started: Instant,
     finished: bool,
     headers: bool,
+    observer: Box<dyn Observer>,
 }
 impl Observation {
-    fn finish(&mut self, outcome: &'static str) {
+    fn finish(&mut self, outcome: Outcome) {
         if self.finished {
             return;
         }
         self.finished = true;
-        let phase = if self.headers { "body" } else { "headers" };
-        if outcome == "error" {
-            tracing::error!(parent: &self.span, outcome, phase, duration_ms = elapsed_ms(self.started), "http.finished");
-        } else if outcome == "cancelled" {
-            tracing::warn!(parent: &self.span, outcome, phase, duration_ms = elapsed_ms(self.started), "http.finished");
+        let phase = if self.headers {
+            Phase::Body
         } else {
-            tracing::info!(parent: &self.span, outcome, phase, duration_ms = elapsed_ms(self.started), "http.finished");
-        }
+            Phase::Headers
+        };
+        let _entered = self.span.enter();
+        self.observer
+            .on_finish(&self.span, outcome, phase, self.started.elapsed());
     }
 }
 impl Drop for Observation {
     fn drop(&mut self) {
-        self.finish("cancelled");
+        self.finish(Outcome::Cancelled);
     }
 }
 
@@ -168,10 +272,10 @@ impl HttpBody for ObservedBody {
         let _entered = span.enter();
         let result = self.inner.as_mut().poll_frame(cx);
         match &result {
-            Poll::Ready(Some(Err(_))) => self.observation.finish("error"),
-            Poll::Ready(None) => self.observation.finish("complete"),
+            Poll::Ready(Some(Err(_))) => self.observation.finish(Outcome::Error),
+            Poll::Ready(None) => self.observation.finish(Outcome::Complete),
             Poll::Ready(Some(Ok(_))) if self.inner.is_end_stream() => {
-                self.observation.finish("complete")
+                self.observation.finish(Outcome::Complete)
             }
             _ => {}
         }

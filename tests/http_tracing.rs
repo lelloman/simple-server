@@ -417,3 +417,115 @@ async fn protocol_bodyless_statuses_complete_without_polling_or_mutating_bodies(
         assert_eq!(event["fields"]["outcome"], "complete");
     }
 }
+
+#[derive(Clone, Default)]
+struct Observations(Arc<Mutex<Vec<String>>>);
+impl simple_server::http_tracing::Observer for Observations {
+    fn on_response(
+        &mut self,
+        _: &tracing::Span,
+        response: &Response<Body>,
+        _: std::time::Duration,
+    ) {
+        assert_eq!(response.extensions().get::<u32>(), Some(&42));
+        assert_eq!(response.headers()["x-app"], "kept");
+        self.0
+            .lock()
+            .unwrap()
+            .push(format!("headers:{}", response.status().as_u16()));
+    }
+    fn on_finish(
+        &mut self,
+        _: &tracing::Span,
+        outcome: simple_server::http_tracing::Outcome,
+        phase: simple_server::http_tracing::Phase,
+        _: std::time::Duration,
+    ) {
+        self.0
+            .lock()
+            .unwrap()
+            .push(format!("{}:{}", phase.as_str(), outcome.as_str()));
+    }
+}
+fn observed_response(body: Body) -> Response<Body> {
+    let mut response = Response::builder()
+        .status(201)
+        .header("x-app", "kept")
+        .body(body)
+        .unwrap();
+    response.extensions_mut().insert(42_u32);
+    response
+}
+
+#[tokio::test]
+async fn custom_observer_replaces_default_events_and_keeps_response_and_body_contracts() {
+    use simple_server::http_tracing::trace_with_observer;
+    let capture = Capture::default();
+    let _guard = capture.install();
+    let observations = Observations::default();
+    let response = trace_with_observer(request(), observations.clone(), |_| async {
+        observed_response(Body::from("payload"))
+    })
+    .await;
+    assert_eq!(observations.0.lock().unwrap().as_slice(), &["headers:201"]);
+    assert_eq!(response.headers()["x-app"], "kept");
+    assert_eq!(response.extensions().get::<u32>(), Some(&42));
+    assert_eq!(
+        to_bytes(response.into_body(), usize::MAX).await.unwrap(),
+        "payload"
+    );
+    assert_eq!(
+        observations.0.lock().unwrap().as_slice(),
+        &["headers:201", "body:complete"]
+    );
+    assert!(
+        capture.events().is_empty(),
+        "default events must be replaced"
+    );
+}
+
+#[tokio::test]
+async fn custom_observer_runs_without_subscriber_and_reports_each_terminal_outcome_once() {
+    use simple_server::http_tracing::trace_with_observer;
+    let _guard = tracing::subscriber::set_default(tracing::subscriber::NoSubscriber::default());
+    let observations = Observations::default();
+    assert!(
+        trace_with_observer(request(), observations.clone(), |_| std::future::pending())
+            .now_or_never()
+            .is_none()
+    );
+    drop(
+        trace_with_observer(request(), observations.clone(), |_| async {
+            observed_response(Body::from_stream(
+                stream::pending::<Result<Bytes, io::Error>>(),
+            ))
+        })
+        .await,
+    );
+    let response = trace_with_observer(request(), observations.clone(), |_| async {
+        observed_response(Body::from_stream(stream::iter([Err::<Bytes, _>(
+            io::Error::other("error"),
+        )])))
+    })
+    .await;
+    assert!(to_bytes(response.into_body(), usize::MAX).await.is_err());
+    let response = trace_with_observer(request(), observations.clone(), |_| async {
+        let mut response = observed_response(Body::empty());
+        *response.status_mut() = StatusCode::SWITCHING_PROTOCOLS;
+        response
+    })
+    .await;
+    drop(response);
+    assert_eq!(
+        observations.0.lock().unwrap().as_slice(),
+        &[
+            "headers:cancelled",
+            "headers:201",
+            "body:cancelled",
+            "headers:201",
+            "body:error",
+            "headers:101",
+            "body:upgraded"
+        ]
+    );
+}
