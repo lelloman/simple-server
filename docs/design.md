@@ -1,6 +1,30 @@
 # Design direction
 
-This document records the initial direction, not a finalized API specification.
+This document records the agreed end goal and design direction, not a finalized
+API specification.
+
+## End goal: completely abstract Axum away
+
+Consumer services must eventually use only `simple-server`'s public HTTP
+interfaces. Axum may remain the internal implementation, but consumers must not
+need to import, name, implement, or understand Axum APIs to build their services.
+This includes routing, handlers, state, extractors, responses, errors, middleware,
+multipart uploads, streaming, and WebSockets wherever those capabilities are used.
+
+The abstraction is complete when:
+
+- Consumer production code and tests no longer use `simple_server::axum`, direct
+  Axum dependencies, or Axum-specific companion APIs.
+- Public interfaces expose no Axum types, traits, trait bounds, or errors,
+  including through aliases or re-exports.
+- Existing service behavior is preserved and verified through the shared APIs.
+- The transitional Axum re-export and any temporary Axum escape hatches are
+  removed. Missing capabilities are addressed by extending the shared API.
+
+Dependency centralization and completion of the infrastructure modules are
+intermediate milestones. A final consumer/API audit must verify these criteria
+before the overall abstraction is marked complete. The API design and migration
+sequence remain incremental; this goal does not require replacing Axum internally.
 
 The [Step 02 lifecycle contract](step-02-lifecycle.md) defines the first capability
 extraction, its implemented API, shutdown contract, and pilot acceptance checks.
@@ -63,7 +87,8 @@ such as uploads, streaming responses, and WebSockets.
 4. Adopt observability through 03a, 03b, and 03c independently, then follow with
    further HTTP support, health, background tasks, databases, authentication,
    authorization, and rate limiting as requirements are validated.
-5. Replace transitional Axum usage with product-facing interfaces over time.
+5. Replace all transitional Axum usage with product-facing interfaces, verify
+   the end-goal criteria above across consumers, and remove the Axum re-export.
 
 Version the library so each product can upgrade independently. Repository
 creation does not imply a release, a finalized licensing decision, or a

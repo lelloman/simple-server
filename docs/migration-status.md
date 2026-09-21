@@ -690,7 +690,12 @@ HTTP policies into optional 04a body limits, 04b response headers and 04c CORS.
 Further capabilities include the remaining HTTP policies, health, background tasks, database helpers,
 authentication, authorization, and rate limiting. The HTML matrix already shows
 these columns as planned; their exact grouping and order remain adjustable.
-Hiding the transitional Axum API is incremental work across those steps.
+The end goal is to **completely abstract Axum away** from consumer code and the
+public API, then remove the transitional Axum re-export and temporary escape
+hatches. Completing the module columns alone does not establish that outcome;
+a final consumer/API audit must verify the
+[design completion criteria](design.md#end-goal-completely-abstract-axum-away).
+This final abstraction milestone remains planned.
 
 The initial scope is the 17 Axum-based products inventoried in this workspace.
 Custom servers in `rns-rs` and `lxmf-rs`, and embedded servers in `librespot` and

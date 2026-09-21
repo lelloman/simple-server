@@ -2,8 +2,11 @@
 
 A small, modular Rust library for shared infrastructure across Axum services.
 The first stage centralizes Axum versions through a transitional re-export.
-Subsequent stages will extract shared capabilities and gradually hide Axum behind
-the library's own interfaces.
+The end goal is to completely abstract Axum away behind the library's own
+interfaces, including routing, handlers, extractors, responses, and middleware.
+The re-export is temporary and will be removed once all consumers are migrated;
+Axum can remain an internal implementation detail. See the
+[design and completion criteria](docs/design.md#end-goal-completely-abstract-axum-away).
 
 **Status:** Axum dependency centralization, opt-in lifecycle, logging and correlation helpers are
 implemented. All 17 inventoried products have adopted lifecycle helpers locally
