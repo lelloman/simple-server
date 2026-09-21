@@ -46,3 +46,7 @@ pub mod response_headers;
 /// Explicit, framework-independent cross-origin response policy.
 #[cfg(feature = "cors")]
 pub mod cors;
+
+/// Application-owned liveness and readiness checks with optional HTTP adaptation.
+#[cfg(feature = "health")]
+pub mod health;

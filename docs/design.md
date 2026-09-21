@@ -44,6 +44,10 @@ header defaults, replacement and lossless Vary merging.
 The [04c contract](step-04c-cors.md) provides optional CORS configuration with
 framework-independent public types and explicit policy.
 
+[Step 05: health and readiness](step-05-health.md) provides optional ordered
+application checks and a framework-independent endpoint adapter. Applications
+retain dependency policy and response contracts.
+
 ## Composition
 
 Axum remains the internal HTTP implementation. The long-term product API hides

@@ -199,3 +199,26 @@ apply it explicitly to the intended routes. It preserves existing extractor
 limits and rejection responses without requiring lifecycle or observability.
 Raw request-body readers are not automatically limited; multipart file/part
 policies remain application-owned. See the [contract](docs/step-04a-body-limits.md).
+
+## Health and readiness
+
+The optional `health` feature runs application-owned checks without enabling
+Axum or a runtime. See the [Step 05 contract](docs/step-05-health.md).
+`Probe::liveness()` checks no dependencies; readiness requires an explicit check:
+
+```rust
+use simple_server::health::{Check, Probe};
+
+let readiness = Probe::readiness(Check::new("database", || async {
+    // Run the application's real dependency check here.
+    Ok::<(), std::io::Error>(())
+}));
+// readiness.run().await returns the first original error and its check name.
+// readiness.endpoint(render) exposes a Tower service using your HTTP response.
+```
+
+Checks run in order on every request and stop at the first error. Applications
+retain response schemas, status codes, timeouts and lifecycle policy. Mount the
+endpoint behind GET/HEAD routing and existing access controls. The canary uses
+`get_service` through the transitional router; the health API itself exposes no
+Axum types.
