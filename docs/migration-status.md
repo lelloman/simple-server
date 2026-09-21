@@ -17,7 +17,7 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | Project | Server components | 1. Axum centralization | 2. Lifecycle / main() | 03a. Logging | 03b. Correlation | 03c. HTTP tracing | 04a. Body limits | 04b. Response headers | 04c. CORS | 05. Health/readiness |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local canary)** | **Done (local; scoped canary)** | N/A (assessed) | Pending |
-| favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | Pending |
+| favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local canary)** |
 | androidoscopy | `server` | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | Pending |
 | crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | Pending |
 | fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | Pending |
@@ -1462,7 +1462,7 @@ establish adoption. Their application-owned browser/CSRF boundaries remain intac
 | Product | Inspected development branch / HEAD | Applicability evidence |
 | --- | --- | --- |
 | pezzottify | `dev` / `a25b0c3a` | `pezzottify-server/src/server/route_builder.rs` installs authentication, CSRF, rate limits, tracing and cache policy, but no CORS layer or allow-origin response policy. |
-| favzetto | `master` / `47c8fe67` | Backend production router has body/header/auth policy but no CORS middleware or Access-Control-Allow headers. |
+| favzetto | `master` / `47c8fe67` | Backend production router has body/header/auth policy but no CORS middleware or Access-Control-Allow headers. |**Done (local canary)** |
 | androidoscopy | `master` / `f4461a81` | `server/src/main.rs` HTTP/WS router setup and legacy server have no CORS response policy. |
 | lello-auth | `master` / `b1827fdd` | CORS managed by Caddy; not migrated into Rust. `homelab/caddy/Caddyfile` permits selected application origins with credentials and OPTIONS 204. Server, integration crate and examples install no Rust CORS layer. Moving ownership needs coordinated proxy/application changes; live deployment not probed. |
 | meteonesto | `master` / `6d0eb458` | Weather API, gateway and pipeline control routers implement their own HTTP policies, with no application CORS layer. Infrastructure/auth-edge documentation is not application adoption. |
@@ -1532,7 +1532,44 @@ records local implementation and verification only: no pushes or deployments.
 ## Step 05: health and readiness
 
 The [contract and source inventory](step-05-health.md) define the optional `health`
-module. Shared checks run in order, stop at the first original application error,
-and retain application-owned response rendering. No implicit deadlines or
-lifecycle policy. Favzetto is the selected canary; all consumers are Pending
-until their production adoption and integration are verified.
+module, implemented in `44a9fa24c122f3ac93d930813b320abd099cbb79` on `main`.
+Shared checks run in order, stop at the first original application error, and
+retain application-owned response rendering. No implicit deadlines or lifecycle
+policy. **One Done (Favzetto), sixteen Pending.** Pending includes services not
+yet fully assessed; this inventory does not imply every service needs readiness.
+
+Shared verification: baseline 63 tests/doctests passed; final 68 passed, strict
+all-target/all-feature Clippy and formatting passed. Four health tests also pass
+without default features. Minimal normal dependencies are HTTP and Tower only;
+no-feature compilation passes. Documentation links and HTML script syntax checked.
+
+### Favzetto canary
+
+- Applicability: real production `/health` liveness and `/ready` readiness routes.
+  Both now mount shared probe endpoints; database, storage and PDF checks remain
+  ordered and stop at the first AppError. JSON/version, 500 error behavior, public
+  access, GET/HEAD/405, and rate limits are preserved. No new route or timeout.
+- Base: clean `master` at `47c8fe67d532ea8823c0167fe548a48b02d2a329`.
+  Canary commit: `14d5b0d690aed861b00c2fde943254a7a242ef7b`.
+  Reviewed shared revision: `44a9fa24c122f3ac93d930813b320abd099cbb79`.
+  The sibling path dependency is retained; Cargo.lock does not pin that source.
+- Baseline: 131 unit and 93 API tests passed, with the two previously recorded
+  catalog bridge transition failures. Four new health regressions pass against
+  old production handlers before migration; four process tests pass separately.
+- Final: 131 unit, 97 API, and four lifecycle/logging process tests passed
+  (**232 passed total**); the same two catalog bridge failures remain. The new
+  tests cover response/method contracts, storage failure/recovery, liveness during
+  failure, database-before-storage error precedence, and missing OCR languages.
+  Existing rate-limit tests pass. Four health regressions pass again after
+  formatting with locked Cargo. All-target Clippy completes with capped warnings.
+- Existing debt: strict Clippy fails on the untouched baseline (53 library / 55
+  library-test findings). Full formatting output is identical to baseline, with
+  issues only in three unchanged files. Changed files and diff whitespace pass.
+- Integration: `master` rebased onto the canary; ancestry and identical tested
+  tree verified; temporary worktree and branch removed. Original checkout clean.
+  Library `main` likewise rebased onto its implementation branch. Final tracker
+  integration/cleanup is recorded in the tracking commit.
+- Limits: no Docker rebuild, browser suite or live deployment probe. Tests used
+  isolated temporary storage/databases and a separate build target; existing
+  ignored frontend assets were copied for embedding. Full commands and evidence
+  are in Favzetto's `docs/step-05-health.md`. No push or deployment.

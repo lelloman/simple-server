@@ -72,3 +72,12 @@ requests, cancellation, custom response preservation, and GET/HEAD/405 through
 the transitional router. Strict all-target/all-feature Clippy and formatting
 passed. The minimal normal dependency graph contains only `http` and
 `tower-service` (plus HTTP's bytes/itoa); a no-feature build also passed.
+
+## Canary outcome
+
+Favzetto adopted both production endpoints in `14d5b0d` on local `master`.
+Four new health regressions passed against both old and shared implementations.
+232 unit/API/process tests passed; two previously recorded catalog tests fail
+identically to baseline. See the [central evidence](migration-status.md#step-05-health-and-readiness)
+for scope, lint debt, integration, cleanup and checks not rerun. Other consumers
+remain Pending. No push or deployment.
