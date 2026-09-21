@@ -41,6 +41,8 @@ headers (04b) and CORS configuration (04c). The implemented
 [04a contract](step-04a-body-limits.md) preserves extractor-limit semantics.
 The [04b contract](step-04b-response-headers.md) defines framework-independent
 header defaults, replacement and lossless Vary merging.
+The [04c contract](step-04c-cors.md) provides optional CORS configuration with
+framework-independent public types and explicit policy.
 
 ## Composition
 

@@ -9,7 +9,7 @@ Axum can remain an internal implementation detail. See the
 [design and completion criteria](docs/design.md#end-goal-completely-abstract-axum-away).
 
 **Status:** Axum dependency centralization and opt-in lifecycle, logging,
-correlation, HTTP tracing, body limits and response-header helpers are implemented. All 17 inventoried products have adopted lifecycle helpers locally
+correlation, HTTP tracing, body limits, response-header helpers and CORS configuration are implemented. All 17 inventoried products have adopted lifecycle helpers locally
 with documented application scopes. Crumbles and SCT include those migrations on local `master`. Publication to crates.io remains disabled.
 
 Open the [HTML migration matrix](docs/migration-status.html) in a browser for adoption status
@@ -82,6 +82,14 @@ optional, configuration explicit, and dependency upgrades independently adopted.
 See [the design outline](docs/design.md) for boundaries and the adoption plan.
 The [Step 02 lifecycle contract](docs/step-02-lifecycle.md) describes the scope,
 shutdown behavior, validation requirements, and remaining adoption work.
+
+## CORS
+
+Enable the optional `cors` feature for explicit `CorsConfig` policies. It works
+without Axum or default features. No cross-origin permissions are enabled by
+default; applications choose origins, credentials, headers and layer placement.
+`build()` rejects invalid wildcard/credential combinations before serving. See
+the [04c contract](docs/step-04c-cors.md).
 
 ## Response headers
 

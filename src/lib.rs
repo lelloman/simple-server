@@ -42,3 +42,7 @@ pub mod body_limit;
 /// Explicit response-header policies using framework-independent HTTP primitives.
 #[cfg(feature = "response-headers")]
 pub mod response_headers;
+
+/// Explicit, framework-independent cross-origin response policy.
+#[cfg(feature = "cors")]
+pub mod cors;

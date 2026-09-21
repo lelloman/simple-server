@@ -3,7 +3,7 @@
 Status: module split accepted. [04a body limits](step-04a-body-limits.md) is
 implemented and rolled out locally; see the [adoption tracker](migration-status.md)
 for applicability and verification evidence. [04b response headers](step-04b-response-headers.md)
-is implemented and rolled out locally (ten adopted, seven N/A); 04c remains planned. The source assessment below itself involved
+is implemented and rolled out locally (ten adopted, seven N/A); [04c CORS](step-04c-cors.md) is implemented, with canary adoption tracked separately. The source assessment below itself involved
 no runtime tests.
 
 The old “HTTP support” roadmap label conflates unrelated concerns. The five
@@ -96,4 +96,4 @@ headers before migration. Keep it optional even if 04a/04b are adopted.
 
 The matrix separates 04a, 04b and 04c. The 04a rollout is complete locally, with
 eleven products adopted and six assessed N/A. The [04b contract](step-04b-response-headers.md) now defines header operations;
-04c still requires a separate contract before implementation.
+The [04c contract](step-04c-cors.md) defines explicit CORS configuration.

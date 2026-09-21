@@ -9,6 +9,7 @@ cargo test --locked --all-features
 cargo test --locked --no-default-features --features lifecycle
 cargo test --locked --no-default-features --features body-limit
 cargo test --locked --no-default-features --features response-headers
+cargo test --locked --no-default-features --features cors
 cargo test --locked --no-default-features --features logging
 cargo test --locked --no-default-features --features correlation
 cargo test --locked --no-default-features --features http-tracing
