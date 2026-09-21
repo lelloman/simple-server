@@ -339,3 +339,26 @@ async fn opaque_correlation_is_not_automatically_logged() {
     assert!(!capture.text().contains("private legacy value"));
     assert_eq!(capture.finished().len(), 1);
 }
+
+#[tokio::test]
+async fn server_error_is_visible_before_a_stalled_body_finishes() {
+    let capture = Capture::default();
+    let _guard = capture.install();
+    let response = trace(request(), |_| async {
+        Response::builder()
+            .status(503)
+            .body(Body::from_stream(
+                stream::pending::<Result<Bytes, io::Error>>(),
+            ))
+            .unwrap()
+    })
+    .await;
+    let events = capture.events();
+    assert_eq!(events.len(), 1);
+    assert_eq!(events[0]["level"], "ERROR");
+    assert_eq!(events[0]["fields"]["message"], "http.response_headers");
+    assert_eq!(events[0]["fields"]["status"], 503);
+    assert!(capture.finished().is_empty());
+    drop(response);
+    assert_eq!(capture.finished()[0]["fields"]["outcome"], "cancelled");
+}

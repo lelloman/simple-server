@@ -26,10 +26,10 @@ Events use the `simple_server::http_tracing` target:
 
 | Event | Level | Fields / meaning |
 | --- | --- | --- |
-| `http.response_headers` | DEBUG | `status`, `header_latency_ms`: elapsed until the callback returns a response |
+| `http.response_headers` | ERROR for 5xx, DEBUG otherwise | `status`, `header_latency_ms`: elapsed until the callback returns a response |
 | `http.finished` | INFO | `outcome=complete`, `phase=body`, `duration_ms`: body end observed by the server |
 | `http.finished` | INFO | `outcome=upgraded`, `phase=body`, `duration_ms`: HTTP 101 or successful CONNECT handoff |
-| `http.finished` | WARN | `outcome=error`, `phase=body`, `duration_ms`: body polling returned an error |
+| `http.finished` | ERROR | `outcome=error`, `phase=body`, `duration_ms`: body polling returned an error |
 | `http.finished` | WARN | `outcome=cancelled`, `phase=headers` or `body`, `duration_ms`: instrumented future/body dropped before completion |
 
 Durations are monotonic milliseconds from entry into the first poll of `trace`,
@@ -58,7 +58,8 @@ short-circuits outside it is not observed. Remove equivalent existing request
 logging when adopting, avoiding duplicate request events.
 
 This API is infallible like Axum middleware: service failures must become HTTP
-responses before returning. It does not classify application errors from status,
+responses before returning. Body outcomes are independent of HTTP status: a 500
+response can have a completely transmitted body. It does not inspect domain errors,
 change response status/headers/extensions, register global state, trace spawned
 tasks automatically, or implement metrics, exporters, audit events or sampling.
 Filters and subscriber span-close events remain application-owned.

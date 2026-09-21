@@ -87,7 +87,11 @@ where
     let status = response.status();
     span.record("status", status.as_u16());
     observation.headers = true;
-    tracing::debug!(parent: &span, status = status.as_u16(), header_latency_ms = elapsed_ms(started), "http.response_headers");
+    if status.is_server_error() {
+        tracing::error!(parent: &span, status = status.as_u16(), header_latency_ms = elapsed_ms(started), "http.response_headers");
+    } else {
+        tracing::debug!(parent: &span, status = status.as_u16(), header_latency_ms = elapsed_ms(started), "http.response_headers");
+    }
     if status == StatusCode::SWITCHING_PROTOCOLS || (connect && status.is_success()) {
         observation.finish("upgraded");
         return response;
@@ -123,7 +127,9 @@ impl Observation {
         }
         self.finished = true;
         let phase = if self.headers { "body" } else { "headers" };
-        if outcome == "error" || outcome == "cancelled" {
+        if outcome == "error" {
+            tracing::error!(parent: &self.span, outcome, phase, duration_ms = elapsed_ms(self.started), "http.finished");
+        } else if outcome == "cancelled" {
             tracing::warn!(parent: &self.span, outcome, phase, duration_ms = elapsed_ms(self.started), "http.finished");
         } else {
             tracing::info!(parent: &self.span, outcome, phase, duration_ms = elapsed_ms(self.started), "http.finished");
