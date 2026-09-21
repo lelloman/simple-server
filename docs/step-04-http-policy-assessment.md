@@ -3,7 +3,7 @@
 Status: module split accepted. [04a body limits](step-04a-body-limits.md) is
 implemented and rolled out locally; see the [adoption tracker](migration-status.md)
 for applicability and verification evidence. [04b response headers](step-04b-response-headers.md)
-is implemented with two integrated canaries; 04c remains planned. The source assessment below itself involved
+is implemented and rolled out locally (ten adopted, seven N/A); 04c remains planned. The source assessment below itself involved
 no runtime tests.
 
 The old “HTTP support” roadmap label conflates unrelated concerns. The five

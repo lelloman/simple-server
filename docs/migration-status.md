@@ -17,22 +17,22 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | Project | Server components | 1. Axum centralization | 2. Lifecycle / main() | 03a. Logging | 03b. Correlation | 03c. HTTP tracing | 04a. Body limits | 04b. Response headers | 04c. CORS |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local canary)** | **Done (local; scoped canary)** | Planned |
-| favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | Pending | Planned |
-| androidoscopy | `server` | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | Pending | Planned |
-| crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** | **Done (local; scoped)** | Pending | Planned |
-| fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local)** | N/A (assessed) | Pending | Planned |
-| lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | Pending | Planned |
-| lellostore | `backend` | **Done** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local; scoped)** | Pending | Planned |
-| meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; pipeline/gateway)** | N/A (assessed) | **Done (local; scoped)** | Pending | Planned |
-| observo | `observo-server`; standalone extractor logging | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | Pending | Planned |
-| paranza | `apps/paranza-server` | **Done** | **Done (local; scoped)** | N/A (no logger) | N/A (assessed) | N/A (assessed) | N/A (assessed) | Pending | Planned |
-| peerlo | `peerlo-api` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | N/A (assessed) | Pending | Planned |
-| pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local; main HTTP)** | **Done (local; scoped)** | Pending | Planned |
-| pezzottify-downloader | Puppeteer API and downloader HTTP server | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; Puppeteer)** | **Done (local; both HTTP routers)** | N/A (assessed) | Pending | Planned |
-| quentin-torrentino | `crates/server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | Pending | Planned |
-| sct | `sct-server` | **Done** | **Done (scoped)** | N/A (no logger) | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | Pending | Planned |
+| favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | Planned |
+| androidoscopy | `server` | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | Planned |
+| crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** | **Done (local; scoped)** | **Done (local; scoped)** | Planned |
+| fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local; scoped)** | Planned |
+| lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | Planned |
+| lellostore | `backend` | **Done** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local; scoped)** | N/A (assessed) | Planned |
+| meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; pipeline/gateway)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | Planned |
+| observo | `observo-server`; standalone extractor logging | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | Planned |
+| paranza | `apps/paranza-server` | **Done** | **Done (local; scoped)** | N/A (no logger) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | Planned |
+| peerlo | `peerlo-api` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | N/A (assessed) | N/A (assessed) | Planned |
+| pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local; main HTTP)** | **Done (local; scoped)** | **Done (local; scoped)** | Planned |
+| pezzottify-downloader | Puppeteer API and downloader HTTP server | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; Puppeteer)** | **Done (local; both HTTP routers)** | N/A (assessed) | N/A (assessed) | Planned |
+| quentin-torrentino | `crates/server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | Planned |
+| sct | `sct-server` | **Done** | **Done (scoped)** | N/A (no logger) | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; scoped)** | Planned |
 | simple-agents | `simple-agents-service`; runner-shell logging; associated coding test servers | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local pilot; service routes)** | **Done (local; scoped canary)** | Planned |
-| simple-ai | `backend`, `inference-runner` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local; backend)** | **Done (local; scoped)** | Pending | Planned |
+| simple-ai | `backend`, `inference-runner` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local; backend)** | **Done (local; scoped)** | **Done (local; scoped)** | Planned |
 
 ## Step 1: Axum centralization
 
@@ -685,7 +685,7 @@ The [03a contract](step-03a-logging.md) records the API and pilot compatibility.
 The accepted [Step 04 source assessment](step-04-http-policy-assessment.md) splits
 HTTP policies into optional 04a body limits, 04b response headers and 04c CORS.
 04a is implemented; the pilot/canary verification is recorded below.
-[04b response headers](step-04b-response-headers.md) is implemented with two integrated canaries; see the verification record below.
+[04b response headers](step-04b-response-headers.md) is rolled out locally: ten adopted, seven N/A; see the verification record below.
 04c remains planned.
 
 Further capabilities include the remaining HTTP policies, health, background tasks, database helpers,
@@ -1241,7 +1241,169 @@ strict all-target Clippy and full formatting. Migration ancestry verified;
 temporary migration worktree/branch removed, pre-existing worktrees retained.
 See Simple Agents' `docs/step-04b-response-headers.md` for commands and scope.
 
-04b totals: **two Done (scoped canaries), fifteen Pending assessment/migration**.
+At canary completion, 04b totals were **two Done (scoped canaries), fifteen Pending assessment/migration**;
+the rollout record below supersedes those counts.
 Both source pins record the reviewed shared revision above. HTML and Markdown
 matrices agree; no other service has been marked adopted or N/A without
 assessment. 04c remains planned. No pushes or deployments.
+
+
+
+## Step 04b remaining-service rollout
+
+Eight additional products have applicable cache/security-header policies. Their
+production header operations use reviewed shared source
+`b88b908421db2552ff1e81966c56958925741e27`; no shared API extension was needed.
+Applications retain policy values, placement, eligibility and response behavior.
+Seven other products are N/A after source assessment; no runtime tests or
+behavior changes are claimed for those assessments.
+
+| Service | Assessed development branch | N/A evidence |
+| --- | --- | --- |
+| androidoscopy | master `f4461a81` | server/src/control.rs and dashboard.rs: auth/HTTP/WebSocket routes and MIME-only asset responses; no explicit cache/security-header policy. |
+| lellostore | master `54615a10` | backend/src/main.rs and api/{file_response,static_files}.rs: headers describe media type, lengths, disposition and ranges; no explicit cache/security-header policy. File/range handling remains outside 04b. |
+| observo | master `ef3bff39` | observo-server routes/main and routes/plugins.rs: dynamic plugin response forwarding and MIME construction, with no local cache/security-header policy. Upstream header forwarding is not header-policy adoption. |
+| paranza | master `2bd528f7` | apps/paranza-server/src/main.rs: API and PCM protocol/header conversion, no response cache/security-header policy. |
+| peerlo | master `907c9ad2` | crates/peerlo-api/src/lib.rs and routes.rs: auth, rate limiting, tracing and CORS, without response cache/security-header policy. |
+| pezzottify-downloader | master `2bf0158a` | downloader/http_server.rs and puppeteer/{proxy,correlation}.rs: media/transport headers and proxy/correlation propagation; no cache/security-header policy. CORS is separate. |
+| quentin-torrentino | master `e6064149` | crates/server/src/api/{routes,middleware}.rs: auth, metrics and static-service routing, no explicit response cache/security-header policy. Outbound provider request headers are unrelated. |
+
+### crumbles
+
+Migration **`387126219ed8c3da78423466e609aa6de5919dd7`**, based on master `f74f6a8b`.
+The installed browser security policy uses shared insert-if-absent for CSP, nosniff, frame/referrer and permissions headers, retaining configured HSTS replacement. Session-cookie, auth/setup and runner-history no-store helpers use shared replacement. CSP generation, trusted-proxy decisions, cookie append semantics, route placement and endpoint-specific response tuples stay local.
+
+Baseline and migrated suites: **589 passed, 0 failed, 2 ignored**.
+Existing resource-specific CSP, configured HSTS, browser auth/CSRF, repeated cookies, setup rejection and cache-header assertions run in the complete main binary suite. Existing ignored frontend build assets were copied unchanged for compile-time embedding.
+
+Strict all-target Clippy passes. Changed-file formatting and
+whitespace checks pass. Other workspace packages, fresh frontend/Android builds, standalone native-dispatch qualification, live providers and containers were not rerun.
+
+Original master rebased onto the migration; ancestry and identical tested tree
+verified, temporary migration worktree/branch removed. The original checkout
+was clean; pre-existing worktrees and branches were left alone.
+See the service's `docs/step-04b-response-headers.md` for commands and scope.
+
+### fausto
+
+Migration **`e59b3241a608e6e34b03ec64daaebe0b0514f517`**, based on master `7b494b7e`.
+The production plugin-file success response uses shared replacement for its existing public, max-age=3600 cache policy. MIME selection, file/path validation, missing-file errors and the response body remain local; request correlation and rate-limit Retry-After are outside this scope.
+
+Baseline and migrated suites: **202 passed, 0 failed, 1 ignored**.
+A new production-router regression passes before/after replacement for successful GET, HEAD, body/MIME/cache headers and missing-file responses without a cache policy. The server package suite includes that regression. Its initial test-client HEAD API mismatch was corrected before obtaining the passing baseline.
+
+All-target Clippy completes with capped warnings; existing lint debt remains. Strict warning-free lint is not claimed. Changed-file formatting and
+whitespace checks pass. Other workspace packages, optional plugin feature combinations, frontend/Android builds, live federation/plugins and Docker were not rerun.
+
+Original master rebased onto the migration; ancestry and identical tested tree
+verified, temporary migration worktree/branch removed. The original checkout
+was clean; pre-existing worktrees and branches were left alone.
+See the service's `docs/step-04b-response-headers.md` for commands and scope.
+
+### favzetto
+
+Migration **`47c8fe67d532ea8823c0167fe548a48b02d2a329`**, based on master `22b6a2d2`.
+The embedded frontend and catalog person-picture responses use shared replacement for their three existing cache policies: immutable assets, no-cache frontend fallback, and public picture max-age. Asset selection, auth, MIME, response bodies and application policy remain local.
+
+Baseline and migrated suites: **224 passed, 2 failed, 0 ignored**.
+Both runs pass 131 unit tests and 93 API tests, with the same two failures: catalog_research_runtime_bridge_approves_runtime_draft and catalog_research_runtime_bridge_rejects_runtime_draft. Both reject transitions from completed terminal flows with the same messages/statuses. Cargo stops at that integration target; later targets are not claimed. Existing ignored web/dist assets were copied unchanged for embedding.
+
+All-target Clippy completes with capped warnings; existing lint debt remains. Strict warning-free lint is not claimed. Changed-file formatting and
+whitespace checks pass. The unrelated catalog-flow failures were not fixed. Later integration targets, fresh frontend/Android builds, containers and live providers were not rerun.
+
+Original master rebased onto the migration; ancestry and identical tested tree
+verified, temporary migration worktree/branch removed. The original checkout
+was clean; pre-existing worktrees and branches were left alone.
+See the service's `docs/step-04b-response-headers.md` for commands and scope.
+
+### lello-auth
+
+Migration **`b1827fddee81bd1d1ba6e2ccca088f439d1b17ec`**, based on master `758db1b9`.
+The Axum adapter's existing token/authenticator/admin/hosted-UI no-store and Pragma helpers use shared replacement, along with authenticator Referrer-Policy and embedded-asset cache/nosniff headers. Header values, cookies, authentication, error formats and call placement remain local; unrelated endpoint-specific response tuples are unchanged.
+
+Baseline and migrated suites: **358 passed, 0 failed, 0 ignored**.
+Both affected HTTP/server packages run, including token/authenticator/admin/hosted-UI cache and no-store assertions and the existing body-limit rejection regression. The core-only package suite was not separately run.
+
+All-target Clippy completes with capped warnings; existing lint debt remains. Strict warning-free lint is not claimed. Changed-file formatting and
+whitespace checks pass. Browser builds, external identity providers, release/containers and full deployment qualification were not rerun. Three existing untracked research documents are preserved.
+
+Original master rebased onto the migration; ancestry and identical tested tree
+verified, temporary migration worktree/branch removed. 3 unrelated working files
+were preserved byte-for-byte, with staged/unstaged status unchanged.
+See the service's `docs/step-04b-response-headers.md` for commands and scope.
+
+### meteonesto
+
+Migration **`6d0eb4589776aeaaddae25871a7780b8fcb3993d`**, based on master `68509418`.
+Weather API forecast-cache helpers and integrity-checked map assets use shared cache-header replacement; the gateway retains route/status-selected cache policy and no-store problem responses through shared replacement. ETags, map validation, upstream forwarding/deadlines and eligibility remain local. Map manifest/error tuples remain local response construction. The pipeline has no matching cache/security-header policy to migrate.
+
+Baseline and migrated suites: **101 passed, 0 failed, 1 ignored**.
+Both weather-api and weather-gateway package suites run before/after, including cache/ETag, map asset, proxy/error and auth checks. The three component README source pins are synchronized; only API/gateway enable response-headers.
+
+Strict all-target Clippy passes. Changed-file formatting and
+whitespace checks pass. The pipeline suite, renderers, Android, live weather/identity providers and containers were not rerun. One existing gateway test remains ignored.
+
+The proxy cache-value selection was extracted into a local helper to retain
+strict function-length lint; the changed gateway suite and lint passed again.
+
+Original master rebased onto the migration; ancestry and identical tested tree
+verified, temporary migration worktree/branch removed. The original checkout
+was clean; pre-existing worktrees and branches were left alone.
+See the service's `docs/step-04b-response-headers.md` for commands and scope.
+
+### pezzottflix
+
+Migration **`8b07b337415120cad79278e860a11fed49fdacf8`**, based on master `ca8a370e`.
+All seven installed security-header operations use shared replacement, preserving CSP/permissions values and production-only HSTS. Existing headers for unrelated fields, cookies, response bodies and route/layer placement are unchanged. Media/image/subtitle response constructors remain application-owned.
+
+Baseline and migrated suites: **537 passed, 0 failed, 3 ignored**.
+A new middleware regression passes before/after for repeated Set-Cookie, explicit cache headers, body/status preservation and differing development/production HSTS override behavior. The server package suite includes existing security/auth/media checks.
+
+All-target Clippy completes with capped warnings; existing lint debt remains. Strict warning-free lint is not claimed. Changed-file formatting and
+whitespace checks pass. The separate real-process lifecycle script, frontend/Android, live providers and release/containers were not rerun.
+
+Original master rebased onto the migration; ancestry and identical tested tree
+verified, temporary migration worktree/branch removed. The original checkout
+was clean; pre-existing worktrees and branches were left alone.
+See the service's `docs/step-04b-response-headers.md` for commands and scope.
+
+### sct
+
+Migration **`18d086ea64ab5f308acd37fb3319e8827da4b1d0`**, based on master `d3961d4c`.
+The storage-backed API response policy and ApiError use shared replacement for no-store, nosniff and no-referrer. Correlation, retry guidance, framework-error normalization, auth, status and body construction remain local. No-storage fallback and metrics response tuples remain local response construction; no new global policy is installed.
+
+Baseline and migrated suites: **6 passed, 0 failed, 15 ignored**.
+A new real-HTTP regression exercises the production policy without storage: GET/HEAD, existing cache/referrer override, cookies, body/status, generated correlation and normalized early errors. It passes before and after migration alongside the server suite.
+
+Strict all-target Clippy passes. Changed-file formatting and
+whitespace checks pass. Fifteen existing PostgreSQL/S3 qualification tests remain ignored. Database-backed production HTTP, browser and destructive container qualifications were not rerun.
+
+Concurrent archive commits `592adcd` and `abae1ed` were replayed as `2342023` and
+`f4de667`; range-diff verifies both patches are unchanged. Recovery branch
+`recovery/step04b-before-rebase-abae1edb` is retained. The combined final tree at
+**`f4de6679702955b9bc32535ff64e57846d1e50af`** passes six server tests
+(fifteen ignored) and strict all-target Clippy. New archive features were not
+separately qualified by this migration. Temporary migration branch/worktree removed;
+pre-existing worktrees, stash and subsequent user archive edits remain untouched.
+See the service's `docs/step-04b-response-headers.md` for commands and scope.
+
+### simple-ai
+
+Migration **`b5fa60aee57cd4e6b9c3a34e3c760d60a8885f60`**, based on master `f5115239`.
+Five production streaming branches use shared replacement for their existing no-cache headers: backend chat, Responses and speech, plus runner chat and speech. Stream construction, reservation/cancellation/accounting, content-type, keep-alive and placement stay local; no body polling/buffering is introduced.
+
+Baseline and migrated suites: **399 passed, 0 failed, 1 ignored**.
+Backend and inference-runner package suites run before/after. The existing ignored scripts/configs/rtx.toml test fixture was copied unchanged into the worktree; it is not committed. Shared module contracts separately verify lazy data/trailer/error frames.
+
+All-target Clippy completes with capped warnings; existing lint debt remains. Strict warning-free lint is not claimed. Changed-file formatting and
+whitespace checks pass. Real GPU/model inference, external providers, Android/browser and container/release workflows were not rerun. Existing semantic-evaluation working files are preserved.
+
+Original master rebased onto the migration; ancestry and identical tested tree
+verified, temporary migration worktree/branch removed. 20 unrelated working files
+were preserved byte-for-byte, with staged/unstaged status unchanged.
+See the service's `docs/step-04b-response-headers.md` for commands and scope.
+
+04b rollout totals: **10 Done, seven N/A, 0 Pending**.
+All applicable migrations are committed and integrated into their development
+branches; temporary migration worktrees/branches are removed. Source pins and
+both trackers are updated. 04c remains planned. No pushes or deployments.

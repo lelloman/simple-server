@@ -54,4 +54,7 @@ Before/after checks cover default versus overwrite behavior, existing
 Cache-Control, Vary lists, early auth/limit errors, HEAD, partial/media responses
 and SSE. Real production usage, test counts and integration evidence are
 recorded in the [adoption trackers](migration-status.md).
-Other consumers require assessment before rollout. 04c remains planned.
+The local rollout is complete: ten products adopted the shared operations in
+their documented component scopes, and seven are N/A after source assessment.
+The trackers record per-service tests, existing failures, preserved work and
+integration evidence. 04c remains planned.

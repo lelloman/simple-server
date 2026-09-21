@@ -43,4 +43,4 @@ The local rollout is complete: eleven products adopted the shared limit and six
 are N/A after source assessment. See the [adoption tracker](migration-status.md)
 for per-service verification, existing failures and integration evidence.
 [04b response headers](step-04b-response-headers.md) is now implemented and
-canaried; 04c CORS remains planned. Their adoption is independent.
+rolled out locally; 04c CORS remains planned. Their adoption is independent.
