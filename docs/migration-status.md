@@ -16,7 +16,7 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 
 | Project | Server components | 1. Axum centralization | 2. Lifecycle / main() | 03a. Logging | 03b. Correlation | 03c. HTTP tracing | 04a. Body limits | 04b. Response headers | 04c. CORS |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local canary)** | Pending | Planned |
+| pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local canary)** | **Done (local; scoped canary)** | Planned |
 | favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | Pending | Planned |
 | androidoscopy | `server` | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | Pending | Planned |
 | crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** | **Done (local; scoped)** | Pending | Planned |
@@ -31,7 +31,7 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | pezzottify-downloader | Puppeteer API and downloader HTTP server | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; Puppeteer)** | **Done (local; both HTTP routers)** | N/A (assessed) | Pending | Planned |
 | quentin-torrentino | `crates/server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | Pending | Planned |
 | sct | `sct-server` | **Done** | **Done (scoped)** | N/A (no logger) | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | Pending | Planned |
-| simple-agents | `simple-agents-service`; runner-shell logging; associated coding test servers | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local pilot; service routes)** | Pending | Planned |
+| simple-agents | `simple-agents-service`; runner-shell logging; associated coding test servers | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local pilot; service routes)** | **Done (local; scoped canary)** | Planned |
 | simple-ai | `backend`, `inference-runner` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local; backend)** | **Done (local; scoped)** | Pending | Planned |
 
 ## Step 1: Axum centralization
@@ -685,8 +685,8 @@ The [03a contract](step-03a-logging.md) records the API and pilot compatibility.
 The accepted [Step 04 source assessment](step-04-http-policy-assessment.md) splits
 HTTP policies into optional 04a body limits, 04b response headers and 04c CORS.
 04a is implemented; the pilot/canary verification is recorded below.
-[04b response headers](step-04b-response-headers.md) is implemented; consumer
-qualification is pending. 04c remains planned.
+[04b response headers](step-04b-response-headers.md) is implemented with two integrated canaries; see the verification record below.
+04c remains planned.
 
 Further capabilities include the remaining HTTP policies, health, background tasks, database helpers,
 authentication, authorization, and rate limiting. The HTML matrix already shows
@@ -1166,17 +1166,82 @@ See its service-local `docs/step-04a-body-limits.md` for commands and scope.
 Final rollout: **eleven Done, six N/A, zero Pending**. All applicable migrations
 are committed, integrated into their development branches, and their temporary
 migration worktrees and branches removed.
-04b/04c remain planned. No pushes or deployments.
+At completion of 04a, 04b/04c remained planned; the 04b record below supersedes
+that implementation status. No pushes or deployments.
 
 
 ## Step 04b: response headers
 
-Shared optional `response-headers` operations are implemented. The feature builds
-without Axum, lifecycle or logging. Full `scripts/check` passes, including strict
-Clippy, rustdoc, the feature matrix and five new contracts (four in the minimal
-feature build). Tests cover repeated values, wildcard/case-aware Vary merging,
-invalid input and unpolled response streams with trailers/errors.
+Shared source **`b88b908421db2552ff1e81966c56958925741e27`** implements the optional
+`response-headers` module. It builds without Axum, lifecycle or logging; its
+normal minimal dependency graph contains only http, bytes and itoa. Full
+`bash scripts/check` passes, including formatting, strict Clippy, rustdoc, the
+feature matrix and five new contracts (four in the minimal feature build), plus
+the new doctest. Tests cover repeated values and sensitivity flags, invalid
+input, Vary duplicates/wildcards and lazy data/trailer/error frames without
+changing response status, version or extensions. Shared main was rebased onto
+the verified feature branch and its temporary worktree/branch removed.
 
-Consumer adoption remains Pending until production integration is verified.
-The first canaries are Pezzottify (preserve explicit cache headers) and Simple
-Agents (unconditional no-store). See the [contract](step-04b-response-headers.md).
+The [04b contract](step-04b-response-headers.md) separates defaults from explicit
+replacement. Vary merging intentionally retains existing field lines and opaque
+bytes, appending missing names on separate lines. This improves preservation
+compared with Pezzottify's old normalizing helper; consumers must read all Vary
+values as a combined list. Cache eligibility, header values, route/layer placement,
+CSP generation, ETags, response construction and application policy stay local.
+
+### Pezzottify canary
+
+Migration **`a25b0c3aa65c543f6ddc220f4f7105aafdfb365d`** is integrated into **dev**,
+based on `0b258266`. The actual API/cache middleware calls shared default,
+replacement and Vary operations. Explicit Cache-Control remains authoritative;
+private caching still excludes errors, partial/media/SSE responses and mutations.
+The outer API safety net still covers early auth/CSRF/rate-limit failures with
+unchanged `/v1` selection. Other domain-specific response headers remain local.
+
+Baseline: 1,103 library tests plus 43 actual-HTTP tests pass, two existing library
+tests ignored. Two additional middleware regressions also passed before
+replacement. Final: **1,148 passed, two ignored** (1,105 library, 26 catalog,
+17 body-limit/ingestion/report/streaming HTTP checks). Tests cover HEAD, repeated
+Cache-Control/Set-Cookie, Vary credential lists, early errors, API path boundaries,
+partial/media/SSE classification, body-limit rejections and actual range streams.
+Shared tests additionally cover wildcard/opaque Vary and lazy trailers/errors.
+
+Clippy passes with the existing `items-after-test-module` exemption; the existing
+num-bigint-dig future-incompatibility notice remains. Changed-file formatting and
+whitespace checks pass. Other integration suites, frontend/Android, containers,
+live providers and production-sized uploads were not rerun. Source pin and
+lockfile updated. Original dev rebased onto the migration; ancestry and identical
+tested tree verified, temporary worktree/branch removed, existing worktrees kept.
+See Pezzottify's `docs/step-04b-response-headers.md` for exact commands and scope.
+
+### Simple Agents canary
+
+Migration **`61b36f86123ec1453586540304f183f9db83a907`**, based on main `5e46aa0`, is
+integrated into **main at `0def27fb528d99cd8eaf2f70fb6f1ba40e923bb7`**. Eight route
+groups use shared replacement via a local no-store adapter; browser/native auth
+also retain their no-referrer replacement. Handler-specific response tuples and
+release/metrics/UI response construction remain local; adoption is scoped to the
+reusable route policies. Only the service opts into this feature.
+
+Baseline and final service suites: **131 tests pass**. Added assertions verify
+no-store on successful session creation/replay and SSE before/after migration.
+Existing production-router checks cover body-limit boundaries with and without
+Content-Length, unchanged 413 bodies and headers on auth/limit errors. Existing
+checks also cover browser/native auth, cookies, process signals, WebSockets and
+SSE revocation. Strict all-target Clippy and full formatting pass. Tests use
+disposable databases and local mock listeners. Whole-workspace, browser/Android,
+external providers, containers and deployment checks were not rerun.
+
+During integration, concurrent frontend commit `396efc6` was replayed as
+`0def27f`; range-diff verifies its patch is unchanged. Recovery branch
+`recovery/step04b-before-rebase-396efc6b` is retained. Rebase used the clean linked
+worktree; seven unrelated working files and their staged/unstaged status were
+verified unchanged. The combined final tree passed the same 131 service tests,
+strict all-target Clippy and full formatting. Migration ancestry verified;
+temporary migration worktree/branch removed, pre-existing worktrees retained.
+See Simple Agents' `docs/step-04b-response-headers.md` for commands and scope.
+
+04b totals: **two Done (scoped canaries), fifteen Pending assessment/migration**.
+Both source pins record the reviewed shared revision above. HTML and Markdown
+matrices agree; no other service has been marked adopted or N/A without
+assessment. 04c remains planned. No pushes or deployments.

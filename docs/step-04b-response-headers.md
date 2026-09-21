@@ -49,8 +49,9 @@ invalid input without mutation, and unchanged status/version/extensions with
 lazy data/trailer/error frames. The minimal feature build and full feature matrix
 are included in `scripts/check`, alongside formatting, strict Clippy and rustdoc.
 
-Pezzottify and Simple Agents are the initial canaries. Before/after checks must
-cover default versus overwrite behavior, existing Cache-Control, Vary lists,
-early auth/limit errors, HEAD, partial/media responses and SSE. Real production
-usage and integration evidence are recorded in the [adoption trackers](migration-status.md).
+Pezzottify and Simple Agents are integrated as the initial scoped canaries.
+Before/after checks cover default versus overwrite behavior, existing
+Cache-Control, Vary lists, early auth/limit errors, HEAD, partial/media responses
+and SSE. Real production usage, test counts and integration evidence are
+recorded in the [adoption trackers](migration-status.md).
 Other consumers require assessment before rollout. 04c remains planned.

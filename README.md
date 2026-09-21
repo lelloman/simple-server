@@ -8,8 +8,8 @@ The re-export is temporary and will be removed once all consumers are migrated;
 Axum can remain an internal implementation detail. See the
 [design and completion criteria](docs/design.md#end-goal-completely-abstract-axum-away).
 
-**Status:** Axum dependency centralization, opt-in lifecycle, logging and correlation helpers are
-implemented. All 17 inventoried products have adopted lifecycle helpers locally
+**Status:** Axum dependency centralization and opt-in lifecycle, logging,
+correlation, HTTP tracing, body limits and response-header helpers are implemented. All 17 inventoried products have adopted lifecycle helpers locally
 with documented application scopes. Crumbles and SCT include those migrations on local `master`. Publication to crates.io remains disabled.
 
 Open the [HTML migration matrix](docs/migration-status.html) in a browser for adoption status
