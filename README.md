@@ -83,6 +83,14 @@ See [the design outline](docs/design.md) for boundaries and the adoption plan.
 The [Step 02 lifecycle contract](docs/step-02-lifecycle.md) describes the scope,
 shutdown behavior, validation requirements, and remaining adoption work.
 
+## Response headers
+
+Enable the optional `response-headers` feature for explicit `insert_if_absent`,
+`replace`, and `merge_vary` operations. This module also works with default
+features disabled and has no Axum dependency. Applications own cache policy,
+header values and route placement; the helpers never access response bodies.
+See the [04b contract](docs/step-04b-response-headers.md).
+
 ## Lifecycle
 
 Enable `lifecycle` explicitly. Core coordination also works with

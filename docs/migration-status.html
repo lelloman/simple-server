@@ -68,7 +68,7 @@
     <section class="summary" aria-label="Migration overview">
       <div class="stat"><strong id="service-count">17</strong><span>Services in scope</span></div>
       <div class="stat complete"><strong id="done-count">17 / 17</strong><span>Axum centralization complete</span></div>
-      <div class="stat"><strong id="module-count">6 / 14</strong><span>Shared modules implemented</span></div>
+      <div class="stat"><strong id="module-count">7 / 14</strong><span>Shared modules implemented</span></div>
       <div class="stat"><strong id="pending-count">0</strong><span>Awaiting Axum centralization</span></div>
     </section>
     <div class="toolbar">
@@ -131,6 +131,7 @@
       <p><strong>03c is implemented and canaried in Crumbles.</strong> Shared source <code>5ccbbab</code> provides optional safe HTTP spans, header latency, body outcomes and upgrade handoff. Crumbles <code>4a44b33</code> replaces its main server's Tower tracing while preserving HTTP/error/ID contracts. Workspace tests: 1,433 pass, two existing ignores; after the final HEAD refinement, 654 affected-package tests pass. Strict Clippy, formatting, real HTTP/HEAD/WebSocket and signal/drain checks pass. Master is rebased and the temporary branch/worktree removed. The completed pilot is followed by the rollout assessment below. See <a href="step-03c-http-tracing.md">the contract</a> and <a href="migration-status.md">verification scope and limits</a>. Nothing pushed or deployed.</p>
       <p id="body-limit-rollout"><strong>04a rollout complete locally: 11 adopted, 6 N/A, 0 Pending.</strong> Body-limit policies preserve existing values, route placement and extractor rejection behavior. All applicable migrations are committed, development branches rebased onto their migrations, and temporary migration worktrees/branches removed. SCT's concurrent qualification commit was preserved through rebase; tests and strict Clippy pass on its combined final tree. Favzetto retains its two reproduced baseline failures; existing lint debt and test limits are documented. User work is preserved. See the <a href="step-04a-body-limits.md">contract</a> and <a href="migration-status.md">per-service verification record</a>. 04b/04c remain planned. No pushes or deployments.</p>
       <p id="tracing-rollout"><strong>03c rollout complete locally: 9 adopted, 8 N/A, 0 Pending.</strong> The eight remaining applicable consumers join the Crumbles canary. Shared source <code>adc1640</code> adds application-owned observers to preserve event fields, severity and stderr sinks without duplicate logging. Pezzottify is integrated into dev; Fausto, LelloStore, SCT, Peerlo, Simple AI, Pezzottflix and the downloader are integrated into master. Default shared-target visibility and explicit-filter authority are verified. All migrations are committed, base branches rebased onto their migration branches, and temporary branches/worktrees removed. Unrelated user work and pre-existing worktrees are preserved. Eight other products have no request lifecycle logger to migrate and are N/A after source assessment. See <a href="migration-status.md">commits, verification evidence and existing limitations</a>. No pushes or deployments.</p>
+      <p id="response-headers-rollout"><strong>04b response headers implemented; consumer qualification pending.</strong> Optional framework-independent defaults, replacement and Vary merging preserve response bodies. Shared feature-matrix tests, strict lint and rustdoc pass. See the <a href="step-04b-response-headers.md">contract</a> and <a href="migration-status.md">verification record</a>. 04c remains planned.</p>
     </section>
     <footer>
       Verified against local checkouts on <time datetime="2026-09-21">21 September 2026</time>. Tracks implementation, not deployment or publication.<br>
@@ -143,7 +144,7 @@
     const steps = [
       ['Axum centralization', true], ['Lifecycle / main()', true],
       ['Logging setup', true], ['Request correlation', true], ['HTTP tracing', true],
-      ['Body limits', true], ['Response headers', false], ['CORS configuration', false], ['Health', false],
+      ['Body limits', true], ['Response headers', true], ['CORS configuration', false], ['Health', false],
       ['Background tasks', false], ['Databases', false], ['Authentication', false],
       ['Authorization', false], ['Rate limiting', false]
     ];
@@ -201,7 +202,7 @@
         const components = document.createElement('small');
         components.textContent = service.components; name.append(components); row.append(name);
         steps.forEach((step, index) => {
-          const status = index === 0 ? service.axum : index === 1 ? (service.lifecycle || 'pending') : index === 2 ? (service.logging || 'pending') : index === 3 ? (service.correlation || 'pending') : index === 4 ? (service.tracing || 'pending') : index === 5 ? (service.bodyLimit || 'pending') : 'planned';
+          const status = index === 0 ? service.axum : index === 1 ? (service.lifecycle || 'pending') : index === 2 ? (service.logging || 'pending') : index === 3 ? (service.correlation || 'pending') : index === 4 ? (service.tracing || 'pending') : index === 5 ? (service.bodyLimit || 'pending') : index === 6 ? (service.responseHeaders || 'pending') : 'planned';
           const cell = document.createElement('td');
           const badge = document.createElement('span');
           badge.className = `badge ${status}`;

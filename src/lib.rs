@@ -38,3 +38,7 @@ pub mod http;
 /// Explicit route-scoped extractor body limits.
 #[cfg(feature = "body-limit")]
 pub mod body_limit;
+
+/// Explicit response-header policies using framework-independent HTTP primitives.
+#[cfg(feature = "response-headers")]
+pub mod response_headers;

@@ -39,6 +39,8 @@ defines request spans and response-body lifecycle events.
 [Step 04](step-04-http-policy-assessment.md) separates body limits (04a), response
 headers (04b) and CORS configuration (04c). The implemented
 [04a contract](step-04a-body-limits.md) preserves extractor-limit semantics.
+The [04b contract](step-04b-response-headers.md) defines framework-independent
+header defaults, replacement and lossless Vary merging.
 
 ## Composition
 
