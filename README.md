@@ -224,4 +224,4 @@ endpoint behind GET/HEAD routing and existing access controls. The canary uses
 Axum types.
 
 [Step 06](docs/step-06-background-tasks.md) adds optional task ownership through
-`tasks`. Consumer adoption is tracked independently from library availability.
+`tasks` and bounded scheduling through `task-scheduling`. Consumer adoption is tracked independently from library availability.

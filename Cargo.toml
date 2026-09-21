@@ -10,6 +10,7 @@ publish = false
 [features]
 default = ["http"]
 http = ["dep:axum", "dep:tower-service"]
+task-scheduling = ["tasks", "dep:cron", "dep:chrono", "dep:rand"]
 tasks = ["lifecycle", "tokio/rt"]
 lifecycle = ["dep:tokio", "dep:futures-util"]
 logging = ["dep:tracing", "dep:tracing-subscriber"]
@@ -25,6 +26,8 @@ multipart = ["http", "axum/multipart"]
 ws = ["http", "axum/ws"]
 
 [dependencies]
+cron = { version = "0.12", optional = true }
+chrono = { version = "0.4", default-features = false, features = ["std"], optional = true }
 pin-project-lite = { version = "0.2", optional = true }
 tower-http = { version = "0.6", default-features = false, features = ["cors"], optional = true }
 http = { version = "1", optional = true }
@@ -65,3 +68,7 @@ unsafe_code = "forbid"
 [[example]]
 name = "tasks"
 required-features = ["tasks"]
+
+[[example]]
+name = "scheduler"
+required-features = ["task-scheduling"]

@@ -54,3 +54,7 @@ pub mod health;
 /// Explicit task ownership and cooperative cancellation.
 #[cfg(feature = "tasks")]
 pub mod tasks;
+
+/// Bounded scheduling with application-owned execution and reporting.
+#[cfg(feature = "task-scheduling")]
+pub mod task_scheduling;
