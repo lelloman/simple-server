@@ -222,3 +222,6 @@ retain response schemas, status codes, timeouts and lifecycle policy. Mount the
 endpoint behind GET/HEAD routing and existing access controls. The canary uses
 `get_service` through the transitional router; the health API itself exposes no
 Axum types.
+
+[Step 06](docs/step-06-background-tasks.md) adds optional task ownership through
+`tasks`. Consumer adoption is tracked independently from library availability.

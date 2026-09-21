@@ -50,3 +50,7 @@ pub mod cors;
 /// Application-owned liveness and readiness checks with optional HTTP adaptation.
 #[cfg(feature = "health")]
 pub mod health;
+
+/// Explicit task ownership and cooperative cancellation.
+#[cfg(feature = "tasks")]
+pub mod tasks;

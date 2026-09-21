@@ -101,3 +101,6 @@ such as uploads, streaming responses, and WebSockets.
 Version the library so each product can upgrade independently. Repository
 creation does not imply a release, a finalized licensing decision, or a
 workspace-wide migration.
+
+[Step 06: background tasks](step-06-background-tasks.md) separates task ownership,
+scheduling and execution policies. Durable storage and recovery remain application-owned.
