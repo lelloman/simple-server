@@ -48,3 +48,8 @@ allowlists versus wildcard backend and runner policies. The backend deliberately
 does not expose all response headers; the runner does. Before/after service tests
 must preserve this difference, Crumbles' CSRF/correlation headers, preflights and
 middleware placement. See both adoption trackers for actual integration evidence.
+
+Both local canaries are now integrated: Crumbles master `433d709` and Simple AI
+master `f73daa6`, using shared source `3aa9332`. Crumbles preserves security headers
+but no correlation header on preflights, matching its previous middleware order.
+The remaining 15 products await applicability assessment and rollout.

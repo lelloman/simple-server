@@ -19,7 +19,7 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local canary)** | **Done (local; scoped canary)** | Pending |
 | favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | Pending |
 | androidoscopy | `server` | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | Pending |
-| crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** | **Done (local; scoped)** | **Done (local; scoped)** | Pending |
+| crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** |
 | fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local; scoped)** | Pending |
 | lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | Pending |
 | lellostore | `backend` | **Done** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local; scoped)** | N/A (assessed) | Pending |
@@ -32,7 +32,7 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | quentin-torrentino | `crates/server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | Pending |
 | sct | `sct-server` | **Done** | **Done (scoped)** | N/A (no logger) | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; scoped)** | Pending |
 | simple-agents | `simple-agents-service`; runner-shell logging; associated coding test servers | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local pilot; service routes)** | **Done (local; scoped canary)** | Pending |
-| simple-ai | `backend`, `inference-runner` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local; backend)** | **Done (local; scoped)** | **Done (local; scoped)** | Pending |
+| simple-ai | `backend`, `inference-runner` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local; backend)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** |
 
 ## Step 1: Axum centralization
 
@@ -1410,11 +1410,41 @@ both trackers are updated. 04c remains planned. No pushes or deployments.
 
 ## Step 04c: CORS configuration
 
-The optional [04c module](step-04c-cors.md) is implemented. Consumer adoption
-remains pending until verified and integrated. Planned canaries are Crumbles
-and both Simple AI HTTP entry points; other services require applicability checks.
+Implemented and canaried locally on 2026-09-21: **2 Done, 15 Pending**. Other
+products still require applicability checks; no rollout or agent work was started.
+The optional [04c contract](step-04c-cors.md) exposes only owned public policy,
+layer/service/future types plus HTTP/Tower primitives. Default configuration grants
+no cross-origin permissions. It works with default features disabled, without Axum.
 
-Shared verification: baseline and final feature matrix, strict Clippy, formatting
-and documentation checks pass (one broken documentation link was corrected and
-rustdoc rerun). Five CORS contract tests include 300 legacy comparisons; the
-minimal production dependency graph contains no Axum. Canary integration follows.
+Reviewed source: `3aa933295860a9ed08b51ae882c8297f17e7eac2` on simple-server `main`.
+The full baseline and final feature matrix, strict Clippy and formatting pass.
+A rustdoc link failure was fixed and strict documentation checks rerun successfully.
+Five new CORS contract tests cover 300 comparisons against the prior middleware,
+restrictive defaults, invalid wildcards/credentials, setter replacement, response
+identity, readiness and service errors. Production dependency-tree inspection
+confirms standalone CORS has no Axum dependency.
+
+| Consumer | Production adoption | Baseline → final verification | Integrated commit |
+| --- | --- | --- | --- |
+| Crumbles | Main HTTP router uses configured exact origins/credentials, six methods, existing authorization/content-type/accept/CSRF/correlation headers and exposed correlation ID. Empty origins grant no cross-origin access. Placement preserves security headers on preflights, with correlation IDs on ordinary responses only. Integration daemon has no CORS policy. | 589 → **590 passed**, two existing ignores, complete main binary suite. Five focused CORS tests passed against the old middleware before replacement; final suite includes allowed/denied/missing origins, credentials on/off, unauthorized responses, preflights and browser security state. Strict all-target Clippy and changed-file formatting pass. | `433d7094247c28ec7022f5751949c747e5aadc7c` on `master` |
+| Simple AI | Both backend and inference-runner use shared CORS policies. Both retain wildcard origins/methods/request headers without credentials. Only the runner exposes wildcard response headers. Route/layer placement and inference streams are unchanged. | 399 → **401 passed**, one existing ignore, across backend/runner suites. Both new production-policy tests passed against the old implementation before replacement. All-target Clippy completes with existing capped warnings (backend 12, common 3, runner 5); changed-file formatting passes. | `f73daa6a30c037151b2b6f167dc248e309fb0763` on `master` |
+
+Both consumers remove direct tower-http dependencies and pin the reviewed source
+in `simple-server.rev`. Their resolved tower-http versions remain 0.6.11 and
+0.6.8 respectively; no dependency version upgrades were needed. Detailed commands
+and scope are in each consumer's `docs/step-04c-cors.md`.
+
+Each migration used a dedicated sibling worktree and branch from the inspected
+active `master`: Crumbles started at `3871262`, Simple AI at `b5fa60a`. Both master
+branches were rebased onto their migration branches, ancestry verified, and final
+trees matched the tested trees without concurrent commits to replay. Temporary
+migration branches/worktrees were removed. Simple AI's 20 unrelated working files
+were preserved byte-for-byte with unchanged Git status. Shared-library work was
+also committed in an isolated worktree, integrated into `main` and cleaned up.
+
+Limits: Crumbles reused ignored frontend assets; other workspace packages, fresh
+frontend/Android builds, browser E2E, standalone native-dispatch qualification,
+providers and containers were not rerun. Simple AI reused its ignored runner TOML
+fixture; real GPU/model inference, external providers, browser/Android E2E and
+containers were not rerun. This is local migration qualification, not a production
+deployment. Nothing was pushed or deployed.
