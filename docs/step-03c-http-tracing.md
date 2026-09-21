@@ -40,7 +40,10 @@ includes application replacement/dropping and panic unwinding, and must not be
 interpreted as proof of client disconnect. An entirely unpolled future emits
 nothing. Exactly one terminal event is emitted for an observed lifecycle (subject
 to subscriber filtering); a body error is not followed by cancellation.
-An already-ended/empty body completes at response creation. Otherwise, completion
+HEAD, 204, 304 and non-upgrade informational responses complete at headers:
+HTTP deliberately omits their wire bodies, so dropping such a body is not a
+cancellation. Their bodies and content-length handling remain untouched.
+An already-ended/empty body also completes at response creation. Otherwise, completion
 occurs at EOF or when the inner body reports its final frame. Frames, trailers,
 errors, size hints and end-of-stream signaling are passed through without
 buffering, pre-polling or draining. Upgrade bodies are returned unchanged;

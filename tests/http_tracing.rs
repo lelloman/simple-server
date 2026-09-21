@@ -362,3 +362,58 @@ async fn server_error_is_visible_before_a_stalled_body_finishes() {
     drop(response);
     assert_eq!(capture.finished()[0]["fields"]["outcome"], "cancelled");
 }
+
+#[tokio::test]
+async fn head_route_does_not_report_a_false_body_cancellation() {
+    let capture = Capture::default();
+    let _guard = capture.install();
+    let app = Router::new()
+        .route("/head", get(|| async { "body" }))
+        .layer(middleware::from_fn(middleware));
+    let response = app
+        .oneshot(
+            Request::builder()
+                .method("HEAD")
+                .uri("/head")
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    assert!(
+        to_bytes(response.into_body(), usize::MAX)
+            .await
+            .unwrap()
+            .is_empty()
+    );
+    let events = capture.finished();
+    assert_eq!(events.len(), 1);
+    assert_eq!(events[0]["fields"]["outcome"], "complete");
+}
+
+#[tokio::test]
+async fn protocol_bodyless_statuses_complete_without_polling_or_mutating_bodies() {
+    let capture = Capture::default();
+    let _guard = capture.install();
+    for status in [204, 304] {
+        let response = trace(request(), |_| async {
+            Response::builder()
+                .status(status)
+                .header("x-kept", "yes")
+                .body(Body::from("not-a-wire-body"))
+                .unwrap()
+        })
+        .await;
+        assert_eq!(response.headers()["x-kept"], "yes");
+        // Tracing observes protocol semantics; HTTP enforcement remains outside it.
+        assert_eq!(
+            to_bytes(response.into_body(), usize::MAX).await.unwrap(),
+            "not-a-wire-body"
+        );
+    }
+    let events = capture.finished();
+    assert_eq!(events.len(), 2);
+    for event in events {
+        assert_eq!(event["fields"]["outcome"], "complete");
+    }
+}

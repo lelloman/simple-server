@@ -62,6 +62,7 @@ where
         _ => "OTHER",
     };
     let connect = request.method() == Method::CONNECT;
+    let head = request.method() == Method::HEAD;
     let span = tracing::info_span!(
         "http.request",
         method,
@@ -94,6 +95,16 @@ where
     }
     if status == StatusCode::SWITCHING_PROTOCOLS || (connect && status.is_success()) {
         observation.finish("upgraded");
+        return response;
+    }
+    // The HTTP stack discards these bodies by protocol, not cancellation.
+    // Leave the response intact so it can preserve HEAD content-length semantics.
+    if head
+        || status == StatusCode::NO_CONTENT
+        || status == StatusCode::NOT_MODIFIED
+        || status.is_informational()
+    {
+        observation.finish("complete");
         return response;
     }
     let (parts, body) = response.into_parts();
