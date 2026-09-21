@@ -18,21 +18,21 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local canary)** | **Done (local; scoped canary)** | N/A (assessed) | N/A (no served probe) |
 | favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local canary)** |
-| androidoscopy | `server` | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | Pending |
-| crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | Pending |
-| fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | Pending |
-| lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (Rust; Caddy owns CORS) | Pending |
-| lellostore | `backend` | **Done** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | Pending |
-| meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; pipeline/gateway)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | Pending |
-| observo | `observo-server`; standalone extractor logging | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | Pending |
-| paranza | `apps/paranza-server` | **Done** | **Done (local; scoped)** | N/A (no logger) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | Pending |
-| peerlo | `peerlo-api` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | Pending |
-| pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local; main HTTP)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | Pending |
-| pezzottify-downloader | Puppeteer API and downloader HTTP server | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; Puppeteer)** | **Done (local; both HTTP routers)** | N/A (assessed) | N/A (assessed) | **Done (local; both routers)** | Pending |
-| quentin-torrentino | `crates/server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | Pending |
-| sct | `sct-server` | **Done** | **Done (scoped)** | N/A (no logger) | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; scoped)** | N/A (assessed) | Pending |
-| simple-agents | `simple-agents-service`; runner-shell logging; associated coding test servers | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local pilot; service routes)** | **Done (local; scoped canary)** | N/A (assessed) | Pending |
-| simple-ai | `backend`, `inference-runner` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local; backend)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | Pending |
+| androidoscopy | `server` | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (no served probe) |
+| crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** |
+| fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** |
+| lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (Rust; Caddy owns CORS) | **Done (local; scoped)** |
+| lellostore | `backend` | **Done** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** |
+| meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; pipeline/gateway)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** |
+| observo | `observo-server`; standalone extractor logging | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (no served probe) |
+| paranza | `apps/paranza-server` | **Done** | **Done (local; scoped)** | N/A (no logger) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** |
+| peerlo | `peerlo-api` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** |
+| pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local; main HTTP)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** |
+| pezzottify-downloader | Puppeteer API and downloader HTTP server | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; Puppeteer)** | **Done (local; both HTTP routers)** | N/A (assessed) | N/A (assessed) | **Done (local; both routers)** | **Done (local; scoped)** |
+| quentin-torrentino | `crates/server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** |
+| sct | `sct-server` | **Done** | **Done (scoped)** | N/A (no logger) | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** |
+| simple-agents | `simple-agents-service`; runner-shell logging; associated coding test servers | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local pilot; service routes)** | **Done (local; scoped canary)** | N/A (assessed) | **Done (local; scoped)** |
+| simple-ai | `backend`, `inference-runner` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local; backend)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** |
 
 ## Step 1: Axum centralization
 
@@ -1262,7 +1262,7 @@ behavior changes are claimed for those assessments.
 | --- | --- | --- |
 | androidoscopy | master `f4461a81` | server/src/control.rs and dashboard.rs: auth/HTTP/WebSocket routes and MIME-only asset responses; no explicit cache/security-header policy. |
 | lellostore | master `54615a10` | backend/src/main.rs and api/{file_response,static_files}.rs: headers describe media type, lengths, disposition and ranges; no explicit cache/security-header policy. File/range handling remains outside 04b. |
-| observo | master `ef3bff39` | observo-server routes/main and routes/plugins.rs: dynamic plugin response forwarding and MIME construction, with no local cache/security-header policy. Upstream header forwarding is not header-policy adoption. |
+| observo | master `ef3bff39` | observo-server routes/main and routes/plugins.rs: dynamic plugin response forwarding and MIME construction, with no local cache/security-header policy. Upstream header forwarding is not header-policy adoption. |N/A (no served probe) |
 | paranza | master `2bd528f7` | apps/paranza-server/src/main.rs: API and PCM protocol/header conversion, no response cache/security-header policy. |
 | peerlo | master `907c9ad2` | crates/peerlo-api/src/lib.rs and routes.rs: auth, rate limiting, tracing and CORS, without response cache/security-header policy. |
 | pezzottify-downloader | master `2bf0158a` | downloader/http_server.rs and puppeteer/{proxy,correlation}.rs: media/transport headers and proxy/correlation propagation; no cache/security-header policy. CORS is separate. |
@@ -1485,7 +1485,7 @@ was used for delegated work.
 | --- | --- | --- | --- |
 | lellostore | Outermost backend CORS: any origin/request header; exactly GET/POST/PUT/DELETE; no credentials, exposed headers or max-age. | Baseline 135 tests; strengthened production-router assertion passed on both legacy and shared policy, including a fail-closed 503 and preflight short-circuit. Final all-feature suite **136 passed, two ignored doctests**; strict all-target/all-feature Clippy passes. Existing ignored frontend assets were copied after the initial all-feature build reported their absence. | `7abeb7a2597acca4f8e2d140aea460ca0e4da394` |
 | fausto | Configured comma-separated origins with existing invalid-entry filtering; six methods and four request headers; no credentials/exposed headers/max-age; trace/correlation placement unchanged. | Existing baseline CORS audit passed. Strengthened real-router tests cover configured/denied origins and exact methods/headers. Final server-package suite **203 passed, one ignored doctest**. All-target Clippy completes with warnings capped; existing lint debt remains. | `cb8f077886849865452256938b6d243fb6e7e74c` |
-| observo | Protected-route tree only: wildcard origins/methods/request/exposed headers, no credentials; public routes stay outside CORS, auth/body-limit stay inside. | Baseline route tests: 47 passed. Final server suite **92 passed**; new policy test distinguishes preflight from ordinary exposed headers. All-target Clippy completes with warnings capped. | `86d28f401fc4fa5236b30dc26c310e8ce3262684` |
+| observo | Protected-route tree only: wildcard origins/methods/request/exposed headers, no credentials; public routes stay outside CORS, auth/body-limit stay inside. | Baseline route tests: 47 passed. Final server suite **92 passed**; new policy test distinguishes preflight from ordinary exposed headers. All-target Clippy completes with warnings capped. | `86d28f401fc4fa5236b30dc26c310e8ce3262684` |N/A (no served probe) |
 | peerlo | Conditional production server plus both CORS router helpers: wildcard origins/methods/request headers, no exposed headers/credentials; original auth/rate-limit order retained. | Three baseline CORS tests pass with socket permission (initial sandbox run denied two local binds). Final peerlo-api suite **167 passed**, including real loopback startup and combined rate-limit paths. All-target Clippy completes with warnings capped. | `067c2a71354d73ee803235869c49afc296c75557` |
 | pezzottflix | Wildcard origins/methods/request/exposed headers; no credentials/max-age; compression/security-header placement retained. | Existing production-router CORS test passed before migration and was strengthened for OPTIONS status and ordinary exposed headers. Final server suite **537 passed, three ignored**; capped all-target Clippy passes. Shared tower-http 0.6.11 CORS is added alongside retained 0.5 dependencies for other middleware. | `1e1a94a80b3843b3d54a3cdcaec805de924cea45` |
 | pezzottify-downloader | Puppeteer exact configured/empty origin list, GET/POST/OPTIONS and four request headers; downloader any origin/header but GET/OPTIONS only. Neither exposes headers or enables credentials/max-age. Existing trace/correlation placement retained. | Baseline parser tests passed. Three differential tests compare old tower-http 0.5 CORS with shared 0.6 behavior, plus tests of both production policies. Full package suite **166 passed, one ignored** and capped all-target Clippy pass, including a full rerun after worktree recovery. Existing formatting debt is retained and diff checks pass. | `22103243f75c0f6c8ad75f732c6dbbbd5c1ab122` |
@@ -1535,8 +1535,8 @@ The [contract and source inventory](step-05-health.md) define the optional `heal
 module, implemented in `44a9fa24c122f3ac93d930813b320abd099cbb79` on `main`.
 Shared checks run in order, stop at the first original application error, and
 retain application-owned response rendering. No implicit deadlines or lifecycle
-policy. **One Done (Favzetto), sixteen Pending.** Pending includes services not
-yet fully assessed; this inventory does not imply every service needs readiness.
+policy. **Canary milestone: one Done (Favzetto).** The subsequent rollout is complete:
+**14 Done, 3 N/A, zero Pending**; see the per-service record below.
 
 Shared verification: baseline 63 tests/doctests passed; final 68 passed, strict
 all-target/all-feature Clippy and formatting passed. Four health tests also pass
@@ -1575,29 +1575,101 @@ no-feature compilation passes. Documentation links and HTML script syntax checke
   are in Favzetto's `docs/step-05-health.md`. No push or deployment.
 
 
-## Step 05 rollout
+## Step 05 rollout — complete locally
 
-Rollout in progress using three `gpt-5.6-sol` agents at low reasoning effort.
-The coordinator owns both central trackers; agents own disjoint repositories.
-Reviewed library: `44a9fa24c122f3ac93d930813b320abd099cbb79` (current
-`138325a` is a documentation-only descendant). Each applicable service uses an
-isolated migration worktree, commits and verifies adoption, then rebases its
-active development branch onto the migration and removes its own temporary
-worktree/branch. No push or deployment is authorized.
+**14 adopted, 3 N/A, zero Pending.** Three `gpt-5.6-sol` agents at low reasoning
+effort assessed disjoint repositories and prepared migrations; the coordinator
+reviewed patches, ran blocked child mutations/checks, integrated branches, and
+owned both trackers. Child approval stalls required parent execution; they were
+not source failures. No pushes or deployments.
 
-### Pezzottify — N/A
+The final shared revision is `ed245d2d46e9d29aeee7be5202f3a8b8113c9caf`.
+It adds backward-compatible `Check<E, T = ()>::run()` so detailed aggregate
+reports survive healthy and unhealthy outcomes without duplicate polling or
+mutable side channels. Unit-valued Probe checks remain unchanged. Verified
+**69 all-feature tests/doctests**, **five minimal-feature health tests**, strict
+all-target/all-feature Clippy, and formatting. Favzetto's earlier canary record
+above retains its original reviewed revision and evidence.
 
-Active `dev` at `a25b0c3aa65c543f6ddc220f4f7105aafdfb365d`, original checkout
-clean. Source audit of production route composition and bootstrap finds no
-served liveness or readiness endpoint. `/metrics` is telemetry; outbound
-downloader health checks are client operations, not served health probes.
-No artificial endpoint or health feature added. No implementation, migration
-branch or tests required for this source-only assessment. Existing unrelated
-worktree preserved.
+### Consumer commits and verification
 
-### Shared extension during rollout
+All test counts below describe the stated scope, not an unqualified full product
+suite. Most runs used offline Cargo, two jobs, debug information disabled, and
+isolated temporary build targets; socket tests required local network permission.
+Consumer Clippy and full workspace/browser/container/deployment suites were not
+generally rerun. Existing formatting/lint debt was preserved and is not presented
+as passing. Per-service `docs/step-05-health.md` records implementation details;
+Favzetto's canary evidence remains above.
 
-Value-preserving `Check<E, T = ()>::run()` retains complete aggregate health
-reports on success and failure (required by Simple AI's runner). No change to
-existing unit-valued `Probe` behavior. Verified 69 all-feature tests/doctests,
-five minimal-feature tests, strict all-target/all-feature Clippy and formatting.
+| Service | Development base at start | Integrated migration commit | Verified scope |
+| --- | --- | --- | --- |
+| crumbles | `master` / `433d709` | `c35fa3f297ba0ca2789d7557234b4aa7b374ed62` | Baseline 533 server tests passed, 2 ignored; final 534 passed, 2 ignored. Added HEAD suppression and POST 405/Allow; existing correlation, headers, metrics and CORS covered. Formatting/diff clean. |
+| lello-auth | `master` / `b1827fd` | `5215f6d6e55d6388072255c27f7d4f161a201a6f` | Baseline two focused tests; final 22 server tests (13 unit and 3 each configuration, lifecycle process, logging). Liveness and composite database/signing readiness retain independent result fields. Changed-file formatting passed. |
+| lellostore | `master` / `7abeb7a` | `c3a3f7f2cdc811232cfbfa8c022bd54bd32761cf` | Baseline health 1; final health 1, authentication 10, HTTP tracing 1. Failed OIDC still leaves liveness public. Formatting/diff passed. |
+| fausto | `master` / `cb8f077` | `4ccfb9cee540992aacb46511acbb0f56c2f758e7` | Baseline production health 1; final health 1 plus HTTP tracing 1. Version JSON, OpenAPI, auth exemption and middleware retained. Formatting/diff passed. |
+| meteonesto | `master` / `6d0eb45` | `6d032afedc8ee948be47dd6aeeec916a2d9a382c` | API 2 health tests, gateway 1 health-boundary test, pipeline liveness 1 and readiness recovery/shutdown 1 passed. Component checks passed with Rust 1.97.1; pipeline lock updated offline. Metrics, OIDC/upstream timeout and correlation preserved. |
+| sct | `master` / `b7d8230` | `b34840dbf7dbf1939426565acedd068916bf20b4` | Baseline HTTP test compiled but sandbox denied bind; permitted final HTTP test 1/1 and server check passed. Database timeout, writer readiness, 204/503 and text liveness preserved. Changed-file formatting passed. |
+| simple-agents | `main` / `0cf88e2` | `3a106d9efac3852146ff10d74bda924830a7281c` | Focused real-router database readiness/liveness regression 1/1 before and after; formatting passed. Replayed concurrent UI commit; tested Cargo/crates tree unchanged by replay. |
+| simple-ai | `master` / `30ed3ea` | `0523c03277930f2e8bc64ff715779d16e600541c` | Baseline runner health 2; final backend 1 and runner 4. Fake engines verify complete mixed/unhealthy reports, every-engine polling, empty/OCR behavior; GET/HEAD/POST verified. Existing ignored rtx.toml copied unchanged after missing-fixture compile failure; final rerun passed. |
+| peerlo | `master` / `067c2a7` | `e51e4b7444f17073d509d04ca88f531d204a5f5e` | Baseline health 4; final 165 unit + 2 tracing tests. Always-200 degraded/healthy response, uptime, routing, auth, metrics, rate limits and CORS retained. Formatting/diff passed. |
+| paranza | `master` / `2bd528f` | `1c559ee7bde3b510177f93dc979bfe02335d9842` | Baseline health test passed; final full server suite 54 passed, including new real-router success and poisoned-mutex 500 test. Single detailed snapshot and original error mapping retained. Incidental formatting excluded. |
+| pezzottflix | `master` / `1e1a94a` | `f8159f0e19436d5cfba6a785d255a3f0b74bc3ab` | Health-filter baseline/final each 14 passed. Final full API health suite 12 passed (overlaps filter), with added storage failure, database failure vs independent liveness, HEAD/POST tests. Both aggregate dependency results retained. Formatting/diff passed. |
+| pezzottify-downloader | `master` / `2210324` | `620a0af18c5918bb9383f3b57469e1c397ddcc4b` | Baseline health 6; final all-target suite 159 passed, including Unix/public probes, proxy/CORS and real process lifecycle. Both production endpoints migrated; Spotify connection policy unchanged. Existing broad formatting debt preserved. |
+| quentin-torrentino | `master` / `e606414` | `a8a921f3e8014e7996095ad5ea26bcbfc8625633` | Two health tests passed in each baseline/final phase: in-process API and real-server startup. Existing API auth and metrics placement retained. Changed-file formatting/diff passed. |
+
+### Scope and applicability
+
+- **Favzetto:** both production probes, as verified in the earlier canary.
+- **Crumbles, LelloStore, Fausto, Quentin:** existing static production liveness;
+  no dependency readiness or new routes were invented. Crumbles integration
+  daemon has no additional HTTP health route to migrate.
+- **Lello Auth:** production server `/health`, `/health/live`, `/health/ready`.
+  The independently runnable webhook-handler demonstration is not shipped in
+  that server binary and retains its own sample endpoint; no sample adoption
+  is claimed. Both database and signing checks still run on a failed request.
+- **Meteonesto:** weather API, gateway and pipeline control API all migrated.
+- **SCT:** liveness, database and writer readiness in the server; clients only
+  consume probes. Existing archive work is unrelated and was preserved.
+- **Simple Agents:** service `/healthz` and `/readyz`; runner/client/delivery
+  binaries do not serve additional health routes.
+- **Simple AI:** backend liveness and runner aggregate engine health; every
+  engine is still polled and original empty/OCR/any-healthy semantics remain.
+- **Peerlo:** dynamic DHT configuration/uptime snapshot; degraded remains 200.
+- **Paranza:** detailed snapshot including node/runner/activation/freshness data
+  and original store/mutex error handling. No second snapshot or new probe.
+- **Pezzottflix:** aggregate database/storage, independent liveness, database
+  readiness. Aggregate failures still include both results. An unrelated generic
+  monitoring abstraction not installed at these production routes stays local.
+- **Downloader:** public Puppeteer TCP and child downloader Unix HTTP probes.
+
+The following three products have no served production health/readiness contract;
+adding a feature or new endpoint solely to fill the table would not be adoption.
+
+| N/A service | Audited branch/revision | Evidence and documentation |
+| --- | --- | --- |
+| Pezzottify | `dev` / `a25b0c3aa65c543f6ddc220f4f7105aafdfb365d` | Route builder/bootstrap serve application routes and metrics, no dedicated probe. Docker startup polling of `/` is not a probe contract; outbound downloader health calls are client operations. No migration branch or code change; existing paravoid worktree untouched. |
+| Androidoscopy | `master` / `f4461a8155a4461005b72ed6fd752e137774145c` | Legacy dashboard/app WebSocket and v2 controller expose no health route. Source-only assessment committed as `a6648cd8d5ad873ac91dc367639aac48048c78ee`, rebased/integrated, assessment worktree/branch removed. |
+| Observo | `master` / `86d28f401fc4fa5236b30dc26c310e8ce3262684` | Server, content extractor and link scorer expose no probe. Source-only assessment committed as `a2dc0c21de26253862b55997b23b140c9fbbd43c`, rebased/integrated, assessment worktree/branch removed. |
+
+### Integration and remaining limits
+
+Every applicable development branch was rebased **onto** its migration branch.
+Ancestry and the tested tree were verified before deleting each temporary
+worktree and migration branch; documentation-only assessments followed the same
+workflow. Final audit confirms no Step 05 consumer migration worktrees/branches
+remain. Pre-existing unrelated worktrees were not removed.
+
+Simple Agents advanced from `0cf88e2` to UI commit `91b63b0` during migration.
+Its migration is `3a106d9`; replay produced `977c7ce`, with identical tested
+Cargo/crates contents. A recovery ref retains the pre-rebase tip. Later user
+commits may advance the branch further; adoption is verified by ancestry.
+Uncommitted Simple Agents UI changes, SCT archive work, Lello Auth research,
+and Simple AI semantic-evaluation files were preserved. Dirty path lists matched
+before/after integration; no unrelated work was committed by this rollout.
+
+This record covers local implementation and the checks explicitly listed, not
+live deployments, all language clients, every workspace test, or a promise that
+all existing lint/formatting debt is resolved. No extra runtime routes, readiness
+conditions, authentication policies, deadlines or deployment changes were added.
+The coordinator's final tracker commit is integrated into `simple-server/main`
+using the same worktree/rebase/cleanup workflow.

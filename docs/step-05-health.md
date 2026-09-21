@@ -15,7 +15,7 @@ Inventory on 2026-09-21 found these distinct production contracts:
 
 This is a design inventory, not verified adoption or a complete component audit.
 The pilot is Favzetto: it exercises both liveness and ordered dependency checks.
-Other services remain Pending until their complete production scope is assessed.
+The completed rollout is recorded in [the adoption tracker](migration-status.md#step-05-rollout--complete-locally): 14 adopted and 3 N/A after scope assessment.
 
 ## Contract
 
@@ -85,8 +85,8 @@ Favzetto adopted both production endpoints in `14d5b0d` on local `master`.
 Four new health regressions passed against both old and shared implementations.
 232 unit/API/process tests passed; two previously recorded catalog tests fail
 identically to baseline. See the [central evidence](migration-status.md#step-05-health-and-readiness)
-for scope, lint debt, integration, cleanup and checks not rerun. Other consumers
-remain Pending. No push or deployment.
+for scope, lint debt, integration, cleanup and checks not rerun. The subsequent rollout completed the remaining applicable production consumers;
+see the central tracker for per-service scope and limitations. No push or deployment.
 
 ## Rollout extension: value-preserving checks
 
