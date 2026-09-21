@@ -3,7 +3,7 @@
 Status: 03a is locally adopted by 15 products; two products are N/A.
 Module [03b](step-03b-correlation.md) is locally adopted by six products;
 eleven products are N/A after individual assessment. Module
-[03c](step-03c-http-tracing.md) is implemented and canaried in Crumbles; other products await assessment. See the
+[03c](step-03c-http-tracing.md) is locally adopted by nine products; eight are N/A. See the
 [migration status](migration-status.md) for verification and applicability.
 
 Step 03 contains three independently adoptable modules. Each has its own
@@ -13,7 +13,7 @@ contract, tests, and consumer migration evidence.
 | --- | --- | --- |
 | 03a — Logging setup | Explicitly install text, pretty, compact, or JSON logging, with optional filter reload and span events | Usable without HTTP, lifecycle, or a Tokio runtime |
 | 03b — Request correlation | Generate or validate a request ID, expose it to application code, and propagate it in responses | HTTP integration without requiring the shared logging initializer |
-| 03c — HTTP tracing | Request spans, response status, and precisely defined timing | Works with an application-owned tracing subscriber; integrates with correlation when enabled |
+| 03c — HTTP tracing | Request spans, response status, and precisely defined timing | Uses an application-owned subscriber or observer sink; integrates with correlation when enabled |
 
 Applications retain configuration loading, startup order, domain events, audit
 semantics, and error-response formats. Adopting one module does not require
@@ -35,7 +35,8 @@ contracts must be examined during each migration, not replaced implicitly.
 ## Constraints for 03b and 03c
 
 The [03b contract](step-03b-correlation.md) defines its public API and boundaries.
-The following requirements also guide the remaining 03c design.
+The [03c contract](step-03c-http-tracing.md) defines tracing and observer behavior.
+Both modules retain the following constraints.
 
 - One request ID should agree across logs, response headers, and application
   error bodies. Applications provide the error-body integration.

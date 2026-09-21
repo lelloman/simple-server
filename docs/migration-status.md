@@ -16,23 +16,23 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 
 | Project | Server components | 1. Axum centralization | 2. Lifecycle / main() | 03a. Logging | 03b. Correlation | 03c. HTTP tracing |
 | --- | --- | --- | --- | --- | --- | --- |
-| pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | Pending |
+| pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** |
 | favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** | N/A (assessed) | N/A (assessed) |
 | androidoscopy | `server` | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | N/A (assessed) | N/A (assessed) |
 | crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** |
-| fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | Pending |
+| fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local)** |
 | lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) |
-| lellostore | `backend` | **Done** | **Done (local)** | **Done (local)** | N/A (assessed) | Pending |
+| lellostore | `backend` | **Done** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local)** |
 | meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; pipeline/gateway)** | N/A (assessed) |
 | observo | `observo-server`; standalone extractor logging | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) |
 | paranza | `apps/paranza-server` | **Done** | **Done (local; scoped)** | N/A (no logger) | N/A (assessed) | N/A (assessed) |
-| peerlo | `peerlo-api` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | Pending |
-| pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | Pending |
-| pezzottify-downloader | Puppeteer API and downloader HTTP server | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; Puppeteer)** | Pending |
+| peerlo | `peerlo-api` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** |
+| pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local; main HTTP)** |
+| pezzottify-downloader | Puppeteer API and downloader HTTP server | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; Puppeteer)** | **Done (local; both HTTP routers)** |
 | quentin-torrentino | `crates/server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) |
-| sct | `sct-server` | **Done** | **Done (scoped)** | N/A (no logger) | **Done (local; storage-backed HTTP)** | Pending |
+| sct | `sct-server` | **Done** | **Done (scoped)** | N/A (no logger) | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** |
 | simple-agents | `simple-agents-service`; runner-shell logging; associated coding test servers | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) |
-| simple-ai | `backend`, `inference-runner` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | Pending |
+| simple-ai | `backend`, `inference-runner` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local; backend)** |
 
 ## Step 1: Axum centralization
 
@@ -561,7 +561,7 @@ Master was rebased onto the pilot branch, with identical tested tree and ancestr
 verified. The temporary worktree and branch were removed; pre-existing worktrees
 were preserved. No pushes or deployments. The pilot initially left the other
 16 products Pending; the subsequent assessment is recorded below. 03a status
-is unchanged and 03c is implemented with a completed Crumbles canary; other products await assessment.
+is unchanged and 03c is locally adopted by nine products, with eight N/A after assessment.
 
 ## Step 03b rollout applicability
 
@@ -671,7 +671,7 @@ The 03b assessment is complete locally: **six adopted products**, **eleven N/A**
 only their temporary worktrees and branches were removed. Unrelated work was
 preserved, including subsequently committed Pezzottify Android changes and
 Simple Agents runtime-assets work. Nothing was pushed or deployed. Each product's
-verification scope and existing limitations are recorded above; 03c is implemented with a completed Crumbles canary; other products await assessment.
+verification scope and existing limitations are recorded above; 03c is locally adopted by nine products, with eight N/A after assessment.
 
 ## Planned steps
 
@@ -679,7 +679,7 @@ verification scope and existing limitations are recorded above; 03c is implement
 adoptable modules: **03a logging setup**, **03b request correlation**, and
 **03c HTTP tracing**. 03a is implemented; local adoption is recorded per service
 above. 03b rollout is complete with six adopted products and eleven N/A;
-03c is implemented with a completed Crumbles canary; other products await assessment.
+03c is locally adopted by nine products, with eight N/A after assessment.
 The [03a contract](step-03a-logging.md) records the API and pilot compatibility. Completion of one module does not imply completion of Step 03.
 
 Further capabilities include HTTP support, health, background tasks, database helpers,
@@ -761,9 +761,9 @@ callbacks even without a subscriber. The already-integrated Crumbles production
 HTTP and real WebSocket canary tests also pass against this extension; its
 historical source pin is unchanged.
 
-Eight remaining products have actual request tracing/logging to migrate and are
-Pending until tested, committed and integrated: Fausto, LelloStore, SCT,
-Pezzottify, Peerlo, Simple AI, Pezzottflix and the downloader. The following eight
+Eight additional products had actual request tracing/logging and are now migrated:
+Fausto, LelloStore, SCT, Pezzottify, Peerlo, Simple AI, Pezzottflix and the
+downloader. Adoption is recorded only after testing, committing and integration. The following eight
 are N/A after source assessment; no dependencies or application behavior were
 changed merely to enable tracing.
 
@@ -773,11 +773,166 @@ changed merely to enable tracing.
 | LelloAuth | master `d5699c8` | Server security headers, cookies and metrics middleware; HTTP histograms are not request spans/events. Three unrelated research documents preserved. |
 | Androidoscopy | master `f4461a8` | Legacy and control routers have auth/device events, no HTTP lifecycle logger or spans. |
 | Quentin Torrentino | master `e606414` | API middleware records Prometheus request counts/durations only; domain events remain local. |
-| Simple Agents | main `e054d4b` | Browser boundary, auth/session and domain logs; no request lifecycle observer. Existing harness/runner/service/web WIP and other worktrees preserved. |
+| Simple Agents | main `e054d4b`, rechecked at `646f3f1` | Browser boundary, auth/session and domain logs; no request lifecycle observer. Existing harness/runner/service/web work was preserved and subsequently committed externally; production router unchanged. Other worktrees preserved. |
 | Meteonesto | master `9a83f3e` | Weather API metrics, pipeline envelope/audit and gateway metrics/admission/problem diagnostics; selective errors are not a request lifecycle logger. |
 | Observo | master `fd16a9d` | Production router layers body limit, auth and CORS; metrics endpoint and domain logs only. |
 | Paranza | master `2bd528f` | Management API router has no request tracing/logger; runner domain events are separate. |
 
 These N/A assessments used source inspection, not runtime test runs. No service
 worktree or branch was needed for them because no consumer files changed.
-Current rollout: **one Done, eight N/A, eight Pending**. Nothing pushed or deployed.
+Pezzottify `dev` is integrated at **`6998803214f3df5f85a22d54fdb7a19b1f17d158`**,
+from `b82e17d4`, using shared source `adc1640`. Production request logging retains
+None/Path/Headers/Body selection, INFO response-header visibility for all statuses,
+opt-in redacted diagnostics, metrics/bandwidth accounting and separate incident
+IDs. The shared observer replaces request lifecycle events with safe route spans
+and header/body timing; terminal events use the shared default policy.
+
+Baseline: 1,103 library tests pass, two existing ignores. Final: **1,122 passed,
+two ignored** (1,103 library, one actual-wire all-mode tracing, four production
+lifecycle, three route-contract and eleven streaming/range tests). Lifecycle
+checks cover SIGINT/SIGTERM/reboot/bind failure and WebSocket drain. Changed-file
+formatting and diff checks pass. Strict Clippy finds only the unchanged
+`enrichment_store/works.rs:247` `items_after_test_module` finding; all library/test
+targets pass with that single lint exempted and all other warnings denied. Other
+integration suites and Android/browser/container builds were not repeated.
+See Pezzottify's `docs/step-03c-http-tracing.md` for exact commands and boundaries.
+The original development branch was rebased onto the migration, exact tree and
+ancestry verified, temporary worktree/branch removed; checkout clean. No pushes.
+
+Fausto migration is integrated at **`4ad3ff4a7fb36c501f325de278e3faf5d49cd4ef`**
+from `300e884`, using `adc1640`. Its production default Tower tracing layer is
+replaced in place, inside correlation and outside CORS/auth/rate limits/plugins
+and static fallback. HTTP and opaque-ID contracts remain unchanged. Shared safe
+spans and header/body events intentionally replace raw URI / DEBUG Tower output;
+Fausto still owns filtering, audits and metrics. Baseline **199 passed / one
+ignored doctest**, final **200 / one ignored**, including real process signals,
+HTTP draining, logging compatibility and the new production-router 200/405
+safe-field/correlation check. Full formatting and all-target Clippy complete;
+Clippy retains existing repository warnings (not a warning-free claim). README
+and four active CI pins are updated. Frontend/container/external OIDC and separate
+exhaustive WebSocket load checks were not run. Original master is clean. A final
+review found that Fausto's scoped fallback excluded the shared target. Follow-up
+**`7b494b7e1780b83f267ec0a28ff5e42e57eb7d73`** fixes only that fallback by adding
+`simple_server::http_tracing=info`; explicit `RUST_LOG` remains authoritative.
+The real-process regression first reproduced missing events, then passed default,
+service-only and shared-error-only filter cases with real 200/500 responses.
+Seven focused checks pass (router tracing, four process/lifecycle and two logging
+compatibility tests); full formatting, diff and focused Clippy checks pass with
+existing unrelated warnings. The original full suite remains 200/one ignored;
+a full 201-test suite rerun is not claimed. Master was rebased onto the dedicated
+fix branch, exact tree/ancestry verified and its temporary worktree/branch removed.
+Final Fausto master is `7b494b7`, clean.
+
+LelloStore master is integrated at **`d2276292ceb349d03c61bcb54d72554bd2b6528a`**
+from `22881b3`, using `adc1640`. Backend default Tower tracing is replaced outside
+metrics and inside CORS, covering auth/fail-closed API, health/admin and static
+fallback; outer CORS short-circuits and the separate metrics listener retain their
+scope. No IDs/subscriber changes are added. Baseline **133 passed / two ignored
+doctests**, final **134 / two ignored**. The new production-router test covers
+200/405/503, safe fields, no new IDs and no duplicate Tower events; the existing
+suite covers API/file ranges/startup/signals/draining/logging configuration.
+Changed-file formatting and all-target Clippy pass, with no Clippy warnings.
+README and active CI pins are updated. Android/frontend/external OIDC/Docker/APK
+checks were not run. Fourteen unrelated Android/backend WIP files and the entire
+working diff were verified unchanged after integration; those user edits were
+not part of the tested migration tree.
+
+SCT master is integrated at **`3343fbed2fae113f5c5628ae9dad516e244011c4`** from
+`2d1a921`, using `adc1640`. Storage-backed `application()` uses the shared observer
+for header timing and retains its unconditional metadata-only stderr JSON event,
+including request ID and approved error code. Existing metrics keep their labels,
+buckets and header-time active gauge. There is no new subscriber, duplicate
+event, or body-completion output; its observer deliberately leaves completion
+silent. No-storage `router()` and domain/startup/worker/CLI output remain unchanged.
+Baseline **31 passed / 65 PostgreSQL/S3 ignores**, final **33 / 65 ignored**.
+New exact JSON-schema and real-loopback pending-stream tests verify response code,
+ID policy, 405 and metrics at headers without a subscriber. Strict all-feature /
+all-target Clippy, full formatting and diff checks pass. Database-backed router,
+S3/browser/container recovery qualification was not repeated; active user
+qualification fixtures were not touched. Sixteen WIP file hashes and the entire
+working diff were verified unchanged after integration.
+
+All three original masters were rebased onto their dedicated migration commits;
+ancestry and exact tested trees verified, temporary worktrees/branches removed.
+Dirty LelloStore/SCT checkouts were integrated through clean linked worktrees
+without stashing. Pre-existing worktrees remain. Each service's
+`docs/step-03c-http-tracing.md` records commands and boundaries.
+
+Peerlo master is integrated at **`907c9ad246c79fa71ffd905566075301d9bf4708`**
+from `a142552`, using `adc1640`. Production `create_router` replaces both Tower
+tracing and duplicate request events from metrics middleware. It preserves INFO
+headers below 400, WARN for 4xx and ERROR for 5xx; shared body outcomes are separate.
+Metrics retain endpoint normalization/counters/histograms at header creation.
+Outer CORS/auth/rate-limit short-circuit placement is unchanged; no IDs are added.
+Baseline **165 passed**, final **167 passed**. New production-router tests cover
+200/400/503/404/HEAD, safe labels/severity, metrics at headers and one cancellation
+on dropped bodies. Existing loopback HTTP/auth/rate-limit/shutdown tests pass.
+All-target Clippy exits successfully with existing warnings in unchanged code;
+an introduced item-order warning was fixed and Clippy rerun. Changed-file rustfmt
+and diff checks pass. Full workspace and remote tracker/DHT deployment checks
+were not run; repository-wide formatting is not claimed. Original master is clean.
+
+Simple AI master is integrated at **`2b9c6a6165a764c650836b3e89638a58239f1fe8`**
+from `11462d6`, using `adc1640`. The existing backend request middleware delegates
+to shared tracing with an observer preserving INFO header events for all statuses.
+It covers the same gateway/auth/rate-limit/runner-WebSocket-handshake scope;
+inference/audit events remain local, and the inference-runner binary has no
+HTTP tracing layer to migrate. Baseline **310 passed / one ignored doctest**,
+final **312 / one ignored**. New adapter tests cover severity, safe matched routes,
+unchanged headers/bodies, lazy SSE and exactly-once completion/cancellation;
+existing smoke/auth/backend tests pass. All-target Clippy succeeds with 12 backend
+and three common-library warnings in unchanged files, no new adapter/test findings.
+Changed-file formatting/diff checks pass. Full inference-runner, Android, GPU,
+browser and deployed-OIDC checks were not run; full-repository formatting is not
+claimed. All twenty unrelated working files, including README and semantic-scoring
+scripts/docs/fixtures, were verified byte-identical after integration.
+
+Both base masters were rebased onto their dedicated migration branches, exact
+trees and ancestry verified, temporary branches/worktrees removed. Simple AI used
+the clean linked-worktree integration path; existing worktrees are retained.
+Their `simple-server.rev` files and service migration docs record reviewed source.
+
+Pezzottflix master is integrated at **`f0557a29117de03e3abdb10ef6474fa4a514531e`**
+from `39f6b51`, using `adc1640`. The main production router delegates its existing
+request logger to shared observation; the separate metrics listener is unchanged.
+Header severity remains INFO below 500 and WARN for 5xx. Its parent request span
+retains conventional bounded IDs and redacts other opaque IDs in telemetry only;
+HTTP ID semantics remain unchanged. Raw paths/queries become safe route labels,
+with header timing and body completion/error/cancellation/upgrade outcomes.
+Baseline **535 passed / three ignored**, final **536 / three ignored**. New
+telemetry contracts cover severity, ID shapes, privacy, exactly-once events and
+unchanged bodies/headers/extensions. Real-process SIGINT/SIGTERM checks pass,
+including HTTP, metrics, authenticated WebSocket drain and visible, safe tracing.
+Capped all-target Clippy completes with existing 33 library / 37 including unit
+warnings and three integration findings; strict warning-free lint is not claimed.
+Changed Rust modules/tests and whitespace checks pass; unrelated formatting debt
+remains. Browser/frontend builds, external providers and release containers were
+not run.
+
+Pezzottify-downloader master is integrated at
+**`2bf0158a627437fd366163c7458bb8c0de33403b`** from `d61b17d`, using `adc1640`.
+Both downloader-child and Puppeteer HTTP routers replace custom Tower tracing
+with shared observation, preserving their separate severity policies and optional
+numeric content length. Puppeteer retains approved bounded parent-span IDs;
+opaque IDs are redacted only in telemetry. HTTP correlation and body behavior
+remain unchanged. Default filtering enables the shared target, while explicit
+`RUST_LOG` remains authoritative. Baseline **159 passed / one ignored doctest**,
+final **161 / one ignored**. New checks cover both components, status/ID classes,
+content length, privacy and pass-through behavior. Fresh-process filter checks
+and actual Puppeteer HTTP/WebSocket/SIGINT/SIGTERM telemetry checks pass. Capped
+all-target Clippy completes with unchanged 11 library / 12 including unit-test
+warnings; strict warning-free lint is not claimed. New tracing and changed
+logging/test files pass rustfmt; router files retain existing formatting debt.
+Whitespace checks pass. Authenticated Spotify child startup, browser/provider
+workflows and release containers were not exercised.
+
+Both original masters were rebased onto their dedicated migration branches;
+ancestry and identical tested trees verified, temporary worktrees/branches
+removed, original checkouts clean. Their service-local
+`docs/step-03c-http-tracing.md` records behavior and verification limits.
+
+Final rollout: **nine Done, eight N/A, zero Pending**. All implementation and
+consumer migration changes are committed and integrated into the original active
+development branches. Temporary migration worktrees/branches are removed;
+unrelated user work and pre-existing worktrees are preserved. Nothing pushed or
+deployed.
