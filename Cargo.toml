@@ -13,6 +13,7 @@ http = ["dep:axum", "dep:tower-service"]
 lifecycle = ["dep:tokio", "dep:futures-util"]
 logging = ["dep:tracing", "dep:tracing-subscriber"]
 correlation = ["http", "dep:tokio", "dep:rand"]
+body-limit = ["http", "dep:tower-layer"]
 http-tracing = ["http", "dep:tracing", "dep:http-body"]
 http2 = ["http", "axum/http2"]
 macros = ["http", "axum/macros"]
@@ -20,6 +21,7 @@ multipart = ["http", "axum/multipart"]
 ws = ["http", "axum/ws"]
 
 [dependencies]
+tower-layer = { version = "0.3", optional = true }
 http-body = { version = "1", optional = true }
 rand = { version = "0.8", optional = true }
 axum = { version = "=0.8.9", optional = true }

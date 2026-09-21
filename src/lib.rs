@@ -34,3 +34,7 @@ pub mod http_tracing;
 
 #[cfg(all(feature = "lifecycle", feature = "http"))]
 pub mod http;
+
+/// Explicit route-scoped extractor body limits.
+#[cfg(feature = "body-limit")]
+pub mod body_limit;

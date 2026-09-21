@@ -172,3 +172,11 @@ Invalid filters and repeated global initialization return errors. The module
 neither installs a `log` facade bridge nor reads configuration from the environment.
 See the [03a contract](docs/step-03a-logging.md) and
 [standalone example](examples/logging.rs) for output and compatibility details.
+
+## Body limits (Step 04a)
+
+Enable `body-limit` for `simple_server::body_limit::BodyLimit::max(bytes)` and
+apply it explicitly to the intended routes. It preserves existing extractor
+limits and rejection responses without requiring lifecycle or observability.
+Raw request-body readers are not automatically limited; multipart file/part
+policies remain application-owned. See the [contract](docs/step-04a-body-limits.md).

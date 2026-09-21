@@ -774,6 +774,7 @@ dependencies = [
  "serde_json",
  "tokio",
  "tower",
+ "tower-layer",
  "tower-service",
  "tracing",
  "tracing-subscriber",
