@@ -682,6 +682,11 @@ above. 03b rollout is complete with six adopted products and eleven N/A;
 03c is locally adopted by nine products, with eight N/A after assessment.
 The [03a contract](step-03a-logging.md) records the API and pilot compatibility. Completion of one module does not imply completion of Step 03.
 
+The [Step 04 source assessment](step-04-http-policy-assessment.md) proposes optional
+body limits, response-header policies and CORS configuration, based on Crumbles,
+Pezzottify, Meteonesto, Simple AI and Simple Agents. This is a proposal only;
+Step 04 remains planned and no adoption status changes.
+
 Further capabilities include HTTP support, health, background tasks, database helpers,
 authentication, authorization, and rate limiting. The HTML matrix already shows
 these columns as planned; their exact grouping and order remain adjustable.
