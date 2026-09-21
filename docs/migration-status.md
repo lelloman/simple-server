@@ -14,25 +14,25 @@ Optional modules do not have to be adopted by every product.
 
 Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its original dates.
 
-| Project | Server components | 1. Axum centralization | 2. Lifecycle / main() | 03a. Logging | 03b. Correlation |
-| --- | --- | --- | --- | --- | --- |
-| pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) |
-| favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** | N/A (assessed) |
-| androidoscopy | `server` | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | N/A (assessed) |
-| crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** |
-| fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** |
-| lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) |
-| lellostore | `backend` | **Done** | **Done (local)** | **Done (local)** | N/A (assessed) |
-| meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; pipeline/gateway)** |
-| observo | `observo-server`; standalone extractor logging | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) |
-| paranza | `apps/paranza-server` | **Done** | **Done (local; scoped)** | N/A (no logger) | N/A (assessed) |
-| peerlo | `peerlo-api` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) |
-| pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** |
-| pezzottify-downloader | Puppeteer API and downloader HTTP server | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; Puppeteer)** |
-| quentin-torrentino | `crates/server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) |
-| sct | `sct-server` | **Done** | **Done (scoped)** | N/A (no logger) | **Done (local; storage-backed HTTP)** |
-| simple-agents | `simple-agents-service`; runner-shell logging; associated coding test servers | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) |
-| simple-ai | `backend`, `inference-runner` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) |
+| Project | Server components | 1. Axum centralization | 2. Lifecycle / main() | 03a. Logging | 03b. Correlation | 03c. HTTP tracing |
+| --- | --- | --- | --- | --- | --- | --- |
+| pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | Pending |
+| favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** | N/A (assessed) | Pending |
+| androidoscopy | `server` | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | N/A (assessed) | Pending |
+| crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | Pending |
+| fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | Pending |
+| lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | Pending |
+| lellostore | `backend` | **Done** | **Done (local)** | **Done (local)** | N/A (assessed) | Pending |
+| meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; pipeline/gateway)** | Pending |
+| observo | `observo-server`; standalone extractor logging | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | Pending |
+| paranza | `apps/paranza-server` | **Done** | **Done (local; scoped)** | N/A (no logger) | N/A (assessed) | Pending |
+| peerlo | `peerlo-api` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | Pending |
+| pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | Pending |
+| pezzottify-downloader | Puppeteer API and downloader HTTP server | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; Puppeteer)** | Pending |
+| quentin-torrentino | `crates/server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | Pending |
+| sct | `sct-server` | **Done** | **Done (scoped)** | N/A (no logger) | **Done (local; storage-backed HTTP)** | Pending |
+| simple-agents | `simple-agents-service`; runner-shell logging; associated coding test servers | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | Pending |
+| simple-ai | `backend`, `inference-runner` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | Pending |
 
 ## Step 1: Axum centralization
 
@@ -561,7 +561,7 @@ Master was rebased onto the pilot branch, with identical tested tree and ancestr
 verified. The temporary worktree and branch were removed; pre-existing worktrees
 were preserved. No pushes or deployments. The pilot initially left the other
 16 products Pending; the subsequent assessment is recorded below. 03a status
-is unchanged and 03c remains planned.
+is unchanged and 03c is implemented; its Crumbles canary is in progress.
 
 ## Step 03b rollout applicability
 
@@ -671,7 +671,7 @@ The 03b assessment is complete locally: **six adopted products**, **eleven N/A**
 only their temporary worktrees and branches were removed. Unrelated work was
 preserved, including subsequently committed Pezzottify Android changes and
 Simple Agents runtime-assets work. Nothing was pushed or deployed. Each product's
-verification scope and existing limitations are recorded above; 03c remains planned.
+verification scope and existing limitations are recorded above; 03c is implemented; its Crumbles canary is in progress.
 
 ## Planned steps
 
@@ -679,7 +679,7 @@ verification scope and existing limitations are recorded above; 03c remains plan
 adoptable modules: **03a logging setup**, **03b request correlation**, and
 **03c HTTP tracing**. 03a is implemented; local adoption is recorded per service
 above. 03b rollout is complete with six adopted products and eleven N/A;
-03c remains planned.
+03c is implemented; its Crumbles canary is in progress.
 The [03a contract](step-03a-logging.md) records the API and pilot compatibility. Completion of one module does not imply completion of Step 03.
 
 Further capabilities include HTTP support, health, background tasks, database helpers,
@@ -691,3 +691,7 @@ The initial scope is the 17 Axum-based products inventoried in this workspace.
 Custom servers in `rns-rs` and `lxmf-rs`, and embedded servers in `librespot` and
 `wgtransport`, are not currently scheduled for this migration. They can be added
 if adoption of an independent `simple-server` module becomes useful.
+
+## Step 03c: HTTP tracing
+
+The opt-in `http-tracing` module is implemented; see the [contract](step-03c-http-tracing.md). Consumer adoption remains Pending until verified and integrated. Crumbles is the first canary: its main server installs `TraceLayer::new_for_http()` and an application correlation span. Baseline server tests pass: 529 passed, two existing ignores.

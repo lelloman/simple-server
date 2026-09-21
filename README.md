@@ -53,14 +53,16 @@ versions. Exact Axum uniformity requires the same pin across the adopted
 
 ## Initial scope
 
-Lifecycle, logging and request correlation helpers are available now; HTTP tracing remains planned.
+Lifecycle, logging, request correlation and HTTP tracing helpers are available now.
 
 [Step 03: observability](docs/step-03-observability.md) is split into independently
 adoptable logging setup (03a), request correlation (03b), and HTTP tracing (03c).
 [03a: logging setup](docs/step-03a-logging.md) is implemented, with verified
 adoption and compatibility exceptions in the [migration matrix](docs/migration-status.html).
 [03b: request correlation](docs/step-03b-correlation.md) is implemented;
-03c remains planned. Consumer adoption is tracked separately for each module.
+[03c: HTTP tracing](docs/step-03c-http-tracing.md) provides optional safe request
+spans and response-body lifecycle events via `http-tracing`. Consumer adoption is
+tracked separately for each module.
 
 - Listener setup, shutdown signals, graceful shutdown, and shutdown deadlines.
 - Structured logging, request IDs, and HTTP tracing.

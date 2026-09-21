@@ -9,7 +9,8 @@ extraction, its implemented API, shutdown contract, and pilot acceptance checks.
 modules: logging setup (03a), request correlation (03b), and HTTP tracing (03c).
 The [03a contract](step-03a-logging.md) describes the implemented logging module and
 Favzetto pilot. The [03b contract](step-03b-correlation.md) defines request IDs
-and the Crumbles compatibility pilot; the 03c contract will follow separately.
+and the Crumbles compatibility pilot. The [03c contract](step-03c-http-tracing.md)
+defines request spans and response-body lifecycle events.
 
 ## Composition
 

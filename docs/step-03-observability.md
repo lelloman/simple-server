@@ -2,7 +2,8 @@
 
 Status: 03a is locally adopted by 15 products; two products are N/A.
 Module [03b](step-03b-correlation.md) is locally adopted by six products;
-eleven products are N/A after individual assessment. Module 03c remains planned. See the
+eleven products are N/A after individual assessment. Module
+[03c](step-03c-http-tracing.md) is implemented; its Crumbles canary is in progress. See the
 [migration status](migration-status.md) for verification and applicability.
 
 Step 03 contains three independently adoptable modules. Each has its own
