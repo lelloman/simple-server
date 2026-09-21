@@ -1722,3 +1722,8 @@ pass. The existing health rustdoc link was qualified to fix its resolution error
 Socket and child-signal tests were verified outside the sandbox; the sandboxed
 signal-child attempt timed out. No production/deployment checks or consumer
 adoption are claimed.
+
+Reviewed Step 06 library revision: `2ee010ecc59ca2443cb09bbf5eb828dbb68a082b`.
+Stage commits: 06a `44fe8d1`, 06b `44f7688`, 06c `2ee010e`.
+All three used dedicated worktree branches from the established `main` branch.
+The verification-record commit changes only the two central trackers.
