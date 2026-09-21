@@ -60,6 +60,13 @@ of that body. Place tracing around intended auth/rejection paths; middleware tha
 short-circuits outside it is not observed. Remove equivalent existing request
 logging when adopting, avoiding duplicate request events.
 
+Check application logging filters as well as router wiring. If the default
+filter enables only the application's target, include the new shared target so
+adoption is observable. Explicit user filters and runtime request-logging
+switches remain authoritative. Keep opt-in redacted header/body diagnostics,
+domain events, audits and metric boundaries application-owned; replacing
+request lifecycle logging must not silently disable those behaviors.
+
 This API is infallible like Axum middleware: service failures must become HTTP
 responses before returning. Body outcomes are independent of HTTP status: a 500
 response can have a completely transmitted body. It does not inspect domain errors,

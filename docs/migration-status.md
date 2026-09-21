@@ -17,21 +17,21 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | Project | Server components | 1. Axum centralization | 2. Lifecycle / main() | 03a. Logging | 03b. Correlation | 03c. HTTP tracing |
 | --- | --- | --- | --- | --- | --- | --- |
 | pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | Pending |
-| favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** | N/A (assessed) | Pending |
-| androidoscopy | `server` | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | N/A (assessed) | Pending |
+| favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** | N/A (assessed) | N/A (assessed) |
+| androidoscopy | `server` | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | N/A (assessed) | N/A (assessed) |
 | crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** |
 | fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | Pending |
-| lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | Pending |
+| lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) |
 | lellostore | `backend` | **Done** | **Done (local)** | **Done (local)** | N/A (assessed) | Pending |
-| meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; pipeline/gateway)** | Pending |
-| observo | `observo-server`; standalone extractor logging | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | Pending |
-| paranza | `apps/paranza-server` | **Done** | **Done (local; scoped)** | N/A (no logger) | N/A (assessed) | Pending |
+| meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; pipeline/gateway)** | N/A (assessed) |
+| observo | `observo-server`; standalone extractor logging | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) |
+| paranza | `apps/paranza-server` | **Done** | **Done (local; scoped)** | N/A (no logger) | N/A (assessed) | N/A (assessed) |
 | peerlo | `peerlo-api` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | Pending |
 | pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | Pending |
 | pezzottify-downloader | Puppeteer API and downloader HTTP server | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; Puppeteer)** | Pending |
-| quentin-torrentino | `crates/server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | Pending |
+| quentin-torrentino | `crates/server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) |
 | sct | `sct-server` | **Done** | **Done (scoped)** | N/A (no logger) | **Done (local; storage-backed HTTP)** | Pending |
-| simple-agents | `simple-agents-service`; runner-shell logging; associated coding test servers | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | Pending |
+| simple-agents | `simple-agents-service`; runner-shell logging; associated coding test servers | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) |
 | simple-ai | `backend`, `inference-runner` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | Pending |
 
 ## Step 1: Axum centralization
@@ -745,5 +745,39 @@ The dedicated worktree/branch started from clean active master `91a1cb8`.
 master rebased onto it, and ancestry plus exact tree equality verified. Original
 checkout is clean; the temporary worktree and branch are removed. Pre-existing
 worktrees/branches are retained. See Crumbles' `docs/step-03c-http-tracing.md`.
-Both trackers now show **one Done canary and sixteen Pending assessments**.
+At pilot completion, both trackers showed **one Done canary and sixteen Pending assessments**; the rollout assessment below supersedes those counts.
 No pushes or deployments were performed.
+
+## Step 03c rollout assessment
+
+Reviewed shared source `adc1640bde4ac8f934ed454c8d6c5e264a6a2790` adds
+`trace_with_observer`, preserving application-owned event sinks, response fields
+and severity without installing a subscriber or duplicating HTTP events. The
+safe span and body lifecycle remain shared. `trace` retains its default behavior.
+Full `scripts/check` passes, including 14 HTTP tracing contract tests (12 without
+correlation), strict Clippy, formatting and documentation. Observer tests verify
+read-only response metadata, replacement of default events, and terminal
+callbacks even without a subscriber. The already-integrated Crumbles production
+HTTP and real WebSocket canary tests also pass against this extension; its
+historical source pin is unchanged.
+
+Eight remaining products have actual request tracing/logging to migrate and are
+Pending until tested, committed and integrated: Fausto, LelloStore, SCT,
+Pezzottify, Peerlo, Simple AI, Pezzottflix and the downloader. The following eight
+are N/A after source assessment; no dependencies or application behavior were
+changed merely to enable tracing.
+
+| Product | Development branch / assessed commit | Applicability evidence |
+| --- | --- | --- |
+| Favzetto | master `eda9fc0` | Backend final router has rate-limit and body-limit layers; domain events but no request-wide tracing/logger. |
+| LelloAuth | master `d5699c8` | Server security headers, cookies and metrics middleware; HTTP histograms are not request spans/events. Three unrelated research documents preserved. |
+| Androidoscopy | master `f4461a8` | Legacy and control routers have auth/device events, no HTTP lifecycle logger or spans. |
+| Quentin Torrentino | master `e606414` | API middleware records Prometheus request counts/durations only; domain events remain local. |
+| Simple Agents | main `e054d4b` | Browser boundary, auth/session and domain logs; no request lifecycle observer. Existing harness/runner/service/web WIP and other worktrees preserved. |
+| Meteonesto | master `9a83f3e` | Weather API metrics, pipeline envelope/audit and gateway metrics/admission/problem diagnostics; selective errors are not a request lifecycle logger. |
+| Observo | master `fd16a9d` | Production router layers body limit, auth and CORS; metrics endpoint and domain logs only. |
+| Paranza | master `2bd528f` | Management API router has no request tracing/logger; runner domain events are separate. |
+
+These N/A assessments used source inspection, not runtime test runs. No service
+worktree or branch was needed for them because no consumer files changed.
+Current rollout: **one Done, eight N/A, eight Pending**. Nothing pushed or deployed.
