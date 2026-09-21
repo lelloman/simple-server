@@ -1,8 +1,8 @@
 # Step 04 proposal: HTTP request and response policies
 
 Status: module split accepted. [04a body limits](step-04a-body-limits.md) is
-implemented; see the [adoption tracker](migration-status.md) for pilot/canary
-verification. 04b/04c remain planned. The source assessment below itself involved
+implemented and rolled out locally; see the [adoption tracker](migration-status.md)
+for applicability and verification evidence. 04b/04c remain planned. The source assessment below itself involved
 no runtime tests.
 
 The old “HTTP support” roadmap label conflates unrelated concerns. The five
@@ -93,6 +93,6 @@ headers before migration. Keep it optional even if 04a/04b are adopted.
 - **Authentication/CSRF, health, metrics and rate limiting:** retain their existing
   dedicated scope; do not fold them into generic HTTP policy helpers.
 
-The matrix now separates 04a, 04b and 04c. Qualify the 04a pilot and second canary,
-then assess every consumer before scheduling a rollout. Define separate contracts
-for 04b/04c before implementation.
+The matrix separates 04a, 04b and 04c. The 04a rollout is complete locally, with
+eleven products adopted and six assessed N/A. Define separate contracts for
+04b/04c before implementation.

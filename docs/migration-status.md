@@ -17,22 +17,22 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | Project | Server components | 1. Axum centralization | 2. Lifecycle / main() | 03a. Logging | 03b. Correlation | 03c. HTTP tracing | 04a. Body limits | 04b. Response headers | 04c. CORS |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local canary)** | Planned | Planned |
-| favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** | N/A (assessed) | N/A (assessed) | Pending | Planned | Planned |
-| androidoscopy | `server` | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | N/A (assessed) | N/A (assessed) | Pending | Planned | Planned |
-| crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** | Pending | Planned | Planned |
-| fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local)** | Pending | Planned | Planned |
-| lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | Pending | Planned | Planned |
-| lellostore | `backend` | **Done** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local)** | Pending | Planned | Planned |
-| meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; pipeline/gateway)** | N/A (assessed) | Pending | Planned | Planned |
-| observo | `observo-server`; standalone extractor logging | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | Pending | Planned | Planned |
-| paranza | `apps/paranza-server` | **Done** | **Done (local; scoped)** | N/A (no logger) | N/A (assessed) | N/A (assessed) | Pending | Planned | Planned |
-| peerlo | `peerlo-api` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | Pending | Planned | Planned |
-| pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local; main HTTP)** | Pending | Planned | Planned |
-| pezzottify-downloader | Puppeteer API and downloader HTTP server | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; Puppeteer)** | **Done (local; both HTTP routers)** | Pending | Planned | Planned |
-| quentin-torrentino | `crates/server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | Pending | Planned | Planned |
-| sct | `sct-server` | **Done** | **Done (scoped)** | N/A (no logger) | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | Pending | Planned | Planned |
+| favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | Planned | Planned |
+| androidoscopy | `server` | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | Planned | Planned |
+| crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** | **Done (local; scoped)** | Planned | Planned |
+| fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local)** | N/A (assessed) | Planned | Planned |
+| lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | Planned | Planned |
+| lellostore | `backend` | **Done** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local; scoped)** | Planned | Planned |
+| meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; pipeline/gateway)** | N/A (assessed) | **Done (local; scoped)** | Planned | Planned |
+| observo | `observo-server`; standalone extractor logging | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | Planned | Planned |
+| paranza | `apps/paranza-server` | **Done** | **Done (local; scoped)** | N/A (no logger) | N/A (assessed) | N/A (assessed) | N/A (assessed) | Planned | Planned |
+| peerlo | `peerlo-api` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | N/A (assessed) | Planned | Planned |
+| pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local; main HTTP)** | **Done (local; scoped)** | Planned | Planned |
+| pezzottify-downloader | Puppeteer API and downloader HTTP server | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; Puppeteer)** | **Done (local; both HTTP routers)** | N/A (assessed) | Planned | Planned |
+| quentin-torrentino | `crates/server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | Planned | Planned |
+| sct | `sct-server` | **Done** | **Done (scoped)** | N/A (no logger) | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | Planned | Planned |
 | simple-agents | `simple-agents-service`; runner-shell logging; associated coding test servers | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local pilot; service routes)** | Planned | Planned |
-| simple-ai | `backend`, `inference-runner` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local; backend)** | Pending | Planned | Planned |
+| simple-ai | `backend`, `inference-runner` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local; backend)** | **Done (local; scoped)** | Planned | Planned |
 
 ## Step 1: Axum centralization
 
@@ -998,7 +998,166 @@ Original dev was rebased onto the dedicated migration branch; ancestry and
 identical tested tree were verified, temporary worktree/branch removed and
 original checkout clean. See its `docs/step-04a-body-limits.md` for exact scope.
 
-04a totals: **two Done, fifteen Pending assessment/migration**. The five-service
+At pilot completion, 04a totals were **two Done, fifteen Pending assessment/migration**;
+the rollout record below supersedes these counts. The five-service
 inventory establishes additional candidates, not completed migrations or N/A.
 04b/04c remain Planned. Shared implementation, pilot and canary are committed and
 integrated into their original development branches. Nothing pushed or deployed.
+
+## Step 04a remaining-service rollout
+
+The following six products have no explicit extractor body-limit policy to migrate.
+Framework defaults remain in effect; protocol limits, raw-body reads and bandwidth
+settings are not replaced with extractor middleware. Assessments used production
+source inspection, not runtime test runs. No consumer files changed.
+
+| Product | Branch / inspected commit | Evidence |
+| --- | --- | --- |
+| androidoscopy | master `f4461a81` | Legacy WebSocket routers and control::router auth layer have no explicit extractor limit. |
+| fausto | master `7b494b7e` | server/src/api/mod.rs composes auth/rate limits, CORS, tracing and plugins without explicit extractor limits. |
+| paranza | master `2bd528f7` | apps/paranza-server/src/main.rs::api_router defines management routes and state without a body-limit layer. |
+| peerlo | master `907c9ad2` | peerlo-api create_router/start_server installs metrics, tracing, auth, rate limiting and optional CORS without an extractor limit. |
+| pezzottify-downloader | master `2bf0158a` | Both production HTTP routers install CORS/tracing (Puppeteer also correlation); no explicit extractor limit. Proxy body handling is separate. |
+| quentin-torrentino | master `e6064149` | crates/server/src/api/routes.rs composes auth, metrics and static fallback without an extractor limit; torrent bandwidth limits are unrelated. |
+
+Nine additional products have explicit limits. Their verification and integration
+evidence follows. All use reviewed shared source `0b94575`; no shared-library
+changes were needed for this rollout.
+
+### crumbles
+
+Migration **`f74f6a8b5e9fd865b99f79370e29a7f3d59f4f0f`**, based on master `4a44b330`.
+Main HTTP upload ceiling (configured upload size plus multipart overhead), setup ceiling and Simple Agents browser proxy ceiling. All three declarations preserve exact values and placement.
+
+Baseline: 588 passed, two ignored in the crumbles binary suite. Final: 589 passed, two ignored. New production setup-route boundary regression passed before and after migration: below/at/above limits, declared/absent lengths, correlated 413 code and response header. Initial fixture lacked required same-origin headers; corrected before migration. Existing ignored web/dist assets were copied for compile-time embedding; no fresh frontend build.
+
+Strict all-target package Clippy passes. Changed-file formatting and whitespace checks pass.
+Other workspace packages, full release/frontend/container builds and external providers were not rerun.
+
+Original master rebased onto the migration; ancestry and identical tested tree
+verified, temporary branch/worktree removed. 0 unrelated working files
+were preserved byte-for-byte; staged/unstaged status also verified unchanged.
+See its service-local `docs/step-04a-body-limits.md` for commands and scope.
+
+### favzetto
+
+Migration **`22b6a2d2fb356079982ea63d8df17e6a53395f6c`**, based on master `eda9fc0a`.
+The backend router retains its existing 128 MiB extractor limit outside rate limiting. No global policy changes or new limit is introduced.
+
+Both baseline and migrated runs: 131 unit tests and 93 API tests pass; the same two API tests fail: catalog_research_runtime_bridge_approves_runtime_draft and catalog_research_runtime_bridge_rejects_runtime_draft. Both reject transitions from terminal catalog flows with the same messages/statuses. Cargo stops at that failing integration target, so later targets are not claimed. Existing ignored web/dist assets were copied for compile-time embedding.
+
+All-target Clippy completes with capped warnings; existing catalog/runtime/test warning debt remains. Strict warning-free lint is not claimed. Changed-file formatting and whitespace checks pass.
+The unrelated catalog-flow failures were not fixed. Frontend, Docker, provider workflows and later integration targets were not rerun.
+
+Original master rebased onto the migration; ancestry and identical tested tree
+verified, temporary branch/worktree removed. 0 unrelated working files
+were preserved byte-for-byte; staged/unstaged status also verified unchanged.
+See its service-local `docs/step-04a-body-limits.md` for commands and scope.
+
+### lello-auth
+
+Migration **`758db1b975a338664b3ad99436cf774d8f694005`**, based on master `d5699c81`.
+Three 64 KiB authenticator API/hosted/enrollment declarations. Existing response mapping, no-store and CSRF/auth ordering are retained, including conversion of 413 extractor rejection into 400 invalid_request.
+
+Baseline affected HTTP/server packages: 357 passed. Final: 358 passed. New authenticator regression passes before/after replacement with valid requests padded below/at/above 64 KiB; overflow retains the exact application error JSON and no-store response. Existing authenticator, login, cookie, CSRF and logging tests pass.
+
+Strict Clippy finds existing core large_enum_variant and too_many_arguments warnings. Capped all-target Clippy is used to review remaining targets; existing warnings remain. Changed-file formatting and whitespace checks pass.
+Core-only suites, external OIDC/deployed E2E, browser and container builds were not rerun. Three unrelated research documents are preserved.
+
+Original master rebased onto the migration; ancestry and identical tested tree
+verified, temporary branch/worktree removed. 3 unrelated working files
+were preserved byte-for-byte; staged/unstaged status also verified unchanged.
+See its service-local `docs/step-04a-body-limits.md` for commands and scope.
+
+### lellostore
+
+Migration **`54615a10126284ec8464fc8f6470a5e04d57050b`**, based on master `d2276292`.
+Backend configured multipart request ceiling is unchanged, including its existing overhead calculation and route placement. Per-file/APK validation remains local.
+
+Baseline and final: 134 passed, two ignored doctests. Existing API, upload/file, process, lifecycle and logging tests pass.
+
+Strict all-target Clippy passes. Changed-file formatting and whitespace checks pass.
+Android/frontend/container and external-provider checks were not repeated. Original Android/backend working edits are excluded from the tested migration tree and preserved.
+
+Original master rebased onto the migration; ancestry and identical tested tree
+verified, temporary branch/worktree removed. 14 unrelated working files
+were preserved byte-for-byte; staged/unstaged status also verified unchanged.
+See its service-local `docs/step-04a-body-limits.md` for commands and scope.
+
+### meteonesto
+
+Migration **`685094181f03e9e9fe0d920d03a5f26fc24c66a1`**, based on master `9a83f3e1`.
+Only weather-pipeline control-plane DefaultBodyLimit is replaced, keeping envelope.max_body_bytes. Declared-length checks, admission permits, correlation, problem responses and header-time timeout stay application-owned. Weather API and gateway have no equivalent declaration to migrate.
+
+Baseline and final pipeline suite: 161 passed. Existing HTTP control-plane, envelope timeout/capacity, correlation and application contract suites pass.
+
+Strict all-target pipeline Clippy passes. Changed-file formatting and whitespace checks pass.
+Weather API/gateway suites, Android/renderers, live weather providers and container builds were not rerun.
+
+Original master rebased onto the migration; ancestry and identical tested tree
+verified, temporary branch/worktree removed. 0 unrelated working files
+were preserved byte-for-byte; staged/unstaged status also verified unchanged.
+See its service-local `docs/step-04a-body-limits.md` for commands and scope.
+
+### observo
+
+Migration **`ef3bff39964d0adb6641dd2d659f04ec2c518f43`**, based on master `fd16a9dd`.
+The production server router retains its existing 64 MiB extractor limit. Content-extractor/link-scorer binaries do not acquire body-limit middleware.
+
+Baseline and final server suite: 91 passed. The initial baseline compiler overflowed while building headless_chrome; retry with RUST_MIN_STACK=16777216 passes and the same setting is used after migration.
+
+All-target Clippy completes with capped warnings; existing server/extractor lint debt remains. Strict warning-free lint is not claimed. Changed-file formatting and whitespace checks pass.
+Live headless-browser/provider, frontend and Docker E2E workflows were not rerun.
+
+Original master rebased onto the migration; ancestry and identical tested tree
+verified, temporary branch/worktree removed. 0 unrelated working files
+were preserved byte-for-byte; staged/unstaged status also verified unchanged.
+See its service-local `docs/step-04a-body-limits.md` for commands and scope.
+
+### pezzottflix
+
+Migration **`ca8a370e6a5ce071e818d0e2d57321303c63d9e3`**, based on master `f0557a29`.
+Main production router retains the 100 MiB upload extractor limit at the same layer position. Metrics router, auth, media streams and WebSockets retain their existing behavior.
+
+Baseline and final server suite: 536 passed, three ignored. Existing production HTTP/media, tracing/correlation and lifecycle contract tests pass.
+
+All-target Clippy completes with capped warnings: existing 33 library / 37 including unit-test warnings plus existing integration findings remain. Strict warning-free lint is not claimed. Changed-file formatting and whitespace checks pass.
+Separate real-process lifecycle script, frontend/browser/release-container and external-provider checks were not repeated.
+
+Original master rebased onto the migration; ancestry and identical tested tree
+verified, temporary branch/worktree removed. 0 unrelated working files
+were preserved byte-for-byte; staged/unstaged status also verified unchanged.
+See its service-local `docs/step-04a-body-limits.md` for commands and scope.
+
+### sct
+
+Migration **`90c02a4d7bbea3424084a8fda74fab0d68cfc579`**, based on master `3343fbed`.
+Storage-backed application router retains its explicit 65,536-byte extractor limit. Existing problem response, correlation, auth, content-type and observability behavior remains local. No-storage router has no explicit limit to migrate.
+
+Baseline and migrated sct-server suite: five passed, eleven existing PostgreSQL/S3 integration tests ignored. After preserving the concurrent qualification commit, the combined final tree passes five tests with fifteen ignored, and strict all-target/all-feature Clippy passes again. No database-backed production HTTP qualification is claimed.
+
+Strict all-target/all-feature server Clippy passes. Changed-file formatting and whitespace checks pass.
+Database-backed HTTP, PostgreSQL/S3, browser and container qualification were not repeated. Active original qualification work/staging and pre-existing worktrees/stash are preserved.
+
+Original master rebased onto the migration and now points to **`d3961d4c14bda4d22a6dec5cf0f349511b1c6a16`**. Concurrent developer commit `be48680d` was replayed as `d3961d4`; `git range-diff` verifies its patch is unchanged. Recovery branch `recovery/step04a-before-rebase-be48680d` is retained. Migration ancestry and the combined tested tree were verified; temporary migration worktree and branch removed. Pre-existing worktrees and stash remain untouched.
+See its service-local `docs/step-04a-body-limits.md` for commands and scope.
+
+### simple-ai
+
+Migration **`f511523922aa33231898f7bf8f66e6a872834e04`**, based on master `2b9c6a61`.
+Both production components: backend OCR/extract keep 25 MiB, backend audio 200 MiB; runner OCR 100 MiB and runner audio 200 MiB. All five declarations preserve placement. Domain file validation, inference scheduling, SSE and WebSockets remain local.
+
+Baseline and final: backend 312 passed, one ignored doctest; inference runner 87 passed. Combined final 399 passed, one ignored. Runner compilation initially required the existing ignored scripts/configs/rtx.toml fixture, copied unchanged into the isolated worktree. That local fixture is not committed.
+
+All-target Clippy completes with capped warnings: existing 12 backend, three common and five runner warnings remain. Strict warning-free lint is not claimed. Changed-file formatting and whitespace checks pass.
+GPU/model/provider, Android/browser and container/release workflows were not rerun. Original semantic-evaluation working files are preserved.
+
+Original master rebased onto the migration; ancestry and identical tested tree
+verified, temporary branch/worktree removed. 20 unrelated working files
+were preserved byte-for-byte; staged/unstaged status also verified unchanged.
+See its service-local `docs/step-04a-body-limits.md` for commands and scope.
+
+Final rollout: **eleven Done, six N/A, zero Pending**. All applicable migrations
+are committed, integrated into their development branches, and their temporary
+migration worktrees and branches removed.
+04b/04c remain planned. No pushes or deployments.

@@ -39,5 +39,7 @@ The minimal feature build must work independently of lifecycle and observability
 Simple Agents is the pilot; Pezzottify is the large-upload canary. Migrate actual
 production declarations without changing byte values or placement. Verify on
 original behavior before replacement, then test and integrate dedicated worktrees.
-Other services remain unassessed for 04a rollout. 04b response headers and 04c CORS
-remain planned; their adoption is independent.
+The local rollout is complete: eleven products adopted the shared limit and six
+are N/A after source assessment. See the [adoption tracker](migration-status.md)
+for per-service verification, existing failures and integration evidence.
+04b response headers and 04c CORS remain planned; their adoption is independent.
