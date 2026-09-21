@@ -19,7 +19,7 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | Pending |
 | favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** | N/A (assessed) | Pending |
 | androidoscopy | `server` | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | N/A (assessed) | Pending |
-| crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | Pending |
+| crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** |
 | fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | Pending |
 | lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | Pending |
 | lellostore | `backend` | **Done** | **Done (local)** | **Done (local)** | N/A (assessed) | Pending |
@@ -561,7 +561,7 @@ Master was rebased onto the pilot branch, with identical tested tree and ancestr
 verified. The temporary worktree and branch were removed; pre-existing worktrees
 were preserved. No pushes or deployments. The pilot initially left the other
 16 products Pending; the subsequent assessment is recorded below. 03a status
-is unchanged and 03c is implemented; its Crumbles canary is in progress.
+is unchanged and 03c is implemented with a completed Crumbles canary; other products await assessment.
 
 ## Step 03b rollout applicability
 
@@ -671,7 +671,7 @@ The 03b assessment is complete locally: **six adopted products**, **eleven N/A**
 only their temporary worktrees and branches were removed. Unrelated work was
 preserved, including subsequently committed Pezzottify Android changes and
 Simple Agents runtime-assets work. Nothing was pushed or deployed. Each product's
-verification scope and existing limitations are recorded above; 03c is implemented; its Crumbles canary is in progress.
+verification scope and existing limitations are recorded above; 03c is implemented with a completed Crumbles canary; other products await assessment.
 
 ## Planned steps
 
@@ -679,7 +679,7 @@ verification scope and existing limitations are recorded above; 03c is implement
 adoptable modules: **03a logging setup**, **03b request correlation**, and
 **03c HTTP tracing**. 03a is implemented; local adoption is recorded per service
 above. 03b rollout is complete with six adopted products and eleven N/A;
-03c is implemented; its Crumbles canary is in progress.
+03c is implemented with a completed Crumbles canary; other products await assessment.
 The [03a contract](step-03a-logging.md) records the API and pilot compatibility. Completion of one module does not imply completion of Step 03.
 
 Further capabilities include HTTP support, health, background tasks, database helpers,
@@ -694,4 +694,56 @@ if adoption of an independent `simple-server` module becomes useful.
 
 ## Step 03c: HTTP tracing
 
-The opt-in `http-tracing` module is implemented; see the [contract](step-03c-http-tracing.md). Consumer adoption remains Pending until verified and integrated. Crumbles is the first canary: its main server installs `TraceLayer::new_for_http()` and an application correlation span. Baseline server tests pass: 529 passed, two existing ignores.
+Shared source `5ccbbabdc1c91b2869cb9090648b3cae4dac9f34` provides the opt-in
+`http-tracing` feature. The [contract](step-03c-http-tracing.md) defines safe route
+spans, status and header latency, body completion/error/cancellation, and upgrade
+handoff. It works with an application-owned subscriber and optionally captures
+validated correlation IDs. It never records raw URIs, headers or bodies by default.
+HEAD and protocol bodyless responses finish at headers rather than producing
+false cancellation warnings. Server-error headers and body errors retain ERROR
+visibility; response-body outcomes are independent of status.
+
+The final shared-library `scripts/check` passes: formatting, strict all-target /
+all-feature Clippy, feature combinations, lifecycle/socket/signal tests, and
+warnings-as-errors documentation. Twelve tracing tests pass with correlation;
+ten pass independently without it. Tests cover actual router templates, fallback
+and extension-method labels, header/body timing, data/trailers, size hints,
+errors, cancellation phases, HEAD/bodyless statuses, upgrade handoff, callback
+and body span context, concurrent IDs and opaque-ID exclusion.
+
+Crumbles **master `4a44b33`** adopts it in the main HTTP server. Applicability was
+its production `TraceLayer::new_for_http()` plus application correlation span;
+the integration daemon and runner have no HTTP tracing to migrate. The shared
+callback sits inside the correlation scope and includes canonical response
+normalization, retaining the existing `correlation_id` parent field and matching
+it with the shared `request_id`. It replaces the Tower tracing layer and trace
+feature. CSRF rejections are now inside tracing; outer CORS short-circuits remain
+outside. Status, headers, bodies, ID validation/generation, audits, auth, metrics
+and shutdown contracts are retained. Telemetry intentionally adopts the shared
+safe-field and timing schema; the application logging initializer is unchanged.
+
+Verification evidence:
+
+- Baseline main-server tests: **529 passed, two existing ignores**. Initial
+  sandbox socket restrictions were resolved by running with local socket access.
+- Workspace suite: **1,433 passed, two existing ignores**. After the final HEAD
+  refinement, the affected Crumbles package was rerun: **588 binary tests plus
+  66 CLI integration tests passed**, retaining the two existing ignores.
+- Final strict workspace all-target Clippy, formatting and diff checks pass.
+- Two new production canary tests cover status/error/ID agreement, safe fields,
+  HEAD, no duplicate Tower logs, and an authenticated real WebSocket handshake:
+  one correlated 101 event before close and no HTTP lifetime event at close.
+  Existing legacy correlation comparisons continue to pass.
+- Real-process checks pass: 15 rejection cases, safe health-query and HEAD
+  requests, shared header/body log fields and correlation, plus both binaries'
+  SIGINT/SIGTERM behavior, active HTTP drain and immediate restart.
+- The existing ignored frontend `dist` was copied unchanged for Rust embedding.
+  Frontend rebuild, browser, Docker and deployment qualification were not repeated.
+
+The dedicated worktree/branch started from clean active master `91a1cb8`.
+`simple-server.rev` pins the reviewed source above. The migration was committed,
+master rebased onto it, and ancestry plus exact tree equality verified. Original
+checkout is clean; the temporary worktree and branch are removed. Pre-existing
+worktrees/branches are retained. See Crumbles' `docs/step-03c-http-tracing.md`.
+Both trackers now show **one Done canary and sixteen Pending assessments**.
+No pushes or deployments were performed.
