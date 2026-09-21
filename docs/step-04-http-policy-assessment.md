@@ -1,7 +1,9 @@
 # Step 04 proposal: HTTP request and response policies
 
-Status: source assessment and proposed scope, not an approved API or implemented
-capability. No consumers migrated and no runtime tests run for this assessment.
+Status: module split accepted. [04a body limits](step-04a-body-limits.md) is
+implemented; see the [adoption tracker](migration-status.md) for pilot/canary
+verification. 04b/04c remain planned. The source assessment below itself involved
+no runtime tests.
 
 The old “HTTP support” roadmap label conflates unrelated concerns. The five
 reviewed services already serve HTTP; the useful next extraction is optional
@@ -91,6 +93,6 @@ headers before migration. Keep it optional even if 04a/04b are adopted.
 - **Authentication/CSRF, health, metrics and rate limiting:** retain their existing
   dedicated scope; do not fold them into generic HTTP policy helpers.
 
-Keep the matrix's single Step 04 column planned until the module split is agreed.
-Then define a contract, implement the shared capability, qualify a pilot and a
-second canary, and assess every consumer before scheduling a rollout.
+The matrix now separates 04a, 04b and 04c. Qualify the 04a pilot and second canary,
+then assess every consumer before scheduling a rollout. Define separate contracts
+for 04b/04c before implementation.

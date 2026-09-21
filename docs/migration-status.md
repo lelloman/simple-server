@@ -14,25 +14,25 @@ Optional modules do not have to be adopted by every product.
 
 Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its original dates.
 
-| Project | Server components | 1. Axum centralization | 2. Lifecycle / main() | 03a. Logging | 03b. Correlation | 03c. HTTP tracing |
-| --- | --- | --- | --- | --- | --- | --- |
-| pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** |
-| favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** | N/A (assessed) | N/A (assessed) |
-| androidoscopy | `server` | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | N/A (assessed) | N/A (assessed) |
-| crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** |
-| fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local)** |
-| lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) |
-| lellostore | `backend` | **Done** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local)** |
-| meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; pipeline/gateway)** | N/A (assessed) |
-| observo | `observo-server`; standalone extractor logging | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) |
-| paranza | `apps/paranza-server` | **Done** | **Done (local; scoped)** | N/A (no logger) | N/A (assessed) | N/A (assessed) |
-| peerlo | `peerlo-api` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** |
-| pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local; main HTTP)** |
-| pezzottify-downloader | Puppeteer API and downloader HTTP server | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; Puppeteer)** | **Done (local; both HTTP routers)** |
-| quentin-torrentino | `crates/server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) |
-| sct | `sct-server` | **Done** | **Done (scoped)** | N/A (no logger) | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** |
-| simple-agents | `simple-agents-service`; runner-shell logging; associated coding test servers | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) |
-| simple-ai | `backend`, `inference-runner` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local; backend)** |
+| Project | Server components | 1. Axum centralization | 2. Lifecycle / main() | 03a. Logging | 03b. Correlation | 03c. HTTP tracing | 04a. Body limits | 04b. Response headers | 04c. CORS |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local canary)** | Planned | Planned |
+| favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** | N/A (assessed) | N/A (assessed) | Pending | Planned | Planned |
+| androidoscopy | `server` | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | N/A (assessed) | N/A (assessed) | Pending | Planned | Planned |
+| crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** | Pending | Planned | Planned |
+| fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local)** | Pending | Planned | Planned |
+| lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | Pending | Planned | Planned |
+| lellostore | `backend` | **Done** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local)** | Pending | Planned | Planned |
+| meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; pipeline/gateway)** | N/A (assessed) | Pending | Planned | Planned |
+| observo | `observo-server`; standalone extractor logging | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | Pending | Planned | Planned |
+| paranza | `apps/paranza-server` | **Done** | **Done (local; scoped)** | N/A (no logger) | N/A (assessed) | N/A (assessed) | Pending | Planned | Planned |
+| peerlo | `peerlo-api` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | Pending | Planned | Planned |
+| pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local; main HTTP)** | Pending | Planned | Planned |
+| pezzottify-downloader | Puppeteer API and downloader HTTP server | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; Puppeteer)** | **Done (local; both HTTP routers)** | Pending | Planned | Planned |
+| quentin-torrentino | `crates/server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | Pending | Planned | Planned |
+| sct | `sct-server` | **Done** | **Done (scoped)** | N/A (no logger) | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | Pending | Planned | Planned |
+| simple-agents | `simple-agents-service`; runner-shell logging; associated coding test servers | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local pilot; service routes)** | Planned | Planned |
+| simple-ai | `backend`, `inference-runner` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local; backend)** | Pending | Planned | Planned |
 
 ## Step 1: Axum centralization
 
@@ -682,12 +682,12 @@ above. 03b rollout is complete with six adopted products and eleven N/A;
 03c is locally adopted by nine products, with eight N/A after assessment.
 The [03a contract](step-03a-logging.md) records the API and pilot compatibility. Completion of one module does not imply completion of Step 03.
 
-The [Step 04 source assessment](step-04-http-policy-assessment.md) proposes optional
-body limits, response-header policies and CORS configuration, based on Crumbles,
-Pezzottify, Meteonesto, Simple AI and Simple Agents. This is a proposal only;
-Step 04 remains planned and no adoption status changes.
+The accepted [Step 04 source assessment](step-04-http-policy-assessment.md) splits
+HTTP policies into optional 04a body limits, 04b response headers and 04c CORS.
+04a is implemented; the pilot/canary verification is recorded below.
+04b and 04c remain planned.
 
-Further capabilities include HTTP support, health, background tasks, database helpers,
+Further capabilities include the remaining HTTP policies, health, background tasks, database helpers,
 authentication, authorization, and rate limiting. The HTML matrix already shows
 these columns as planned; their exact grouping and order remain adjustable.
 Hiding the transitional Axum API is incremental work across those steps.
@@ -941,3 +941,64 @@ consumer migration changes are committed and integrated into the original active
 development branches. Temporary migration worktrees/branches are removed;
 unrelated user work and pre-existing worktrees are preserved. Nothing pushed or
 deployed.
+
+
+## Step 04a: extractor body limits
+
+Shared source **`0b945750b6b97a9e18c531d1cf1137d4ed4b69c9`** adds the optional
+`body-limit` feature and `BodyLimit::max(bytes)`. Values, route placement and
+extractor rejection behavior remain application-owned. It does not impose an
+unconditional wire-body ceiling or buffer/limit responses. See the
+[contract](step-04a-body-limits.md). Full `scripts/check` passes, including strict
+Clippy, formatting, warnings-denied rustdoc, minimal feature builds and four
+body-limit contract tests (three without multipart), plus the API doctest.
+Differential tests cover zero/below/at/above limits, JSON failures, absent and
+declared Content-Length, multipart, route overrides, raw reads and lazy responses.
+Loopback lifecycle tests required sandbox escalation, then passed.
+
+Simple Agents main is integrated at **`b8c4276`**, from `62b44a3`, using shared
+source `0b94575`. All nine production extractor-limit declarations in the service
+now use the shared API with unchanged values and placement. Baseline service
+suite: **126 pass**; final: **127 pass**, including the new production-router
+Bytes/JSON test, passing before and after migration. It checks below/at/above
+5 MiB session and 4 KiB broker limits, present/absent lengths, unchanged 413 text
+and no-store headers. Existing real-process, WebSocket, SSE and auth tests pass.
+Strict all-target service Clippy, full workspace formatting and diff checks pass.
+Whole-workspace tests, browser/container builds and external-provider checks were
+not run. These results apply to the committed migration tree, not concurrent WIP.
+
+Original main was rebased onto the dedicated migration branch in the clean
+worktree; identical tested tree and ancestry were verified. On restoration, Git
+merged the overlapping fleet route file without conflicts. All 15 recorded WIP
+files were verified byte-identical except the intended body-limit substitution
+in that file; the new power-status route and all user edits are retained. Existing
+worktrees are preserved; the temporary migration worktree/branch are removed.
+Service-local `docs/step-04a-body-limits.md` records scope and commands. During
+final verification, concurrent work was committed externally as `5e46aa0`;
+main still contains the migration by ancestry. Its additional changes were not
+part of the migration test run.
+
+Pezzottify dev is integrated at **`b5c96887`**, from `69988032`, using shared source
+`0b94575`. All three production declarations now use BodyLimit: legacy bug reports
+2 MiB, reports 20 MiB and ingestion multipart 5 GiB. Values, placement, custom
+admission and rejection behavior are unchanged. Baseline: **1,103 library tests
+pass, two existing ignores**, plus **17 affected HTTP tests** (including the new
+canary) passing before migration. Final: **1,120 passed, two ignored** across the
+library and body-limit/ingestion/reports/streaming suites. The canary exercises
+below/at/above JSON ceilings and a 3 MiB multipart body reaching filename validation;
+a full 5 GiB runtime upload was not attempted. An initial fixture permission
+mismatch was corrected before migration; production authorization was unchanged.
+Eleven existing media-stream/range cases pass. Library/test Clippy passes with
+only the previously documented items-after-test-module lint exempted; existing
+num-bigint-dig future-incompatibility remains. Changed-file formatting and diff
+checks pass. Other integration suites, frontend/Android, containers, provider
+workflows and production-scale uploads were not rerun.
+
+Original dev was rebased onto the dedicated migration branch; ancestry and
+identical tested tree were verified, temporary worktree/branch removed and
+original checkout clean. See its `docs/step-04a-body-limits.md` for exact scope.
+
+04a totals: **two Done, fifteen Pending assessment/migration**. The five-service
+inventory establishes additional candidates, not completed migrations or N/A.
+04b/04c remain Planned. Shared implementation, pilot and canary are committed and
+integrated into their original development branches. Nothing pushed or deployed.

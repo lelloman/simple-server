@@ -12,6 +12,10 @@ Favzetto pilot. The [03b contract](step-03b-correlation.md) defines request IDs
 and the Crumbles compatibility pilot. The [03c contract](step-03c-http-tracing.md)
 defines request spans and response-body lifecycle events.
 
+[Step 04](step-04-http-policy-assessment.md) separates body limits (04a), response
+headers (04b) and CORS configuration (04c). The implemented
+[04a contract](step-04a-body-limits.md) preserves extractor-limit semantics.
+
 ## Composition
 
 Axum remains the internal HTTP implementation. The long-term product API hides
