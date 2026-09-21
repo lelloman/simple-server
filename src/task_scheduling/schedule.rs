@@ -49,6 +49,17 @@ pub enum Schedule {
 }
 impl Schedule {
     pub fn validate(&self) -> Result<(), ConfigError> {
+        let longest = match self {
+            Self::FixedRate { every, .. } => Some(*every),
+            Self::FixedDelay { every, jitter, .. } => every.checked_add(*jitter),
+            Self::Cron(_) => return Ok(()),
+        };
+        if longest.is_none_or(|duration| {
+            std::time::Instant::now().checked_add(duration).is_none()
+                || SystemTime::now().checked_add(duration).is_none()
+        }) {
+            return Err(ConfigError("schedule duration is not representable".into()));
+        }
         match self {
             Self::FixedRate { every, .. } | Self::FixedDelay { every, .. } if every.is_zero() => {
                 Err(ConfigError("interval must be nonzero".into()))

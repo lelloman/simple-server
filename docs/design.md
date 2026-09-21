@@ -74,7 +74,7 @@ coordinator will compose the same public building blocks available to products.
 | Optional metrics and middleware helpers | Routes, state, and business behavior |
 | Rate-limit policies, key extraction, and middleware | Limit scope, trusted proxies, keys, and storage choice |
 | Optional database setup and migration helpers | Database library, schema, queries, and transactions |
-| Future task cancellation and supervision | Background job implementations |
+| Task ownership, scheduling and execution policies | Background jobs, durable claims and recovery |
 | Future authentication and authorization building blocks | Identity providers, permission models, and policy |
 
 Shutdown deadlines, long-lived requests, and worker cleanup need explicit

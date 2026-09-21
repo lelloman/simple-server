@@ -16,23 +16,23 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 
 | Project | Server components | 1. Axum centralization | 2. Lifecycle / main() | 03a. Logging | 03b. Correlation | 03c. HTTP tracing | 04a. Body limits | 04b. Response headers | 04c. CORS | 05. Health/readiness | 06a. Task ownership | 06b. Scheduling | 06c. Execution policies |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local canary)** | **Done (local; scoped canary)** | N/A (assessed) | N/A (no served probe) | Pending | Pending | Planned |
-| favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local canary)** | Pending | Pending | Planned |
-| androidoscopy | `server` | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (no served probe) | Pending | Pending | Planned |
-| crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | Pending | Pending | Planned |
-| fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | Pending | Pending | Planned |
-| lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (Rust; Caddy owns CORS) | **Done (local; scoped)** | Pending | Pending | Planned |
-| lellostore | `backend` | **Done** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | Pending | Pending | Planned |
-| meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; pipeline/gateway)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | Pending | Pending | Planned |
-| observo | `observo-server`; standalone extractor logging | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (no served probe) | Pending | Pending | Planned |
-| paranza | `apps/paranza-server` | **Done** | **Done (local; scoped)** | N/A (no logger) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | Pending | Pending | Planned |
-| peerlo | `peerlo-api` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | Pending | Pending | Planned |
-| pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local; main HTTP)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | Pending | Pending | Planned |
-| pezzottify-downloader | Puppeteer API and downloader HTTP server | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; Puppeteer)** | **Done (local; both HTTP routers)** | N/A (assessed) | N/A (assessed) | **Done (local; both routers)** | **Done (local; scoped)** | Pending | Pending | Planned |
-| quentin-torrentino | `crates/server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | Pending | Pending | Planned |
-| sct | `sct-server` | **Done** | **Done (scoped)** | N/A (no logger) | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | Pending | Pending | Planned |
-| simple-agents | `simple-agents-service`; runner-shell logging; associated coding test servers | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local pilot; service routes)** | **Done (local; scoped canary)** | N/A (assessed) | **Done (local; scoped)** | Pending | Pending | Planned |
-| simple-ai | `backend`, `inference-runner` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local; backend)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | Pending | Pending | Planned |
+| pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local canary)** | **Done (local; scoped canary)** | N/A (assessed) | N/A (no served probe) | Pending | Pending | Pending |
+| favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local canary)** | Pending | Pending | Pending |
+| androidoscopy | `server` | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (no served probe) | Pending | Pending | Pending |
+| crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | Pending | Pending | Pending |
+| fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | Pending | Pending | Pending |
+| lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (Rust; Caddy owns CORS) | **Done (local; scoped)** | Pending | Pending | Pending |
+| lellostore | `backend` | **Done** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | Pending | Pending | Pending |
+| meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; pipeline/gateway)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | Pending | Pending | Pending |
+| observo | `observo-server`; standalone extractor logging | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (no served probe) | Pending | Pending | Pending |
+| paranza | `apps/paranza-server` | **Done** | **Done (local; scoped)** | N/A (no logger) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | Pending | Pending | Pending |
+| peerlo | `peerlo-api` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | Pending | Pending | Pending |
+| pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local; main HTTP)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | Pending | Pending | Pending |
+| pezzottify-downloader | Puppeteer API and downloader HTTP server | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; Puppeteer)** | **Done (local; both HTTP routers)** | N/A (assessed) | N/A (assessed) | **Done (local; both routers)** | **Done (local; scoped)** | Pending | Pending | Pending |
+| quentin-torrentino | `crates/server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | Pending | Pending | Pending |
+| sct | `sct-server` | **Done** | **Done (scoped)** | N/A (no logger) | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | Pending | Pending | Pending |
+| simple-agents | `simple-agents-service`; runner-shell logging; associated coding test servers | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local pilot; service routes)** | **Done (local; scoped canary)** | N/A (assessed) | **Done (local; scoped)** | Pending | Pending | Pending |
+| simple-ai | `backend`, `inference-runner` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local; backend)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | Pending | Pending | Pending |
 
 ## Step 1: Axum centralization
 
@@ -673,7 +673,7 @@ preserved, including subsequently committed Pezzottify Android changes and
 Simple Agents runtime-assets work. Nothing was pushed or deployed. Each product's
 verification scope and existing limitations are recorded above; 03c is locally adopted by nine products, with eight N/A after assessment.
 
-## Planned steps
+## Roadmap
 
 [Step 03: observability](step-03-observability.md) contains three independently
 adoptable modules: **03a logging setup**, **03b request correlation**, and
@@ -686,11 +686,13 @@ The accepted [Step 04 source assessment](step-04-http-policy-assessment.md) spli
 HTTP policies into optional 04a body limits, 04b response headers and 04c CORS.
 04a is implemented; the pilot/canary verification is recorded below.
 [04b response headers](step-04b-response-headers.md) is rolled out locally: ten adopted, seven N/A; see the verification record below.
-04c remains planned.
+[04c CORS](step-04c-cors.md) and [05 health](step-05-health.md) are implemented;
+their completed local rollout evidence is recorded below.
+[06 background tasks](step-06-background-tasks.md) now has three implemented
+library modules; consumer rollout remains pending.
 
-Further capabilities include the remaining HTTP policies, health, background tasks, database helpers,
-authentication, authorization, and rate limiting. The HTML matrix already shows
-these columns as planned; their exact grouping and order remain adjustable.
+Remaining shared capabilities are database helpers, authentication, authorization,
+and rate limiting. The HTML matrix shows those columns as planned.
 The end goal is to **completely abstract Axum away** from consumer code and the
 public API, then remove the transitional Axum re-export and temporary escape
 hatches. Completing the module columns alone does not establish that outcome;
@@ -1676,7 +1678,7 @@ using the same worktree/rebase/cleanup workflow.
 
 ## Step 06: background tasks
 
-06a/06b libraries implemented; 06c planned. All 17 consumers remain unmigrated,
+06a/06b/06c libraries implemented; consumer rollout pending. All 17 consumers remain unmigrated,
 with applicability to be verified before adoption. No consumer changes.
 
 06a verification: unchanged baseline 69 tests/doctests; 10 ownership contract
@@ -1697,3 +1699,26 @@ outer deadline. No consumers migrated.
 06b final checks: 86 tests/doctests, strict all-feature/all-target Clippy and
 the runnable scheduler/lifecycle example passed. HTML script syntax and a
 no-default-features scheduling build were checked.
+
+06b integrated on main at `44f7688`; tested tree matched and its temporary
+worktree and branch were removed. 06c adds storage-independent execution budgets,
+classified retries, generation-fenced circuit breakers, pause scopes and control
+snapshots, with scheduler integration and actual execution timestamps.
+
+06c verification includes six pure policy tests, twelve combined policy/scheduler
+tests and two additional scheduler clock/ingress tests, plus an observer-shutdown
+regression test. These exercise retained
+blocking capacity, source errors after timeout, actual versus observed runtime,
+retry reservations, pause cancellation, snapshot restoration without job replay,
+atomic snapshot validation, UTC/monotonic separation and bounded command ingress.
+Consumer adoption remains Pending for all three stages; no service code changed.
+
+Final 06c verification: **107 tests/doctests pass** across all features. Minimal
+feature suites also pass: tasks 22, scheduling 32, policies 28, scheduling plus
+policies 50; the empty-feature build passes. All four normal dependency graphs
+exclude Axum and Tower HTTP. Strict all-target/all-feature Clippy, formatting,
+three runnable examples, rustdoc warnings-as-errors and HTML matrix validation
+pass. The existing health rustdoc link was qualified to fix its resolution error.
+Socket and child-signal tests were verified outside the sandbox; the sandboxed
+signal-child attempt timed out. No production/deployment checks or consumer
+adoption are claimed.

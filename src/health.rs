@@ -2,7 +2,7 @@
 //!
 //! Checks run afresh, sequentially, and stop at the first failure. No tasks, timers,
 //! logging, database connections, or lifecycle transitions are installed implicitly.
-//! Mount [`Endpoint`] behind the application's GET/HEAD routing and access controls;
+//! Mount [`Endpoint`](crate::health::Endpoint) behind the application's GET/HEAD routing and access controls;
 //! it deliberately leaves method dispatch, paths, and response policy to that router.
 
 use http::{Request, Response};

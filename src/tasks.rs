@@ -10,7 +10,7 @@ use std::{
     fmt,
     future::Future,
     num::NonZeroUsize,
-    sync::{Arc, Mutex},
+    sync::{Arc, Mutex, OnceLock},
     time::Instant,
 };
 use tokio::{
@@ -150,11 +150,29 @@ pub enum CancellationReason {
     RuntimeBudget,
 }
 
+#[derive(Debug, Default)]
+struct Timing {
+    started: OnceLock<Instant>,
+    finished: OnceLock<Instant>,
+}
+#[derive(Clone, Copy, Debug, Default)]
+pub struct TaskTiming {
+    pub started: Option<Instant>,
+    pub finished: Option<Instant>,
+}
+struct FinishTiming(Arc<Timing>);
+impl Drop for FinishTiming {
+    fn drop(&mut self) {
+        let _ = self.0.finished.set(tokio::time::Instant::now().into_std());
+    }
+}
+
 #[derive(Clone, Debug)]
 pub struct TaskContext {
     pub id: TaskId,
     pub name: String,
     cancellation: Shutdown,
+    timing: Arc<Timing>,
 }
 impl TaskContext {
     pub fn is_cancelled(&self) -> bool {
@@ -174,6 +192,7 @@ pub enum TaskExit<E> {
 }
 #[derive(Debug)]
 pub struct TaskCompletion<E> {
+    pub timing: TaskTiming,
     pub task: WorkInfo,
     pub exit: TaskExit<E>,
     pub cancellation: Option<CancellationReason>,
@@ -194,7 +213,15 @@ pub enum AbortError {
     BlockingTask,
 }
 
+impl fmt::Display for AbortError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "cannot abort task: {self:?}")
+    }
+}
+impl std::error::Error for AbortError {}
+
 struct Entry {
+    timing: Arc<Timing>,
     task: WorkInfo,
     cancellation: Shutdown,
     reason: Option<CancellationReason>,
@@ -257,6 +284,7 @@ impl<E: Send + 'static> TaskSet<E> {
             id,
             name,
             cancellation: Shutdown::new(),
+            timing: Arc::new(Timing::default()),
         })
     }
     fn register(
@@ -270,6 +298,7 @@ impl<E: Send + 'static> TaskSet<E> {
         self.entries.insert(
             abort.id(),
             Entry {
+                timing: context.timing,
                 task: WorkInfo {
                     id,
                     name: context.name,
@@ -295,7 +324,14 @@ impl<E: Send + 'static> TaskSet<E> {
     {
         let context = self.prepare(name.into())?;
         let supplied = context.clone();
-        let abort = self.tasks.spawn(async move { job(supplied).await });
+        let abort = self.tasks.spawn(async move {
+            let _finish = FinishTiming(supplied.timing.clone());
+            let _ = supplied
+                .timing
+                .started
+                .set(tokio::time::Instant::now().into_std());
+            job(supplied).await
+        });
         Ok(self.register(context, behavior, false, abort))
     }
     pub fn spawn_blocking<F>(
@@ -309,7 +345,14 @@ impl<E: Send + 'static> TaskSet<E> {
     {
         let context = self.prepare(name.into())?;
         let supplied = context.clone();
-        let abort = self.tasks.spawn_blocking(move || job(supplied));
+        let abort = self.tasks.spawn_blocking(move || {
+            let _finish = FinishTiming(supplied.timing.clone());
+            let _ = supplied
+                .timing
+                .started
+                .set(tokio::time::Instant::now().into_std());
+            job(supplied)
+        });
         Ok(self.register(context, behavior, true, abort))
     }
     pub fn request_cancel(&mut self, id: TaskId, reason: CancellationReason) -> bool {
@@ -342,6 +385,16 @@ impl<E: Send + 'static> TaskSet<E> {
         entry.abort.abort();
         Ok(())
     }
+    /// Actual execution boundaries, independent of when the owner observes completion.
+    pub fn timing(&self, id: TaskId) -> Option<TaskTiming> {
+        self.entries
+            .values()
+            .find(|entry| entry.task.id == id)
+            .map(|entry| TaskTiming {
+                started: entry.timing.started.get().copied(),
+                finished: entry.timing.finished.get().copied(),
+            })
+    }
     pub fn unfinished(&self) -> Vec<WorkInfo> {
         self.entries
             .values()
@@ -373,6 +426,10 @@ impl<E: Send + 'static> TaskSet<E> {
             .remove(&id)
             .expect("joined task has ownership metadata");
         Some(TaskCompletion {
+            timing: TaskTiming {
+                started: entry.timing.started.get().copied(),
+                finished: entry.timing.finished.get().copied(),
+            },
             task: entry.task,
             exit,
             cancellation: entry.reason,

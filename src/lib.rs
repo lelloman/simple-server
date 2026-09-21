@@ -58,3 +58,7 @@ pub mod tasks;
 /// Bounded scheduling with application-owned execution and reporting.
 #[cfg(feature = "task-scheduling")]
 pub mod task_scheduling;
+
+/// Optional execution budgets, retries, circuit breakers and pause state.
+#[cfg(feature = "task-policies")]
+pub mod task_policies;

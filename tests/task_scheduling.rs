@@ -307,3 +307,42 @@ async fn outer_deadline_keeps_scheduler_tasks_available_for_later_drain() {
     s.run(stop, |_| {}).await.unwrap();
     assert!(s.unfinished().is_empty());
 }
+
+#[tokio::test]
+async fn shutdown_requested_by_observer_stops_dispatch_and_further_admission() {
+    let mut s = Scheduler::<(), ()>::new(limits()).unwrap();
+    let stop = Shutdown::new();
+    for name in ["a", "b"] {
+        s.register(Job::new(
+            name,
+            JobConfig {
+                schedules: vec![delay(60)],
+                ..Default::default()
+            },
+            |_| {
+                panic!("shutdown must prevent dispatch");
+                #[allow(unreachable_code)]
+                async {
+                    Ok(())
+                }
+            },
+        ))
+        .unwrap();
+    }
+    let mut cancelled = 0;
+    let mut rejected = 0;
+    s.run(stop.clone(), |event| match event {
+        Event::Admitted { .. } => stop.request(),
+        Event::Cancelled { .. } => cancelled += 1,
+        Event::Rejected {
+            reason: Rejection::Closed,
+            ..
+        } => rejected += 1,
+        Event::Started { .. } => panic!("started after shutdown"),
+        _ => {}
+    })
+    .await
+    .unwrap();
+    assert_eq!(cancelled, 1);
+    assert_eq!(rejected, 1);
+}

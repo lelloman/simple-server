@@ -9,7 +9,7 @@ Axum can remain an internal implementation detail. See the
 [design and completion criteria](docs/design.md#end-goal-completely-abstract-axum-away).
 
 **Status:** Axum dependency centralization and opt-in lifecycle, logging,
-correlation, HTTP tracing, body limits, response-header helpers and CORS configuration are implemented. All 17 inventoried products have adopted lifecycle helpers locally
+correlation, HTTP tracing, body limits, response-header helpers, CORS, health checks, task ownership, scheduling and execution policies are implemented. All 17 inventoried products have adopted lifecycle helpers locally
 with documented application scopes. Crumbles and SCT include those migrations on local `master`. Publication to crates.io remains disabled.
 
 Open the [HTML migration matrix](docs/migration-status.html) in a browser for adoption status
@@ -72,7 +72,7 @@ tracked separately for each module.
 - Health and readiness endpoint plumbing with application-provided checks.
 - Optional rate limiting with application-defined keys and route placement.
 
-Metrics, background-task supervision, database helpers, authentication, and
+Metrics, database helpers, authentication, and
 authorization are follow-up modules, shaped by real service integrations.
 
 Applications own their routes, state, configuration loading, database setup,
@@ -224,4 +224,6 @@ endpoint behind GET/HEAD routing and existing access controls. The canary uses
 Axum types.
 
 [Step 06](docs/step-06-background-tasks.md) adds optional task ownership through
-`tasks` and bounded scheduling through `task-scheduling`. Consumer adoption is tracked independently from library availability.
+`tasks`, bounded scheduling through `task-scheduling`, and optional budgets, retries,
+circuit breakers and control snapshots through `task-policies`. All work without HTTP
+when default features are disabled. Consumer adoption is tracked independently from library availability.

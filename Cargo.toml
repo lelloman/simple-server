@@ -10,6 +10,7 @@ publish = false
 [features]
 default = ["http"]
 http = ["dep:axum", "dep:tower-service"]
+task-policies = ["tasks"]
 task-scheduling = ["tasks", "dep:cron", "dep:chrono", "dep:rand"]
 tasks = ["lifecycle", "tokio/rt"]
 lifecycle = ["dep:tokio", "dep:futures-util"]
@@ -72,3 +73,7 @@ required-features = ["tasks"]
 [[example]]
 name = "scheduler"
 required-features = ["task-scheduling"]
+
+[[example]]
+name = "policy_snapshot"
+required-features = ["task-policies"]
