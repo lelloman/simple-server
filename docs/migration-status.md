@@ -17,21 +17,21 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | Project | Server components | 1. Axum centralization | 2. Lifecycle / main() | 03a. Logging | 03b. Correlation | 03c. HTTP tracing | 04a. Body limits | 04b. Response headers | 04c. CORS | 05. Health/readiness | 06a. Task ownership | 06b. Scheduling | 06c. Execution policies |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local canary)** | **Done (local; scoped canary)** | N/A (assessed) | N/A (no served probe) | **Done (local; scoped canary)** | **Done (local; primitives)** | **Done (local; primitives)** |
-| favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local canary)** | Pending | Pending | Pending |
+| favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local canary)** | **Done (local; request work)** | Pending (durable workflow) | **Done (local; retry scope)** |
 | androidoscopy | `server` | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (no served probe) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) |
-| crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | Pending | Pending | Pending |
+| crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | Pending (durable scheduler) | Pending (durable policies) |
 | fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | Pending (dynamic cron gap) | N/A (assessed) |
-| lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (Rust; Caddy owns CORS) | **Done (local; scoped)** | Pending | Pending | Pending |
+| lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (Rust; Caddy owns CORS) | **Done (local; scoped)** | **Done (local; webhook scope)** | **Done (local; capacity)** | **Done (local; retry scope)** |
 | lellostore | `backend` | **Done** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) |
-| meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; pipeline/gateway)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | Pending | Pending | Pending |
+| meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; pipeline/gateway)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | Pending (durable scheduler) | **Partial (runtime budgets)** |
 | observo | `observo-server`; standalone extractor logging | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (no served probe) | **Done (local; scoped)** | **Done (local; primitives)** | N/A (assessed) |
 | paranza | `apps/paranza-server` | **Done** | **Done (local; scoped)** | N/A (no logger) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | N/A (assessed) |
 | peerlo | `peerlo-api` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; retry primitives)** |
-| pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local; main HTTP)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | Pending | Pending | Pending |
-| pezzottify-downloader | Puppeteer API and downloader HTTP server | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; Puppeteer)** | **Done (local; both HTTP routers)** | N/A (assessed) | N/A (assessed) | **Done (local; both routers)** | **Done (local; scoped)** | Pending | Pending | Pending |
-| quentin-torrentino | `crates/server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | Pending | Pending | Pending |
-| sct | `sct-server` | **Done** | **Done (scoped)** | N/A (no logger) | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | Pending | Pending | Pending |
-| simple-agents | `simple-agents-service`; runner-shell logging; associated coding test servers | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local pilot; service routes)** | **Done (local; scoped canary)** | N/A (assessed) | **Done (local; scoped)** | Pending | Pending | Pending |
+| pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local; main HTTP)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; socket scope)** | Pending (dynamic scheduler) | N/A (assessed) |
+| pezzottify-downloader | Puppeteer API and downloader HTTP server | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; Puppeteer)** | **Done (local; both HTTP routers)** | N/A (assessed) | N/A (assessed) | **Done (local; both routers)** | **Done (local; scoped)** | **Done (local; scoped)** | Pending (priority scheduler) | N/A (assessed) |
+| quentin-torrentino | `crates/server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; stage capacity)** | N/A (assessed) |
+| sct | `sct-server` | **Done** | **Done (scoped)** | N/A (no logger) | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; worker scope)** | Pending (durable scheduling) | **Done (local; retry scope)** |
+| simple-agents | `simple-agents-service`; runner-shell logging; associated coding test servers | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local pilot; service routes)** | **Done (local; scoped canary)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | Pending (fleet reservations) | **Done (local; retry scope)** |
 | simple-ai | `backend`, `inference-runner` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local; backend)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | Pending (model-aware batching gap) | N/A (assessed) |
 
 ## Step 1: Axum centralization
@@ -1679,9 +1679,10 @@ using the same worktree/rebase/cleanup workflow.
 ## Step 06: background tasks
 
 06a/06b/06c are implemented. Pezzottify has completed the local canary through
-the shared ownership, scheduling/capacity, and policy primitives. The remaining
-rollout is in progress; per-service adoption, N/A decisions and compatibility gaps
-are recorded in the matrix and rollout evidence below.
+the shared ownership, scheduling/capacity, and policy primitives. All remaining
+services have now been assessed and supported scoped migrations integrated locally.
+Unsupported requirements remain Pending/Partial rather than being called complete
+or N/A. Per-service evidence and compatibility gaps are recorded below.
 
 06a verification: unchanged baseline 69 tests/doctests; 10 ownership contract
 tests covering callback reservations, admission races, retained errors/panics,
@@ -1696,7 +1697,7 @@ worktree, commit, development-branch rebase, verification and cleanup workflow.
 and branch were removed. 06b adds seven contract tests for UTC boundaries,
 interval/jitter calculations, registration validation, pool isolation, bounded
 queues, typed event fanout, failure observation and retained ownership after an
-outer deadline. No consumers migrated.
+outer deadline. At that implementation checkpoint, no consumers had migrated.
 
 06b final checks: 86 tests/doctests, strict all-feature/all-target Clippy and
 the runnable scheduler/lifecycle example passed. HTML script syntax and a
@@ -1818,10 +1819,32 @@ worktree/branch removed. The unrelated `pezzottify-paravoid` worktree is preserv
 The coordinator's tracker changes use the same worktree/rebase/cleanup workflow
 on `simple-server/main`. No pushes or deployments were performed by this work.
 See Pezzottify's `docs/step-06-background-tasks.md` for commands and retained
-behavior. Both central trackers mark only Pezzottify's Step 06 adoption complete;
-all other consumers stay Pending.
+behavior. At this canary checkpoint only Pezzottify was marked complete; the
+subsequent consumer rollout and current statuses are recorded below.
 
 ### Step 06 remaining-service rollout
+
+**Supported scoped rollout complete locally; compatibility gaps remain.** All
+17 services are assessed. The Pezzottify canary and 15 subsequent consumer changes
+are committed on their development branches. Each development branch was rebased
+onto its migration branch; ancestry and tested trees were verified, and all Step 06
+consumer worktrees/branches removed. Paranza required no code change. Concurrent
+LelloStore commits and unrelated Simple AI, LelloAuth and SCT work are preserved.
+No pushes or deployments were performed.
+
+| Module | Done (scoped) | Partial | Pending compatibility | N/A (assessed) |
+| --- | ---: | ---: | ---: | ---: |
+| 06a ownership | 14 | 0 | 0 | 3 |
+| 06b scheduling/capacity | 4 | 0 | 9 | 4 |
+| 06c policies | 6 | 1 | 1 | 9 |
+
+Remaining scheduling gaps cover dynamic registration (Fausto/Pezzottflix), durable
+claims/reservations (Favzetto/Crumbles/Meteonesto/SCT/Simple Agents), model-aware
+batching (Simple AI), and downloader priority/prefetch rules. Crumbles' durable
+execution authority and signed jitter remain Pending; Meteonesto adopts runtime
+budgets but retains incompatible configurable retry multipliers, hence Partial.
+Baseline test/lint failures and checks not rerun are explicit in each record.
+
 
 LelloStore `master` is integrated at `0074ced571db77cd51b6b7d753338db8bdd64563`,
 from `dbebdfa`, using shared source `4a6353f55b23dff173ec1968915c6e10312d5795`.
@@ -1927,4 +1950,127 @@ v2/legacy WebSocket/legacy TLS cases pass under SIGINT/SIGTERM with open sockets
 and listener reuse. All-target Clippy completes with warnings; changed-file
 formatting/diff pass. Android/device/browser suites not rerun. Master rebased,
 tested tree verified, temporary worktree/branch removed. See Androidoscopy's
+`docs/step-06-background-tasks.md`.
+
+Crumbles `master` is integrated at `a74f4dd` from `c35fa3f`, shared source
+`06c7531`. 06a adopts WorkTracker for realtime WebSocket reservations, with guards
+before upgrade and 503 after admission closes. 06b remains Pending: production
+SQLite reservations provide cross-process priority/project scheduling and paused
+sessions retain profile capacity while releasing global capacity. 06c remains
+Pending for durable recovery authority and signed-jitter retry semantics. The
+standalone CapacityCoordinator has no production callers. Baseline 657 tests;
+final 658 passed, two existing ignored. Authenticated socket drain and closed
+admission tests, both binary builds, SIGINT/SIGTERM active HTTP drain and restart
+checks pass. Clippy completes with one existing unused import warning. Master
+rebased, tested tree verified, migration worktree/branch removed. See Crumbles'
+`docs/step-06-background-tasks.md`; frontend was not rebuilt.
+
+Simple Agents `main` is integrated at `6b520b0` from `999a877`, shared source
+`06c7531`. 06a owns broker upgrades and Codex checks/login work before database
+mutation, draining inside the existing Lifecycle deadline before database close.
+06c uses RetryPolicy for persisted recovery delay calculation; durable fencing,
+cleanup evidence, attempts and exhaustion remain application-owned. 06b remains
+Pending for durable fleet reservations; the unused CapacityCoordinator is not
+adoption. Baseline 134 service tests; final 136 pass, including a live enrolled
+broker during SIGINT/SIGTERM/restart, rejected Codex admission without DB mutation,
+and exact 999/1000ms retry eligibility. Strict service Clippy and changed-file
+formatting pass. Main rebased, tested tree verified, migration worktree/branch
+removed. Runner GPU/container/browser suites not rerun. See Simple Agents'
+`docs/step-06-background-tasks.md`.
+
+LelloAuth `master` is integrated at `8122dc8` from `5215f6d`, shared source
+`06c7531`. 06a owns the webhook worker and deliveries and drains accepted queue
+entries inside the existing Lifecycle deadline. Alert delivery remains application-
+owned. 06b adopts bounded ExecutionCapacity; 06c uses RetryPolicy for production
+retry configuration, retaining permissive library-input compatibility fallback.
+Baseline 24 webhook tests and three process tests; final 26 webhook and all three
+process tests pass. Real TCP coverage verifies interrupted drain, queued deliveries,
+503 retry, late rejection and concurrency. Process tests verify drain ordering and
+signals/deadline behavior. Affected all-target Clippy completes with five warnings
+in unchanged code; changed-file formatting/diff pass. Full workspace/PostgreSQL/
+browser suites not rerun. Master rebased, tested tree verified, temporary worktree/
+branch removed; unrelated research documents preserved. See LelloAuth's
+`docs/step-06-background-tasks.md`.
+
+Pezzottify Downloader `master` is integrated at `e10c767` from `620a0af`, shared
+source `06c7531`. 06a owns explicit restarts/status sockets, reserving before
+credential writes or state changes. Download streams retain ActivityLease/process
+ownership. 06b is Pending for priority/prefetch/queue-bound semantics unsupported
+by shared FIFO capacity; 06c N/A for Rust background execution (browser retries
+and transport state-machine timers remain outside this module). Baseline 166 tests;
+final 168 pass, one existing ignored doctest. Added closed-admission mutation and
+real HTTP WebSocket 503 regressions; existing real-process HTTP/WS signal/restart,
+child-process and stream-lifetime tests pass. Clippy completes with 12 warnings and
+an existing dependency future-compatibility notice. Changed-file formatting/diff
+pass. Master rebased, tested tree verified, worktree/branch removed. No Spotify or
+browser tests. See downloader's `docs/step-06-background-tasks.md`.
+
+Pezzottflix `master` is integrated at `2d49435` from `f8159f0`, shared source
+`06c7531`. 06a owns authenticated sync socket upgrades and cancel-safe drain;
+closed admission returns 503 without phantom connections. 06b remains Pending
+for dynamic replacement, nonblocking admission, available-permit reporting and
+zero concurrency semantics. 06c N/A: queue/download retry helpers have no production
+callers; worker joins already belong to Lifecycle. Baseline 540 server tests;
+final 542 pass, three existing ignored. New real authenticated HTTP rejection and
+interrupted drain tests pass; the binary SIGINT/SIGTERM script passes with open
+socket, HTTP/metrics and workers. All-target Clippy completes with warnings;
+changed-file formatting/diff pass. Master rebased, tested tree verified, worktree/
+branch removed. Frontend/browser/container suites not rerun. See Pezzottflix's
+`docs/step-06-background-tasks.md`.
+
+Favzetto `master` is integrated at `b8f5260` from `14d5b0d`, shared source `06c7531`.
+06a owns catalog runs, ingestion analysis, research turns and three socket entry
+points. Admission precedes persistent mutation; accepted work drains after HTTP and
+assistant worker within the same deadline. Socket writer children abort and join.
+06b remains Pending for durable claim/priority/per-user/workflow scheduling. 06c
+shares retry calculation with an explicit legacy fallback for extreme accepted
+inputs, preserving attempt/exponent normalization. Baseline 131 unit + 97 API tests
+pass with two catalog runtime-bridge failures; separate two-process baseline passes.
+Final all-target run: 234 pass, the same two failures. New retry/admission tests,
+accepted mock-AI catalog drain and live socket signal/deadline checks pass. Clippy
+completes with warnings; existing test-formatting debt retained. Master rebased,
+tested tree verified, worktree/branch removed. Frontend/browser/container checks
+not rerun. See Favzetto's `docs/step-06-background-tasks.md`.
+
+Quentin Torrentino `master` is integrated at `4229de2` from `a8a921f`, shared source
+`06c7531`. 06a owns pipeline jobs and dashboard upgrades with closed admission;
+06b shares independent conversion/placement capacities, preserving zero-sized
+stage waits, statistics and permit lifetimes. 06c N/A: configured processor retry
+fields have no execution callers; manual retries remain domain operations.
+Baseline core library 503 pass/one subtitle failure; server 192 pass/one MusicBrainz
+failure. Final affected targets 708 pass, the same two failures, 12 ignored docs.
+New pool/release/zero and interrupted-drain/admission checks pass, as do existing
+pipeline, ticket/audit and real-process SIGINT/SIGTERM socket shutdown tests.
+All-target Clippy completes with warnings, formatting/diff pass. Master rebased,
+tested tree verified, worktree/branch removed. External/browser/container suites
+not rerun. See Quentin's `docs/step-06-background-tasks.md`.
+
+Meteonesto `master` is integrated at `080a852` from `6d032af`, shared source `06c7531`.
+06c Partial: production runtime deadlines use ExecutionBudget with unchanged Tokio
+clock/cancellation and fenced timeout recording. Configurable floating-multiplier
+retry and durable pause remain application-owned gaps. 06a N/A: supervisor handles
+and typed worker JoinSets already have structured abort/join ownership. 06b Pending
+for durable weighted lanes, leases/fencing and hot configuration. Pinned Rust 1.97.1:
+baseline 70 tests, final 72 pass. New cancellation and ready/boundary tests plus
+two real-process unittest cases pass, including SQLite integrity and hot-reloaded
+shutdown budgets. Strict Clippy's missing-Panics-doc error in unchanged
+control_plane.rs:506 is reproduced on master. Formatting/diff pass. Master rebased,
+tested tree verified, worktree/branch removed. Full provider/ingestion/browser suites
+not rerun. See Meteonesto's `docs/step-06-background-tasks.md`.
+
+SCT `master` is integrated at `6a999be` from `2651b53`, shared source `06c7531`.
+06a owns fixed archive/recovery workers with TaskSet, preserving ordered abort/join
+before writer release and catalog closure. HTTP-body/read-pin/archive-lease cleanup
+remains app-owned. 06b Pending for PostgreSQL clock/claim/fencing authority; 06c
+shares maintenance retry delay calculation while transaction clocks, classification
+and exhaustion stay authoritative. Baseline 15 ordinary tests and two disposable-
+PostgreSQL maintenance tests pass; final 18 ordinary and both PostgreSQL tests pass
+with persisted deadline/exhaustion assertions. The same 91 qualification tests are
+ignored in the ordinary suite. Strict affected Clippy, formatting/diff, server and
+recovery builds pass. Five real-process cases verify active HTTP drain under both
+signals, writer release/restart under both signals, and unsuccessful lease-loss exit.
+The process harness was updated for current JSON logging/recovery fixtures and an
+isolated static page; test containers are removed. Master rebased, tested tree
+verified, worktree/branch removed, unrelated validation/CORS files preserved. Full
+archive/media/S3/browser qualification not rerun. See SCT's
 `docs/step-06-background-tasks.md`.
