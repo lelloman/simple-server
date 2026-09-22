@@ -145,3 +145,17 @@ Paused Tokio time and deterministic jitter avoid timing-dependent policy tests;
 real blocking tests verify executor queue time and late completion observation.
 All consumer rows remain Pending, not adopted, until production call sites are
 migrated separately. See both migration trackers for staged verification records.
+
+
+## Application-owned scheduler capacity (Pezzottify canary)
+
+`ExecutionCapacity` and its non-cloneable `ExecutionPermit` expose global and
+named-pool limits without requiring `Scheduler`. Applications with durable job
+history or different trigger semantics can combine these with `Schedule`,
+`TaskSet`, and the policy primitives. Limits are nonzero and clones share slots.
+Acquisition waits for the pool first, then the global semaphore. Waiting on a
+saturated pool never holds global capacity, but a global waiter can hold its pool
+permit. Dropping a pending acquisition releases any partially acquired capacity.
+Applications bound their pending jobs, apply queue deadlines/cancellation, and
+hold permits until execution actually finishes, including blocking overruns.
+There is no storage, hidden worker, queue-capacity policy, or hard abortion.

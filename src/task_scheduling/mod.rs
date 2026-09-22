@@ -1,5 +1,7 @@
 //! Application-owned, bounded scheduler. Registration is static; execution is
 //! driven by `run`, not by a hidden supervisor. Observers own reporting/storage.
+mod capacity;
+pub use capacity::{CapacityError, ExecutionCapacity, ExecutionPermit};
 #[cfg(feature = "task-policies")]
 mod policies;
 mod schedule;

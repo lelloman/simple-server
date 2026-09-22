@@ -1727,3 +1727,17 @@ Reviewed Step 06 library revision: `2ee010ecc59ca2443cb09bbf5eb828dbb68a082b`.
 Stage commits: 06a `44fe8d1`, 06b `44f7688`, 06c `2ee010e`.
 All three used dedicated worktree branches from the established `main` branch.
 The verification-record commit changes only the two central trackers.
+
+
+### Pezzottify canary preparation: shared execution capacity
+
+The canary requires capacity limits independently of the shared scheduler so it
+can retain its database-owned history, manual-run schedule resets, and existing
+pause cancellation policy. `ExecutionCapacity` now exposes nonzero global and
+named-pool limits with cancellation-safe class-before-global acquisition and
+owned execution permits. Six new contract tests cover class isolation, global
+limits across clones, cancelled partial acquisition, retained executing permits,
+unknown pools, and invalid configuration. All **113** library tests/doctests and
+strict all-feature/all-target Clippy pass; the six capacity tests also pass with
+only `task-scheduling` enabled and default HTTP features disabled. Consumer
+integration is still in progress; this addition alone does not mark adoption.

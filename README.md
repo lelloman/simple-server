@@ -227,3 +227,9 @@ Axum types.
 `tasks`, bounded scheduling through `task-scheduling`, and optional budgets, retries,
 circuit breakers and control snapshots through `task-policies`. All work without HTTP
 when default features are disabled. Consumer adoption is tracked independently from library availability.
+
+
+Applications retaining their own durable scheduler can use
+`task_scheduling::ExecutionCapacity` for shared global/resource-pool limits,
+`Schedule` for recurrence, and the task/policy primitives independently. Keep
+execution permits until blocking work actually finishes, even after cancellation.
