@@ -1,8 +1,8 @@
 # Step 06: background tasks
 
 Implemented in three optional stages: 06a ownership (`tasks`), 06b scheduling
-(`task-scheduling`), 06c execution policies (`task-policies`). Library delivery
-only: no consumer has adopted these APIs yet. Applications retain runtime,
+(`task-scheduling`), 06c execution policies (`task-policies`). Library delivery and consumer rollout are tracked separately in both migration
+trackers. Applications retain runtime,
 signals, process exit policy, storage, durable claims/leases/fencing/recovery,
 job logic, configuration and administrative endpoints. No HTTP dependency.
 
@@ -143,8 +143,8 @@ blocking work, claim finalization, resource-pool isolation, bounded ingress,
 interval/UTC behavior, cancellation-safe draining, retries and circuit fencing.
 Paused Tokio time and deterministic jitter avoid timing-dependent policy tests;
 real blocking tests verify executor queue time and late completion observation.
-All consumer rows remain Pending, not adopted, until production call sites are
-migrated separately. See both migration trackers for staged verification records.
+Consumer rows remain Pending until their production call sites are migrated
+and verified separately. See both migration trackers for staged verification records.
 
 
 ## Application-owned scheduler capacity (Pezzottify canary)

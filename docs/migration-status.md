@@ -18,21 +18,21 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local canary)** | **Done (local; scoped canary)** | N/A (assessed) | N/A (no served probe) | **Done (local; scoped canary)** | **Done (local; primitives)** | **Done (local; primitives)** |
 | favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local canary)** | Pending | Pending | Pending |
-| androidoscopy | `server` | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (no served probe) | Pending | Pending | Pending |
+| androidoscopy | `server` | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (no served probe) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) |
 | crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | Pending | Pending | Pending |
-| fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | Pending | Pending | Pending |
+| fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | Pending (dynamic cron gap) | N/A (assessed) |
 | lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (Rust; Caddy owns CORS) | **Done (local; scoped)** | Pending | Pending | Pending |
-| lellostore | `backend` | **Done** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | Pending | Pending | Pending |
+| lellostore | `backend` | **Done** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) |
 | meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; pipeline/gateway)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | Pending | Pending | Pending |
-| observo | `observo-server`; standalone extractor logging | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (no served probe) | Pending | Pending | Pending |
-| paranza | `apps/paranza-server` | **Done** | **Done (local; scoped)** | N/A (no logger) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | Pending | Pending | Pending |
-| peerlo | `peerlo-api` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | Pending | Pending | Pending |
+| observo | `observo-server`; standalone extractor logging | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (no served probe) | **Done (local; scoped)** | **Done (local; primitives)** | N/A (assessed) |
+| paranza | `apps/paranza-server` | **Done** | **Done (local; scoped)** | N/A (no logger) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | N/A (assessed) |
+| peerlo | `peerlo-api` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; retry primitives)** |
 | pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local; main HTTP)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | Pending | Pending | Pending |
 | pezzottify-downloader | Puppeteer API and downloader HTTP server | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; Puppeteer)** | **Done (local; both HTTP routers)** | N/A (assessed) | N/A (assessed) | **Done (local; both routers)** | **Done (local; scoped)** | Pending | Pending | Pending |
 | quentin-torrentino | `crates/server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | Pending | Pending | Pending |
 | sct | `sct-server` | **Done** | **Done (scoped)** | N/A (no logger) | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | Pending | Pending | Pending |
 | simple-agents | `simple-agents-service`; runner-shell logging; associated coding test servers | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local pilot; service routes)** | **Done (local; scoped canary)** | N/A (assessed) | **Done (local; scoped)** | Pending | Pending | Pending |
-| simple-ai | `backend`, `inference-runner` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local; backend)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | Pending | Pending | Pending |
+| simple-ai | `backend`, `inference-runner` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local; backend)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | Pending (model-aware batching gap) | N/A (assessed) |
 
 ## Step 1: Axum centralization
 
@@ -1679,8 +1679,9 @@ using the same worktree/rebase/cleanup workflow.
 ## Step 06: background tasks
 
 06a/06b/06c are implemented. Pezzottify has completed the local canary through
-the shared ownership, scheduling/capacity, and policy primitives. The other
-16 consumers remain Pending, with applicability to be verified before adoption.
+the shared ownership, scheduling/capacity, and policy primitives. The remaining
+rollout is in progress; per-service adoption, N/A decisions and compatibility gaps
+are recorded in the matrix and rollout evidence below.
 
 06a verification: unchanged baseline 69 tests/doctests; 10 ownership contract
 tests covering callback reservations, admission races, retained errors/panics,
@@ -1819,3 +1820,111 @@ on `simple-server/main`. No pushes or deployments were performed by this work.
 See Pezzottify's `docs/step-06-background-tasks.md` for commands and retained
 behavior. Both central trackers mark only Pezzottify's Step 06 adoption complete;
 all other consumers stay Pending.
+
+### Step 06 remaining-service rollout
+
+LelloStore `master` is integrated at `0074ced571db77cd51b6b7d753338db8bdd64563`,
+from `dbebdfa`, using shared source `4a6353f55b23dff173ec1968915c6e10312d5795`.
+06a adopts `WorkTracker` in the production catalog WebSocket hub, preserving
+pre-upgrade reservations, 503 after shutdown, close frames and Lifecycle drain.
+06b is N/A: the directly awaited metrics refresh loop has no independent job
+queue or scheduling controls. 06c is N/A: no background execution retry, budget,
+circuit or pause policies. Startup authentication retries are not job policies.
+Baseline 136 tests; final 137 passed, two existing ignored doctests. Includes ten
+HTTP/authentication E2E and three process lifecycle tests. Multi-client WebSocket
+shutdown/disconnect coverage was strengthened; interrupted drain retains upgrade
+reservations. Strict all-target Clippy, formatting and diff checks pass. Frontend
+embedding was not rebuilt. Master was rebased onto the migration branch; ancestry
+and identical tested tree verified, clean temporary worktree and branch removed.
+See LelloStore's `docs/step-06-background-tasks.md` for scope and commands.
+
+Fausto `master` is integrated at `44dc1b02575156bc8370603f1d595115e40e3e9a`, from
+`4ccfb9c`, using shared source `4a6353f`. 06a adopts shared work reservations for
+WebSocket sessions and manual/cron jobs. 06b remains Pending: the existing live
+register/enable/disable contract is unsupported by the shared static-registration
+scheduler. This is a compatibility gap, not N/A. 06c is N/A: no execution retry,
+budget, circuit or pause policies (cron registration enablement remains app-owned).
+Baseline 203 tests; final 204 passed, one existing ignored doctest, including six
+lifecycle integrations and four process tests. Added interrupted-stop coverage
+proves accepted persisted jobs remain owned and late submissions are rejected.
+Configured all-target Clippy completes with warnings; formatting/diff pass.
+Optional embedded frontend/swagger builds not rerun. Master was rebased onto the
+migration branch, ancestry and identical tested tree verified; temporary worktree
+and branch removed. See Fausto's `docs/step-06-background-tasks.md`.
+
+Observo `master` is integrated at `9ce6b07` from `a2dc0c2`, using shared source
+`06c7531dfcd4149a0947b4b74a79e96bf245639c`. 06a adopts named webhook reservations
+and permanent closed admission. 06b adopts cron occurrence primitives while
+retaining the existing parser grammar, SQLite queue, catch-up/claim/recovery and
+WAL behavior. 06c is N/A: no background execution retry/circuit/pause policy;
+stale-claim recovery and HTTP-client timeout remain domain/client concerns.
+Baseline 92 Rust tests; final 94 pass. Real-process HTTP/SQLite tests pass with
+added due alias/field, disabled/invalid/future schedules, pending worker runs and
+restart checks. Real TCP tests cover held webhook drain and late admission through
+clones. Formatting/diff pass. All-target Clippy has a reproduced baseline failure
+at `src/indexing/embeddings.rs:387` (`approx_constant`) and 36 warnings. Master was
+rebased onto the migration, tested tree verified and temporary branch/worktree
+removed. See Observo's `docs/step-06-background-tasks.md`.
+
+Shared cron correction `06c7531` is integrated on main. Observo's compatibility
+comparison exposed cron 0.12 skipping lower calendar fields across a future-year
+jump: after February 2024, `0 15 3 1,15 * * 2026-2030` incorrectly started in March
+2026 instead of January. Updated the internal dependency to cron 0.15; a focused
+regression demonstrably failed before and passes after. All 114 tests/doctests,
+strict all-target/all-feature Clippy, formatting and HTTP-free scheduling tests
+pass. The rollout worktree remains active for central documentation updates.
+
+Paranza assessed on clean `master` `1c559ee`: 06a/06b/06c N/A. In
+`apps/paranza-server/src/main.rs`, `serve_runners` already owns its structured,
+typed blocking TLS-session joins and interrupts actual sockets before joining
+cleanup. No detached job/callback registry needs shared ownership. The directly
+awaited `run_pcm_maintenance_loop` is a Lifecycle service, not an independent job
+scheduler. No job retry, execution-budget, circuit or pause policy exists here;
+runner activation/freshness settings are protocol/domain state. No Cargo feature,
+service code, worktree or branch was added; this was a read-only applicability
+assessment, not a new test run or migration claim.
+
+Simple AI `master` is integrated at `d3103f8` from `0523c03`, shared source
+`06c7531`. 06a adopts named WorkTracker reservations before runner planning,
+retaining completion/response delivery and shutdown drain. Late dispatch is
+rejected without consuming runner capacity. 06b remains Pending for model-aware
+batch size/readiness/age and live runner saturation semantics, unsupported by
+the generic scheduler. 06c is N/A for background execution policies; batching
+readiness ages and outbound inference client behavior remain application-owned.
+Baseline/final backend suites: 314 passed, one existing ignored doctest. Strengthened
+real mock-runner coverage verifies accepted requests drain, responses arrive,
+capacity returns and late dispatch makes no outbound request. All-target backend
+Clippy completes with 12 warnings; changed-file formatting/diff pass. Workspace
+formatting has unrelated existing differences; inference/GPU/browser suites were
+not rerun. Master was rebased in the clean linked worktree, original README diff
+and untracked file list verified preserved, then temporary worktree/branch removed.
+See Simple AI's `docs/step-06-background-tasks.md`.
+
+Peerlo `master` is integrated at `e3b08f6` from `e51e4b7`, shared source `06c7531`.
+06c adopts RetryPolicy delay calculations for metadata cooldowns and persisted
+candidate-peer retries. Reason-specific penalties, unlimited attempts, count/
+exponent saturation, reset, eviction and SQLite eligibility remain application-owned.
+06a is N/A: independently spawned network components already have explicit
+lifecycle-owned abort/join order; typed per-cycle fanout remains structured.
+06b is N/A: no separate cron/job-trigger scheduler beyond protocol operations.
+Baseline affected suites: 162 passed, two existing ignored; final 164 passed,
+two ignored, including two process lifecycle checks and SQLite eligibility tests.
+New matrices compare counts 0..63/u32::MAX, caps, failure reasons and fixed penalties.
+Affected all-target Clippy completes with warnings; changed-file formatting/diff
+pass. Full DHT network/Docker/browser suites not rerun. Master rebased onto the
+migration, tested tree verified, temporary worktree/branch removed. See Peerlo's
+`docs/step-06-background-tasks.md`.
+
+Androidoscopy `master` is integrated at `49bfea4` from `a6648cd`, shared source
+`06c7531`. 06a adopts WorkTracker for legacy upgrades and v2 controller connection,
+reader, event and action work, retaining TLS reader abort-on-drop. Guards precede
+spawn/mutation; closed upgrades return 503 and rejected connections leave no
+phantom devices. 06b/06c N/A: heartbeat/discovery/cleanup/reconnect and call/pairing
+budgets are protocol loops and transport behavior, not an independent job scheduler
+or execution-policy system. Baseline 72 Rust tests; final 74 pass. Added closed
+admission/pending-reservation and real-socket shutdown tests. All six real-process
+v2/legacy WebSocket/legacy TLS cases pass under SIGINT/SIGTERM with open sockets
+and listener reuse. All-target Clippy completes with warnings; changed-file
+formatting/diff pass. Android/device/browser suites not rerun. Master rebased,
+tested tree verified, temporary worktree/branch removed. See Androidoscopy's
+`docs/step-06-background-tasks.md`.
