@@ -27,7 +27,7 @@ multipart = ["http", "axum/multipart"]
 ws = ["http", "axum/ws"]
 
 [dependencies]
-cron = { version = "0.12", optional = true }
+cron = { version = "0.15", optional = true }
 chrono = { version = "0.4", default-features = false, features = ["std"], optional = true }
 pin-project-lite = { version = "0.2", optional = true }
 tower-http = { version = "0.6", default-features = false, features = ["cors"], optional = true }

@@ -50,6 +50,18 @@ fn cron_seconds_validation_and_utc_boundary() {
     );
 }
 #[test]
+fn cron_future_year_resets_lower_calendar_fields() {
+    let after: SystemTime = chrono::DateTime::parse_from_rfc3339("2024-02-28T23:59:59Z")
+        .unwrap()
+        .into();
+    let expected: SystemTime = chrono::DateTime::parse_from_rfc3339("2026-01-01T03:15:00Z")
+        .unwrap()
+        .into();
+    let schedule = CronSchedule::parse("0 15 3 1,15 * * 2026-2030").unwrap();
+    assert_eq!(schedule.next_after(after), Some(expected));
+}
+
+#[test]
 fn pure_interval_timing_and_jitter_are_deterministic() {
     let now = SystemTime::UNIX_EPOCH + Duration::from_secs(100);
     let rate = Schedule::FixedRate {
