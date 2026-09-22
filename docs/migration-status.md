@@ -16,7 +16,7 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 
 | Project | Server components | 1. Axum centralization | 2. Lifecycle / main() | 03a. Logging | 03b. Correlation | 03c. HTTP tracing | 04a. Body limits | 04b. Response headers | 04c. CORS | 05. Health/readiness | 06a. Task ownership | 06b. Scheduling | 06c. Execution policies |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local canary)** | **Done (local; scoped canary)** | N/A (assessed) | N/A (no served probe) | Pending | Pending | Pending |
+| pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local canary)** | **Done (local; scoped canary)** | N/A (assessed) | N/A (no served probe) | **Done (local; scoped canary)** | **Done (local; primitives)** | **Done (local; primitives)** |
 | favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local canary)** | Pending | Pending | Pending |
 | androidoscopy | `server` | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (no served probe) | Pending | Pending | Pending |
 | crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | Pending | Pending | Pending |
@@ -1678,8 +1678,9 @@ using the same worktree/rebase/cleanup workflow.
 
 ## Step 06: background tasks
 
-06a/06b/06c libraries implemented; consumer rollout pending. All 17 consumers remain unmigrated,
-with applicability to be verified before adoption. No consumer changes.
+06a/06b/06c are implemented. Pezzottify has completed the local canary through
+the shared ownership, scheduling/capacity, and policy primitives. The other
+16 consumers remain Pending, with applicability to be verified before adoption.
 
 06a verification: unchanged baseline 69 tests/doctests; 10 ownership contract
 tests covering callback reservations, admission races, retained errors/panics,
@@ -1739,5 +1740,82 @@ owned execution permits. Six new contract tests cover class isolation, global
 limits across clones, cancelled partial acquisition, retained executing permits,
 unknown pools, and invalid configuration. All **113** library tests/doctests and
 strict all-feature/all-target Clippy pass; the six capacity tests also pass with
-only `task-scheduling` enabled and default HTTP features disabled. Consumer
-integration is still in progress; this addition alone does not mark adoption.
+only `task-scheduling` enabled and default HTTP features disabled. The addition
+is committed at `4a6353f55b23dff173ec1968915c6e10312d5795`; consumer adoption
+is recorded separately below.
+
+
+### Step 06 Pezzottify canary — complete locally
+
+Verified 2026-09-22. Active development branch `dev`, starting at `700d0394`,
+is integrated at **`5ea9ed6bb8206943b86d883738ae78fae39046ee`**. Reviewed shared
+source **`4a6353f55b23dff173ec1968915c6e10312d5795`** is recorded in the
+consumer's `simple-server.rev`, which its CI checkout script reads.
+
+Applicability is established by production call sites, not Cargo features:
+
+- 06a: `server/lifecycle.rs` uses `WorkTracker` for upgrade reservations and
+  tracked request/maintenance work; WebSocket and MCP reject late admission.
+  `background_jobs/scheduler.rs` owns each execution with a bounded `TaskSet`.
+  Blocking completion and history finalization remain inside the owned scope.
+- 06b: persisted interval/jitter recurrence uses `Schedule::FixedDelay`, and
+  global/resource-class limits use `ExecutionCapacity`. Class-before-global
+  acquisition, defaults, per-job overlap exclusion, first-run policies, hooks,
+  manual-run schedule resets and durable dates remain application-owned.
+- 06c: production queue/runtime deadlines use `ExecutionBudget`, circuit
+  transitions use `CircuitBreaker`/snapshots, and pause admission uses
+  `PauseState`. Existing JSON/history/HTTP contracts and persistence failure
+  behavior remain intact, including loading state after a threshold change.
+
+The application deliberately retains its scheduler orchestration, SQLite
+persistence/recovery, metrics/audit, and domain cancellation tokens. Ownership
+adoption covers the existing lifecycle-tracked application work and registered
+background jobs; the existing Step 02 subsystem boundaries, including the
+independently owned OS-thread index builder, remain unchanged. It does not
+adopt the shared runnable scheduler wholesale: its manual-run resets, accepted
+queued-work pause behavior, cancellation-support checks, and runtime budget
+starting before Tokio blocking dispatch differ from that scheduler's defaults.
+No new automatic retries or execution of previously stubbed cron variants are
+introduced. Runtime expiry still waits for blocking execution, preserves its
+capacity, and records the established timeout history. Application-specific
+retry/claim semantics remain application-owned.
+
+Completion now wakes the loop promptly. Finished owners are consumed before
+replacement; shutdown has admission priority. Interrupted draining retains live
+owners, and resuming it does not rerun stale-job recovery or startup hooks.
+
+Verification:
+
+- Baseline: 127 background-job tests passed, two existing ignores; 16 admin-job
+  E2E and four production-process lifecycle cases passed before changes.
+- Full consumer suite: **1,429 passed, 36 existing ignores**, including the new
+  E2E coverage. After the final drain-resume guard and import cleanup, **128
+  background-job tests** (two existing ignores) and **44 focused HTTP/process
+  E2E cases** passed again. The restart case was then made deterministic by
+  selecting local `device_pruning` and passed independently again.
+- **23 new scheduler E2E scenarios** drive real HTTP routes, application
+  scheduling, blocking jobs, and SQLite. They cover payloads/history, concurrent
+  deduplication, queue/runtime limits, class/global capacity, cancellation,
+  errors/panics, pause scopes, shutdown ownership, circuits, hooks/recurrence,
+  reopened-database restart state, overdue/stale records, actual SQL write
+  failures, authorization, and changed circuit thresholds.
+- **Five process lifecycle cases** run the actual binary: SIGTERM, SIGINT,
+  admin reboot, both listeners, WebSocket/MCP drain, bind failure, and persisted
+  pause restoration across process restart with HTTP rejection/resumption.
+- Final release container build passed; **all 45 non-Android Docker API/browser
+  E2E tests passed** (two Android cases deselected). The final run includes the
+  drain-resume fix. Isolated project, image tags, fixtures, network and volumes
+  were used; test containers, network and volumes were removed afterwards.
+- Strict CI Clippy, formatting, whitespace and database-boundary checks pass.
+  `cargo audit` passes under the existing policy with six allowed warnings;
+  that policy was not changed. The shared extension passed **113 tests/doctests**,
+  strict all-feature/all-target Clippy, and its six HTTP-free capacity tests.
+
+The migration was committed in a dedicated worktree; `dev` was rebased onto that
+branch, ancestry and tested-tree equality verified, and the temporary consumer
+worktree/branch removed. The unrelated `pezzottify-paravoid` worktree is preserved.
+The coordinator's tracker changes use the same worktree/rebase/cleanup workflow
+on `simple-server/main`. No pushes or deployments were performed by this work.
+See Pezzottify's `docs/step-06-background-tasks.md` for commands and retained
+behavior. Both central trackers mark only Pezzottify's Step 06 adoption complete;
+all other consumers stay Pending.
