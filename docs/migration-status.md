@@ -20,7 +20,7 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local canary)** | **Done (local; request work)** | Pending (durable workflow) | **Done (local; retry scope)** |
 | androidoscopy | `server` | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (no served probe) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) |
 | crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | Pending (durable scheduler) | Pending (durable policies) |
-| fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | Pending (registry adoption) | N/A (assessed) |
+| fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; dynamic cron)** | N/A (assessed) |
 | lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (Rust; Caddy owns CORS) | **Done (local; scoped)** | **Done (local; webhook scope)** | **Done (local; capacity)** | **Done (local; retry scope)** |
 | lellostore | `backend` | **Done** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) |
 | meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; pipeline/gateway)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | Pending (durable scheduler) | **Partial (runtime budgets)** |
@@ -1835,11 +1835,10 @@ No pushes or deployments were performed.
 | Module | Done (scoped) | Partial | Pending compatibility | N/A (assessed) |
 | --- | ---: | ---: | ---: | ---: |
 | 06a ownership | 14 | 0 | 0 | 3 |
-| 06b scheduling/capacity | 4 | 0 | 9 | 4 |
+| 06b scheduling/capacity | 5 | 0 | 8 | 4 |
 | 06c policies | 6 | 1 | 1 | 9 |
 
-Remaining scheduling work covers dynamic cron adoption (Fausto), durable
-claims/reservations/queues (Pezzottflix/Favzetto/Crumbles/Meteonesto/SCT/Simple Agents), model-aware
+Remaining scheduling work covers durable claims/reservations/queues (Pezzottflix/Favzetto/Crumbles/Meteonesto/SCT/Simple Agents), model-aware
 batching (Simple AI), and downloader priority/prefetch rules. Crumbles' durable
 execution authority and signed jitter remain Pending; Meteonesto adopts runtime
 budgets but retains incompatible configurable retry multipliers, hence Partial.
@@ -1866,7 +1865,7 @@ Fausto `master` is integrated at `44dc1b02575156bc8370603f1d595115e40e3e9a`, fro
 WebSocket sessions and manual/cron jobs. At that rollout checkpoint, 06b remained Pending for live schedule
 enable/disable, unsupported by the shared static-registration scheduler.
 Production job registration occurs at startup. The dynamic cron extension below
-now offers separate timing controls; consumer adoption remains Pending. This is a compatibility gap, not N/A. 06c is N/A: no execution retry,
+now offers separate timing controls; the subsequent Fausto adoption is recorded below. This is a compatibility gap, not N/A. 06c is N/A: no execution retry,
 budget, circuit or pause policies (cron registration enablement remains app-owned).
 Baseline 203 tests; final 204 passed, one existing ignored doctest, including six
 lifecycle integrations and four process tests. Added interrupted-stop coverage
@@ -2094,8 +2093,8 @@ startup, its admin API changes automatic cron enablement while running, manual
 runs ignore that flag, and its job execution has no configured concurrency bound.
 The new registry addresses these timing/control requirements without imposing
 bounded execution or moving database history into simple-server. Fausto and all
-other consumers are unchanged. **Fausto 06b remains Pending (registry adoption)**;
-cron parser/occurrence compatibility and consumer E2E validation are still required.
+other consumers are unchanged. **Fausto 06b was Pending (registry adoption) at this library-only checkpoint**;
+the subsequent compatibility/E2E-verified adoption is recorded below.
 All service matrix totals remain unchanged. This does not resolve durable claims,
 fencing, priority queues, model batching or execution-policy gaps in other services.
 
@@ -2130,3 +2129,37 @@ priority/due-time queue. Its 06b status remains Pending, now accurately describe
 as durable queue integration. The dormant cron engine's lookback and deferred
 admission behavior are potential future shared-library requirements, not evidence
 of current production usage. All matrix status counts remain unchanged.
+
+
+### Step 06b Fausto dynamic cron adoption — complete locally
+
+Fausto `master` is integrated at `4c89738`, from `44dc1b0`, using reviewed shared
+revision `0cff4b24e375eeafb61834f6c03d5da30ae5f5dc`. Its production scheduler uses
+CronRegistry through a private adapter for live schedule registration/removal and
+skip-missed-tick timing. Job execution, persistence, manual/event triggers and
+shutdown remain application-owned. Automatic executions can overlap; disabling
+cron leaves admitted jobs and manual runs alone. The driver is joined by reference
+so interrupted shutdown retains ownership. Fausto 06b is now **Done (scoped)**;
+06a stays Done and 06c N/A. Scheduling totals: **5 Done, 8 Pending, 4 N/A**.
+
+The old cron 0.12 parser remains at the boundary to preserve aliases/named fields;
+shared cron calculation intentionally fixes the known future-year field-reset bug.
+Tokio-cron-scheduler is removed from the lockfile. All four CI sibling-source pins
+and active README instructions now use the reviewed shared revision.
+
+Untouched baseline: **204 server tests pass**, one existing ignored doctest.
+Final: **209 pass**, the same ignored doctest. The expanded **seven lifecycle and
+six real-process tests pass against both old and migrated implementations**, using
+a separate unchanged baseline checkout. New coverage proves automatic overlap,
+disable/manual behavior, persisted completion and enabled-state restart, live
+re-enable, invalid cron/manual execution, repeated interrupted drain and late
+admission rejection. Two occurrence/grammar tests include the explicit calendar
+bug regression. Existing HTTP drain/deadline, signal and logging checks pass.
+Configured all-target Clippy completes with existing warning-level lint debt;
+changed-file rustfmt and diff checks pass. Optional frontend/swagger, complete
+workspace/plugin suites and Docker/Python E2E were not rerun.
+
+Master was rebased onto the migration branch; ancestry and identical tested tree
+were verified. Migration and baseline worktrees and the temporary consumer branch
+were removed. See Fausto's `docs/step-06b-dynamic-cron.md` for the detailed contract
+and evidence. No other consumer changed; no push or deployment was performed.
