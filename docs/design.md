@@ -54,13 +54,13 @@ Step 07 (optional database helpers) is deferred until after Step 10 and the
 consumer Axum-removal milestone. Keep the existing step numbers so historical
 references remain valid. The execution order after Step 06 is:
 
-1. Step 08: authentication.
-2. Step 09: authorization.
-3. Step 10: rate limiting.
-4. Complete the public HTTP interfaces, migrate all remaining consumer Axum
+1. Steps 08/09: one optional `auth` module for authentication and authorization,
+   designed and migrated together. Step 09 is absorbed; there is no second rollout.
+2. Step 10: rate limiting.
+3. Complete the public HTTP interfaces, migrate all remaining consumer Axum
    usage, and verify the end-goal criteria above before removing the transitional
    Axum re-export. This includes production code and tests across all services.
-5. Revisit Step 07: optional database setup and migration helpers.
+4. Revisit Step 07: optional database setup and migration helpers.
 
 Database helpers are not a prerequisite for the HTTP abstraction. Services retain
 their existing database libraries, setup and migrations while that work proceeds.
@@ -124,3 +124,6 @@ workspace-wide migration.
 
 [Step 06: background tasks](step-06-background-tasks.md) separates task ownership,
 scheduling and execution policies. Durable storage and recovery remain application-owned.
+
+[Steps 08/09: auth](step-08-auth.md) combine identity verification and access checks
+in one optional, Axum-independent module with application-owned providers and policy.

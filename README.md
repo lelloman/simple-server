@@ -9,7 +9,7 @@ Axum can remain an internal implementation detail. See the
 [design and completion criteria](docs/design.md#end-goal-completely-abstract-axum-away).
 
 **Status:** Axum dependency centralization and opt-in lifecycle, logging,
-correlation, HTTP tracing, body limits, response-header helpers, CORS, health checks, task ownership, scheduling and execution policies are implemented. All 17 inventoried products have adopted lifecycle helpers locally
+correlation, HTTP tracing, body limits, response-header helpers, CORS, health checks, task ownership, scheduling, execution policies and combined auth are implemented. All 17 inventoried products have adopted lifecycle helpers locally
 with documented application scopes. Crumbles and SCT include those migrations on local `master`. Publication to crates.io remains disabled.
 
 Open the [HTML migration matrix](docs/migration-status.html) in a browser for adoption status
@@ -240,3 +240,12 @@ per-entry skip/catch-up policies. Applications drive bounded `poll_due` batches
 or select on the cancellation-safe `next_due()` future with their own admin
 channel and shutdown. Manual execution, concurrency and persistence remain
 application-owned. See [the dynamic cron example](examples/dynamic_cron.rs).
+
+## Authentication and authorization
+
+Enable `auth` for application-owned identity verification and access checks in one
+module. `Access` and `AsyncAccess` support synchronous and asynchronous flows;
+`HeaderCredential` provides explicit parsing rules and `AuthLayer` supplies a
+body-preserving Tower gate with application-owned failure responses. The feature
+works without default features, Axum or Tokio. See the [auth contract](docs/step-08-auth.md)
+for ownership boundaries, provider integration and verification evidence.

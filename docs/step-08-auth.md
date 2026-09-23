@@ -1,0 +1,99 @@
+# Steps 08/09: one optional auth module
+
+Authentication and authorization are designed and migrated together under the
+single `auth` feature and `simple_server::auth` module. Step 09 is absorbed into
+this milestone; Step 10 keeps its existing number. Database helpers (07) remain
+deferred until after consumer Axum removal.
+
+## Scope and consumer evidence
+
+The first source assessment identified these actual production requirements:
+
+| Service | Existing access flow | Ownership retained |
+| --- | --- | --- |
+| Favzetto | Exact Bearer or x-api-key, local administrator identity, admin checks; WebSocket query key forwarded by the application | Key configuration, fallback precedence, wire errors and route placement |
+| LelloStore | Bearer → OIDC validation → roles/user registry → authenticated/admin extractors | Issuer/JWKS/claims validation, registry writes and outages |
+| Simple AI | API key or JWT; explicit LAN identity only without Authorization; disabled-account checks | Trusted-network policy, API-key storage, OIDC and account state |
+| Simple Agents | Strict single Bearer header; separate browser session flow; scoped durable permissions | Origin/session/CSRF boundary, revocation and transactional permissions |
+| Crumbles | Auth session followed by named global/project/resource checks; some denials conceal existence with 404 | Permission model, transactional authorization and visibility semantics |
+| Pezzottify | Session identity and named route permissions | Session persistence, CSRF, permission snapshots and business policy |
+| Meteonesto | AccessControl-backed principal and permission checks with denial audit | Hot policy, principal kinds, audit writes and storage transactions |
+
+These are design inputs, not claims of migration. Other services still require
+assessment. No JWT implementation, OAuth flow, cookie format, password hashing,
+role schema or database is mandated by this module.
+
+## Public contract
+
+- `Access<Context, Principal, Error>` runs a synchronous application verifier,
+  then every registered check in order. `AsyncAccess` supports borrowed async
+  callbacks via `AuthFuture`. Construction requires a verifier; a verifier-only
+  flow accepts whatever identities that verifier accepts. Extra restrictions
+  require explicit checks. No hidden anonymous fallback or permissive default.
+- `evaluate` returns an identity only after all checks succeed. The first error
+  is returned unchanged. `authorize` applies the configured checks to an identity
+  already verified by the caller; it never authenticates or refreshes that identity.
+  Context can include actions, loaded resources or transaction references. Keep
+  mutation-sensitive checks in the application's transaction to avoid TOCTOU.
+- `HeaderCredential` extracts an opaque header value, optionally after a literal
+  scheme and one ASCII space. Scheme matching is explicitly exact or ASCII case
+  insensitive. Values are never trimmed or decoded. Repeated headers and empty
+  values are rejected by default; explicit compatibility options permit first-value
+  selection and empty values. Invalid text, missing, repeated, wrong-scheme and
+  empty errors contain no secret. Credential Debug is redacted; `expose` is explicit.
+- Credential-source precedence and fallback are caller-owned. Parse errors must
+  not silently trigger weaker identity fallback unless that is the service's
+  deliberately preserved policy. This module does not compare stored secrets or
+  validate token signatures; existing reviewed verifier libraries remain in use.
+- `AuthLayer` adapts `AsyncAccess<http::request::Parts, ...>` to Tower. It preserves
+  the body, headers, URI and unrelated extensions. An existing `Identity<P>` is
+  removed before verification; the new identity is installed only after success.
+  Mount it explicitly on protected routes. It does not exempt OPTIONS, change
+  routing or install CSRF policy. Application rendering controls all failure
+  statuses, bodies, challenges, redirects and headers, including provider outages.
+- The layer forwards inner readiness and calls the same ready instance. Failed
+  access never calls the handler. Evaluation cancellation drops the active future;
+  no detached work is started. Committed application side effects cannot be undone.
+- No credential logging, policy cache, timeout, retry, database, runtime or provider
+  is installed. Clones share callbacks but do not retain request identities.
+
+The feature depends only on `http`, `tower-layer` and `tower-service`. It builds
+with default features disabled, without Axum or Tokio. Public types and bounds
+contain no Axum APIs. The HTTP layer is optional to use; handlers/CLI/background
+work can evaluate the same access flows directly.
+
+## Example
+
+```rust
+use simple_server::auth::Access;
+
+let access = Access::new(|token: &String| {
+    if token == "test-fixture" { Ok("admin") } else { Err("unauthenticated") }
+}).with_check(|principal, _| {
+    if *principal == "admin" { Ok(()) } else { Err("forbidden") }
+});
+assert_eq!(access.evaluate(&"test-fixture".to_owned()), Ok("admin"));
+```
+
+The example is a fixture; production credential verification belongs in the
+application callback. Resource checks can use `authorize` later with the verified
+principal and a context containing the resource/action, preserving transaction
+boundaries and application-specific 403/404 behavior.
+
+## Verification and rollout
+
+Library baseline: 137 tests/doctests; final: 145 pass. Strict all-feature/all-target
+Clippy passes. Seven auth tests also pass with default features disabled; the normal
+dependency tree contains only http, bytes, itoa, tower-layer and tower-service.
+Added contract tests cover header ambiguity,
+opaque values, redacted diagnostics, exact errors, check ordering, provider failure,
+request-local identity, revocation, cancellation, stacked gates and inner readiness.
+A real HTTP test exercises unauthenticated, forbidden, unavailable, successful and
+public requests while counting actual handler calls. Minimal-feature build/tests
+verify that auth works without Axum or a runtime dependency.
+
+Favzetto is the first canary. Its old implementation passes a new 13-case credential
+precedence/duplicate/spacing/fallback matrix plus a public-route check before
+migration. Both identification and admin authorization will use the shared module;
+no unused Cargo feature will be counted as adoption. Other services remain pending
+assessment/migration until individually verified. Full rollout is a separate pass.

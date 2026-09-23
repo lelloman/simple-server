@@ -62,3 +62,7 @@ pub mod task_scheduling;
 /// Optional execution budgets, retries, circuit breakers and pause state.
 #[cfg(feature = "task-policies")]
 pub mod task_policies;
+
+/// Combined authentication and authorization without Axum or a required runtime.
+#[cfg(feature = "auth")]
+pub mod auth;

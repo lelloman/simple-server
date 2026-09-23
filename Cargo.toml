@@ -8,6 +8,7 @@ readme = "README.md"
 publish = false
 
 [features]
+auth = ["dep:http", "dep:tower-layer", "dep:tower-service"]
 default = ["http"]
 http = ["dep:axum", "dep:tower-service"]
 task-policies = ["tasks"]
