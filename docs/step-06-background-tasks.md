@@ -211,3 +211,34 @@ permit. Dropping a pending acquisition releases any partially acquired capacity.
 Applications bound their pending jobs, apply queue deadlines/cancellation, and
 hold permits until execution actually finishes, including blocking overruns.
 There is no storage, hidden worker, queue-capacity policy, or hard abortion.
+
+## Composable selection and retry extensions
+
+The following opt-in primitives support applications that keep their own queue,
+transactional claims and execution model. They do not turn process memory into
+an authority for durable reservations:
+
+- `WeightedSelection` probes a configured lane cycle through an asynchronous
+  backend callback and advances shared fairness state only on a successful claim.
+  Empty polls and errors do not spend weight. Backend transactions enforce
+  exclusivity; concurrent callers can inspect the same lane.
+- `PriorityCapacity` provides FIFO admission within explicitly ordered priority
+  classes, per-class caps (including zero), a bounded live waiter queue and RAII
+  permits. It skips saturated classes; strict priority may starve lower classes.
+  Cancellation before or after a grant returns capacity. The queue bound applies
+  before immediate dispatch, so a zero queue bound rejects all admissions.
+- `BatchReadiness` combines fullness, minimum batch size and separate normal/
+  saturation age thresholds. Queue identity, runner compatibility and reservation
+  remain application policy.
+- `ResourceDemand` and `denied_resources` check resource dimensions sampled by
+  the caller under its transaction. Overflow rejects. Persist accepted reservations
+  before releasing the database transaction; this API never reserves by itself.
+- `QuantizedBackoff` computes fractional-multiplier exponential delays in explicit
+  caller-defined integer ticks, preserving truncation and caps. `doubling_backoff`
+  handles integer Duration growth and product-specific exponent saturation.
+  `signed_jitter_millis` supports signed percentages with explicit millisecond
+  truncation and saturating arithmetic. Entropy, attempt exhaustion, failure
+  classification, durable deadlines and recovery authority remain caller-owned.
+
+All are HTTP-free and independent of the bounded Scheduler and CronRegistry.
+Consumer statuses change only after actual production adoption and verification.

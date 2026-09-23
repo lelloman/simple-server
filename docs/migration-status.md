@@ -2163,3 +2163,14 @@ Master was rebased onto the migration branch; ancestry and identical tested tree
 were verified. Migration and baseline worktrees and the temporary consumer branch
 were removed. See Fausto's `docs/step-06b-dynamic-cron.md` for the detailed contract
 and evidence. No other consumer changed; no push or deployment was performed.
+
+
+### Step 06B/06C completion extensions — library checkpoint
+
+The shared library now offers independently usable weighted transactional-claim
+selection, priority admission with cancellation-safe permits, batching readiness,
+resource-demand checks against caller-owned transactional snapshots, fractional
+quantized backoff and signed millisecond jitter. Claims, leases and recovery state
+remain application-owned. Library validation: 132 tests/doctests, strict all-feature
+all-target Clippy and nine HTTP-free new policy/selection tests pass. No consumer
+adoption is claimed at this checkpoint; per-service migration evidence follows.

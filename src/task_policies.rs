@@ -1,5 +1,8 @@
 //! Storage-independent execution policies. All state-machine clocks and jitter
 //! samples are caller supplied. Snapshots contain control state, never job claims.
+#[path = "task_backoff.rs"]
+mod backoff;
+pub use backoff::{QuantizedBackoff, doubling_backoff, signed_jitter_millis};
 use std::{
     collections::BTreeSet,
     fmt,
