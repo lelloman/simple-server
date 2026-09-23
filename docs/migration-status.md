@@ -27,7 +27,7 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | observo | `observo-server`; standalone extractor logging | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (no served probe) | **Done (local; scoped)** | **Done (local; primitives)** | N/A (assessed) |
 | paranza | `apps/paranza-server` | **Done** | **Done (local; scoped)** | N/A (no logger) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | N/A (assessed) |
 | peerlo | `peerlo-api` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; retry primitives)** |
-| pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local; main HTTP)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; socket scope)** | Pending (dynamic scheduler) | N/A (assessed) |
+| pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local; main HTTP)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; socket scope)** | Pending (durable queue) | N/A (assessed) |
 | pezzottify-downloader | Puppeteer API and downloader HTTP server | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; Puppeteer)** | **Done (local; both HTTP routers)** | N/A (assessed) | N/A (assessed) | **Done (local; both routers)** | **Done (local; scoped)** | **Done (local; scoped)** | Pending (priority scheduler) | N/A (assessed) |
 | quentin-torrentino | `crates/server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; stage capacity)** | N/A (assessed) |
 | sct | `sct-server` | **Done** | **Done (scoped)** | N/A (no logger) | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; worker scope)** | Pending (durable scheduling) | **Done (local; retry scope)** |
@@ -1838,8 +1838,8 @@ No pushes or deployments were performed.
 | 06b scheduling/capacity | 4 | 0 | 9 | 4 |
 | 06c policies | 6 | 1 | 1 | 9 |
 
-Remaining scheduling work covers dynamic scheduling adoption/compatibility
-(Fausto/Pezzottflix; see the dynamic cron extension below), durable claims/reservations (Favzetto/Crumbles/Meteonesto/SCT/Simple Agents), model-aware
+Remaining scheduling work covers dynamic cron adoption (Fausto), durable
+claims/reservations/queues (Pezzottflix/Favzetto/Crumbles/Meteonesto/SCT/Simple Agents), model-aware
 batching (Simple AI), and downloader priority/prefetch rules. Crumbles' durable
 execution authority and signed jitter remain Pending; Meteonesto adopts runtime
 budgets but retains incompatible configurable retry multipliers, hence Partial.
@@ -2009,9 +2009,10 @@ browser tests. See downloader's `docs/step-06-background-tasks.md`.
 
 Pezzottflix `master` is integrated at `2d49435` from `f8159f0`, shared source
 `06c7531`. 06a owns authenticated sync socket upgrades and cancel-safe drain;
-closed admission returns 503 without phantom connections. 06b remains Pending
-for dynamic replacement, nonblocking admission, available-permit reporting and
-zero concurrency semantics. 06c N/A: queue/download retry helpers have no production
+closed admission returns 503 without phantom connections. The original 06b assessment cited dynamic replacement, nonblocking admission,
+available-permit reporting and zero concurrency semantics. The subsequent
+cron consumer reassessment found those cron registrations only in tests:
+06b remains Pending for the production SQLite priority/due-time queue instead. 06c N/A: queue/download retry helpers have no production
 callers; worker joins already belong to Lifecycle. Baseline 540 server tests;
 final 542 pass, three existing ignored. New real authenticated HTTP rejection and
 interrupted drain tests pass; the binary SIGINT/SIGTERM script passes with open
@@ -2111,3 +2112,21 @@ formatting/diff checks and the HTTP-free `dynamic_cron` example pass.
 Implementation used an isolated branch/worktree from `simple-server/main`
 `2db31ef`. See the [contract](step-06-background-tasks.md#dynamic-timing-without-execution)
 and [example](../examples/dynamic_cron.rs). No consumer changes, pushes or deployments.
+
+
+### Step 06 consumer reassessment after dynamic cron
+
+Reviewed all 16 other consumer checkouts against shared `0cff4b2`, with no consumer
+changes or test reruns. See the [complete source-backed assessment](step-06-cron-consumer-reassessment.md).
+Fausto remains the immediate registry candidate. Observo should retain stateless
+shared recurrence with database-owned run history; Pezzottify could use the new
+component for a separately requested cron feature, whose execution is currently
+unimplemented. Other consumers' durable scheduling, priority/batching and existing
+capacity integrations are unaffected.
+
+**Correction: Pezzottflix's cron scheduler starts empty in production; job
+registration occurs only in tests.** Its actual work runs through the SQLite
+priority/due-time queue. Its 06b status remains Pending, now accurately described
+as durable queue integration. The dormant cron engine's lookback and deferred
+admission behavior are potential future shared-library requirements, not evidence
+of current production usage. All matrix status counts remain unchanged.
