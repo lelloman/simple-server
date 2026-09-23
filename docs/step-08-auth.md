@@ -122,9 +122,11 @@ and each consumer's `docs/step-08-auth.md`.
 
 The second round adds Pezzottify's session/named-route flows and all three
 Meteonesto services. Simple Agents' caller/browser and transactional admin/session
-flows are tested and committed on its migration branch but await integration
-because concurrent edits overlap an auth file. No shared API changes were needed.
+flows are also tested and integrated into main, with concurrent display-name/UI
+edits preserved. Combined verification exposes a stale identity-JSON assertion
+in that uncommitted work; the auth-only suite passed all 139 tests. No shared API
+changes were needed.
 The [second-round evidence](migration-status.md#steps-0809-second-auth-rollout--2026-09-23)
 records tests, retained application policy, branch integration and cleanup limits.
-Current adoption is six services; 11 remain pending, including Simple Agents'
-tested migration. No push or deployment.
+Current adoption is seven services; 10 remain pending assessment/migration.
+No push or deployment.

@@ -38,7 +38,7 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | pezzottify-downloader | Puppeteer API and downloader HTTP server | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; Puppeteer)** | **Done (local; both HTTP routers)** | N/A (assessed) | N/A (assessed) | **Done (local; both routers)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; priority admission)** | N/A (assessed) | Pending (assessment/migration) |
 | quentin-torrentino | `crates/server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; stage capacity)** | N/A (assessed) | Pending (assessment/migration) |
 | sct | `sct-server` | **Done** | **Done (scoped)** | N/A (no logger) | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; worker scope)** | **Done (local; durable worker cadence)** | **Done (local; retry scope)** | Pending (assessment/migration) |
-| simple-agents | `simple-agents-service`; runner-shell logging; associated coding test servers | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local pilot; service routes)** | **Done (local; scoped canary)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; transactional capacity)** | **Done (local; retry scope)** | Pending (tested migration; integration held) |
+| simple-agents | `simple-agents-service`; runner-shell logging; associated coding test servers | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local pilot; service routes)** | **Done (local; scoped canary)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; transactional capacity)** | **Done (local; retry scope)** | **Done (local; caller + transactional access)** |
 | simple-ai | `backend`, `inference-runner` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local; backend)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; batch readiness)** | N/A (assessed) | **Done (local; backend user/admin)** |
 
 ## Step 1: Axum centralization
@@ -2398,15 +2398,27 @@ socket tests where child tool approvals stalled.
   Clippy finds an existing items-after-test-module warning in an unchanged file.
   Unrelated suites, browser/Android and container qualification were not repeated.
 
-Pezzottify and Meteonesto are integrated into their original development branches;
-tested tree and ancestry checks pass. Their migration/baseline worktrees, branches
-and owned build assets are removed; pre-existing Pezzottify Paravoid worktrees are
-preserved. Simple Agents remains **Pending integration**, not Done: concurrent
-account-display-name/UI edits appeared in its original checkout, including an
-`auth_http.rs` hunk. The tested migration branch `migrate/step08-auth-wave2` at
-`ac4b8bc` is retained in `/tmp/auth-simple-agents-wave2/simple-agents` with its
-build artifacts until that active work is coordinated. Original edits are untouched.
-The workflow explicitly requires coordination before stashing actively edited
-files; no timing assumption is treated as approval. Both tracker views now show
-**6 Done, 11 Pending**, including this tested-but-unintegrated service. No push or
+All three migrations are integrated into their original development branches:
+Pezzottify `dev` at `3f2271ff`, Meteonesto `master` at `6684b37`, and Simple Agents
+`main` at `ac4b8bc`. Tested trees and ancestry were verified. Simple Agents initially
+waited for coordination because concurrent account-display-name/UI edits overlapped
+`auth_http.rs`. After the user authorized continuation, all eight edited/untracked
+files were preserved through a temporary stash. The overlapping file merged
+cleanly and matched the expected combination; hashes verified the other files
+were unchanged. The edits remain uncommitted and separate from migration history.
+
+The auth-only committed tree passed all 139 service tests and strict Clippy as
+recorded above. Post-integration `cargo test -p simple-agents-service --all-targets
+--locked --no-fail-fast` against the restored user edits completed with **138 pass,
+1 fail, none ignored**. The sole failure is
+`http_accepts_only_bearer_identity_and_prevents_nonadmin_provisioning`: its exact
+JSON assertion expects the old identity response, while the uncommitted display-name
+change adds `display_name: null`. The shared-auth credential matrix, browser/OIDC,
+revocation, broker sockets, transaction checks and process tests pass. The unrelated
+response-shape/test mismatch was left with that uncommitted work.
+
+Migration/baseline worktrees, branches and owned temporary build assets are
+removed, including the temporary preservation stash after restoration was verified.
+Pre-existing Pezzottify Paravoid and Simple Agents worktrees are preserved. Both
+tracker views now show **7 Done, 10 Pending assessment/migration**. No push or
 deployment. Consumer Axum removal is still a separate completion milestone.
