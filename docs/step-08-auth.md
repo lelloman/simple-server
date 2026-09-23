@@ -132,6 +132,12 @@ The third round adds Lello Auth's optional-session, token and admin/resource
 flows, Fausto's HTTP/WebSocket and admin/write flows, and Peerlo's bearer/Torznab
 credential gates. Their application protocols and policies remain intact, with no
 shared API extension. See the [third-round evidence](migration-status.md#steps-0809-third-auth-rollout--2026-09-23)
-for scope, tests, lint qualifications and integration/cleanup records. Current
-adoption is ten services; seven remain pending assessment/migration. No push or
-deployment.
+for scope, tests, lint qualifications and integration/cleanup records.
+
+The fourth round adds Observo's IP/key/JWT route access, Pezzottflix's HTTP and
+WebSocket sessions and named permissions, and SCT's token/session authentication
+and transactional administrator/root-capability decisions. Each retains its
+existing credential precedence, error mapping and application authority. No
+shared API extension was needed. See the [fourth-round evidence](migration-status.md#steps-0809-fourth-auth-rollout--2026-09-23)
+for verification, integration and cleanup. Current adoption is thirteen services;
+four remain pending assessment/migration. No push or deployment.

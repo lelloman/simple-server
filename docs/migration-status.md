@@ -31,13 +31,13 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (Rust; Caddy owns CORS) | **Done (local; scoped)** | **Done (local; webhook scope)** | **Done (local; capacity)** | **Done (local; retry scope)** | **Done (local; sessions + resource/admin access)** |
 | lellostore | `backend` | **Done** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; OIDC + admin)** |
 | meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; pipeline/gateway)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; weighted claims)** | **Done (local; budgets/retry)** | **Done (local; all three services)** |
-| observo | `observo-server`; standalone extractor logging | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (no served probe) | **Done (local; scoped)** | **Done (local; primitives)** | N/A (assessed) | Pending (assessment/migration) |
+| observo | `observo-server`; standalone extractor logging | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (no served probe) | **Done (local; scoped)** | **Done (local; primitives)** | N/A (assessed) | **Done (local; IP/key/JWT access)** |
 | paranza | `apps/paranza-server` | **Done** | **Done (local; scoped)** | N/A (no logger) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | Pending (assessment/migration) |
 | peerlo | `peerlo-api` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; retry primitives)** | **Done (local; bearer + Torznab keys)** |
-| pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local; main HTTP)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; socket scope)** | **Done (local; durable queue cadence)** | N/A (assessed) | Pending (assessment/migration) |
+| pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local; main HTTP)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; socket scope)** | **Done (local; durable queue cadence)** | N/A (assessed) | **Done (local; sessions + permissions + WebSocket)** |
 | pezzottify-downloader | Puppeteer API and downloader HTTP server | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; Puppeteer)** | **Done (local; both HTTP routers)** | N/A (assessed) | N/A (assessed) | **Done (local; both routers)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; priority admission)** | N/A (assessed) | Pending (assessment/migration) |
 | quentin-torrentino | `crates/server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; stage capacity)** | N/A (assessed) | Pending (assessment/migration) |
-| sct | `sct-server` | **Done** | **Done (scoped)** | N/A (no logger) | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; worker scope)** | **Done (local; durable worker cadence)** | **Done (local; retry scope)** | Pending (assessment/migration) |
+| sct | `sct-server` | **Done** | **Done (scoped)** | N/A (no logger) | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; worker scope)** | **Done (local; durable worker cadence)** | **Done (local; retry scope)** | **Done (local; tokens/sessions + transactional access)** |
 | simple-agents | `simple-agents-service`; runner-shell logging; associated coding test servers | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local pilot; service routes)** | **Done (local; scoped canary)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; transactional capacity)** | **Done (local; retry scope)** | **Done (local; caller + transactional access)** |
 | simple-ai | `backend`, `inference-runner` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local; backend)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; batch readiness)** | N/A (assessed) | **Done (local; backend user/admin)** |
 
@@ -2482,8 +2482,69 @@ branches. The coordinator reviewed production diffs and verified test evidence;
 ancestry and tested trees match (Fausto's follow-up adds only tests/docs).
 Migration worktrees/branches, private baseline library sources, targets and logs
 are removed. Lello Auth's three unrelated untracked identity-provider documents
-and pre-existing stale worktree remain untouched. Both tracker views now agree:
+and pre-existing stale worktree remain untouched. At the end of that round, both tracker views agreed:
 **10 Done, 7 Pending assessment/migration** for combined auth. No shared API
 extension was needed; no push or deployment. This does not claim full consumer
 Axum removal. Each consumer's `docs/step-08-auth.md` records detailed scope and
 qualification limits.
+
+## Steps 08/09: fourth auth rollout — 2026-09-23
+
+Three GPT-6 Sol agents at medium reasoning assessed Observo, Pezzottflix and SCT
+in separate migration worktrees. All three use authentication and access checks
+in production. Shared source remains `0a629da`; service-owned credential,
+permission and transaction policies remain authoritative.
+
+- Pezzottflix `master` → `51fd1be`: shared raw-header extraction preserves
+  first-value selection, empty/untrimmed session IDs and cookie fallback only
+  for missing/non-text Authorization. `AsyncAccess` covers HTTP session/user
+  lookup and the separate cookie-only WebSocket session/expiry flow. Shared
+  `Access` covers named permission decisions; role policy, optional-auth error
+  suppression, public byte-stream routes and distinct WebSocket behavior stay
+  local. Baseline auth suite: 49 pass. Final Rust suites: **546 pass** (493 library,
+  53 integration), two ignored doctests. Docker backend auth/WebSocket E2E:
+  **10/10 pass**. Adopting the reviewed source exposed let-chain syntax unsupported
+  by its Rust 1.87 Docker image; updating the image and documented minimum to
+  Rust 1.88 fixed the build, and the release image passed. Normal all-target
+  Clippy passes with existing warnings; targeted formatting and diff checks pass.
+  Active pin and README are updated. Android/emulator qualification was not run.
+  The migration worktree/branch and private target/venv files are removed; the
+  E2E container was removed by the fixture. Generic E2E image, shared Docker
+  cache and compose volume were preserved rather than pruned.
+
+- Observo `master` → `96beec9`: shared `Access` and `HeaderCredential`
+  preserve IP allowlist → API key → JWT fallback, first repeated headers,
+  empty configured keys, exact Bearer syntax, trusted-proxy handling, OPTIONS
+  and public metrics. All accepted sources retain the same route access;
+  JWT verification and constant-time key comparison remain local. Baseline:
+  **94/94** server unit tests. Final: **97/97**, plus passing real-process HTTP
+  E2E covering auth, CRUD, persistence, restart and shutdown. Changed-source
+  formatting and diff checks pass; normal Clippy passes with 36 existing
+  warnings outside auth. Strict Clippy and whole-repository formatting retain
+  existing unrelated failures. README and the active source pin are updated.
+- SCT `master` → `7a0c6bd`: shared `HeaderCredential` and `AsyncAccess` preserve exact Bearer syntax,
+  first repeated Authorization, supplied-header precedence over cookies,
+  token/session verification and browser-content denial. Shared `Access` handles
+  administrator and root-capability decisions after the existing transactional
+  queries; live revocation, grants, ownership and database authority stay local.
+  Baseline core/server test targets compiled, the nonignored suite passed outside
+  the sandbox, and database-backed HTTP management passed before edits. Final:
+  **18 nonignored core/server tests pass; 91 environment-dependent tests remain
+  ignored in that default invocation**. Three explicitly selected PostgreSQL
+  tests also pass: HTTP management (including the new credential matrix), HTTP
+  storage/admin configuration, and core credential/identity/revocation/grant
+  boundaries. These verify malformed-credential rejection, repeated-header precedence, cookie
+  fallback rules, CSRF, admin denial, grant changes and stale-actor revocation.
+  Formatting, diff checks and strict all-target/all-feature Clippy for core and
+  server pass. Active pin and README are updated. Full archive/media/S3/browser
+  qualification was not repeated.
+
+All three migrations are committed and integrated into their original `master`
+branches. The coordinator reviewed production changes and verification evidence;
+branch ancestry and tested trees match. Owned migration worktrees, branches,
+build targets and SCT's disposable PostgreSQL container are removed. SCT's
+unrelated `.validation-work/` directory and `docs/step-04c-cors.md` are preserved.
+Both tracker views agree: **13 Done, 4 Pending assessment/migration** for combined
+auth. Androidoscopy, Paranza, Pezzottify Downloader and Quentin Torrentino remain
+pending. No shared API change, push or deployment was needed. This records scoped
+auth adoption, not complete consumer Axum removal.
