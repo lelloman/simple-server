@@ -94,7 +94,7 @@ coordinator will compose the same public building blocks available to products.
 | Rate-limit policies, key extraction, and middleware | Limit scope, trusted proxies, keys, and storage choice |
 | Optional database setup and migration helpers | Database library, schema, queries, and transactions |
 | Task ownership, scheduling and execution policies | Background jobs, durable claims and recovery |
-| Future authentication and authorization building blocks | Identity providers, permission models, and policy |
+| Optional authentication and authorization composition | Identity providers, permission models, and policy |
 
 Shutdown deadlines, long-lived requests, and worker cleanup need explicit
 semantics. Readiness must reflect application conditions; process liveness alone

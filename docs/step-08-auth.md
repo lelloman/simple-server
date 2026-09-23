@@ -94,6 +94,19 @@ verify that auth works without Axum or a runtime dependency.
 
 Favzetto is the first canary. Its old implementation passes a new 13-case credential
 precedence/duplicate/spacing/fallback matrix plus a public-route check before
-migration. Both identification and admin authorization will use the shared module;
-no unused Cargo feature will be counted as adoption. Other services remain pending
-assessment/migration until individually verified. Full rollout is a separate pass.
+migration. Favzetto now adopts both identification and admin authorization in commit
+`5b852cf099b8b2a8a93032bc6e084272286c9b42`, using shared revision
+`0a629da7b5eb5aeeb0ed64aac2c5f96cd4d9717b`. Final all-target checks: 237 pass,
+with the same two baseline catalog runtime-bridge failures. New checks cover
+non-admin denial, malformed-text fallback and redacted AuthService Debug. Lifecycle
+and logging subprocesses and authenticated WebSocket API cases pass. Configured
+Clippy completes with existing warnings and no new auth findings. The auth source
+and new test sections are formatted; unrelated formatting is preserved.
+
+Favzetto master was rebased onto its canary commit, tested tree/ancestry verified,
+and the temporary branch/worktree removed. Existing ignored frontend assets were
+used only for compilation; browser/PDF/provider/container qualification was not
+repeated. See Favzetto's `docs/step-08-auth.md` for the detailed compatibility record.
+Its handlers use the synchronous flow, not the HTTP layer; the latter has shared
+real-HTTP coverage. Other services remain pending assessment/migration. No push
+or deployment. Full rollout is a separate pass.

@@ -24,7 +24,7 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | Project | Server components | 1. Axum centralization | 2. Lifecycle / main() | 03a. Logging | 03b. Correlation | 03c. HTTP tracing | 04a. Body limits | 04b. Response headers | 04c. CORS | 05. Health/readiness | 06a. Task ownership | 06b. Scheduling | 06c. Execution policies | 08/09. Auth |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local canary)** | **Done (local; scoped canary)** | N/A (assessed) | N/A (no served probe) | **Done (local; scoped canary)** | **Done (local; primitives)** | **Done (local; primitives)** | Pending (assessment/migration) |
-| favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local canary)** | **Done (local; request work)** | **Done (local; bounded batches)** | **Done (local; retry scope)** | Pending (assessment/migration) |
+| favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local canary)** | **Done (local; request work)** | **Done (local; bounded batches)** | **Done (local; retry scope)** | **Done (local canary)** |
 | androidoscopy | `server` | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (no served probe) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | Pending (assessment/migration) |
 | crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; durable primitives)** | **Done (local; retry primitives)** | Pending (assessment/migration) |
 | fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; dynamic cron)** | N/A (assessed) | Pending (assessment/migration) |
@@ -2264,11 +2264,37 @@ were preserved. **Final 06b: 13 Done, 4 N/A; 06c: 8 Done, 9 N/A; zero Pending or
 Partial in either module.** No push or deployment. Per-consumer
 `docs/step-06-background-tasks.md` files contain detailed scope and evidence.
 
-## Steps 08/09: combined auth — library and canary preparation
+## Steps 08/09: combined auth — canary complete locally
 
 One optional `auth` module now supplies synchronous/asynchronous identity and
 access flows, explicit header credential parsing and an Axum-independent Tower
 gate. Authentication and authorization are migrated together. Step 09 is absorbed;
 Step 10 rate limiting and deferred Step 07 database helpers retain their numbers.
-See the [contract and source assessment](step-08-auth.md). No consumer is marked
-adopted at this library checkpoint; Favzetto is the first canary in progress.
+See the [contract and source assessment](step-08-auth.md). Favzetto is the first adopted canary; the other 16 products remain pending
+assessment/migration. Authentication and authorization are one column/module.
+
+Shared implementation `0a629da`: baseline 137/final 145 tests/doctests pass,
+strict all-feature/all-target Clippy passes, and seven auth contract tests pass
+with default features disabled. The normal minimal dependency tree has no Axum
+or Tokio. Tests cover credentials, ordered rejection, revocation, cancellation,
+identity isolation, readiness and real HTTP access/public-route behavior.
+
+Favzetto master `5b852cf` (from `437aad5`) uses shared HeaderCredential and Access
+for production API-key verification and every existing admin check. Exact Bearer
+case, duplicate-first semantics, fallback, local identity, HTTP errors and socket
+query-key forwarding are retained. AuthService Debug deliberately stops printing
+the configured key. The auth module and its tests no longer name Axum; other
+service HTTP code remains transitional, so this does not claim complete Axum removal.
+
+Baseline: 234 passing tests and two existing catalog runtime-bridge API failures.
+A new 13-case credential matrix plus public-route check passes before migration.
+Final: 237 pass, the same two failures (134 unit, 99 API, two lifecycle-process,
+two logging-process). Added unit coverage proves admin denial, malformed-text
+fallback and secret redaction. Configured all-target Clippy completes with existing
+warnings and no new auth findings; new sections formatted and diff checks pass.
+Frontend/browser/PDF/provider/container qualification was not repeated.
+
+Committed in an isolated worktree; master rebased onto the canary, identical tested
+tree and ancestry verified, temporary worktree/branch removed. Shared main includes
+the library and tracker commits. Both tracker views agree: **1 Done, 16 Pending
+assessment/migration**. Nothing pushed or deployed.
