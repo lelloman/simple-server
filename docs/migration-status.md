@@ -17,9 +17,9 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | Project | Server components | 1. Axum centralization | 2. Lifecycle / main() | 03a. Logging | 03b. Correlation | 03c. HTTP tracing | 04a. Body limits | 04b. Response headers | 04c. CORS | 05. Health/readiness | 06a. Task ownership | 06b. Scheduling | 06c. Execution policies |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local canary)** | **Done (local; scoped canary)** | N/A (assessed) | N/A (no served probe) | **Done (local; scoped canary)** | **Done (local; primitives)** | **Done (local; primitives)** |
-| favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local canary)** | **Done (local; request work)** | Pending (durable workflow) | **Done (local; retry scope)** |
+| favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local canary)** | **Done (local; request work)** | **Done (local; bounded batches)** | **Done (local; retry scope)** |
 | androidoscopy | `server` | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (no served probe) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) |
-| crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | Pending (durable scheduler) | Pending (durable policies) |
+| crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; durable primitives)** | **Done (local; retry primitives)** |
 | fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; dynamic cron)** | N/A (assessed) |
 | lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (Rust; Caddy owns CORS) | **Done (local; scoped)** | **Done (local; webhook scope)** | **Done (local; capacity)** | **Done (local; retry scope)** |
 | lellostore | `backend` | **Done** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) |
@@ -27,10 +27,10 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | observo | `observo-server`; standalone extractor logging | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (no served probe) | **Done (local; scoped)** | **Done (local; primitives)** | N/A (assessed) |
 | paranza | `apps/paranza-server` | **Done** | **Done (local; scoped)** | N/A (no logger) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | N/A (assessed) |
 | peerlo | `peerlo-api` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; retry primitives)** |
-| pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local; main HTTP)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; socket scope)** | Pending (durable queue) | N/A (assessed) |
+| pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local; main HTTP)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; socket scope)** | **Done (local; durable queue cadence)** | N/A (assessed) |
 | pezzottify-downloader | Puppeteer API and downloader HTTP server | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; Puppeteer)** | **Done (local; both HTTP routers)** | N/A (assessed) | N/A (assessed) | **Done (local; both routers)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; priority admission)** | N/A (assessed) |
 | quentin-torrentino | `crates/server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; stage capacity)** | N/A (assessed) |
-| sct | `sct-server` | **Done** | **Done (scoped)** | N/A (no logger) | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; worker scope)** | Pending (durable scheduling) | **Done (local; retry scope)** |
+| sct | `sct-server` | **Done** | **Done (scoped)** | N/A (no logger) | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; worker scope)** | **Done (local; durable worker cadence)** | **Done (local; retry scope)** |
 | simple-agents | `simple-agents-service`; runner-shell logging; associated coding test servers | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local pilot; service routes)** | **Done (local; scoped canary)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; transactional capacity)** | **Done (local; retry scope)** |
 | simple-ai | `backend`, `inference-runner` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local; backend)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; batch readiness)** | N/A (assessed) |
 
@@ -1681,8 +1681,11 @@ using the same worktree/rebase/cleanup workflow.
 06a/06b/06c are implemented. Pezzottify has completed the local canary through
 the shared ownership, scheduling/capacity, and policy primitives. All remaining
 services have now been assessed and supported scoped migrations integrated locally.
-Unsupported requirements remain Pending/Partial rather than being called complete
-or N/A. Per-service evidence and compatibility gaps are recorded below.
+The 2026-09-23 completion pass resolves all remaining 06b/06c adoption gaps with
+composable primitives and drivers: 06b is 13 Done / 4 N/A; 06c is 8 Done / 9 N/A.
+Durable database authority and product-specific workflows remain application-owned.
+Earlier checkpoint records below are historical; the final completion record
+supersedes their Pending/Partial assessments.
 
 06a verification: unchanged baseline 69 tests/doctests; 10 ownership contract
 tests covering callback reservations, admission races, retained errors/panics,
@@ -1824,25 +1827,25 @@ subsequent consumer rollout and current statuses are recorded below.
 
 ### Step 06 remaining-service rollout
 
-**Supported scoped rollout complete locally; compatibility gaps remain.** All
-17 services are assessed. The Pezzottify canary and 15 subsequent consumer changes
-are committed on their development branches. Each development branch was rebased
-onto its migration branch; ancestry and tested trees were verified, and all Step 06
-consumer worktrees/branches removed. Paranza required no code change. Concurrent
-LelloStore commits and unrelated Simple AI, LelloAuth and SCT work are preserved.
-No pushes or deployments were performed.
+**All applicable Step 06 migrations are complete locally (2026-09-23).**
+All 17 services are assessed. Development branches were rebased onto their tested
+migration branches; ancestry and tested trees were verified, and migration
+worktrees/branches removed. Unrelated edits and pre-existing worktrees remain
+untouched. No pushes or deployments were performed.
 
 | Module | Done (scoped) | Partial | Pending compatibility | N/A (assessed) |
 | --- | ---: | ---: | ---: | ---: |
 | 06a ownership | 14 | 0 | 0 | 3 |
-| 06b scheduling/capacity | 5 | 0 | 8 | 4 |
-| 06c policies | 6 | 1 | 1 | 9 |
+| 06b scheduling/capacity | 13 | 0 | 0 | 4 |
+| 06c policies | 8 | 0 | 0 | 9 |
 
-Remaining scheduling work covers durable claims/reservations/queues (Pezzottflix/Favzetto/Crumbles/Meteonesto/SCT/Simple Agents), model-aware
-batching (Simple AI), and downloader priority/prefetch rules. Crumbles' durable
-execution authority and signed jitter remain Pending; Meteonesto adopts runtime
-budgets but retains incompatible configurable retry multipliers, hence Partial.
-Baseline test/lint failures and checks not rerun are explicit in each record.
+The completion pass below records eight additional scheduling migrations and the
+two outstanding policy migrations. Shared selection/capacity/batching/cadence
+primitives support each product's existing storage authority; they do not move SQL
+claims, leases, workflow state or fencing into memory. Baseline failures and checks
+not rerun remain explicit. **The following original rollout records are historical
+checkpoints; their Pending/Partial statements are superseded by the completion
+pass at the end of this document.**
 
 
 LelloStore `master` is integrated at `0074ced571db77cd51b6b7d753338db8bdd64563`,
@@ -2204,6 +2207,52 @@ backoff and signed jitter. Its 132 tests/doctests and strict all-feature Clippy 
 Each consumer was committed in its dedicated worktree, its development branch
 rebased onto that commit, ancestry and tested tree checked, then temporary branch
 and worktree removed. Unrelated Simple AI and Simple Agents edits were preserved.
-Nothing was pushed or deployed. Other pending services remain pending until
-verified; these are scoped primitive adoptions, not an in-memory replacement for
-durable scheduling or inference/fleet protocols.
+Nothing was pushed or deployed. These are scoped primitive adoptions, not an
+in-memory replacement for durable scheduling or inference/fleet protocols.
+
+Shared revision `429b782` adds caller-owned durable polling and bounded batch
+drivers plus composable preference/optional-rank selection. **137 shared tests and
+doctests pass**, along with strict all-feature/all-target Clippy. Driver tests
+cover per-outcome cadence, closed admission, completing accepted cycles, bounded
+concurrency, panic observation and abort-on-drop cleanup.
+
+- Crumbles `master` → `46e7f3e`: 06b production preference/backlog ordering and
+  global resource admission use shared primitives inside SQLite reservations;
+  06c queue polling and durable dispatcher transport/cancellation retries use
+  shared doubling and signed jitter. Baseline 779/final 780 core/integration tests
+  pass, including exact legacy seeded retry comparisons. Strict affected Clippy,
+  both binary builds and real-process signal/drain/restart checks pass. The HTTP
+  app retains one existing unused-import build warning; browser/container suites
+  were not rerun.
+- Favzetto `master` → `437aad5`: 06b production loop/ticket batches use the shared
+  bounded executor. SQL priority/due selection, conditional claims, per-user caps,
+  workflow state and retry bookkeeping remain application-owned. Baseline/final
+  each pass 234 tests and reproduce the same two existing catalog runtime-bridge
+  API failures. Passing cases include multi-ticket worker cycles, lifecycle and
+  logging subprocesses. Clippy completes with existing warnings; browser/PDF and
+  container qualification were not rerun. This sibling-path consumer has no
+  revision checkout file; its migration report records reviewed source `429b782`.
+- Pezzottflix `master` → `aa0700d`: 06b all eight SQLite queue workers use the
+  shared outcome-sensitive cadence driver. Baseline 542/final 543 tests pass
+  (three ignored), including actual workers processing 20 due jobs, preserving
+  future eligibility and ceasing admission after stop. Both real-process signal
+  cases pass with authenticated WebSocket and worker drain. Clippy completes with
+  existing warnings; browser/container/external metadata services were not rerun.
+  The unused production cron registry remains untouched; 06c remains N/A.
+- SCT `master` → `0c750e7`: 06b archive/recovery polling uses shared completion-
+  relative cadence, preserving immediate first execution and two-second delays.
+  PostgreSQL due selection, SKIP LOCKED claims, leases and fencing remain in core;
+  existing abort/join sequencing owns shutdown. Baseline/final each pass 18
+  ordinary tests with the same 91 opt-in database/qualification tests ignored.
+  Strict affected Clippy and both binary builds pass. Five real-process cases
+  pass with disposable PostgreSQL (signals, HTTP drain, writer release/restart,
+  lease loss); containers were removed. Full archive/media/S3/browser and ignored
+  qualification suites were not rerun.
+
+All eight consumer migrations are committed and integrated into their original
+active development branches (Simple Agents `main`, the others `master`). Tested
+trees and ancestry were verified before removing each migration worktree/branch.
+SCT's untracked validation/CORS notes and Simple AI/Agents' active unrelated edits
+were preserved. **Final 06b: 13 Done, 4 N/A; 06c: 8 Done, 9 N/A; zero Pending or
+Partial in either module.** No push or deployment. Per-consumer
+`docs/step-06-background-tasks.md` files contain detailed scope and evidence.
