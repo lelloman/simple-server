@@ -1,10 +1,15 @@
 //! Application-owned scheduling. `Scheduler` provides bounded execution with
 //! static registration; `CronRegistry` provides dynamic timing without execution.
 //! Neither starts a hidden supervisor. Applications own reporting and storage.
+mod driver;
+pub use driver::{PollCadence, PollOutcome, run_bounded_batch, run_poll_worker};
 mod priority;
 pub use priority::{PriorityAdmissionError, PriorityCapacity, PriorityPermit, PrioritySnapshot};
 mod selection;
-pub use selection::{BatchReadiness, ResourceDemand, WeightedSelection, denied_resources};
+pub use selection::{
+    BatchReadiness, PreferenceOrder, ResourceDemand, WeightedSelection, denied_resources,
+    missing_last,
+};
 mod capacity;
 pub use capacity::{CapacityError, ExecutionCapacity, ExecutionPermit};
 mod cron_registry;

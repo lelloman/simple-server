@@ -147,7 +147,12 @@
       <a href="migration-status.md">Migration details and verification notes</a> · <a href="design.md">Architecture outline</a>
     </footer>
   </main>
-  <script>
+  <p>2026-09-23 completion pass: Meteonesto (34cca34), Downloader (201f834),
+Simple AI (986438f), and Simple Agents (0c0af51) now adopt scoped 06b primitives;
+Meteonesto also completes 06c retry calculation. Tested, committed, integrated,
+and worktrees removed. See the <a href="migration-status.md">Markdown evidence</a>
+for test counts, existing lint warnings/failures and retained database ownership.</p>
+<script>
     // Update adoption here and in migration-status.md when a service is verified.
     // Status keys: done, pending, planned, partial, na.
     const steps = [
@@ -165,16 +170,16 @@
       {name: 'fausto', tasks: 'done', scheduling: 'done', taskPolicies: 'na', health: 'done', cors: 'done', responseHeaders: 'done', bodyLimit: 'na', tracing: 'done', logging: 'done', correlation: 'done', components: 'server · HTTP, WebSockets, event workers, jobs and plugin cleanup', axum: 'done', lifecycle: 'done'},
       {name: 'lello-auth', tasks: 'done', scheduling: 'done', taskPolicies: 'done', health: 'done', cors: 'na', responseHeaders: 'done', bodyLimit: 'done', tracing: 'na', correlation: 'na', logging: 'done', components: 'server · axum · examples (CORS: Caddy-owned; no Rust migration)', axum: 'done', lifecycle: 'done'},
       {name: 'lellostore', tasks: 'done', scheduling: 'na', taskPolicies: 'na', health: 'done', cors: 'done', responseHeaders: 'na', bodyLimit: 'done', tracing: 'done', correlation: 'na', logging: 'done', components: 'backend (lifecycle: local adoption)', axum: 'done', lifecycle: 'done'},
-      {name: 'meteonesto', tasks: 'na', scheduling: 'pending', taskPolicies: 'partial', health: 'done', cors: 'na', responseHeaders: 'done', bodyLimit: 'done', tracing: 'na', logging: 'done', correlation: 'done', components: 'weather API/cache · gateway/refresh · ordered pipeline drain (03b: pipeline/gateway)', axum: 'done', lifecycle: 'done'},
+      {name: 'meteonesto', tasks: 'na', scheduling: 'done', taskPolicies: 'done', health: 'done', cors: 'na', responseHeaders: 'done', bodyLimit: 'done', tracing: 'na', logging: 'done', correlation: 'done', components: 'weather API/cache · gateway/refresh · ordered pipeline drain (03b: pipeline/gateway)', axum: 'done', lifecycle: 'done'},
       {name: 'observo', tasks: 'done', scheduling: 'done', taskPolicies: 'na', health: 'na', cors: 'done', responseHeaders: 'na', bodyLimit: 'done', tracing: 'na', correlation: 'na', logging: 'done', components: 'HTTP · scheduler · server tasks · webhook drain; extractor logging', axum: 'done', lifecycle: 'done'},
       {name: 'paranza', tasks: 'na', scheduling: 'na', taskPolicies: 'na', health: 'done', cors: 'na', responseHeaders: 'na', bodyLimit: 'na', tracing: 'na', correlation: 'na', logging: 'na', components: 'HTTP · runner sessions · PCM maintenance', axum: 'done', lifecycle: 'done'},
       {name: 'peerlo', tasks: 'na', scheduling: 'na', taskPolicies: 'done', health: 'done', cors: 'done', responseHeaders: 'na', bodyLimit: 'na', tracing: 'done', correlation: 'na', components: 'HTTP · ordered subsystem cleanup', axum: 'done', lifecycle: 'done', logging: 'done'},
       {name: 'pezzottflix', tasks: 'done', scheduling: 'pending', taskPolicies: 'na', health: 'done', cors: 'done', responseHeaders: 'done', bodyLimit: 'done', tracing: 'done', logging: 'done', correlation: 'done', components: 'HTTP/metrics · jobs · WebSockets · SQLite', axum: 'done', lifecycle: 'done'},
-      {name: 'pezzottify-downloader', tasks: 'done', scheduling: 'pending', taskPolicies: 'na', health: 'done', cors: 'done', responseHeaders: 'na', bodyLimit: 'na', tracing: 'done', logging: 'done', correlation: 'done', components: 'parent HTTP/tasks · child Unix HTTP · process cleanup (03b: Puppeteer)', axum: 'done', lifecycle: 'done'},
+      {name: 'pezzottify-downloader', tasks: 'done', scheduling: 'done', taskPolicies: 'na', health: 'done', cors: 'done', responseHeaders: 'na', bodyLimit: 'na', tracing: 'done', logging: 'done', correlation: 'done', components: 'parent HTTP/tasks · child Unix HTTP · process cleanup (03b: Puppeteer)', axum: 'done', lifecycle: 'done'},
       {name: 'quentin-torrentino', tasks: 'done', scheduling: 'done', taskPolicies: 'na', health: 'done', cors: 'na', responseHeaders: 'na', bodyLimit: 'na', tracing: 'na', correlation: 'na', logging: 'done', components: 'HTTP · orchestrator · pipeline · audit (scoped)', axum: 'done', lifecycle: 'done'},
       {name: 'sct', tasks: 'done', scheduling: 'pending', taskPolicies: 'done', health: 'done', cors: 'na', responseHeaders: 'done', bodyLimit: 'done', tracing: 'done', logging: 'na', correlation: 'done', components: 'HTTP · writer lease (03b: storage-backed HTTP)', axum: 'done', lifecycle: 'done'},
-      {name: 'simple-agents', tasks: 'done', scheduling: 'pending', taskPolicies: 'done', health: 'done', cors: 'na', responseHeaders: 'done', bodyLimit: 'done', tracing: 'na', correlation: 'na', logging: 'done', components: 'HTTP · maintenance · dispatch · power (scoped)', axum: 'done', lifecycle: 'done'},
-      {name: 'simple-ai', tasks: 'done', scheduling: 'pending', taskPolicies: 'na', health: 'done', cors: 'done', responseHeaders: 'done', bodyLimit: 'done', tracing: 'done', correlation: 'na', logging: 'done', components: 'backend HTTP/batches · runner HTTP/gateway', axum: 'done', lifecycle: 'done'}
+      {name: 'simple-agents', tasks: 'done', scheduling: 'done', taskPolicies: 'done', health: 'done', cors: 'na', responseHeaders: 'done', bodyLimit: 'done', tracing: 'na', correlation: 'na', logging: 'done', components: 'HTTP · maintenance · dispatch · power (scoped)', axum: 'done', lifecycle: 'done'},
+      {name: 'simple-ai', tasks: 'done', scheduling: 'done', taskPolicies: 'na', health: 'done', cors: 'done', responseHeaders: 'done', bodyLimit: 'done', tracing: 'done', correlation: 'na', logging: 'done', components: 'backend HTTP/batches · runner HTTP/gateway', axum: 'done', lifecycle: 'done'}
     ];
     document.getElementById('module-count').textContent = `${steps.filter(([, available]) => available).length} / ${steps.length}`;
     const labels = {done: '✓ Complete', pending: 'Pending', planned: 'Planned', partial: 'Partial', na: 'N/A'};

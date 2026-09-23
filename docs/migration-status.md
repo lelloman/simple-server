@@ -23,16 +23,16 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; dynamic cron)** | N/A (assessed) |
 | lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (Rust; Caddy owns CORS) | **Done (local; scoped)** | **Done (local; webhook scope)** | **Done (local; capacity)** | **Done (local; retry scope)** |
 | lellostore | `backend` | **Done** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) |
-| meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; pipeline/gateway)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | Pending (durable scheduler) | **Partial (runtime budgets)** |
+| meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; pipeline/gateway)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; weighted claims)** | **Done (local; budgets/retry)** |
 | observo | `observo-server`; standalone extractor logging | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (no served probe) | **Done (local; scoped)** | **Done (local; primitives)** | N/A (assessed) |
 | paranza | `apps/paranza-server` | **Done** | **Done (local; scoped)** | N/A (no logger) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | N/A (assessed) |
 | peerlo | `peerlo-api` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; retry primitives)** |
 | pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local; main HTTP)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; socket scope)** | Pending (durable queue) | N/A (assessed) |
-| pezzottify-downloader | Puppeteer API and downloader HTTP server | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; Puppeteer)** | **Done (local; both HTTP routers)** | N/A (assessed) | N/A (assessed) | **Done (local; both routers)** | **Done (local; scoped)** | **Done (local; scoped)** | Pending (priority scheduler) | N/A (assessed) |
+| pezzottify-downloader | Puppeteer API and downloader HTTP server | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; Puppeteer)** | **Done (local; both HTTP routers)** | N/A (assessed) | N/A (assessed) | **Done (local; both routers)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; priority admission)** | N/A (assessed) |
 | quentin-torrentino | `crates/server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; stage capacity)** | N/A (assessed) |
 | sct | `sct-server` | **Done** | **Done (scoped)** | N/A (no logger) | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; worker scope)** | Pending (durable scheduling) | **Done (local; retry scope)** |
-| simple-agents | `simple-agents-service`; runner-shell logging; associated coding test servers | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local pilot; service routes)** | **Done (local; scoped canary)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | Pending (fleet reservations) | **Done (local; retry scope)** |
-| simple-ai | `backend`, `inference-runner` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local; backend)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | Pending (model-aware batching gap) | N/A (assessed) |
+| simple-agents | `simple-agents-service`; runner-shell logging; associated coding test servers | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local pilot; service routes)** | **Done (local; scoped canary)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; transactional capacity)** | **Done (local; retry scope)** |
+| simple-ai | `backend`, `inference-runner` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local; backend)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; batch readiness)** | N/A (assessed) |
 
 ## Step 1: Axum centralization
 
@@ -2174,3 +2174,36 @@ quantized backoff and signed millisecond jitter. Claims, leases and recovery sta
 remain application-owned. Library validation: 132 tests/doctests, strict all-feature
 all-target Clippy and nine HTTP-free new policy/selection tests pass. No consumer
 adoption is claimed at this checkpoint; per-service migration evidence follows.
+
+## Step 06b/06c completion pass — 2026-09-23
+
+Shared revision `8edcf14` adds weighted backend claims, cancellation-safe priority
+capacity, model batch readiness, transactional resource decisions, quantized
+backoff and signed jitter. Its 132 tests/doctests and strict all-feature Clippy pass.
+
+- Meteonesto `master` → `34cca34`: 06b weighted 8:4:2:1 claims; 06c fractional
+  microsecond retry calculation now joins existing runtime budgets. SQLite owns
+  eligibility, leases and pause. Baseline 56/final 57 targeted Rust tests and two
+  real-process lifecycle tests pass. Strict Clippy retains one existing
+  control-plane missing-panic-documentation error; provider/browser suites not rerun.
+- Downloader `master` → `201f834`: 06b priority/FIFO admission with separate
+  prefetch ceiling. Baseline 168/final 169 Rust tests/doctests pass (one ignored).
+  Cancellation after grant now returns capacity instead of leaking it. Clippy
+  completes with 12 existing warnings; Spotify/browser/container suites not rerun.
+- Simple AI `master` → `986438f`: 06b per-model size/minimum/age/saturation
+  decisions use BatchReadiness. Runner routing/reservations stay application-owned.
+  Baseline 314/final 315 backend tests pass (one ignored doctest), including real
+  loopback runner drain and capacity checks. Clippy completes with 12 existing
+  warnings; GPU/browser suites not rerun.
+- Simple Agents `main` → `0c0af51`: 06b profile/runner concurrency and all four
+  resource dimensions use ResourceDemand inside the durable admission transaction.
+  Workspace residency, compatibility, affinity and fencing remain authoritative.
+  Baseline/final 138 service tests and strict all-target Clippy pass, including
+  concurrent admission, reconnect/restart, workspace cleanup and real processes.
+
+Each consumer was committed in its dedicated worktree, its development branch
+rebased onto that commit, ancestry and tested tree checked, then temporary branch
+and worktree removed. Unrelated Simple AI and Simple Agents edits were preserved.
+Nothing was pushed or deployed. Other pending services remain pending until
+verified; these are scoped primitive adoptions, not an in-memory replacement for
+durable scheduling or inference/fleet protocols.

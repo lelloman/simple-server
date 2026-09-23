@@ -242,3 +242,19 @@ an authority for durable reservations:
 
 All are HTTP-free and independent of the bounded Scheduler and CronRegistry.
 Consumer statuses change only after actual production adoption and verification.
+
+### Durable-worker composition
+
+`run_poll_worker` owns claim/execute cadence, with independent delays after work,
+empty polls and failures. The caller supplies atomic storage operations, reporting,
+and notification/timer waiting. It checks admission before each cycle and never
+cancels an accepted cycle on its own; external supervisor cancellation still drops
+the future and requires the backend's durable recovery. Zero-delay cycles yield.
+`run_bounded_batch` admits finite caller-selected candidates in order up to a
+nonzero concurrency limit, observes completion/panic results, drains normally,
+and aborts children if its owning future is dropped. Neither driver infers leases,
+fencing, eligibility, retries or ownership from database records.
+
+`PreferenceOrder` and `missing_last` compose caller-defined deterministic sort
+keys without sentinel collisions for optional numeric ranks. Resource checks and
+these selection keys can be applied inside a caller-owned durable transaction.

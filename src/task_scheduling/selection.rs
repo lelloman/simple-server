@@ -115,3 +115,34 @@ pub fn denied_resources<'a>(
         .filter_map(|(name, demand)| (!demand.fits()).then_some(name))
         .collect()
 }
+
+/// Caller-defined preference order. Unknown values sort after configured ones;
+/// duplicate entries retain their last position, like an indexed map. Business
+/// tie breakers remain explicit in the caller's composite sort key.
+#[derive(Clone, Debug)]
+pub struct PreferenceOrder<T> {
+    positions: std::collections::HashMap<T, usize>,
+}
+impl<T: Eq + std::hash::Hash> PreferenceOrder<T> {
+    pub fn new(values: impl IntoIterator<Item = T>) -> Self {
+        Self {
+            positions: values
+                .into_iter()
+                .enumerate()
+                .map(|(i, v)| (v, i))
+                .collect(),
+        }
+    }
+    pub fn position<Q: ?Sized + Eq + std::hash::Hash>(&self, value: &Q) -> usize
+    where
+        T: std::borrow::Borrow<Q>,
+    {
+        self.positions.get(value).copied().unwrap_or(usize::MAX)
+    }
+}
+
+/// Key for optional ranks: every known value precedes missing values, including
+/// the largest representable rank (no sentinel collision).
+pub fn missing_last<T>(value: Option<T>) -> (bool, Option<T>) {
+    (value.is_none(), value)
+}
