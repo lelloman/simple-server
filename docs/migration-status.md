@@ -27,13 +27,13 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local canary)** | **Done (local; request work)** | **Done (local; bounded batches)** | **Done (local; retry scope)** | **Done (local canary)** |
 | androidoscopy | `server` | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (no served probe) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | Pending (assessment/migration) |
 | crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; durable primitives)** | **Done (local; retry primitives)** | **Done (local; main + integration)** |
-| fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; dynamic cron)** | N/A (assessed) | Pending (assessment/migration) |
-| lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (Rust; Caddy owns CORS) | **Done (local; scoped)** | **Done (local; webhook scope)** | **Done (local; capacity)** | **Done (local; retry scope)** | Pending (assessment/migration) |
+| fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; dynamic cron)** | N/A (assessed) | **Done (local; HTTP + WebSocket + admin/write)** |
+| lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (Rust; Caddy owns CORS) | **Done (local; scoped)** | **Done (local; webhook scope)** | **Done (local; capacity)** | **Done (local; retry scope)** | **Done (local; sessions + resource/admin access)** |
 | lellostore | `backend` | **Done** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; OIDC + admin)** |
 | meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; pipeline/gateway)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; weighted claims)** | **Done (local; budgets/retry)** | **Done (local; all three services)** |
 | observo | `observo-server`; standalone extractor logging | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (no served probe) | **Done (local; scoped)** | **Done (local; primitives)** | N/A (assessed) | Pending (assessment/migration) |
 | paranza | `apps/paranza-server` | **Done** | **Done (local; scoped)** | N/A (no logger) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | Pending (assessment/migration) |
-| peerlo | `peerlo-api` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; retry primitives)** | Pending (assessment/migration) |
+| peerlo | `peerlo-api` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; retry primitives)** | **Done (local; bearer + Torznab keys)** |
 | pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local; main HTTP)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; socket scope)** | **Done (local; durable queue cadence)** | N/A (assessed) | Pending (assessment/migration) |
 | pezzottify-downloader | Puppeteer API and downloader HTTP server | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; Puppeteer)** | **Done (local; both HTTP routers)** | N/A (assessed) | N/A (assessed) | **Done (local; both routers)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; priority admission)** | N/A (assessed) | Pending (assessment/migration) |
 | quentin-torrentino | `crates/server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; stage capacity)** | N/A (assessed) | Pending (assessment/migration) |
@@ -2420,5 +2420,70 @@ response-shape/test mismatch was left with that uncommitted work.
 Migration/baseline worktrees, branches and owned temporary build assets are
 removed, including the temporary preservation stash after restoration was verified.
 Pre-existing Pezzottify Paravoid and Simple Agents worktrees are preserved. Both
-tracker views now show **7 Done, 10 Pending assessment/migration**. No push or
+tracker views at completion of this second wave showed **7 Done, 10 Pending assessment/migration**. No push or
 deployment. Consumer Axum removal is still a separate completion milestone.
+
+## Steps 08/09: third auth rollout — 2026-09-23
+
+Three GPT-6 Sol agents at medium reasoning assessed Lello Auth, Fausto and Peerlo
+in disjoint migration worktrees. All three have applicable production auth paths.
+The reviewed shared source is `0a629da`; application-owned credential validation,
+permission policy, errors and protocol boundaries remain authoritative.
+
+- Peerlo `master` → `87b17b8`: the optional global bearer middleware evaluates
+  shared `Access` with `HeaderCredential`; the optional Torznab query API key
+  evaluates a separate shared flow. Exact Bearer, first-header selection, opaque
+  and empty values, constant-time bearer comparison, existing 401 JSON and 200
+  XML errors, and gate order are preserved. Configuration still disables absent
+  gates. Debug output now redacts the configured bearer secret. DHT/tracker UDP
+  and metadata TCP have no client identity/permission policy to migrate. Baseline
+  old-pin checks: 9 in-process auth and 4 Torznab tests pass; four live HTTP tests
+  were socket-blocked in the sandbox. Final unrestricted API all-target suites:
+  **170 pass, none ignored**, including both-gate real HTTP coverage. Formatting
+  and diff checks pass. Normal all-target Clippy passes with existing warnings;
+  strict Clippy stops in untouched DHT/metadata dependencies. Source pin and active
+  README instructions are updated. No external network or deployment qualification.
+- Lello Auth `master` → `e4872f4`: shared `Access` coordinates optional browser-session identity,
+  admin JWT audience/role checks, live-account admin/disabled checks, UserInfo,
+  QR approval and UI admin access. Shared header parsing preserves exact Basic
+  and Bearer schemes, first-header selection, empty/opaque values and the local
+  Basic payload cap. Browser-source checks and CSRF still precede optional
+  session lookup; existing anonymous fallback, revocation ordering, OAuth errors,
+  redirects, signing/password/session state and transactional grants stay local.
+  Server and embedded/external OIDC examples reuse the affected Axum package;
+  webhook examples have no auth routes. Baseline: 188 library tests pass against
+  both previous and reviewed pins. Full affected all-target suite: **340 pass**
+  (190 unit, 150 real-TCP integration). After boxing callback errors for lint,
+  190 unit and 39 TCP admin-UI tests pass again. Configured workspace Clippy passes
+  on CI Rust 1.88; affected-package Clippy passes on local Rust 1.96 with CI's
+  allowances. Two unrelated server-test warnings remain on the newer toolchain.
+  Formatting and four CI-contract tests pass; one old router line was formatted.
+  CI and README pins reference reviewed source; external-provider/deployment
+  qualification was not repeated.
+- Fausto `master` → `e40830a` (implementation `d9a3fc1`): HTTP and WebSocket
+  identities evaluate shared `AsyncAccess`, with
+  existing JWT/JWKS validation and distinct user-provisioning/lookup behavior.
+  HTTP header extraction preserves exact Bearer, first-header selection and
+  empty/invalid-text errors; WebSocket subprotocol/query precedence remains local.
+  Shared `Access` covers admin and instance-write checks; owner/grant/event
+  visibility and plugin placement stay application-owned. Baseline: 125 units,
+  29 API and 19 audit tests pass; lifecycle tests were socket-blocked. Initial
+  final suites: 205 pass, including real HTTP/process lifecycle checks. Follow-up
+  tests additionally verify signed-token provisioning/reuse, admin allow/member
+  denial and expiration using a local JWKS server and an in-process production
+  router; configured WebSocket verification rejects missing/malformed tokens.
+  The two HTTP fixture tests and new WebSocket unit test pass. Formatting and
+  normal all-target Clippy pass with existing warnings; strict Clippy stops in
+  untouched core code. External-provider, browser and WebSocket-upgrade
+  qualification were not repeated. CI and active README pins are updated.
+
+All three migrations are committed and integrated into their original `master`
+branches. The coordinator reviewed production diffs and verified test evidence;
+ancestry and tested trees match (Fausto's follow-up adds only tests/docs).
+Migration worktrees/branches, private baseline library sources, targets and logs
+are removed. Lello Auth's three unrelated untracked identity-provider documents
+and pre-existing stale worktree remain untouched. Both tracker views now agree:
+**10 Done, 7 Pending assessment/migration** for combined auth. No shared API
+extension was needed; no push or deployment. This does not claim full consumer
+Axum removal. Each consumer's `docs/step-08-auth.md` records detailed scope and
+qualification limits.

@@ -128,5 +128,10 @@ in that uncommitted work; the auth-only suite passed all 139 tests. No shared AP
 changes were needed.
 The [second-round evidence](migration-status.md#steps-0809-second-auth-rollout--2026-09-23)
 records tests, retained application policy, branch integration and cleanup limits.
-Current adoption is seven services; 10 remain pending assessment/migration.
-No push or deployment.
+The third round adds Lello Auth's optional-session, token and admin/resource
+flows, Fausto's HTTP/WebSocket and admin/write flows, and Peerlo's bearer/Torznab
+credential gates. Their application protocols and policies remain intact, with no
+shared API extension. See the [third-round evidence](migration-status.md#steps-0809-third-auth-rollout--2026-09-23)
+for scope, tests, lint qualifications and integration/cleanup records. Current
+adoption is ten services; seven remain pending assessment/migration. No push or
+deployment.
