@@ -108,5 +108,15 @@ and the temporary branch/worktree removed. Existing ignored frontend assets were
 used only for compilation; browser/PDF/provider/container qualification was not
 repeated. See Favzetto's `docs/step-08-auth.md` for the detailed compatibility record.
 Its handlers use the synchronous flow, not the HTTP layer; the latter has shared
-real-HTTP coverage. Other services remain pending assessment/migration. No push
-or deployment. Full rollout is a separate pass.
+real-HTTP coverage.
+
+The first rollout adds LelloStore, Crumbles and Simple AI, each assessed by a
+GPT-6 Sol agent at medium reasoning in a separate service worktree. LelloStore
+adopts JWT/user-registry verification and admin checks; Crumbles adopts HTTP
+session/route checks and integration-daemon capability evaluation; Simple AI
+adopts backend user authentication and admin checks. Provider verification,
+resource policies and transaction authority remain application-owned. The shared
+API required no change. Per-service scope, test evidence, retained protocol checks
+and integration records are in the [migration tracker](migration-status.md#steps-0809-first-auth-rollout--2026-09-23)
+and each consumer's `docs/step-08-auth.md`. Current adoption is four services;
+13 remain pending assessment/migration. No push or deployment.

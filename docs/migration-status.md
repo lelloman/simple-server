@@ -26,10 +26,10 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local canary)** | **Done (local; scoped canary)** | N/A (assessed) | N/A (no served probe) | **Done (local; scoped canary)** | **Done (local; primitives)** | **Done (local; primitives)** | Pending (assessment/migration) |
 | favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local canary)** | **Done (local; request work)** | **Done (local; bounded batches)** | **Done (local; retry scope)** | **Done (local canary)** |
 | androidoscopy | `server` | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (no served probe) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | Pending (assessment/migration) |
-| crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; durable primitives)** | **Done (local; retry primitives)** | Pending (assessment/migration) |
+| crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; durable primitives)** | **Done (local; retry primitives)** | **Done (local; main + integration)** |
 | fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; dynamic cron)** | N/A (assessed) | Pending (assessment/migration) |
 | lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (Rust; Caddy owns CORS) | **Done (local; scoped)** | **Done (local; webhook scope)** | **Done (local; capacity)** | **Done (local; retry scope)** | Pending (assessment/migration) |
-| lellostore | `backend` | **Done** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | Pending (assessment/migration) |
+| lellostore | `backend` | **Done** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; OIDC + admin)** |
 | meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; pipeline/gateway)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; weighted claims)** | **Done (local; budgets/retry)** | Pending (assessment/migration) |
 | observo | `observo-server`; standalone extractor logging | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (no served probe) | **Done (local; scoped)** | **Done (local; primitives)** | N/A (assessed) | Pending (assessment/migration) |
 | paranza | `apps/paranza-server` | **Done** | **Done (local; scoped)** | N/A (no logger) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | Pending (assessment/migration) |
@@ -39,7 +39,7 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | quentin-torrentino | `crates/server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; stage capacity)** | N/A (assessed) | Pending (assessment/migration) |
 | sct | `sct-server` | **Done** | **Done (scoped)** | N/A (no logger) | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; worker scope)** | **Done (local; durable worker cadence)** | **Done (local; retry scope)** | Pending (assessment/migration) |
 | simple-agents | `simple-agents-service`; runner-shell logging; associated coding test servers | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local pilot; service routes)** | **Done (local; scoped canary)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; transactional capacity)** | **Done (local; retry scope)** | Pending (assessment/migration) |
-| simple-ai | `backend`, `inference-runner` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local; backend)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; batch readiness)** | N/A (assessed) | Pending (assessment/migration) |
+| simple-ai | `backend`, `inference-runner` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local; backend)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; batch readiness)** | N/A (assessed) | **Done (local; backend user/admin)** |
 
 ## Step 1: Axum centralization
 
@@ -2270,8 +2270,7 @@ One optional `auth` module now supplies synchronous/asynchronous identity and
 access flows, explicit header credential parsing and an Axum-independent Tower
 gate. Authentication and authorization are migrated together. Step 09 is absorbed;
 Step 10 rate limiting and deferred Step 07 database helpers retain their numbers.
-See the [contract and source assessment](step-08-auth.md). Favzetto is the first adopted canary; the other 16 products remain pending
-assessment/migration. Authentication and authorization are one column/module.
+See the [contract and source assessment](step-08-auth.md). Favzetto was the first adopted canary; the first rollout below records subsequent adoption. Authentication and authorization are one column/module.
 
 Shared implementation `0a629da`: baseline 137/final 145 tests/doctests pass,
 strict all-feature/all-target Clippy passes, and seven auth contract tests pass
@@ -2296,5 +2295,56 @@ Frontend/browser/PDF/provider/container qualification was not repeated.
 
 Committed in an isolated worktree; master rebased onto the canary, identical tested
 tree and ancestry verified, temporary worktree/branch removed. Shared main includes
-the library and tracker commits. Both tracker views agree: **1 Done, 16 Pending
-assessment/migration**. Nothing pushed or deployed.
+the library and tracker commits. At canary completion the count was **1 Done, 16 Pending
+assessment/migration**; current totals follow below. Nothing pushed or deployed.
+
+## Steps 08/09: first auth rollout — 2026-09-23
+
+Three GPT-6 Sol agents at medium reasoning assessed LelloStore, Crumbles and
+Simple AI in separate migration worktrees. Each service has applicable identity
+and access behavior. Shared source remains `0a629da`; no library change was
+needed. Application credential, permission and transaction authority is retained.
+
+- Crumbles `master` → `fe46df2`: main HTTP session verification and named
+  global/project access checks use shared flows; the integration daemon uses
+  shared live-principal/capability evaluation. Exact Bearer/first-header behavior,
+  malformed-header rejection without cookie fallback, CSRF, 403/404 concealment,
+  revocation and authorization audit ordering remain intact. Baseline focused
+  tests: 5 route authorization, 7 extractor and 2 integration auth tests pass.
+  Final affected-package suites: 766 pass, 2 ignored, including a real-socket
+  authenticated WebSocket test; formatting and strict Clippy pass. An existing
+  unused route import was removed. Browser, external OIDC, Docker and production
+  data qualification were not repeated. Existing ignored frontend assets were
+  used unchanged for compile-time embedding.
+- Simple AI `master` → `739cccc`: backend API-key/JWT/LAN identity selection
+  uses shared `AsyncAccess`, including the disabled-account check. Shared
+  `HeaderCredential` preserves exact Bearer and first-header semantics; any
+  supplied header prevents LAN fallback. Shared `Access` covers admin middleware,
+  SSE and WebSocket checks. Model/resource policy and the backend's separate
+  runner-registration protocol token gate remain application-owned. The inference
+  runner has no inbound user identity/access flow to migrate. Baseline: three
+  selected LAN/admin HTTP tests and the new credential compatibility matrix pass.
+  Final backend all-target suites: 317 pass, including admin role/user-list/denial
+  and HTTP compatibility checks. Normal Clippy passes with existing warnings;
+  strict Clippy stops on three pre-existing `derivable_impls` warnings in the
+  untouched common crate. Unrelated README and semantic-scoring work is preserved.
+- LelloStore `master` → `033bc86`: shared header parsing and `AsyncAccess`
+  coordinate OIDC/JWT verification, user construction and registry observation;
+  admin extractors use `Access`. Only exact Bearer/bearer and first-header
+  semantics are accepted, with existing 401/403/500 errors and public routes.
+  Resource/acquisition/publication checks retain their transaction boundaries.
+  Baseline: 26 auth unit tests and the OIDC expiry/audience fixture pass; the new
+  compatibility/registry-outage contract passes both in-process and over real
+  HTTP before migration. Final backend all-target suites: 186 pass, 4 ignored,
+  including that real HTTP contract, authenticated WebSockets and lifecycle
+  subprocesses. Strict Clippy, changed-source formatting and diff checks pass.
+  External live OIDC and Android build qualification were not repeated. CI and
+  the active README now pin the reviewed shared revision.
+
+All three migrations are committed and integrated into their original `master`
+branches. Ancestry and identical tested trees were verified before removing the
+migration worktrees/branches and owned temporary build files. Simple AI's unrelated
+README and semantic-scoring work remains intact. No push or deployment. Detailed
+scope and evidence live in each consumer's `docs/step-08-auth.md`. Current combined
+auth status in both tracker views: **4 Done, 13 Pending assessment/migration**.
+These scoped adoptions do not yet claim complete consumer Axum removal.
