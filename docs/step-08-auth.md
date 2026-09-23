@@ -139,5 +139,18 @@ WebSocket sessions and named permissions, and SCT's token/session authentication
 and transactional administrator/root-capability decisions. Each retains its
 existing credential precedence, error mapping and application authority. No
 shared API extension was needed. See the [fourth-round evidence](migration-status.md#steps-0809-fourth-auth-rollout--2026-09-23)
-for verification, integration and cleanup. Current adoption is thirteen services;
-four remain pending assessment/migration. No push or deployment.
+for verification, integration and cleanup.
+
+The final round adds Androidoscopy's v2 controller and LAN authorization checks,
+Paranza's runner/PCM gates, and Quentin Torrentino's API access flow. Pezzottify
+Downloader is N/A: its public TCP routes have no caller gate, the child API uses
+Unix-socket filesystem permissions, and Spotify credentials belong to outbound
+provider sessions. Application policy and cryptographic protocols remain local.
+No shared API extension was needed. The [final-round evidence](migration-status.md#steps-0809-final-auth-rollout--2026-09-23)
+records test scopes, existing lint debt, applicability and integration/cleanup.
+
+Combined auth rollout is complete locally: **16 Done, 1 N/A, 0 Pending**.
+These statuses cover the documented production scopes; they do not imply that
+every application-specific credential protocol or permission rule moved into
+the shared library, or that consumer Axum removal is complete. Step 10 rate
+limiting is next. Nothing was pushed or deployed.

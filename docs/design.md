@@ -56,7 +56,9 @@ references remain valid. The execution order after Step 06 is:
 
 1. Steps 08/09: one optional `auth` module for authentication and authorization,
    designed and migrated together. Step 09 is absorbed; there is no second rollout.
-2. Step 10: rate limiting.
+   Completed locally: 16 adopted and one N/A; see the
+   [auth rollout evidence](migration-status.md#steps-0809-final-auth-rollout--2026-09-23).
+2. Step 10: rate limiting (next).
 3. Complete the public HTTP interfaces, migrate all remaining consumer Axum
    usage, and verify the end-goal criteria above before removing the transitional
    Axum re-export. This includes production code and tests across all services.
