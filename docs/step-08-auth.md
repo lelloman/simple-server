@@ -118,5 +118,13 @@ adopts backend user authentication and admin checks. Provider verification,
 resource policies and transaction authority remain application-owned. The shared
 API required no change. Per-service scope, test evidence, retained protocol checks
 and integration records are in the [migration tracker](migration-status.md#steps-0809-first-auth-rollout--2026-09-23)
-and each consumer's `docs/step-08-auth.md`. Current adoption is four services;
-13 remain pending assessment/migration. No push or deployment.
+and each consumer's `docs/step-08-auth.md`.
+
+The second round adds Pezzottify's session/named-route flows and all three
+Meteonesto services. Simple Agents' caller/browser and transactional admin/session
+flows are tested and committed on its migration branch but await integration
+because concurrent edits overlap an auth file. No shared API changes were needed.
+The [second-round evidence](migration-status.md#steps-0809-second-auth-rollout--2026-09-23)
+records tests, retained application policy, branch integration and cleanup limits.
+Current adoption is six services; 11 remain pending, including Simple Agents'
+tested migration. No push or deployment.

@@ -23,14 +23,14 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 
 | Project | Server components | 1. Axum centralization | 2. Lifecycle / main() | 03a. Logging | 03b. Correlation | 03c. HTTP tracing | 04a. Body limits | 04b. Response headers | 04c. CORS | 05. Health/readiness | 06a. Task ownership | 06b. Scheduling | 06c. Execution policies | 08/09. Auth |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local canary)** | **Done (local; scoped canary)** | N/A (assessed) | N/A (no served probe) | **Done (local; scoped canary)** | **Done (local; primitives)** | **Done (local; primitives)** | Pending (assessment/migration) |
+| pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local canary)** | **Done (local; scoped canary)** | N/A (assessed) | N/A (no served probe) | **Done (local; scoped canary)** | **Done (local; primitives)** | **Done (local; primitives)** | **Done (local; sessions + route permissions)** |
 | favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local canary)** | **Done (local; request work)** | **Done (local; bounded batches)** | **Done (local; retry scope)** | **Done (local canary)** |
 | androidoscopy | `server` | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (no served probe) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | Pending (assessment/migration) |
 | crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; durable primitives)** | **Done (local; retry primitives)** | **Done (local; main + integration)** |
 | fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; dynamic cron)** | N/A (assessed) | Pending (assessment/migration) |
 | lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (Rust; Caddy owns CORS) | **Done (local; scoped)** | **Done (local; webhook scope)** | **Done (local; capacity)** | **Done (local; retry scope)** | Pending (assessment/migration) |
 | lellostore | `backend` | **Done** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; OIDC + admin)** |
-| meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; pipeline/gateway)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; weighted claims)** | **Done (local; budgets/retry)** | Pending (assessment/migration) |
+| meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; pipeline/gateway)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; weighted claims)** | **Done (local; budgets/retry)** | **Done (local; all three services)** |
 | observo | `observo-server`; standalone extractor logging | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (no served probe) | **Done (local; scoped)** | **Done (local; primitives)** | N/A (assessed) | Pending (assessment/migration) |
 | paranza | `apps/paranza-server` | **Done** | **Done (local; scoped)** | N/A (no logger) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | Pending (assessment/migration) |
 | peerlo | `peerlo-api` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; retry primitives)** | Pending (assessment/migration) |
@@ -38,7 +38,7 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | pezzottify-downloader | Puppeteer API and downloader HTTP server | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; Puppeteer)** | **Done (local; both HTTP routers)** | N/A (assessed) | N/A (assessed) | **Done (local; both routers)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; priority admission)** | N/A (assessed) | Pending (assessment/migration) |
 | quentin-torrentino | `crates/server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; stage capacity)** | N/A (assessed) | Pending (assessment/migration) |
 | sct | `sct-server` | **Done** | **Done (scoped)** | N/A (no logger) | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; worker scope)** | **Done (local; durable worker cadence)** | **Done (local; retry scope)** | Pending (assessment/migration) |
-| simple-agents | `simple-agents-service`; runner-shell logging; associated coding test servers | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local pilot; service routes)** | **Done (local; scoped canary)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; transactional capacity)** | **Done (local; retry scope)** | Pending (assessment/migration) |
+| simple-agents | `simple-agents-service`; runner-shell logging; associated coding test servers | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local pilot; service routes)** | **Done (local; scoped canary)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; transactional capacity)** | **Done (local; retry scope)** | Pending (tested migration; integration held) |
 | simple-ai | `backend`, `inference-runner` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local; backend)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; batch readiness)** | N/A (assessed) | **Done (local; backend user/admin)** |
 
 ## Step 1: Axum centralization
@@ -2345,6 +2345,68 @@ All three migrations are committed and integrated into their original `master`
 branches. Ancestry and identical tested trees were verified before removing the
 migration worktrees/branches and owned temporary build files. Simple AI's unrelated
 README and semantic-scoring work remains intact. No push or deployment. Detailed
-scope and evidence live in each consumer's `docs/step-08-auth.md`. Current combined
-auth status in both tracker views: **4 Done, 13 Pending assessment/migration**.
+scope and evidence live in each consumer's `docs/step-08-auth.md`. At completion of
+this first wave: **4 Done, 13 Pending assessment/migration**.
 These scoped adoptions do not yet claim complete consumer Axum removal.
+
+## Steps 08/09: second auth rollout — 2026-09-23
+
+Three more GPT-6 Sol agents at medium reasoning assessed Pezzottify, Meteonesto
+and Simple Agents in separate migration worktrees. All three have applicable
+production identity and access flows. Shared revision remains `0a629da`; the
+library required no change. The coordinator reviewed production diffs and ran
+socket tests where child tool approvals stalled.
+
+- Meteonesto `master` → `6684b37` (implementation `4faff4b`): all three
+  production binaries adopt shared auth. Pipeline
+  identity resolves against the reloadable AccessControl, then shared access
+  checks preserve permission and denial-audit ordering. The gateway retains strict
+  single Bearer parsing, OIDC verification and product/rate policy. The weather API
+  retains first-header edge credentials, all-hash constant-time comparison,
+  loopback-canary bypass, failure metrics/challenge and credential-header removal.
+  Baseline gateway 31 and API 70 tests pass; the pipeline baseline reached 46
+  passes with four socket-binding failures in the sandbox. Final unrestricted
+  pipeline all-targets pass 164 tests, including 22 HTTP cases and process checks
+  for hot reload, signals and restart. Gateway 31 and API 71 tests pass, plus the
+  explicit real-process gateway-to-API E2E: **267 total passing tests**. Formatting,
+  locked builds and gateway/API strict Clippy pass. Pipeline strict Clippy has the
+  same pre-existing missing-panics-doc finding before/after; allowing that single
+  lint yields a pass. Pipeline cargo-deny passes with existing warnings. Docker
+  and external-provider qualification were not repeated.
+- Simple Agents migration source `83cd492`, documentation through `ac4b8bc`:
+  shared `AsyncAccess` selects the existing bearer/browser verification path;
+  `HeaderCredential` preserves exact single Bearer and origin rejection, including
+  broker WebSocket parsing. Shared `Access` applies admin/session decisions to
+  rows loaded inside existing transactions, preserving live revocation, audit
+  order and 403/404 concealment. Browser origin/cookie/CSRF policy, runner leases,
+  metrics credentials and runtime peer checks remain application-owned. Baseline
+  authorization/session suites pass 32 tests. Final service all-target suites pass
+  **139 tests, none ignored**, including live broker sockets, browser/OIDC,
+  metrics revocation and process restart checks. Strict all-target Clippy,
+  formatting and diff checks pass. External provider and full browser/deployment
+  qualification were not repeated.
+- Pezzottify `dev` → `3f2271ff`: `AsyncAccess` runs the production OIDC-first,
+  legacy-token fallback verifier for HTTP and long-lived transport revalidation.
+  Shared `Access` covers every named route permission policy using the existing
+  session snapshot. The token68/case-insensitive/multiple-space/optional-raw-token
+  parser remains application-owned; duplicate/malformed headers still cannot
+  fall back to a valid cookie. Baseline at original consumer/shared revisions:
+  32 focused unit tests plus 46 auth/MCP/permission HTTP tests pass. Final: the
+  same 32 units plus 47 HTTP tests pass, including the new duplicate-header/cookie
+  regression; open-connection revocation and permission refresh are covered.
+  Formatting and repository-standard strict Clippy pass. Expanded all-target
+  Clippy finds an existing items-after-test-module warning in an unchanged file.
+  Unrelated suites, browser/Android and container qualification were not repeated.
+
+Pezzottify and Meteonesto are integrated into their original development branches;
+tested tree and ancestry checks pass. Their migration/baseline worktrees, branches
+and owned build assets are removed; pre-existing Pezzottify Paravoid worktrees are
+preserved. Simple Agents remains **Pending integration**, not Done: concurrent
+account-display-name/UI edits appeared in its original checkout, including an
+`auth_http.rs` hunk. The tested migration branch `migrate/step08-auth-wave2` at
+`ac4b8bc` is retained in `/tmp/auth-simple-agents-wave2/simple-agents` with its
+build artifacts until that active work is coordinated. Original edits are untouched.
+The workflow explicitly requires coordination before stashing actively edited
+files; no timing assumption is treated as approval. Both tracker views now show
+**6 Done, 11 Pending**, including this tested-but-unintegrated service. No push or
+deployment. Consumer Axum removal is still a separate completion milestone.
