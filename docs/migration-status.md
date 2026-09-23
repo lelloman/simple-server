@@ -12,6 +12,14 @@ each product independently as it adopts that capability.
 Partial = only some listed components migrated; N/A = deliberately not needed.
 Optional modules do not have to be adopted by every product.
 
+**Next execution order:** Step 08 authentication → Step 09 authorization →
+Step 10 rate limiting → complete and verify Axum removal from every consumer →
+revisit Step 07 database helpers. Step numbers are retained; Step 07 is deferred,
+not required for the Axum abstraction. Database setup and migrations remain local
+to services. The Axum-removal milestone includes production code, tests and removal
+of the transitional re-export; Axum can remain internal to simple-server.
+See the [roadmap and completion criteria](design.md).
+
 Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its original dates.
 
 | Project | Server components | 1. Axum centralization | 2. Lifecycle / main() | 03a. Logging | 03b. Correlation | 03c. HTTP tracing | 04a. Body limits | 04b. Response headers | 04c. CORS | 05. Health/readiness | 06a. Task ownership | 06b. Scheduling | 06c. Execution policies |

@@ -48,6 +48,25 @@ framework-independent public types and explicit policy.
 application checks and a framework-independent endpoint adapter. Applications
 retain dependency policy and response contracts.
 
+## Next milestones (updated 2026-09-23)
+
+Step 07 (optional database helpers) is deferred until after Step 10 and the
+consumer Axum-removal milestone. Keep the existing step numbers so historical
+references remain valid. The execution order after Step 06 is:
+
+1. Step 08: authentication.
+2. Step 09: authorization.
+3. Step 10: rate limiting.
+4. Complete the public HTTP interfaces, migrate all remaining consumer Axum
+   usage, and verify the end-goal criteria above before removing the transitional
+   Axum re-export. This includes production code and tests across all services.
+5. Revisit Step 07: optional database setup and migration helpers.
+
+Database helpers are not a prerequisite for the HTTP abstraction. Services retain
+their existing database libraries, setup and migrations while that work proceeds.
+Axum may remain internal to simple-server; the milestone removes its exposure to
+consumers. Completing Steps 08–10 alone does not establish that milestone.
+
 ## Composition
 
 Axum remains the internal HTTP implementation. The long-term product API hides
@@ -93,8 +112,9 @@ such as uploads, streaming responses, and WebSockets.
 3. Extract lifecycle and entry-point setup, retaining product ownership of
    `main()`. Apply each shared capability incrementally across services.
 4. Adopt observability through 03a, 03b, and 03c independently, then follow with
-   further HTTP support, health, background tasks, databases, authentication,
-   authorization, and rate limiting as requirements are validated.
+   further HTTP support, health, background tasks, authentication, authorization,
+   and rate limiting as requirements are validated. Database helpers are deferred
+   until after the consumer Axum-removal milestone.
 5. Replace all transitional Axum usage with product-facing interfaces, verify
    the end-goal criteria above across consumers, and remove the Axum re-export.
 
