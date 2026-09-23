@@ -75,5 +75,9 @@ name = "scheduler"
 required-features = ["task-scheduling"]
 
 [[example]]
+name = "dynamic_cron"
+required-features = ["task-scheduling"]
+
+[[example]]
 name = "policy_snapshot"
 required-features = ["task-policies"]

@@ -233,3 +233,10 @@ Applications retaining their own durable scheduler can use
 `task_scheduling::ExecutionCapacity` for shared global/resource-pool limits,
 `Schedule` for recurrence, and the task/policy primitives independently. Keep
 execution permits until blocking work actually finishes, even after cancellation.
+
+For live cron controls without handing over execution, use `CronRegistry`.
+It supports registration/replacement, enable/disable, removal, inspection and
+per-entry skip/catch-up policies. Applications drive bounded `poll_due` batches
+or select on the cancellation-safe `next_due()` future with their own admin
+channel and shutdown. Manual execution, concurrency and persistence remain
+application-owned. See [the dynamic cron example](examples/dynamic_cron.rs).

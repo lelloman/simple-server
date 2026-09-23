@@ -1,7 +1,13 @@
-//! Application-owned, bounded scheduler. Registration is static; execution is
-//! driven by `run`, not by a hidden supervisor. Observers own reporting/storage.
+//! Application-owned scheduling. `Scheduler` provides bounded execution with
+//! static registration; `CronRegistry` provides dynamic timing without execution.
+//! Neither starts a hidden supervisor. Applications own reporting and storage.
 mod capacity;
 pub use capacity::{CapacityError, ExecutionCapacity, ExecutionPermit};
+mod cron_registry;
+pub use cron_registry::{
+    CronEntryConfig, CronEntrySnapshot, CronRegistry, CronRegistryError, CronRevision,
+    DueOccurrence, MissedTickPolicy,
+};
 #[cfg(feature = "task-policies")]
 mod policies;
 mod schedule;

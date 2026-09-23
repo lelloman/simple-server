@@ -57,6 +57,58 @@ races and reservations made before callback startup.
 
 ## Scheduling details
 
+### Dynamic timing without execution
+
+`CronRegistry` is an independent, HTTP-free timing component under
+`task-scheduling`. Use it when the application needs live schedule control while
+retaining its own execution, overlap, admission, persistence or durable claims.
+It does not change the bounded `Scheduler` described below.
+
+- Register, replace, enable/disable and remove entries at runtime. Settings are
+  parsed before insertion; duplicate registration and unknown updates return
+  errors without changing existing entries. Separate IDs support multiple
+  schedules for one application job.
+- Each entry chooses `MissedTickPolicy::Skip` (default: deliver one overdue tick,
+  then advance beyond now) or `CatchUp` (deliver historical ticks in order).
+  `poll_due(now, nonzero_limit)` globally bounds delivery, ordered by scheduled
+  time then ID, and advances only delivered entries. Backlogs use cursors rather
+  than allocated notification queues. Each poll costs O(entries * delivered).
+- New, replaced and re-enabled schedules begin strictly after the caller's clock
+  sample. Disabled periods are never replayed, even in catch-up mode. Repeating
+  enable/disable with the existing state is a no-op. Clock rollback does not
+  rewind delivered ticks. Cron uses the existing UTC six/seven-field parser.
+- `next_due()` consumes one occurrence using the real wall clock. Pending waits
+  are cancellation-safe and recheck UTC deadlines at least once a second. Empty,
+  disabled or calendar-exhausted registries wait until the caller cancels the
+  future. Applications select between this future, their own admin channel and
+  shutdown; the caller chooses branch priority when events race. A closed
+  registry immediately returns `None`.
+- Inspection exposes configuration, revision and next deadline. Replacement,
+  enable/disable changes, and remove/re-register invalidate older occurrence
+  revisions. `is_current` checks an occurrence from this same registry before
+  optional downstream admission. Revisions are local to an instance, not durable
+  IDs or cross-registry tokens. Snapshots are views, not restart checkpoints.
+- `close()` permanently stops ticks and mutations, preserving inspection. It
+  never cancels previously emitted notifications or application jobs. Manual and
+  event-triggered execution remain wholly independent of cron enablement.
+
+There is no hidden task, internal command transport, execution limit, retry
+policy or database. Applications own registration limits, bounded transport,
+execution outcomes and shutdown drain. Delivering a tick advances its cursor;
+there is no acknowledgement/redelivery or exactly-once guarantee. Durable
+consumers must retain transactional claims/fencing. Catch-up consumers choose
+batch/yield limits to keep their control loop responsive.
+
+See `examples/dynamic_cron.rs` for a live control loop and separate `WorkTracker`
+drain. This extension addresses Fausto's automatic schedule enable/disable needs
+without imposing bounded execution or blocking manual runs. Fausto registers its
+production jobs at startup; hot registration/replacement are additional reusable
+library capabilities. Consumer integration, cron-dialect compatibility and E2E
+verification remain separate work. Fixed-rate/fixed-delay execution scheduling
+continues to use `Schedule`/`Scheduler`; this registry intentionally covers cron.
+
+### Bounded execution scheduler
+
 `Scheduler<P, E>` registers async or blocking `Job`s before its first `run`.
 `SchedulerHandle<P>` accepts typed manual/event commands through a bounded
 channel. Losing an acknowledgement does not cancel accepted work. Per-job
