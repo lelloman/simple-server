@@ -14,9 +14,9 @@ Optional modules do not have to be adopted by every product.
 
 **Combined auth (08/09):** complete locally — 16 Done, 1 N/A, 0 Pending.
 
-**Rate limiting (10):** 4 Done, 5 Partial, 4 N/A, 4 Pending. Three four-service
-batches integrated locally; Downloader has an assessed Python quota gap, while
-Androidoscopy, Paranza and Quentin Torrentino remain unassessed for this step.
+**Rate limiting (10):** 5 Done, 5 Partial, 5 N/A, 2 Pending. All 17 services
+have been assessed. Androidoscopy’s Kotlin pairing quota and Downloader’s
+Python/SQLite quotas remain Pending; five Partial services retain documented gaps.
 
 **Next execution order:** Step 10 rate limiting → complete and verify Axum removal from every consumer →
 revisit Step 07 database helpers. Step numbers are retained; Step 07 is deferred,
@@ -31,18 +31,18 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local canary)** | **Done (local; scoped canary)** | N/A (assessed) | N/A (no served probe) | **Done (local; scoped canary)** | **Done (local; primitives)** | **Done (local; primitives)** | **Done (local; sessions + route permissions)** | **Partial (HTTP done; MCP pending)** |
 | favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local canary)** | **Done (local; request work)** | **Done (local; bounded batches)** | **Done (local; retry scope)** | **Done (local canary)** | **Done (local; global + endpoint budgets)** |
-| androidoscopy | `server` | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (no served probe) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; controller + LAN access)** | Pending (assessment/migration) |
+| androidoscopy | `server` | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (no served probe) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; controller + LAN access)** | Pending (Kotlin device pairing quota) |
 | crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; durable primitives)** | **Done (local; retry primitives)** | **Done (local; main + integration)** | **Partial (login + MCP done; durable quotas pending)** |
 | fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; dynamic cron)** | N/A (assessed) | **Done (local; HTTP + WebSocket + admin/write)** | **Done (local; five API tiers)** |
 | lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (Rust; Caddy owns CORS) | **Done (local; scoped)** | **Done (local; webhook scope)** | **Done (local; capacity)** | **Done (local; retry scope)** | **Done (local; sessions + resource/admin access)** | **Partial (endpoint budgets done; device polling pending)** |
 | lellostore | `backend` | **Done** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; OIDC + admin)** | N/A (no inbound admission policy) |
 | meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; pipeline/gateway)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; weighted claims)** | **Done (local; budgets/retry)** | **Done (local; all three services)** | **Done (local; gateway budgets)** |
 | observo | `observo-server`; standalone extractor logging | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (no served probe) | **Done (local; scoped)** | **Done (local; primitives)** | N/A (assessed) | **Done (local; IP/key/JWT access)** | N/A (no request quota) |
-| paranza | `apps/paranza-server` | **Done** | **Done (local; scoped)** | N/A (no logger) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; runner + PCM access)** | Pending (assessment/migration) |
+| paranza | `apps/paranza-server` | **Done** | **Done (local; scoped)** | N/A (no logger) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; runner + PCM access)** | N/A (no implemented request quota) |
 | peerlo | `peerlo-api` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; retry primitives)** | **Done (local; bearer + Torznab keys)** | **Partial (API done; crawler/DHT pending)** |
 | pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local; main HTTP)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; socket scope)** | **Done (local; durable queue cadence)** | N/A (assessed) | **Done (local; sessions + permissions + WebSocket)** | **Partial (login done; durable/outbound limits pending)** |
 | pezzottify-downloader | Puppeteer API and downloader HTTP server | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; Puppeteer)** | **Done (local; both HTTP routers)** | N/A (assessed) | N/A (assessed) | **Done (local; both routers)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; priority admission)** | N/A (assessed) | N/A (no application caller gate) | Pending (Python durable sliding quotas) |
-| quentin-torrentino | `crates/server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; stage capacity)** | N/A (assessed) | **Done (local; API access)** | Pending (assessment/migration) |
+| quentin-torrentino | `crates/server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; stage capacity)** | N/A (assessed) | **Done (local; API access)** | **Done (local; MusicBrainz pacing)** |
 | sct | `sct-server` | **Done** | **Done (scoped)** | N/A (no logger) | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; worker scope)** | **Done (local; durable worker cadence)** | **Done (local; retry scope)** | **Done (local; tokens/sessions + transactional access)** | N/A (durable state caps, no request quota) |
 | simple-agents | `simple-agents-service`; runner-shell logging; associated coding test servers | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local pilot; service routes)** | **Done (local; scoped canary)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; transactional capacity)** | **Done (local; retry scope)** | **Done (local; caller + transactional access)** | N/A (task/storage admission, no request quota) |
 | simple-ai | `backend`, `inference-runner` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local; backend)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; batch readiness)** | N/A (assessed) | **Done (local; backend user/admin)** | **Done (local; backend budgets)** |
@@ -3147,8 +3147,129 @@ uses `main`; the other three use `master`. Owned worktrees, branches, test targe
 and archives were removed; pre-existing work and worktree references remain.
 Both central trackers were validated and committed on `simple-server` `main`.
 This batch changes documentation only: no shared API, executable behavior,
-consumer dependency feature or active build pin changed. Current Step 10 totals:
+consumer dependency feature or active build pin changed. Third-batch checkpoint:
 **4 Done, 5 Partial, 4 N/A, 4 Pending**. Downloader's durable Python sliding quota
 is explicitly Pending; Androidoscopy, Paranza and Quentin Torrentino await review.
 No push or deployment. Step 07 remains deferred until after rate limiting and
 verified consumer Axum removal.
+
+## Step 10: fourth parallel rollout — 2026-09-24
+
+Four GPT-6-sol assignments cover the four previously Pending services:
+Androidoscopy, Paranza, Quentin Torrentino and Pezzottify Downloader. Three workers
+run alongside the coordinator; Quentin started when Androidoscopy completed.
+The coordinator owns both trackers and any shared API changes. Reviewed shared
+revision: `b8a53f877f37eb762950aa4f85e0b9a914ea891d`.
+
+### Androidoscopy — assessed Pending, Kotlin enforcement
+
+Clean `master` advanced from `50b1cda3cb45140d53f9c5db9d3b3a4f0883edff` to
+`2c6f9a8c7fb05e4c87db8c1fe35516bcc0d22ca7`. The Android SDK's production
+`SessionRuntime.serve` applies a five-second PAIR attempt limit using Kotlin
+`SystemClock.elapsedRealtime()`. The admitted timestamp is global to the runtime,
+updated before commitment validation, unchanged on denial and retained across
+start/stop. RESUME follows a separate credential path. Denials close the socket
+with `PAIRING_RATE_LIMITED` and retain the existing UI reason. This is a real
+quota at the device enforcement boundary, not an optional desktop check.
+
+The Rust controller/legacy server/MCP bridge has no request quota; its Rust-only
+scope is N/A. Adding a desktop limiter would not cover other LAN callers.
+Kotlin currently has no binding to the shared Rust library, so whole-consumer
+adoption remains **Pending** for a separately chosen language boundary. Existing
+socket/tool capacity and protocol pacing are unrelated. No dependency feature,
+active pin or runtime behavior changed.
+
+The local `androidoscopy/docs/step-10-rate-limiting.md` records source/config
+inspection and baseline/final diff checks. Runtime/device suites were not run for
+this documentation-only change. Original `master` was rebased onto the isolated
+assessment branch; ancestry and identical tree verified, original clean status
+retained, and owned worktree/branch removed. No push/deployment.
+
+### Paranza — assessed N/A
+
+Clean `master` advanced from `5a28680dff3cdb2ec31bfa43c812ea9f74b2fabb` to
+`4c254ff10b561cd4b904df4a219ce6df279f7fe3`. Production server and Linux/Android
+runners have no request rate or concurrency admission policy. PCM submit
+performs authentication and target/link/priority/payload/TTL validation before
+SQLite enqueue. There are no quota settings or live quota-exceeded/429/Retry-After
+paths. Polling, heartbeat, process restart and delivery pacing are scheduling or
+lifecycle behavior. The PCM plan mentions future sender quotas with undecided
+defaults: that is future product work, not an existing migration gap.
+
+`paranza/docs/step-10-rate-limiting.md` records inspected paths and the decisions
+needed before introducing a sender quota. Baseline/final diff checks pass; no
+Rust/Android/Docker suite was needed for this documentation-only change. Active
+features, pins and behavior are unchanged. Original `master` was rebased onto
+the isolated assessment branch; ancestry/tree equality verified, checkout clean,
+and owned worktree/branch removed. No push/deployment.
+
+### Pezzottify Downloader — Pending, concrete language-boundary plan
+
+Clean `master` advanced from `66c68948fd00aff6d06860889a182cc1a3dfa56a` to
+`1db3b72f5f5482a34841331976182b1eae22f534`. The reassessment records a concrete
+shared policy boundary: rolling-window durations, strict cutoffs, per-window
+remaining counts and minimum budget must be owned by a shared policy calling
+an application SQLite count callback. Python would retain its exclusive run lock,
+check placement, run status and success-only upload accounting. Merely wrapping
+`min(limit - count)` is not adoption of the actual quota policy.
+
+A CLI subcommand on the existing downloader binary is the narrowest proposed
+bridge; it still needs packaging/version compatibility, timestamp/SQL equivalence,
+structured results, failure handling and tests at both cron check sites. An HTTP
+bridge would change startup order; a native Python extension creates a separate
+build/distribution path. None was introduced without a language-boundary choice.
+Existing production quotas remain **Pending**, with Rust HTTP budgets N/A and
+priority admission already shared under Step 06. No executable, feature or active
+source-pin changes were made.
+
+Cron and test-module syntax checks pass. Focused standard-library SQLite probes
+pass no-limit fallback, empty history, strict 30-minute cutoff, failed-attempt
+exclusion and the minimum across three windows. `pytest` remains unavailable;
+the complete Python suite was not run. Earlier Rust socket-test limitations remain
+in the local record; that unchanged Rust code was not retested. Documentation diff
+checks, integration ancestry and tree equality pass. Original `master` was rebased
+onto the isolated branch, original checkout remains clean, and owned worktree,
+branch and probe artifacts were removed. No push/deployment.
+
+### Quentin Torrentino — Done, MusicBrainz pacing
+
+Clean `master` advanced from `191a89ca00ce17d4742d123718ea0a562a65a075` to
+`2e0489445fa2bf7987ae5d93e3ff4f675b6866ee`. Production MusicBrainz search and
+get now share a strict burst-one replenishing `Budget`. The existing Tokio mutex
+continues to serialize admissions and stays held during waits; the budget is
+rechecked after waking. The first admission is immediate, cancellation does not
+consume quota, and zero configured delay explicitly remains unlimited. Default
+spacing remains 1100 ms. Application code retains transport, waiting and error
+mapping. The separate searcher token bucket has no production callers and was
+left unchanged; upstream 429 handling is not a local quota.
+
+The `rate-limit` feature and `simple-server.rev` pin adopt shared revision
+`b8a53f877f37eb762950aa4f85e0b9a914ea891d`. The lockfile gains only the two
+required shared dependency entries. Before migration, 16 existing external-catalog
+tests and all five MusicBrainz tests passed. The latter cover paused-clock
+spacing, concurrent admissions, idle behavior, cancellation, zero delay and
+loopback HTTP search/get/error behavior against the original implementation.
+After migration, all five pass; the locked core run reports **508/509 unit tests
+and 11/11 pipeline lifecycle integration tests passed**, with 12 ignored doctests.
+The sole failure, `content::tests::test_post_process_dispatches_to_video`, was
+reproduced at the same assertion on untouched starting commit `191a89c`.
+
+Core all-target Clippy exits successfully with 11 existing warnings. Changed-file
+Rustfmt and diff checks pass. Workspace formatting checks expose pre-existing
+formatting debt in untouched files; no bulk formatting was applied. The full
+workspace test suite was not run. Local evidence is in
+`quentin-torrentino/docs/step10-rate-limit-migration.md`. Original `master` was
+rebased onto the isolated migration branch, ancestry/tree equality verified and
+checkout clean. Owned worktree, branch, frozen shared snapshot and build artifacts
+were removed. No push/deployment.
+
+### Fourth-batch completion
+
+All four original development branches were integrated locally and owned temporary
+worktrees and branches removed. Both central trackers were updated in their own
+isolated worktree. No shared runtime changes were required in this batch.
+Current Step 10 totals: **5 Done, 5 Partial, 5 N/A, 2 Pending**. Every service has
+been assessed; the two Pending cross-language quotas need a language-boundary
+choice, and the five Partial services retain the gaps recorded above. Step 10 is
+not yet complete. No push or deployment; Step 07 remains deferred until after
+rate limiting and verified consumer Axum removal.
