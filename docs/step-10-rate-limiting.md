@@ -34,6 +34,17 @@ This is local implementation, not deployment or completion of consumer Axum remo
   acquiring a mutex and can receive observations out of order. Later samples
   refill from that older anchor. This is a deliberate compatibility policy.
   It does not replace the integer GCRA default or silently change its semantics.
+- `PerSecondTokenBucket::new(rate, burst, now)` preserves existing unit-cost
+  `min(tokens + elapsed_seconds * rate, burst)` accounting. Unlike the per-minute
+  primitive, it deliberately accepts zero capacity and unvalidated `f64` rates,
+  including negative/nonfinite values, for compatibility with existing parsers.
+  `check_at(now)` preserves saturating elapsed time and reanchors to the latest
+  observation; `last_observed()` supports caller-owned idle cleanup. Retry seconds
+  use the legacy ceiling/saturating `u64` cast for positive rates and 60 seconds
+  otherwise; zero and `u64::MAX` are possible. Render the duration directly to
+  retain that response contract, since the generic renderer applies a minimum.
+  New validated configurations should normally use `Quota`. Tests compare 72,000
+  old-algorithm observations, including negative/nonfinite rates and zero capacity.
 - `Budget` is caller-owned state. `check_at(now, cost)` consumes a positive cost
   atomically under the caller's exclusive access. Rejection does not consume;
   cost above capacity is an explicit error. Backward clock readings clamp to

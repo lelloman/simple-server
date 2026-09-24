@@ -8,6 +8,112 @@ use std::{
 fn n(n: u32) -> NonZeroU32 {
     NonZeroU32::new(n).unwrap()
 }
+
+#[test]
+fn per_second_bucket_preserves_fractional_refill_debt_and_observations() {
+    let mut bucket = PerSecondTokenBucket::new(0.1, 2, sec(10));
+    assert!(bucket.check_at(sec(10)).is_ok());
+    assert!(bucket.check_at(sec(10)).is_ok());
+    assert_eq!(
+        bucket.check_at(sec(15)).unwrap_err().retry_after,
+        Some(sec(5))
+    );
+    // A denial observes time but does not charge. Backward samples reanchor.
+    assert_eq!(
+        bucket.check_at(sec(12)).unwrap_err().retry_after,
+        Some(sec(5))
+    );
+    assert_eq!(bucket.last_observed(), sec(12));
+    assert!(bucket.check_at(sec(17)).is_ok());
+    assert_eq!(
+        bucket.check_at(sec(17)).unwrap_err().retry_after,
+        Some(sec(10))
+    );
+}
+
+#[test]
+fn per_second_legacy_configuration_keeps_zero_nonfinite_and_retry_contracts() {
+    for rate in [0.0, -1.0, f64::NAN, f64::NEG_INFINITY] {
+        let mut empty = PerSecondTokenBucket::new(rate, 0, sec(0));
+        let denied = empty.check_at(sec(1)).unwrap_err();
+        assert_eq!(denied.reason, Reason::Rate);
+        assert_eq!(denied.retry_after, Some(sec(60)));
+    }
+    let mut infinite = PerSecondTokenBucket::new(f64::INFINITY, 0, sec(0));
+    assert_eq!(
+        infinite.check_at(sec(0)).unwrap_err().retry_after,
+        Some(sec(0))
+    );
+    let mut tiny = PerSecondTokenBucket::new(f64::MIN_POSITIVE, 0, sec(0));
+    assert_eq!(
+        tiny.check_at(sec(1)).unwrap_err().retry_after,
+        Some(sec(u64::MAX))
+    );
+    // Rust f64::min selects the finite operand when the other is NaN; preserving
+    // unvalidated legacy configuration includes this unusual repeated refill.
+    let mut nan = PerSecondTokenBucket::new(f64::NAN, 1, sec(0));
+    assert!(nan.check_at(sec(0)).is_ok());
+    assert!(nan.check_at(sec(0)).is_ok());
+    let mut negative = PerSecondTokenBucket::new(-1.0, 2, sec(0));
+    assert!(negative.check_at(sec(0)).is_ok());
+    assert!(negative.check_at(sec(2)).is_err());
+}
+
+#[test]
+fn per_second_bucket_matches_existing_float_algorithm() {
+    // Independent old implementation expressed with Instants, including separate
+    // creation/check samples, pre-lock/backward observations and idle resets.
+    let origin = std::time::Instant::now();
+    for rate in [
+        0.1,
+        2.0,
+        1000.0,
+        0.0,
+        -0.5,
+        f64::NAN,
+        f64::INFINITY,
+        f64::NEG_INFINITY,
+        f64::MIN_POSITIVE,
+    ] {
+        for burst in [0, 1, 5, u32::MAX] {
+            let mut shared = PerSecondTokenBucket::new(rate, burst, sec(10));
+            let mut tokens = f64::from(burst);
+            let mut last = origin + sec(10);
+            let mut elapsed_ns = 10_000_000_000u64;
+            let mut seed = 71u64;
+            for i in 0..2000 {
+                seed = seed.wrapping_mul(6364136223846793005).wrapping_add(1);
+                let delta = seed % 2_000_000_000;
+                elapsed_ns = if i % 7 == 0 {
+                    elapsed_ns.saturating_sub(delta)
+                } else {
+                    elapsed_ns + delta
+                };
+                let elapsed = Duration::from_nanos(elapsed_ns);
+                let now = origin + elapsed;
+                tokens = (tokens + now.saturating_duration_since(last).as_secs_f64() * rate)
+                    .min(f64::from(burst));
+                last = now;
+                let expected = if tokens >= 1.0 {
+                    tokens -= 1.0;
+                    Ok(())
+                } else {
+                    Err(if rate > 0.0 {
+                        ((1.0 - tokens) / rate).ceil() as u64
+                    } else {
+                        60
+                    })
+                };
+                let actual = shared.check_at(elapsed).map_err(|e| {
+                    assert_eq!(e.reason, Reason::Rate);
+                    e.retry_after.unwrap().as_secs()
+                });
+                assert_eq!(actual, expected, "rate={rate}, burst={burst}, i={i}");
+                assert_eq!(shared.last_observed(), elapsed);
+            }
+        }
+    }
+}
 fn count(n: usize) -> NonZeroUsize {
     NonZeroUsize::new(n).unwrap()
 }

@@ -6,6 +6,7 @@
 mod budget;
 mod flow;
 mod layer;
+mod per_second_bucket;
 mod store;
 mod token_bucket;
 
@@ -15,6 +16,7 @@ pub use budget::{
 };
 pub use flow::{Admission, AdmissionFuture, AsyncPolicy, Policy};
 pub use layer::{RateLimitBody, RateLimitLayer, RateLimitService, rejection_response};
+pub use per_second_bucket::PerSecondTokenBucket;
 pub use store::{Clock, KeyedLimiter, Overflow, StoreConfig, StoreStats, SystemClock};
 
 pub use token_bucket::{ClockRegression, TokenBucket};
