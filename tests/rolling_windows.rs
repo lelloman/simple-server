@@ -134,22 +134,49 @@ fn errors_propagate_even_after_an_exhausted_window() {
 #[test]
 fn repeated_evaluations_match_direct_history_model_across_rolling_boundaries() {
     let windows = [window(30, 3), window(120, 8), window(1440, 20)];
-    let events: Vec<_> = (-2000..2000).step_by(7).map(|t| (t, t % 3 != 0)).collect();
-    for now in (-1500..1500).step_by(11) {
+    let events: Vec<_> = (-2000..0).step_by(7).map(|t| (t, t % 3 != 0)).collect();
+    let mut observed = std::collections::BTreeSet::new();
+    for now in (-1500..2000).step_by(11) {
         let mut db = store(&[now; 3]);
-        db.events = events.clone();
+        db.events = events
+            .iter()
+            .copied()
+            .filter(|(at, _)| *at <= now)
+            .collect();
         let result = evaluate_rolling_windows(&windows, 100, &mut db).unwrap();
-        let expected = windows
+        let expected: Vec<_> = windows
             .iter()
             .map(|w| {
-                let count = events
+                let count = db
+                    .events
                     .iter()
                     .filter(|(t, ok)| *ok && *t > now - i128::from(w.window_micros))
                     .count() as u64;
-                w.limit.saturating_sub(count)
+                (count, w.limit.saturating_sub(count))
             })
-            .min()
-            .unwrap();
-        assert_eq!(result.remaining, expected);
+            .collect();
+        assert_eq!(
+            result
+                .windows
+                .iter()
+                .map(|w| (w.used, w.remaining))
+                .collect::<Vec<_>>(),
+            expected
+        );
+        assert_eq!(
+            result.remaining,
+            expected
+                .iter()
+                .map(|(_, remaining)| *remaining)
+                .min()
+                .unwrap()
+        );
+        observed.insert(result.remaining);
     }
+    assert!(observed.contains(&0));
+    assert!(observed.contains(&3));
+    assert!(
+        observed.len() > 2,
+        "exercise replenishment as history ages out"
+    );
 }

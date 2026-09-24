@@ -14,9 +14,10 @@ Optional modules do not have to be adopted by every product.
 
 **Combined auth (08/09):** complete locally — 16 Done, 1 N/A, 0 Pending.
 
-**Rate limiting (10):** 5 Done, 5 Partial, 5 N/A, 2 Pending. All 17 services
-have been assessed. Androidoscopy’s Kotlin pairing quota and Downloader’s
-Python/SQLite quotas remain Pending; five Partial services retain documented gaps.
+**Rate limiting (10):** 7 Done, 5 Partial, 5 N/A, 0 Pending. All 17 services
+have been assessed. Androidoscopy’s device pairing and Downloader’s Python/SQLite
+quotas now use shared policies through language bridges. Five Partial services
+still retain documented gaps; Step 10 is not yet fully complete.
 
 **Next execution order:** Step 10 rate limiting → complete and verify Axum removal from every consumer →
 revisit Step 07 database helpers. Step numbers are retained; Step 07 is deferred,
@@ -31,7 +32,7 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local canary)** | **Done (local; scoped canary)** | N/A (assessed) | N/A (no served probe) | **Done (local; scoped canary)** | **Done (local; primitives)** | **Done (local; primitives)** | **Done (local; sessions + route permissions)** | **Partial (HTTP done; MCP pending)** |
 | favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local canary)** | **Done (local; request work)** | **Done (local; bounded batches)** | **Done (local; retry scope)** | **Done (local canary)** | **Done (local; global + endpoint budgets)** |
-| androidoscopy | `server` | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (no served probe) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; controller + LAN access)** | Pending (Kotlin device pairing quota) |
+| androidoscopy | `server`; Android SDK pairing | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (no served probe) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; controller + LAN access)** | **Done (local; device JNI pairing gate)** |
 | crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; durable primitives)** | **Done (local; retry primitives)** | **Done (local; main + integration)** | **Partial (login + MCP done; durable quotas pending)** |
 | fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; dynamic cron)** | N/A (assessed) | **Done (local; HTTP + WebSocket + admin/write)** | **Done (local; five API tiers)** |
 | lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (Rust; Caddy owns CORS) | **Done (local; scoped)** | **Done (local; webhook scope)** | **Done (local; capacity)** | **Done (local; retry scope)** | **Done (local; sessions + resource/admin access)** | **Partial (endpoint budgets done; device polling pending)** |
@@ -41,7 +42,7 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | paranza | `apps/paranza-server` | **Done** | **Done (local; scoped)** | N/A (no logger) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; runner + PCM access)** | N/A (no implemented request quota) |
 | peerlo | `peerlo-api` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; retry primitives)** | **Done (local; bearer + Torznab keys)** | **Partial (API done; crawler/DHT pending)** |
 | pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local; main HTTP)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; socket scope)** | **Done (local; durable queue cadence)** | N/A (assessed) | **Done (local; sessions + permissions + WebSocket)** | **Partial (login done; durable/outbound limits pending)** |
-| pezzottify-downloader | Puppeteer API and downloader HTTP server | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; Puppeteer)** | **Done (local; both HTTP routers)** | N/A (assessed) | N/A (assessed) | **Done (local; both routers)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; priority admission)** | N/A (assessed) | N/A (no application caller gate) | Pending (Python durable sliding quotas) |
+| pezzottify-downloader | Puppeteer API, downloader HTTP server and Python cron | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; Puppeteer)** | **Done (local; both HTTP routers)** | N/A (assessed) | N/A (assessed) | **Done (local; both routers)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; priority admission)** | N/A (assessed) | N/A (no application caller gate) | **Done (local; Python/SQLite quota bridge)** |
 | quentin-torrentino | `crates/server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; stage capacity)** | N/A (assessed) | **Done (local; API access)** | **Done (local; MusicBrainz pacing)** |
 | sct | `sct-server` | **Done** | **Done (scoped)** | N/A (no logger) | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; worker scope)** | **Done (local; durable worker cadence)** | **Done (local; retry scope)** | **Done (local; tokens/sessions + transactional access)** | N/A (durable state caps, no request quota) |
 | simple-agents | `simple-agents-service`; runner-shell logging; associated coding test servers | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local pilot; service routes)** | **Done (local; scoped canary)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; transactional capacity)** | **Done (local; retry scope)** | **Done (local; caller + transactional access)** | N/A (task/storage admission, no request quota) |
@@ -3268,7 +3269,7 @@ were removed. No push/deployment.
 All four original development branches were integrated locally and owned temporary
 worktrees and branches removed. Both central trackers were updated in their own
 isolated worktree. No shared runtime changes were required in this batch.
-Current Step 10 totals: **5 Done, 5 Partial, 5 N/A, 2 Pending**. Every service has
+Fourth-batch checkpoint: **5 Done, 5 Partial, 5 N/A, 2 Pending**. Every service has
 been assessed; the two Pending cross-language quotas need a language-boundary
 choice, and the five Partial services retain the gaps recorded above. Step 10 is
 not yet complete. No push or deployment; Step 07 remains deferred until after
@@ -3295,3 +3296,88 @@ epochs, per-window time sampling, zero/no limits, complete diagnostics after
 exhaustion, clock/storage failures, arithmetic range and repeated history-model
 comparisons. All-feature/all-target strict Clippy, formatting and diff checks
 pass. Consumer integration and final cleanup evidence follow below.
+
+### Pezzottify Downloader — Done, Python/SQLite bridge
+
+Clean `master` advanced from `1db3b72f5f5482a34841331976182b1eae22f534` to
+`463f811c8c0def6ba12955b83b2878d2bcf8294b`. Both production cron quota checks
+now invoke the configured downloader binary's `quota` subcommand, which adopts
+shared revision `36b57d3bc02f10f84d37dbd2cb4a4083d79706ad`. The versioned
+stdio protocol delegates time/count callbacks to Python's existing SQLite
+connection while Rust computes window cutoffs, remaining counts, minimum and
+no-window fallback. The same connection preserves uncommitted-event visibility;
+strict ISO-formatted cutoffs, fresh time per window, successful-only accounting,
+run locking and check placement are retained.
+
+The helper starts no server/authentication/runtime. Each exchange has a ten-second
+deadline, bounded messages and strict sequence/schema checks; failures stop the
+run and the child is reaped. Supported null keys and unknown keys remain ignored;
+zero/negative integer limits preserve zero remaining. Limits now explicitly
+require signed 64-bit integers. Cron and the quota-capable binary must be updated
+together, including when `manage_downloader_process` is false. The local README
+and `docs/step-10-rate-limiting.md` explain this build/runtime requirement.
+
+Baseline Python syntax checks passed; system pytest was absent, and a pre-edit
+Rust suite was not run. Final verification uses an isolated cached pytest install:
+**100 Python tests pass** against the real helper, including strict cutoffs,
+uncommitted rows, completed/failed accounting, no/zero/negative/null/unknown limits,
+database errors, missing/malformed/slow helpers and pre-authentication failure.
+The Rust binary builds; **169 Rust tests pass, one ignored**. Normal Clippy passes
+with 11 pre-existing warnings in unchanged library code; strict Clippy fails on
+those warnings. Diff checks pass. Original `master` was rebased onto the isolated
+migration branch; tested hash/tree equality and clean checkout verified. Temporary
+worktree and branch were removed. No push/deployment.
+
+### Androidoscopy — Done, device-side JNI bridge
+
+Clean `master` advanced from `2c6f9a8c7fb05e4c87db8c1fe35516bcc0d22ca7` to
+`ca813fe2e338b4171f87d646831414965c423ed8`. The actual Kotlin `SessionRuntime.serve` PAIR gate
+now invokes a small JNI bridge using shared `Budget` and a strict single-unit
+five-second quota. Shared revision `66b5259b22c6c48687f822beca497f03ad12c2f7`
+was frozen during implementation and is recorded in `simple-server.rev`.
+The bridge crate enables only `rate-limit` without default features. It retains
+no native handle: Kotlin owns the last admitted elapsedRealtime timestamp and
+Rust reconstructs the budget for each check. Denials leave that timestamp
+unchanged. The gate remains per runtime, survives start/stop and runs before
+commitment validation; RESUME and existing error/socket/UI behavior are retained.
+
+Gradle builds and packages the native library for armeabi-v7a, arm64-v8a, x86 and
+x86_64. JNI shrinker rules preserve symbol lookup. SDK CI, JitPack and README
+instructions include the pinned shared source, Rust targets and NDK 27.0.12077973;
+SDK users receive the native libraries in the AAR. No runtime network bridge or
+new quota on the desktop controller/legacy server was introduced.
+
+Baseline SDK unit tests passed. Final checks: **118 SDK unit tests passed**,
+including three loading the actual host JNI library, and **two Rust bridge tests
+passed**. Debug/release SDK AAR, demo debug APK and Android instrumentation APK
+builds passed. Coordinator independently verified all four ABI libraries in the
+release AAR and demo APK, 16 KiB ELF PT_LOAD alignment and uncompressed APK ZIP
+data offsets. Instrumented tests compiled but were **not run: no device was
+attached**. Full TLS pairing/restart E2E was not executed; gate placement,
+lifecycle retention and RESUME bypass were verified in source. Bridge formatting,
+Clippy and diff checks pass.
+Local details are in `androidoscopy/docs/step-10-rate-limiting.md`.
+
+Original Androidoscopy `master` was rebased onto the migration branch, verified
+against the tested tree and left clean. The owned temporary branch, worktree,
+frozen shared snapshot and build artifacts were removed. No push/deployment.
+
+### Final integration and cleanup
+
+Downloader follow-up `3e04e15719671b9fbe40d8d7016f87e38a5318ec` rejects
+non-object `rate_limits` before spawning the helper, preserving fail-closed
+behavior for malformed list/string/null configuration. Its focused regression
+cases pass (three passed, 100 deselected), along with Python syntax and diff
+checks; the broader suites were not repeated for this Python-only type guard. Both consumer base branches were
+rebased onto their dedicated migration branches, original checkouts are clean,
+and owned temporary branches/worktrees, snapshots, builds and Python test tools
+were removed. Shared `main` was rebased onto the tested library worktree branch;
+the final tracker commit also strengthens the history-model test to verify
+both exhaustion and replenishment as events age out (five rolling tests and
+strict targeted Clippy pass). Tracker script/rendering, row counts, local links
+and Markdown/HTML status parity are verified before integration and cleanup.
+
+Current Step 10 totals: **7 Done, 5 Partial, 5 N/A, 0 Pending**. The formerly
+Pending cross-language consumers are now adopted; remaining work belongs to the
+five explicitly Partial services. No push or deployment. Step 07 remains deferred
+until after rate limiting and verified consumer Axum removal.

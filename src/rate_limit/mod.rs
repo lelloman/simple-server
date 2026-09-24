@@ -1,4 +1,4 @@
-//! Optional, process-local rate budgets, outcome counters and admission policies.
+//! Optional rate budgets, durable quota policies, outcome counters and admission.
 //!
 //! Keys, proxy trust, route scope, identity and durable transactions belong to the
 //! application. Checks never sleep or spawn work. Rate charges are not refunded;
