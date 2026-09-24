@@ -37,7 +37,10 @@ This is local implementation, not deployment or completion of consumer Axum remo
 - `Budget` is caller-owned state. `check_at(now, cost)` consumes a positive cost
   atomically under the caller's exclusive access. Rejection does not consume;
   cost above capacity is an explicit error. Backward clock readings clamp to
-  the last observation. Unrepresentable time arithmetic returns `ClockRange`.
+  the last observation by default. Explicit
+  `Budget::with_clock_regression(ClockRegression::Reanchor)` preserves raw caller
+  samples, including fixed-window retry calculations before the window start.
+  Unrepresentable time arithmetic returns `ClockRange`.
 - `KeyedLimiter<K>` supplies shared process-local synchronization and storage.
   Global limits use `()`, and composite keys can include route/user/device/tier.
   Clones share one budget store and clock. `Clock` allows deterministic tests;
@@ -86,7 +89,12 @@ already in flight during cooldown, retriggering the block at each threshold;
 `CooldownExpiry::PreserveWindow` retains the independent failure window/count after
 cooldown expiry. With counted outcomes, successful recording means no *new* block
 was triggered, not that preflight would allow a request. Always use `check_at` for
-preflight. This preserves services with independent outcome/window policies. Successful login
+preflight. `FailureCounter::with_clock_regression(ClockRegression::Reanchor)`
+can also preserve out-of-order observations sampled before a caller's mutex.
+With `PreserveWindow`, preflight leaves the failure window and stored deadline
+intact: an older sample can still observe a block after a newer one saw it expire.
+Window maintenance occurs when recording outcomes. This preserves services with
+independent outcome/window policies. Successful login
 resets only the dimensions explicitly selected by the service. Key normalization,
 IP/account association, alerting, audit and storage stay application-owned.
 

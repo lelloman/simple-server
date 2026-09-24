@@ -32,7 +32,7 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; dynamic cron)** | N/A (assessed) | **Done (local; HTTP + WebSocket + admin/write)** | Pending (assessment/migration) |
 | lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (Rust; Caddy owns CORS) | **Done (local; scoped)** | **Done (local; webhook scope)** | **Done (local; capacity)** | **Done (local; retry scope)** | **Done (local; sessions + resource/admin access)** | Pending (assessment/migration) |
 | lellostore | `backend` | **Done** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; OIDC + admin)** | Pending (assessment/migration) |
-| meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; pipeline/gateway)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; weighted claims)** | **Done (local; budgets/retry)** | **Done (local; all three services)** | Pending (assessment/migration) |
+| meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; pipeline/gateway)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; weighted claims)** | **Done (local; budgets/retry)** | **Done (local; all three services)** | **Done (local; gateway budgets)** |
 | observo | `observo-server`; standalone extractor logging | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (no served probe) | **Done (local; scoped)** | **Done (local; primitives)** | N/A (assessed) | **Done (local; IP/key/JWT access)** | Pending (assessment/migration) |
 | paranza | `apps/paranza-server` | **Done** | **Done (local; scoped)** | N/A (no logger) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; runner + PCM access)** | Pending (assessment/migration) |
 | peerlo | `peerlo-api` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; retry primitives)** | **Done (local; bearer + Torznab keys)** | Pending (assessment/migration) |
@@ -1476,7 +1476,7 @@ establish adoption. Their application-owned browser/CSRF boundaries remain intac
 | favzetto | `master` / `47c8fe67` | Backend production router has body/header/auth policy but no CORS middleware or Access-Control-Allow headers. |**Done (local canary)** |
 | androidoscopy | `master` / `f4461a81` | `server/src/main.rs` HTTP/WS router setup and legacy server have no CORS response policy. |
 | lello-auth | `master` / `b1827fdd` | CORS managed by Caddy; not migrated into Rust. `homelab/caddy/Caddyfile` permits selected application origins with credentials and OPTIONS 204. Server, integration crate and examples install no Rust CORS layer. Moving ownership needs coordinated proxy/application changes; live deployment not probed. |
-| meteonesto | `master` / `6d0eb458` | Weather API, gateway and pipeline control routers implement their own HTTP policies, with no application CORS layer. Infrastructure/auth-edge documentation is not application adoption. |
+| meteonesto | `master` / `6d0eb458` | Weather API, gateway and pipeline control routers implement their own HTTP policies, with no application CORS layer. Infrastructure/auth-edge documentation is not application adoption. |**Done (local; gateway budgets)** |
 | paranza | `master` / `2bd528f7` | `apps/paranza-server/src/main.rs` router and configuration contain no CORS policy. |
 | quentin-torrentino | `master` / `e6064149` | `crates/server` router has no CORS layer despite an enabled tower-http feature. |
 | sct | `master` / `28604f17` | Server browser-origin and CSRF checks are application security boundaries, not a CORS response policy. Existing dirty work remains untouched. |
@@ -1618,7 +1618,7 @@ Favzetto's canary evidence remains above.
 | lello-auth | `master` / `b1827fd` | `5215f6d6e55d6388072255c27f7d4f161a201a6f` | Baseline two focused tests; final 22 server tests (13 unit and 3 each configuration, lifecycle process, logging). Liveness and composite database/signing readiness retain independent result fields. Changed-file formatting passed. |
 | lellostore | `master` / `7abeb7a` | `c3a3f7f2cdc811232cfbfa8c022bd54bd32761cf` | Baseline health 1; final health 1, authentication 10, HTTP tracing 1. Failed OIDC still leaves liveness public. Formatting/diff passed. |
 | fausto | `master` / `cb8f077` | `4ccfb9cee540992aacb46511acbb0f56c2f758e7` | Baseline production health 1; final health 1 plus HTTP tracing 1. Version JSON, OpenAPI, auth exemption and middleware retained. Formatting/diff passed. |
-| meteonesto | `master` / `6d0eb45` | `6d032afedc8ee948be47dd6aeeec916a2d9a382c` | API 2 health tests, gateway 1 health-boundary test, pipeline liveness 1 and readiness recovery/shutdown 1 passed. Component checks passed with Rust 1.97.1; pipeline lock updated offline. Metrics, OIDC/upstream timeout and correlation preserved. |
+| meteonesto | `master` / `6d0eb45` | `6d032afedc8ee948be47dd6aeeec916a2d9a382c` | API 2 health tests, gateway 1 health-boundary test, pipeline liveness 1 and readiness recovery/shutdown 1 passed. Component checks passed with Rust 1.97.1; pipeline lock updated offline. Metrics, OIDC/upstream timeout and correlation preserved. |**Done (local; gateway budgets)** |
 | sct | `master` / `b7d8230` | `b34840dbf7dbf1939426565acedd068916bf20b4` | Baseline HTTP test compiled but sandbox denied bind; permitted final HTTP test 1/1 and server check passed. Database timeout, writer readiness, 204/503 and text liveness preserved. Changed-file formatting passed. |
 | simple-agents | `main` / `0cf88e2` | `3a106d9efac3852146ff10d74bda924830a7281c` | Focused real-router database readiness/liveness regression 1/1 before and after; formatting passed. Replayed concurrent UI commit; tested Cargo/crates tree unchanged by replay. |
 | simple-ai | `master` / `30ed3ea` | `0523c03277930f2e8bc64ff715779d16e600541c` | Baseline runner health 2; final backend 1 and runner 4. Fake engines verify complete mixed/unhealthy reports, every-engine polling, empty/OCR behavior; GET/HEAD/POST verified. Existing ignored rtx.toml copied unchanged after missing-fixture compile failure; final rerun passed. |**Done (local; backend budgets)** |
@@ -2636,7 +2636,7 @@ policies and 10c HTTP adaptation. The contract is in
 one process. Services retain identity/proxy trust, route placement, wire errors,
 cryptographic protocols and transactional business quotas. Existing governor
 versions are differential-test dependencies only. Simple AI and Pezzottify HTTP
-canaries are integrated. Step 10 status: **1 Done, 1 Partial, 15 Pending**. Remaining
+canaries are integrated. At the canary checkpoint, Step 10 status was: **1 Done, 1 Partial, 15 Pending**. Remaining
 services await individual applicability and behavior review.
 
 Library verification: baseline **145** tests/doctests pass; final **163** pass,
@@ -2753,9 +2753,42 @@ one-interval debt differ from 0.8+: after long idle it can admit an extra unit.
 shared default remains strict. A direct old-version regression and 15,000
 weighted/idle differential transitions validate the compatibility mode.
 
-Shared focused baseline: 12 tests passed. After the compatibility extensions, 19 focused tests
-and **170 full-suite tests/doctests** pass. The no-default-feature rate suite
-passes **24** tests without enabling Axum. Strict all-feature/all-target Clippy
+Shared focused baseline: 12 tests passed. After the compatibility extensions, 21 focused tests
+and **172 full-suite tests/doctests** pass. The no-default-feature rate suite
+passes **26** tests without enabling Axum. Strict all-feature/all-target Clippy
 and formatting pass. Shared source changes are isolated in the coordinator's
 worktree; workers use immutable reviewed library revisions. This checkpoint
-records library capability, not completed service adoption.
+records library capability; integrated service evidence follows below.
+
+Explicit raw timestamp support also covers `Budget` and `FailureCounter` for
+Crumbles' pre-lock observations. Fixed windows retain saturating retry behavior;
+independent cooldown preflight retains expired deadlines and does not advance the
+failure window. 24,000 out-of-order outcome/preflight transitions and exact window
+and deadline regression tests pass. Defaults retain monotonic clamping.
+
+
+### Meteonesto — integrated
+
+`master` advanced from `6684b372453a5861fd2621aa23e924985200bcbe` to
+`e39aa72209bcf730f4b5cda0b8016985f9f50cdb`, reviewed against immutable shared
+revision `6fae02f6e409ecc874fee8414ffd2c06fe769364`. Gateway IP and subject
+admission now use `TokenBucket` with explicit `ClockRegression::Reanchor`.
+The single 10,000-entry map, scope/tier keys, sweep/expiry, concurrency-before-charge,
+permit lifetime, rejection metrics and 429 JSON/Retry-After remain gateway-owned.
+Existing route boundaries and exemptions are unchanged; no new outer HTTP layer
+is installed. Weather API/pipeline have no inbound rate limiter to migrate;
+outbound provider retry and internal resource/concurrency controls remain separate.
+
+Baseline gateway check passed 24 unit tests, 7 deployment checks, formatting,
+strict Clippy and build. Baseline real HTTP E2E passed outside the socket sandbox;
+the new 429 response assertion also passed before migration. Final check against
+the pinned source passed **26 unit tests, 7 deployment checks**, strict Clippy,
+formatting, build and real HTTP E2E. Admission tests preserve Product/Combined
+shared budgets through refill, concurrency denial without charging, and out-of-order
+observations. Other binaries' full checks were not rerun for this gateway change.
+All three active README source pins and local migration evidence were updated.
+
+The original `master` was rebased onto the migration branch and its tree matched
+the tested tree. Original checkout is clean. The owned migration worktree, branch,
+frozen library checkout and temporary test artifacts were removed. No push/deploy.
+See `meteonesto/docs/step-10-rate-limiting.md` in that repository.

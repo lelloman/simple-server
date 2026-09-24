@@ -552,3 +552,92 @@ fn explicit_idle_credit_matches_governor_06_through_idle_and_weighted_checks() {
         }
     }
 }
+
+#[test]
+fn raw_fixed_window_samples_preserve_retry_after_a_newer_observation() {
+    let mut budget = Budget::new(Quota::fixed_window(sec(60), n(1)).unwrap())
+        .with_clock_regression(ClockRegression::Reanchor);
+    budget.check_at(sec(100), n(1)).unwrap();
+    assert_eq!(
+        budget.check_at(sec(130), n(1)).unwrap_err().retry_after,
+        Some(sec(30))
+    );
+    assert_eq!(
+        budget.check_at(sec(90), n(1)).unwrap_err().retry_after,
+        Some(sec(60))
+    );
+    budget.check_at(sec(160), n(1)).unwrap();
+    assert_eq!(
+        budget.check_at(sec(159), n(1)).unwrap_err().retry_after,
+        Some(sec(60))
+    );
+    assert!(!budget.is_replenished_at(sec(159)));
+}
+
+#[test]
+fn independent_failure_windows_preserve_out_of_order_outcomes_and_preflight() {
+    for (threshold, window, cooldown) in [(1, 2, 3), (2, 10, 20), (3, 60, 2)] {
+        let mut shared = FailureCounter::with_policy(
+            n(threshold),
+            Some(sec(window)),
+            sec(cooldown),
+            FailurePolicy {
+                blocked_failures: BlockedFailures::Count,
+                cooldown_expiry: CooldownExpiry::PreserveWindow,
+            },
+        )
+        .unwrap()
+        .with_clock_regression(ClockRegression::Reanchor);
+        let mut start = None;
+        let mut failures = 0_u32;
+        let mut blocked = None;
+        for i in 0..8_000_u64 {
+            let now = Duration::from_millis(i * 43).saturating_sub(if i % 11 == 0 {
+                sec(5)
+            } else {
+                Duration::ZERO
+            });
+            if i % 3 != 0 {
+                let start = start.get_or_insert(now);
+                if now.saturating_sub(*start) >= sec(window) {
+                    *start = now;
+                    failures = 0;
+                }
+                failures += 1;
+                let triggered = failures >= threshold;
+                if triggered {
+                    failures = 0;
+                    blocked = Some(now + sec(cooldown));
+                }
+                assert_eq!(shared.record_failure_at(now).is_err(), triggered);
+            }
+            let expected = blocked
+                .and_then(|until: Duration| until.checked_sub(now))
+                .filter(|d| !d.is_zero());
+            assert_eq!(
+                shared.check_at(now).err().and_then(|e| e.retry_after),
+                expected,
+                "threshold={threshold}, step={i}"
+            );
+        }
+    }
+    let mut shared = FailureCounter::with_policy(
+        n(1),
+        Some(sec(60)),
+        sec(10),
+        FailurePolicy {
+            blocked_failures: BlockedFailures::Count,
+            cooldown_expiry: CooldownExpiry::PreserveWindow,
+        },
+    )
+    .unwrap()
+    .with_clock_regression(ClockRegression::Reanchor);
+    assert!(shared.record_failure_at(sec(10)).is_err());
+    shared.check_at(sec(21)).unwrap();
+    assert_eq!(
+        shared.check_at(sec(15)).unwrap_err().retry_after,
+        Some(sec(5))
+    );
+    assert!(shared.record_failure_at(sec(9)).is_err());
+    shared.check_at(sec(19)).unwrap(); // Older in-flight outcome retained its earlier deadline.
+}

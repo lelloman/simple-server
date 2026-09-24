@@ -7,8 +7,9 @@ pub enum ClockRegression {
     /// Preserve a monotonic refill anchor.
     #[default]
     Clamp,
-    /// Observe zero elapsed on a backward sample, then retain that older anchor.
-    /// Later samples refill from it, preserving legacy pre-lock sampling behavior.
+    /// Process caller observations without clamping. Token buckets retain the
+    /// older refill anchor; fixed windows retain their existing window start.
+    /// This preserves legacy pre-lock sampling behavior.
     Reanchor,
 }
 

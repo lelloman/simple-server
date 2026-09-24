@@ -1,3 +1,4 @@
+use super::token_bucket::ClockRegression;
 use std::{fmt, num::NonZeroU32, time::Duration};
 
 /// Invalid policy configuration. Invalid limits are never silently disabled.
@@ -115,11 +116,13 @@ impl Quota {
 
 /// Small, caller-owned budget usable inside an application lock or transaction.
 /// Times must be elapsed monotonic durations from one origin. Backward samples
-/// are clamped. An admission is atomic under the caller's exclusive `&mut` access.
+/// clamp by default; an explicit clock policy can preserve raw observations.
+/// Admission is atomic under the caller's exclusive `&mut` access.
 #[derive(Clone, Debug)]
 pub struct Budget {
     quota: Quota,
     last_now: Duration,
+    clock_regression: ClockRegression,
     // GCRA theoretical arrival time or fixed-window start.
     time: Option<Duration>,
     count: u32,
@@ -129,15 +132,24 @@ impl Budget {
         Self {
             quota,
             last_now: Duration::ZERO,
+            clock_regression: ClockRegression::default(),
             time: None,
             count: 0,
         }
+    }
+    /// Select handling of out-of-order caller timestamps before using the budget.
+    pub fn with_clock_regression(mut self, policy: ClockRegression) -> Self {
+        self.clock_regression = policy;
+        self
     }
     pub fn check_at(&mut self, now: Duration, cost: NonZeroU32) -> Result<(), Rejection> {
         if cost.get() > self.quota.capacity.get() {
             return Err(Rejection::new(Reason::CostExceedsCapacity, None));
         }
-        let now = now.max(self.last_now);
+        let now = match self.clock_regression {
+            ClockRegression::Clamp => now.max(self.last_now),
+            ClockRegression::Reanchor => now,
+        };
         self.last_now = now;
         match self.quota.algorithm {
             Algorithm::Replenishing(policy) => {
@@ -179,7 +191,7 @@ impl Budget {
                 if cost.get() > self.quota.capacity.get() - self.count {
                     return Err(Rejection::new(
                         Reason::Rate,
-                        Some(self.quota.period.saturating_sub(now - *start)),
+                        Some(self.quota.period.saturating_sub(now.saturating_sub(*start))),
                     ));
                 }
                 self.count += cost.get();
@@ -189,7 +201,10 @@ impl Budget {
     }
     /// True only when discarding this budget cannot restore spent allowance.
     pub fn is_replenished_at(&self, now: Duration) -> bool {
-        let now = now.max(self.last_now);
+        let now = match self.clock_regression {
+            ClockRegression::Clamp => now.max(self.last_now),
+            ClockRegression::Reanchor => now,
+        };
         self.time.is_none_or(|time| match self.quota.algorithm {
             Algorithm::Replenishing(_) => now >= time,
             Algorithm::FixedWindow => {
@@ -234,6 +249,7 @@ pub struct FailureCounter {
     blocked: Option<Duration>,
     failures: u32,
     last_now: Duration,
+    clock_regression: ClockRegression,
 }
 impl FailureCounter {
     pub fn new(
@@ -261,31 +277,34 @@ impl FailureCounter {
             blocked: None,
             failures: 0,
             last_now: Duration::ZERO,
+            clock_regression: ClockRegression::default(),
         })
     }
+    /// Preserve raw caller timestamps explicitly when pre-lock observations can
+    /// arrive out of order. Defaults retain monotonic clamping.
+    pub fn with_clock_regression(mut self, policy: ClockRegression) -> Self {
+        self.clock_regression = policy;
+        self
+    }
     fn observe(&mut self, now: Duration) -> Duration {
-        let now = now.max(self.last_now);
+        let now = match self.clock_regression {
+            ClockRegression::Clamp => now.max(self.last_now),
+            ClockRegression::Reanchor => now,
+        };
         self.last_now = now;
-        if self.blocked.is_some_and(|until| now >= until) {
-            match self.policy.cooldown_expiry {
-                CooldownExpiry::Reset => self.reset(),
-                CooldownExpiry::PreserveWindow => self.blocked = None,
-            }
-        }
-        if self
-            .window
-            .zip(self.started)
-            .is_some_and(|(window, start)| now.saturating_sub(start) >= window)
-        {
-            self.failures = 0;
-            self.started = None;
-        }
         now
     }
     pub fn check_at(&mut self, now: Duration) -> Result<(), Rejection> {
         let now = self.observe(now);
         if let Some(until) = self.blocked {
-            return Err(Rejection::new(Reason::Cooldown, Some(until - now)));
+            if now < until {
+                return Err(Rejection::new(Reason::Cooldown, Some(until - now)));
+            }
+            if self.policy.cooldown_expiry == CooldownExpiry::Reset {
+                self.reset();
+            }
+            // PreserveWindow also retains the deadline: an older observation
+            // may still see it blocked. Preflight never advances failure windows.
         }
         Ok(())
     }
@@ -295,8 +314,17 @@ impl FailureCounter {
     /// an attempt. Use `check_at` for preflight under every policy.
     pub fn record_failure_at(&mut self, now: Duration) -> Result<(), Rejection> {
         let now = self.observe(now);
+        let preflight = self.check_at(now);
         if self.policy.blocked_failures == BlockedFailures::Ignore {
-            self.check_at(now)?;
+            preflight?;
+        }
+        if self
+            .window
+            .zip(self.started)
+            .is_some_and(|(window, start)| now.saturating_sub(start) >= window)
+        {
+            self.failures = 0;
+            self.started = None;
         }
         self.started.get_or_insert(now);
         if self.failures == self.threshold.get() - 1 {
