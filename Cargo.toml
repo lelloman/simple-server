@@ -8,6 +8,7 @@ readme = "README.md"
 publish = false
 
 [features]
+rate-limit-async = ["rate-limit", "dep:tokio", "tokio/rt"]
 rate-limit = ["dep:http", "dep:http-body", "dep:tower-layer", "dep:tower-service", "dep:pin-project-lite"]
 auth = ["dep:http", "dep:tower-layer", "dep:tower-service"]
 default = ["http"]

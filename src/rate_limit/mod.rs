@@ -35,3 +35,10 @@ mod window_counters;
 pub use calendar::{CalendarCounter, CalendarDenial, CalendarGate};
 pub use limits::{LimitCheck, evaluate_limits};
 pub use window_counters::{WindowBoundary, WindowCounters, WindowDenial};
+
+mod polling;
+pub use polling::{PollingDenial, PollingGate};
+#[cfg(feature = "rate-limit-async")]
+mod delayed_release;
+#[cfg(feature = "rate-limit-async")]
+pub use delayed_release::DelayedReleaseLimiter;

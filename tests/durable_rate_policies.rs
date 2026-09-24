@@ -200,3 +200,38 @@ fn snapshot_limits_preserve_signed_values_saturation_and_denial_order() {
     );
     assert!(evaluate_limits::<()>(&[]).is_ok());
 }
+
+#[test]
+fn polling_gate_preserves_raw_signed_intervals_and_durable_reconstruction() {
+    for interval in [-5, 0, 1, 5, 60] {
+        for last in [-100, 0, 100] {
+            for now in -110..=170 {
+                let mut gate = PollingGate::from_parts(interval, Some(last));
+                let allowed = now - last >= interval;
+                assert_eq!(gate.admit_at(now).is_ok(), allowed);
+                assert_eq!(gate.last_poll_at(), Some(if allowed { now } else { last }));
+            }
+        }
+    }
+    let mut fresh = PollingGate::from_parts(5, None);
+    fresh.admit_at(0).unwrap();
+    assert_eq!(
+        fresh.admit_at(4),
+        Err(PollingDenial {
+            retry_after_seconds: 1
+        })
+    );
+    let mut restored = PollingGate::from_parts(5, fresh.last_poll_at());
+    restored.admit_at(5).unwrap();
+    assert_eq!(restored.last_poll_at(), Some(5));
+    assert!(
+        PollingGate::from_parts(i64::MAX, Some(i64::MIN))
+            .check_at(i64::MAX)
+            .is_ok()
+    );
+    assert!(
+        PollingGate::from_parts(i64::MAX, Some(i64::MAX))
+            .check_at(i64::MIN)
+            .is_err()
+    );
+}

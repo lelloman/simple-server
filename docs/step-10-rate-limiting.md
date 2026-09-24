@@ -3,6 +3,8 @@
 The `rate-limit` feature exports `simple_server::rate_limit`. Public APIs use
 standard Rust, `http`, `http-body` and Tower types. They do not expose Axum or
 require Tokio, a database, an authentication provider or a background worker.
+The separate opt-in `rate-limit-async` feature adds a Tokio delayed-release
+waiting adapter; the base `rate-limit` feature remains runtime-independent.
 This is local implementation, not deployment or completion of consumer Axum removal.
 
 ## 10a — Budgets and storage
@@ -179,6 +181,22 @@ usize resource usage plus cost and reserved space with saturating arithmetic.
 quota-before-capacity error precedence. All of these policies are caller-owned,
 read-only or explicit-record operations: no database, transaction, atomic commit,
 queue, identity or persistence is installed implicitly.
+
+`PollingGate` reconstructs persisted signed-epoch polling state with separate
+check/record or combined admit operations. It preserves raw backward time and
+zero/negative stored intervals; wide arithmetic avoids timestamp subtraction
+overflow. Denial does not advance the timestamp or escalate the interval. The
+service retains expiration, storage, protocol status and transaction behavior.
+
+With opt-in `rate-limit-async`, `DelayedReleaseLimiter` provides FIFO waiting for
+a semaphore slot followed by an independent release timer. A burst of N is
+immediate; each slot returns after its configured hold time. This is deliberately
+not an N-per-second budget or request-lifetime concurrency guard. Each admission
+spawns one Tokio timer, beginning its delay when polled, matching existing
+spawn/sleep/drop implementations. Waiting cancellation takes no permit; later
+request cancellation does not refund an admitted slot. Zero capacity waits until
+closed. The application owns transport, metrics and shutdown policy. The base
+rate-limit module still adds no Tokio dependency.
 
 ## 10c — HTTP adaptation
 

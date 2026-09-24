@@ -33,7 +33,7 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local canary)** | **Done (local; scoped canary)** | N/A (assessed) | N/A (no served probe) | **Done (local; scoped canary)** | **Done (local; primitives)** | **Done (local; primitives)** | **Done (local; sessions + route permissions)** | **Partial (HTTP done; MCP pending)** |
 | favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local canary)** | **Done (local; request work)** | **Done (local; bounded batches)** | **Done (local; retry scope)** | **Done (local canary)** | **Done (local; global + endpoint budgets)** |
 | androidoscopy | `server`; Android SDK pairing | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (no served probe) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; controller + LAN access)** | **Done (local; device JNI pairing gate)** |
-| crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; durable primitives)** | **Done (local; retry primitives)** | **Done (local; main + integration)** | **Partial (login + MCP done; durable quotas pending)** |
+| crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; durable primitives)** | **Done (local; retry primitives)** | **Done (local; main + integration)** | **Done (local; HTTP + MCP + durable dispatcher)** |
 | fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; dynamic cron)** | N/A (assessed) | **Done (local; HTTP + WebSocket + admin/write)** | **Done (local; five API tiers)** |
 | lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (Rust; Caddy owns CORS) | **Done (local; scoped)** | **Done (local; webhook scope)** | **Done (local; capacity)** | **Done (local; retry scope)** | **Done (local; sessions + resource/admin access)** | **Partial (endpoint budgets done; device polling pending)** |
 | lellostore | `backend` | **Done** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; OIDC + admin)** | N/A (no inbound admission policy) |
@@ -3405,3 +3405,32 @@ All 42 policy tests pass without default/HTTP features, covering strict/exact
 boundaries, idle ticks, separate attempt charging, zero limits, backward samples,
 category resets, persisted snapshots, date rollover and error precedence.
 Consumer source snapshots will use the committed extension revision.
+
+The persisted signed-epoch `PollingGate` and opt-in Tokio
+`DelayedReleaseLimiter` complete the remaining shared API requirements. The base
+`rate-limit` feature stays runtime-independent; `rate-limit-async` explicitly
+adds FIFO waiting and one release timer per admission. Four paused-clock tests
+verify bursts, delayed replenishment, cancellation, FIFO and closed/zero capacity;
+polling models cover persisted state, signed intervals and backward time. The full
+all-feature shared suite passes **198 tests/doctests**; all-feature/all-target
+strict Clippy, formatting and diff checks pass.
+
+### Crumbles — Done, transactional dispatcher quotas
+
+Clean `master` advanced from `dea9e042042ceae6b0e62b25a7d9e576699a99bf` to
+`25a7ef1953ec2b7c5b2195322505af9a288eedd3`, pinned to shared
+`340e17ca50d1c45b264e1ef3967c617fb04ff5d6`. Global and per-policy dispatcher
+quotas use shared rolling cutoff/remaining calculations in both preview and
+reservation paths. Strict SQL boundaries, all-status reservation accounting,
+legacy COUNT narrowing and the existing SQLite write transaction remain intact;
+outstanding concurrency capacity is a separate application policy.
+
+Baseline admission tests: six passed; two new contract cases passed before the
+adapter change. Final admission tests: nine passed; full core suite: **675 passed**.
+Tests cover strict cutoffs/future rows, settled reservations, per-policy/global
+preview and concurrent reservation of a single rate slot. Production package
+check passed after providing the original ignored web dist in the isolated
+worktree (the initial missing-dist error was a fixture issue). Strict core
+Clippy, formatting and diff checks pass. Original master was rebased onto the
+tested branch, tree/ancestry verified and clean; owned branch/worktrees, snapshot,
+dist and build artifacts were removed. No push or deployment.
