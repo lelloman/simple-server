@@ -14,6 +14,9 @@ Optional modules do not have to be adopted by every product.
 
 **Combined auth (08/09):** complete locally — 16 Done, 1 N/A, 0 Pending.
 
+**Rate limiting (10):** 3 Done, 3 Partial, 11 Pending. First four-service batch
+integrated locally; detailed evidence is recorded below.
+
 **Next execution order:** Step 10 rate limiting → complete and verify Axum removal from every consumer →
 revisit Step 07 database helpers. Step numbers are retained; Step 07 is deferred,
 not required for the Axum abstraction. Database setup and migrations remain local
@@ -26,11 +29,11 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | Project | Server components | 1. Axum centralization | 2. Lifecycle / main() | 03a. Logging | 03b. Correlation | 03c. HTTP tracing | 04a. Body limits | 04b. Response headers | 04c. CORS | 05. Health/readiness | 06a. Task ownership | 06b. Scheduling | 06c. Execution policies | 08/09. Auth | 10. Rate limiting |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local canary)** | **Done (local; scoped canary)** | N/A (assessed) | N/A (no served probe) | **Done (local; scoped canary)** | **Done (local; primitives)** | **Done (local; primitives)** | **Done (local; sessions + route permissions)** | **Partial (HTTP done; MCP pending)** |
-| favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local canary)** | **Done (local; request work)** | **Done (local; bounded batches)** | **Done (local; retry scope)** | **Done (local canary)** | Pending (assessment/migration) |
+| favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local canary)** | **Done (local; request work)** | **Done (local; bounded batches)** | **Done (local; retry scope)** | **Done (local canary)** | **Done (local; global + endpoint budgets)** |
 | androidoscopy | `server` | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (no served probe) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; controller + LAN access)** | Pending (assessment/migration) |
-| crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; durable primitives)** | **Done (local; retry primitives)** | **Done (local; main + integration)** | Pending (assessment/migration) |
+| crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; durable primitives)** | **Done (local; retry primitives)** | **Done (local; main + integration)** | **Partial (login + MCP done; durable quotas pending)** |
 | fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; dynamic cron)** | N/A (assessed) | **Done (local; HTTP + WebSocket + admin/write)** | Pending (assessment/migration) |
-| lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (Rust; Caddy owns CORS) | **Done (local; scoped)** | **Done (local; webhook scope)** | **Done (local; capacity)** | **Done (local; retry scope)** | **Done (local; sessions + resource/admin access)** | Pending (assessment/migration) |
+| lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (Rust; Caddy owns CORS) | **Done (local; scoped)** | **Done (local; webhook scope)** | **Done (local; capacity)** | **Done (local; retry scope)** | **Done (local; sessions + resource/admin access)** | **Partial (endpoint budgets done; device polling pending)** |
 | lellostore | `backend` | **Done** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; OIDC + admin)** | Pending (assessment/migration) |
 | meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; pipeline/gateway)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; weighted claims)** | **Done (local; budgets/retry)** | **Done (local; all three services)** | **Done (local; gateway budgets)** |
 | observo | `observo-server`; standalone extractor logging | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (no served probe) | **Done (local; scoped)** | **Done (local; primitives)** | N/A (assessed) | **Done (local; IP/key/JWT access)** | Pending (assessment/migration) |
@@ -1473,9 +1476,9 @@ establish adoption. Their application-owned browser/CSRF boundaries remain intac
 | Product | Inspected development branch / HEAD | Applicability evidence |
 | --- | --- | --- |
 | pezzottify | `dev` / `a25b0c3a` | `pezzottify-server/src/server/route_builder.rs` installs authentication, CSRF, rate limits, tracing and cache policy, but no CORS layer or allow-origin response policy. |N/A (no served probe) |**Partial (HTTP done; MCP pending)** |
-| favzetto | `master` / `47c8fe67` | Backend production router has body/header/auth policy but no CORS middleware or Access-Control-Allow headers. |**Done (local canary)** |
+| favzetto | `master` / `47c8fe67` | Backend production router has body/header/auth policy but no CORS middleware or Access-Control-Allow headers. |**Done (local canary)** |**Done (local; global + endpoint budgets)** |
 | androidoscopy | `master` / `f4461a81` | `server/src/main.rs` HTTP/WS router setup and legacy server have no CORS response policy. |
-| lello-auth | `master` / `b1827fdd` | CORS managed by Caddy; not migrated into Rust. `homelab/caddy/Caddyfile` permits selected application origins with credentials and OPTIONS 204. Server, integration crate and examples install no Rust CORS layer. Moving ownership needs coordinated proxy/application changes; live deployment not probed. |
+| lello-auth | `master` / `b1827fdd` | CORS managed by Caddy; not migrated into Rust. `homelab/caddy/Caddyfile` permits selected application origins with credentials and OPTIONS 204. Server, integration crate and examples install no Rust CORS layer. Moving ownership needs coordinated proxy/application changes; live deployment not probed. |**Partial (endpoint budgets done; device polling pending)** |
 | meteonesto | `master` / `6d0eb458` | Weather API, gateway and pipeline control routers implement their own HTTP policies, with no application CORS layer. Infrastructure/auth-edge documentation is not application adoption. |**Done (local; gateway budgets)** |
 | paranza | `master` / `2bd528f7` | `apps/paranza-server/src/main.rs` router and configuration contain no CORS policy. |
 | quentin-torrentino | `master` / `e6064149` | `crates/server` router has no CORS layer despite an enabled tower-http feature. |
@@ -1614,8 +1617,8 @@ Favzetto's canary evidence remains above.
 
 | Service | Development base at start | Integrated migration commit | Verified scope |
 | --- | --- | --- | --- |
-| crumbles | `master` / `433d709` | `c35fa3f297ba0ca2789d7557234b4aa7b374ed62` | Baseline 533 server tests passed, 2 ignored; final 534 passed, 2 ignored. Added HEAD suppression and POST 405/Allow; existing correlation, headers, metrics and CORS covered. Formatting/diff clean. |
-| lello-auth | `master` / `b1827fd` | `5215f6d6e55d6388072255c27f7d4f161a201a6f` | Baseline two focused tests; final 22 server tests (13 unit and 3 each configuration, lifecycle process, logging). Liveness and composite database/signing readiness retain independent result fields. Changed-file formatting passed. |
+| crumbles | `master` / `433d709` | `c35fa3f297ba0ca2789d7557234b4aa7b374ed62` | Baseline 533 server tests passed, 2 ignored; final 534 passed, 2 ignored. Added HEAD suppression and POST 405/Allow; existing correlation, headers, metrics and CORS covered. Formatting/diff clean. |**Partial (login + MCP done; durable quotas pending)** |
+| lello-auth | `master` / `b1827fd` | `5215f6d6e55d6388072255c27f7d4f161a201a6f` | Baseline two focused tests; final 22 server tests (13 unit and 3 each configuration, lifecycle process, logging). Liveness and composite database/signing readiness retain independent result fields. Changed-file formatting passed. |**Partial (endpoint budgets done; device polling pending)** |
 | lellostore | `master` / `7abeb7a` | `c3a3f7f2cdc811232cfbfa8c022bd54bd32761cf` | Baseline health 1; final health 1, authentication 10, HTTP tracing 1. Failed OIDC still leaves liveness public. Formatting/diff passed. |
 | fausto | `master` / `cb8f077` | `4ccfb9cee540992aacb46511acbb0f56c2f758e7` | Baseline production health 1; final health 1 plus HTTP tracing 1. Version JSON, OpenAPI, auth exemption and middleware retained. Formatting/diff passed. |
 | meteonesto | `master` / `6d0eb45` | `6d032afedc8ee948be47dd6aeeec916a2d9a382c` | API 2 health tests, gateway 1 health-boundary test, pipeline liveness 1 and readiness recovery/shutdown 1 passed. Component checks passed with Rust 1.97.1; pipeline lock updated offline. Metrics, OIDC/upstream timeout and correlation preserved. |**Done (local; gateway budgets)** |
@@ -2727,8 +2730,8 @@ removal remains a later milestone; Step 07 remains deferred.
 
 Four service assignments: Favzetto, Lello Auth, Meteonesto and Crumbles, using
 GPT-6-sol workers. Three workers can run alongside the coordinator in this
-session; Crumbles starts when a slot is free. Service migrations remain pending
-until tested integration. The coordinator owns this record and the HTML matrix.
+session; Crumbles started after Meteonesto freed a slot. The coordinator owns
+this record and the HTML matrix; agents own disjoint consumer repositories.
 
 Compatibility extensions were required before changing consumer semantics:
 
@@ -2756,9 +2759,9 @@ weighted/idle differential transitions validate the compatibility mode.
 Shared focused baseline: 12 tests passed. After the compatibility extensions, 21 focused tests
 and **172 full-suite tests/doctests** pass. The no-default-feature rate suite
 passes **26** tests without enabling Axum. Strict all-feature/all-target Clippy
-and formatting pass. Shared source changes are isolated in the coordinator's
-worktree; workers use immutable reviewed library revisions. This checkpoint
-records library capability; integrated service evidence follows below.
+and formatting pass. Shared source changes were committed in the coordinator's isolated worktree
+and integrated into `main`; workers used immutable reviewed library revisions.
+Integrated service evidence follows below.
 
 Explicit raw timestamp support also covers `Budget` and `FailureCounter` for
 Crumbles' pre-lock observations. Fixed windows retain saturating retry behavior;
@@ -2792,3 +2795,102 @@ The original `master` was rebased onto the migration branch and its tree matched
 the tested tree. Original checkout is clean. The owned migration worktree, branch,
 frozen library checkout and temporary test artifacts were removed. No push/deploy.
 See `meteonesto/docs/step-10-rate-limiting.md` in that repository.
+
+
+### Favzetto — integrated
+
+`master` advanced from `5b852cf` to
+`3339c4a30854ce64f5b0a8a8acdb227b98d5dff2`, tested against immutable shared
+revision `8392ef42a686261fa12ca48e83ecbe290f965bb8`. Production outer HTTP
+middleware uses `KeyedLimiter` for per-client global and normalized endpoint
+budgets. Existing Forwarded/X-Forwarded-For/X-Real-IP/unknown identity precedence,
+configuration and integer-millisecond intervals, independent bursts, disablement,
+global-before-endpoint charge order, body-limit placement and JSON 429 errors
+remain unchanged. Keyed storage deliberately remains unbounded. The local HTTP
+wrapper is retained; this is adoption of shared budgets and storage.
+
+Focused baseline: one unit and three HTTP tests pass. Final focused checks:
+one unit and **four HTTP tests** pass, including charging order, independent
+endpoint budgets and error schema. Broader backend results: **134 unit, 100 API,
+two lifecycle and two logging tests pass**. Two API failures remain:
+`catalog_research_runtime_bridge_approves_runtime_draft` and
+`catalog_research_runtime_bridge_rejects_runtime_draft`. A targeted run on the
+untouched starting revision reproduced both: HTTP 400 for terminal `completed`
+flow transitions to `completed` and `waiting_user`, respectively; a neighboring
+bridge case passed. These are documented baseline failures, not a fully green
+API suite. All-target Clippy passes with `--cap-lints warn`; this is not strict
+warning-free validation. Whole-repository formatting has existing differences;
+changed limiter/new test formatting and diff checks pass.
+
+The original `master` was rebased onto the migration branch, tested tree verified,
+and the consumer worktree/branch removed. Original checkout is clean. The detached
+reviewed library checkout was also removed. Active build source requirements are
+recorded in `favzetto/docs/step-10-rate-limiting.md`; this repository has no root
+README or CI checkout workflow to update. No push/deployment was performed.
+
+### Crumbles — integrated
+
+`master` advanced from `4f83d48bb8f5402fbdcf22afa0e15d9bbfe4406a` to
+`dea9e042042ceae6b0e62b25a7d9e576699a99bf`, tested against immutable shared
+revision `b89fcfe5807e9a2bfc1c73380e114c01cc8c3ae7`.
+Login, password-change and personal-token failure accounting now uses
+`FailureCounter` with counted in-flight failures, independent window retention
+and raw timestamp reanchoring. Peer/account maps, capacity eviction, success
+reset scope and the threshold attempt's 401 response remain unchanged.
+Authenticated MCP admission uses shared fixed-window `Budget`; per-user keys,
+10,000-entry cap, floor-based retry seconds and protocol ordering are preserved.
+Durable dispatcher admission remains database-transaction-owned, including
+reservations and sliding quotas: **Partial**, with that scope still pending.
+
+The broad baseline login filter passed seven tests (five limiter-module tests,
+one configuration and one metrics test); the existing MCP HTTP budget test also
+passed. Two added login regressions passed against the original implementation.
+Final focused checks passed seven login-module and 27 MCP tests. The full
+workspace/all-target suite passed **1,441 tests, two ignored** outside the socket
+sandbox. Socket fixture failures in the sandbox were resolved by that rerun.
+Strict workspace/all-target Clippy, workspace formatting and diff checks pass.
+
+The original `master` was rebased onto the tested migration branch and is clean.
+The migration worktree/branch and private build artifacts were removed.
+README, `simple-server.rev`, abuse-control documentation and the local
+`crumbles/docs/step-10-rate-limiting.md` record the adoption and source pin.
+No push or deployment was performed; pinned local shared revisions must be
+published before a fresh remote CI checkout can fetch them.
+
+### Lello Auth — integrated
+
+`master` advanced from `e4872f48c8bdaf3bb5e22cb9c31cc4e1bc29f48b` to
+`1533adb24dc0d1a2d33e730eb600064919e32937`, tested against immutable shared
+revision `b239e3728670a5362f63707956f410314aeee6e6` on the CI Rust 1.88 toolchain.
+Production endpoint limiters now charge shared `Budget` with
+`RefillPolicy::ExtraIdleCredit`, preserving governor 0.6 refill and idle behavior.
+The single cross-endpoint capacity, per-class overflow buckets, hashed bounded
+identity components, eviction, metrics, handler order and errors remain local.
+Configuration still restores one token per full configured window. Direct
+governor usage and its dependency were removed; CI checkout pins and README
+were updated. Database-backed device-code polling remains authoritative for
+OAuth `slow_down`, so adoption is **Partial** with that durable scope pending.
+
+Focused baseline passed 20 tests; final focused suite passed 22, adding refill
+boundary and governor 0.6 long-idle coverage. Exact pinned all-target workspace
+validation passed **962 tests, 14 ignored** with socket access; ignored tests
+require the optional PostgreSQL fixture. Strict Clippy passes on CI Rust 1.88,
+workspace formatting and four CI contract tests pass. Local Rust 1.96 strict
+Clippy reports two pre-existing `cmp_owned` warnings in unchanged server code;
+this is documented separately from the successful CI-toolchain check.
+
+The original `master` was rebased onto the tested migration branch and its tree
+verified. The three pre-existing untracked identity-provider research files and
+pre-existing detached retest worktree were preserved. Owned migration/review
+worktrees, branch and build artifacts were removed. See
+`lello-auth/docs/step-10-rate-limiting.md` in that repository. No push/deployment.
+
+### First batch completion
+
+All four service migrations were committed in dedicated worktrees and integrated
+by rebasing their original `master` branches onto the migration branches. Owned
+worktrees, branches and temporary build artifacts were removed. The coordinator
+committed both trackers and integrated its branch into `simple-server` `main`.
+Current Step 10 totals: **3 Done, 3 Partial, 11 Pending**. Partial rows retain
+explicit remaining scope; they are not N/A. No changes were pushed or deployed.
+Step 07 remains deferred until after rate limiting and the Axum-removal milestone.
