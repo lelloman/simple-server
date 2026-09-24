@@ -14,8 +14,9 @@ Optional modules do not have to be adopted by every product.
 
 **Combined auth (08/09):** complete locally — 16 Done, 1 N/A, 0 Pending.
 
-**Rate limiting (10):** 4 Done, 5 Partial, 1 N/A, 7 Pending. Two four-service
-batches integrated locally; detailed evidence is recorded below.
+**Rate limiting (10):** 4 Done, 5 Partial, 4 N/A, 4 Pending. Three four-service
+batches integrated locally; Downloader has an assessed Python quota gap, while
+Androidoscopy, Paranza and Quentin Torrentino remain unassessed for this step.
 
 **Next execution order:** Step 10 rate limiting → complete and verify Axum removal from every consumer →
 revisit Step 07 database helpers. Step numbers are retained; Step 07 is deferred,
@@ -36,14 +37,14 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (Rust; Caddy owns CORS) | **Done (local; scoped)** | **Done (local; webhook scope)** | **Done (local; capacity)** | **Done (local; retry scope)** | **Done (local; sessions + resource/admin access)** | **Partial (endpoint budgets done; device polling pending)** |
 | lellostore | `backend` | **Done** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; OIDC + admin)** | N/A (no inbound admission policy) |
 | meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; pipeline/gateway)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; weighted claims)** | **Done (local; budgets/retry)** | **Done (local; all three services)** | **Done (local; gateway budgets)** |
-| observo | `observo-server`; standalone extractor logging | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (no served probe) | **Done (local; scoped)** | **Done (local; primitives)** | N/A (assessed) | **Done (local; IP/key/JWT access)** | Pending (assessment/migration) |
+| observo | `observo-server`; standalone extractor logging | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (no served probe) | **Done (local; scoped)** | **Done (local; primitives)** | N/A (assessed) | **Done (local; IP/key/JWT access)** | N/A (no request quota) |
 | paranza | `apps/paranza-server` | **Done** | **Done (local; scoped)** | N/A (no logger) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; runner + PCM access)** | Pending (assessment/migration) |
 | peerlo | `peerlo-api` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; retry primitives)** | **Done (local; bearer + Torznab keys)** | **Partial (API done; crawler/DHT pending)** |
 | pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local; main HTTP)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; socket scope)** | **Done (local; durable queue cadence)** | N/A (assessed) | **Done (local; sessions + permissions + WebSocket)** | **Partial (login done; durable/outbound limits pending)** |
-| pezzottify-downloader | Puppeteer API and downloader HTTP server | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; Puppeteer)** | **Done (local; both HTTP routers)** | N/A (assessed) | N/A (assessed) | **Done (local; both routers)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; priority admission)** | N/A (assessed) | N/A (no application caller gate) | Pending (assessment/migration) |
+| pezzottify-downloader | Puppeteer API and downloader HTTP server | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; Puppeteer)** | **Done (local; both HTTP routers)** | N/A (assessed) | N/A (assessed) | **Done (local; both routers)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; priority admission)** | N/A (assessed) | N/A (no application caller gate) | Pending (Python durable sliding quotas) |
 | quentin-torrentino | `crates/server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; stage capacity)** | N/A (assessed) | **Done (local; API access)** | Pending (assessment/migration) |
-| sct | `sct-server` | **Done** | **Done (scoped)** | N/A (no logger) | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; worker scope)** | **Done (local; durable worker cadence)** | **Done (local; retry scope)** | **Done (local; tokens/sessions + transactional access)** | Pending (assessment/migration) |
-| simple-agents | `simple-agents-service`; runner-shell logging; associated coding test servers | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local pilot; service routes)** | **Done (local; scoped canary)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; transactional capacity)** | **Done (local; retry scope)** | **Done (local; caller + transactional access)** | Pending (assessment/migration) |
+| sct | `sct-server` | **Done** | **Done (scoped)** | N/A (no logger) | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; worker scope)** | **Done (local; durable worker cadence)** | **Done (local; retry scope)** | **Done (local; tokens/sessions + transactional access)** | N/A (durable state caps, no request quota) |
+| simple-agents | `simple-agents-service`; runner-shell logging; associated coding test servers | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local pilot; service routes)** | **Done (local; scoped canary)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; transactional capacity)** | **Done (local; retry scope)** | **Done (local; caller + transactional access)** | N/A (task/storage admission, no request quota) |
 | simple-ai | `backend`, `inference-runner` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local; backend)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; batch readiness)** | N/A (assessed) | **Done (local; backend user/admin)** | **Done (local; backend budgets)** |
 
 ## Step 1: Axum centralization
@@ -3032,6 +3033,122 @@ All four service assignments were committed in dedicated worktrees; original
 `master` branches were rebased onto the migration branches and tested trees
 verified. Owned worktrees, branches and temporary build artifacts were removed.
 The coordinator integrated both shared extensions and committed both status
-trackers on `simple-server` `main`. Current totals: **4 Done, 5 Partial, 1 N/A,
+trackers on `simple-server` `main`. Second-batch checkpoint: **4 Done, 5 Partial, 1 N/A,
 7 Pending**. Shared source pins are local commits; nothing was pushed or deployed.
 Step 07 remains deferred until after rate limiting and verified Axum removal.
+
+## Step 10: third parallel rollout — 2026-09-24
+
+Four GPT-6-sol assignments: Observo, Simple Agents, Pezzottify Downloader and SCT.
+Three workers run alongside the coordinator; SCT started when Observo completed.
+Each assessment inspects actual production paths, not just limiter names, HTTP
+429 codes or transitive dependencies. The coordinator owns both central trackers.
+Reviewed shared revision: `15ad34b5ee7c2f36720a13467984ff63c042b326`.
+
+### Observo — assessed N/A
+
+Clean `master` advanced from `96beec99c5f93ec44b5b26f8fd2a8fbb09a30c87` to
+`2427747ef6e21e8ebaf41296ee8bd93bdd3e832e`. Production startup, routes,
+authentication, configuration, errors and dependencies have no request quota,
+cooldown, concurrency admission or rate rejection. Crawl pace settings are data
+managed by the service; webhook WorkTracker admission closes during shutdown.
+Neither is a request limiter. Upstream 429 recognition selects an extraction
+fallback. The MCP program uses stdio; express-rate-limit is only transitive in its
+lockfile. The assessment also searched workers, extension, scripts and deployment
+files. No rate-limit feature, dependency or source pin was changed.
+
+`observo/docs/step-10-rate-limiting.md` records the evidence. Baseline/final diff
+checks passed; no executable tests were needed for this documentation-only change.
+Original `master` was rebased onto the isolated assessment branch; ancestry and
+identical tree verified, original checkout clean, owned worktree/branch removed.
+No push/deployment.
+
+### Simple Agents — assessed N/A
+
+Clean `main` advanced from `a4c4d499ce083a4432b8e657e96a129124695faf` to
+`9ce77fb8c00317109f3254d65775fe12b6bc8013`. Production service/Runner code
+has no request quota, cooldown or Step 10 HTTP admission policy. The HTTP 429
+`EvidenceFull` response means durable evidence storage capacity is exhausted,
+not that a request-rate budget was exceeded. Evidence promises and writes retain
+their SQLite transaction and per-session storage limits.
+
+Fleet reservations are Step 06 task admission: authorization, replay/generation,
+profile/Runner compatibility and several resource dimensions share the transaction
+with attempt creation, state/journal writes and durable reservation/audit records.
+A process-local limiter would change authority; wrapping the transaction in a
+single policy callback would not extract any behavior. The standalone Runner
+CapacityCoordinator has no production call sites, and GitHub 429 parsing handles
+an outbound provider response. No Step 10 feature or active source pin changed.
+
+Baseline checks against the immutable reviewed shared source passed **13 fleet
+and 22 session tests** using a private target. The local evidence file is
+`simple-agents/docs/step-10-rate-limiting.md`; the result changes documentation
+only. Original `main` was rebased onto the isolated assessment branch and its
+tested tree verified. Original checkout remains clean; the pre-existing
+`/tmp/cr173-simple-agents` worktree reference was preserved. Owned migration
+worktree/branch, frozen shared archive and private target were removed.
+No push/deployment.
+
+### Pezzottify Downloader — assessed Pending
+
+Clean `master` advanced from `32f6ff745252a6bcaa7e96bacea46e9163e2f7ea` to
+`66c68948fd00aff6d06860889a182cc1a3dfa56a`. The Python production entry point
+`scripts/cron_downloader.py --config ...` enforces durable SQLite sliding quotas
+on completed download attempts: strict `finished_at > now - window` over optional
+30-minute, 2-hour and 24-hour windows. The minimum remaining budget controls the
+run; no configured limits yields 100. Checks run before authentication and each
+album, and only successful completed upload attempts consume allowance. This is
+a used capability, not N/A. Rust fixed-window/process-local budgets cannot
+preserve its sliding history, completion accounting and language boundary.
+A compatible durable integration remains **Pending**; no Step 10 adoption is claimed.
+
+Rust HTTP rate budgets are N/A. Downloader's sole 429 reports a full priority
+queue after cache lookup; its shared Step 06 PriorityCapacity already preserves
+waiting order, prefetch capacity, cancellation and streaming permit lifetime.
+Puppeteer forwards downstream responses without an independent limiter. Replacing
+that scheduler with immediate rejection would change its contract.
+
+`pezzottify-downloader/docs/step-10-rate-limiting.md` records the assessment.
+Baseline Cargo tests compiled against an immutable shared archive: **119 passed,
+11 failed because the sandbox denied Unix/TCP socket binds**. The escalated retry
+did not complete. Python tests could not start because `pytest` is unavailable.
+These are validation limitations, not a passing full suite. The result changes
+only documentation, with a clean diff check; executable code, dependencies and
+active source pins remain unchanged. Original `master` was rebased onto the
+isolated assessment branch; ancestry and identical tree verified, original
+checkout clean, owned worktree/branch and temporary build/archive removed.
+No push/deployment.
+
+### SCT — assessed N/A
+
+`master` advanced from `7a0c6bd5ad77f6f3c12bc18aaf8afeb9b53c357f` to
+`3b1144fe2ef5ca2f042b093fcad4f0f60ccb70a2`. The production server, configuration,
+routes, core paths and offline recovery tool have no request-rate budget or
+failure cooldown. Its two `RateLimited` sites enforce PostgreSQL row cardinality:
+10,000 global live OIDC flows and 10,000 saved cursors per principal. Their 429
+and one-second Retry-After mapping do not make them elapsed-time request quotas.
+Expiry, consumption and persisted state remain database-owned. Upload storage
+reservations, payload-I/O waiting capacity, workers and archive record limits
+remain storage/task policies; adding a request limiter would introduce behavior.
+
+`sct/docs/step-10-rate-limiting.md` records the
+production review. Baseline/final diff checks pass; no executable tests were
+needed for a documentation-only assessment. No dependencies, active pins or
+runtime configuration changed. Original `master` was rebased onto the isolated
+assessment branch, ancestry and identical tree verified. All 86 existing local
+commits were preserved, along with untracked `.validation-work/` and
+`docs/step-04c-cors.md`. Owned worktree/branch removed; no push/deployment.
+
+### Third batch completion
+
+All four assessments were committed on isolated branches and integrated by
+rebasing their original development branches onto those branches. Simple Agents
+uses `main`; the other three use `master`. Owned worktrees, branches, test targets
+and archives were removed; pre-existing work and worktree references remain.
+Both central trackers were validated and committed on `simple-server` `main`.
+This batch changes documentation only: no shared API, executable behavior,
+consumer dependency feature or active build pin changed. Current Step 10 totals:
+**4 Done, 5 Partial, 4 N/A, 4 Pending**. Downloader's durable Python sliding quota
+is explicitly Pending; Androidoscopy, Paranza and Quentin Torrentino await review.
+No push or deployment. Step 07 remains deferred until after rate limiting and
+verified consumer Axum removal.
