@@ -8,6 +8,7 @@ mod flow;
 mod layer;
 mod outcomes;
 mod per_second_bucket;
+mod rolling;
 mod store;
 mod token_bucket;
 
@@ -22,3 +23,8 @@ pub use per_second_bucket::PerSecondTokenBucket;
 pub use store::{Clock, KeyedLimiter, Overflow, StoreConfig, StoreStats, SystemClock};
 
 pub use token_bucket::{ClockRegression, TokenBucket};
+
+pub use rolling::{
+    RollingBudget, RollingWindow, RollingWindowError, RollingWindowStore, RollingWindowUsage,
+    evaluate_rolling_windows,
+};

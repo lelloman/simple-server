@@ -73,6 +73,25 @@ This is local implementation, not deployment or completion of consumer Axum remo
   decision. Applications may continue using their own bounded/durable stores
   with `Budget` and the policy callbacks instead.
 
+### Durable rolling windows and language bridges
+
+`evaluate_rolling_windows` evaluates caller-configured `RollingWindow` quotas
+against a `RollingWindowStore`. It owns per-window clock sampling, signed
+microsecond cutoff subtraction, saturating remaining counts and the minimum
+budget. An empty configuration uses the caller's explicit fallback budget.
+The store counts applicable events strictly after each cutoff, with no upper
+bound, and propagates clock/database failures. All windows are read, including
+ones following an exhausted quota, so diagnostics stay complete and errors
+cannot silently become quota results. Zero limits and durations are supported.
+
+This is a read-only policy: the service owns its database, transaction, event
+selection, locking and success accounting. Evaluation does not reserve quota;
+concurrent callers needing atomic admission must supply the transaction/lock.
+Signed timestamps allow windows crossing the Unix epoch; underflow is an explicit
+error. No database, IPC, JNI or language runtime dependency is added to the crate.
+Consumers can adapt the same API through a bounded language bridge while keeping
+their authoritative storage in the calling process.
+
 ## 10b — Policies, outcomes and concurrency
 
 `Policy<C,E>` and `AsyncPolicy<C,E>` evaluate consuming callbacks in declaration

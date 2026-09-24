@@ -3273,3 +3273,25 @@ been assessed; the two Pending cross-language quotas need a language-boundary
 choice, and the five Partial services retain the gaps recorded above. Step 10 is
 not yet complete. No push or deployment; Step 07 remains deferred until after
 rate limiting and verified consumer Axum removal.
+
+## Step 10: remaining cross-language quotas — 2026-09-24
+
+### Shared rolling-window policy
+
+The isolated `feat/rate-cross-language` worktree starts from clean `main` at
+`66b5259b22c6c48687f822beca497f03ad12c2f7`. The shared rate-limit module now
+provides `evaluate_rolling_windows`, `RollingWindowStore` and typed window/usage
+results. This read-only policy owns signed-microsecond cutoff calculation,
+per-window clock samples, strict-after count requests, saturating subtraction
+and minimum/fallback budgets. The application retains transactions and successful
+event accounting; errors propagate and evaluation does not reserve capacity.
+No database or language-runtime dependency was added.
+
+Baseline: all 28 existing rate-limit policy tests passed. After the extension,
+33 policy tests pass without default/HTTP features, including five new rolling
+window tests. The full all-feature suite passes **184 tests/doctests**. New tests
+cover strict boundaries, failed-event exclusion, future timestamps, negative
+epochs, per-window time sampling, zero/no limits, complete diagnostics after
+exhaustion, clock/storage failures, arithmetic range and repeated history-model
+comparisons. All-feature/all-target strict Clippy, formatting and diff checks
+pass. Consumer integration and final cleanup evidence follow below.
