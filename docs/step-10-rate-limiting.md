@@ -16,6 +16,13 @@ This is local implementation, not deployment or completion of consumer Axum remo
   resets at elapsed time **greater than or equal to** the window. This differs
   from calendar-aligned and sliding-window quotas. Do not silently substitute it
   for either, or for legacy strictly-greater-than boundaries.
+- `TokenBucket::per_minute(rate, burst)` is a caller-owned compatibility primitive
+  for existing floating-point refill policies. It deliberately preserves
+  `elapsed_seconds * rate / 60.0` arithmetic and whole-second ceiling retry times.
+  `refill_at(now)` lets a service update allowance before checking concurrency;
+  `check_at(now, cost)` charges after that gate, under the service's lock. Storage,
+  heterogeneous quota selection, cleanup and permit ownership remain local.
+  It does not replace the integer GCRA default or silently change its semantics.
 - `Budget` is caller-owned state. `check_at(now, cost)` consumes a positive cost
   atomically under the caller's exclusive access. Rejection does not consume;
   cost above capacity is an explicit error. Backward clock readings clamp to

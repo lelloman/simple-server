@@ -311,3 +311,68 @@ fn gcra_matches_both_consumer_governor_versions_for_weighted_sequences() {
         }
     }
 }
+
+#[test]
+fn fractional_bucket_preserves_legacy_refill_and_retry_across_denied_attempts() {
+    // Independent reference copied from the gateway's established arithmetic.
+    for (per_minute, burst) in [(6, 12), (12, 20), (30, 30), (120, 120), (600, 48)] {
+        let mut shared = TokenBucket::per_minute(n(per_minute), n(burst));
+        let mut tokens = f64::from(burst);
+        let mut last = Duration::ZERO;
+        let mut now = Duration::ZERO;
+        for i in 0..10_000_u32 {
+            now += Duration::from_nanos(u64::from((i * 7_919) % 1_000_003));
+            if i % 71 == 0 {
+                now += sec(1);
+            }
+            tokens = (tokens + (now - last).as_secs_f64() * f64::from(per_minute) / 60.0)
+                .min(f64::from(burst));
+            last = now;
+            // Concurrency denial still refills, but must never spend tokens.
+            shared.refill_at(now);
+            if i % 7 == 0 {
+                continue;
+            }
+            let expected = if tokens < 1.0 {
+                Some(
+                    ((1.0 - tokens) * 60.0 / f64::from(per_minute))
+                        .ceil()
+                        .max(1.0) as u64,
+                )
+            } else {
+                tokens -= 1.0;
+                None
+            };
+            let actual = shared
+                .check_at(now, n(1))
+                .err()
+                .map(|e| e.retry_after.unwrap().as_secs());
+            assert_eq!(
+                actual, expected,
+                "rate={per_minute}, burst={burst}, attempt={i}"
+            );
+        }
+    }
+}
+
+#[test]
+fn fractional_bucket_handles_weight_capacity_refill_and_backward_time() {
+    let mut bucket = TokenBucket::per_minute(n(60), n(3));
+    assert_eq!(
+        bucket.check_at(sec(0), n(4)).unwrap_err().reason,
+        Reason::CostExceedsCapacity
+    );
+    bucket.check_at(sec(0), n(3)).unwrap();
+    assert_eq!(
+        bucket
+            .check_at(Duration::from_millis(500), n(1))
+            .unwrap_err()
+            .retry_after,
+        Some(sec(1))
+    );
+    assert!(bucket.check_at(sec(0), n(1)).is_err());
+    bucket.check_at(sec(1), n(1)).unwrap();
+    bucket.refill_at(sec(100));
+    bucket.check_at(sec(100), n(3)).unwrap();
+    assert!(bucket.check_at(sec(100), n(1)).is_err());
+}
