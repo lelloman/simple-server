@@ -129,3 +129,6 @@ scheduling and execution policies. Durable storage and recovery remain applicati
 
 [Steps 08/09: auth](step-08-auth.md) combine identity verification and access checks
 in one optional, Axum-independent module with application-owned providers and policy.
+
+[Step 10: rate limiting](step-10-rate-limiting.md) supplies optional budgets,
+outcome counters, bounded storage and streaming-preserving HTTP admission.

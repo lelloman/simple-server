@@ -66,3 +66,7 @@ pub mod task_policies;
 /// Combined authentication and authorization without Axum or a required runtime.
 #[cfg(feature = "auth")]
 pub mod auth;
+
+/// Optional rate budgets, outcome counters and HTTP admission without Axum.
+#[cfg(feature = "rate-limit")]
+pub mod rate_limit;

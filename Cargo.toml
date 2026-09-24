@@ -8,6 +8,7 @@ readme = "README.md"
 publish = false
 
 [features]
+rate-limit = ["dep:http", "dep:http-body", "dep:tower-layer", "dep:tower-service", "dep:pin-project-lite"]
 auth = ["dep:http", "dep:tower-layer", "dep:tower-service"]
 default = ["http"]
 http = ["dep:axum", "dep:tower-service"]
@@ -44,6 +45,9 @@ tracing = { version = "0.1", default-features = false, features = ["std"], optio
 tracing-subscriber = { version = "0.3", default-features = false, features = ["fmt", "env-filter", "ansi", "json"], optional = true }
 
 [dev-dependencies]
+bytes = "1"
+governor = { version = "0.10", default-features = false, features = ["std"] }
+governor_08 = { package = "governor", version = "0.8", default-features = false, features = ["std"] }
 http-body-util = "0.1"
 tracing-subscriber = { version = "0.3", default-features = false, features = ["fmt", "json"] }
 futures-util = "0.3"

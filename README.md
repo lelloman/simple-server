@@ -249,3 +249,12 @@ module. `Access` and `AsyncAccess` support synchronous and asynchronous flows;
 body-preserving Tower gate with application-owned failure responses. The feature
 works without default features, Axum or Tokio. See the [auth contract](docs/step-08-auth.md)
 for ownership boundaries, provider integration and verification evidence.
+
+## Rate limiting
+
+The optional `rate-limit` feature provides explicit replenishing and fixed-window
+budgets, outcome-driven cooldown counters, keyed stores, rate/concurrency admission
+and ordered sync/async policy callbacks. An HTTP layer preserves streaming and
+holds admission guards until completion or drop. No Axum, Tokio, database or auth
+provider is required; services own identity, proxy trust, route policy and errors.
+See the [Step 10 contract](docs/step-10-rate-limiting.md).
