@@ -109,6 +109,21 @@ independent outcome/window policies. Successful login
 resets only the dimensions explicitly selected by the service. Key normalization,
 IP/account association, alerting, audit and storage stay application-owned.
 
+`FailureWindow` separates non-consuming preflight from outcome recording, with a
+window anchored at the first failure rather than the threshold. Recording an
+outcome resets an expired window; preflight does not change it. Zero threshold
+blocks after the first failure, and zero duration never blocks. `is_expired_at`
+and `reset` allow caller-owned cleanup and success-reset scope.
+
+`FailureLatch` accumulates failures until a threshold, then keeps a single
+cooldown deadline until explicitly reset or discarded. In-flight failures never
+extend it, including after expiry; preflight only reports the current deadline.
+`is_expired_at` lets application preflight own cleanup. Zero duration latches
+without a blocking period; zero legacy thresholds can explicitly select one.
+Unrepresentable deadlines return `ClockRange` without consuming the threshold
+outcome. These policies preserve Pezzottflix's distinct IP and email controls;
+36,000 old-model sequences cover outcome/preflight/reset ordering and zero values.
+
 Validation cases model Crumbles' success-reset scope, Lello Auth's shared overflow
 bucket, and Meteonesto's rate/concurrency coupling. These are contract tests,
 **not consumer migrations**. Their precise policies, multi-dimensional storage

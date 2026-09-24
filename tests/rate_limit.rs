@@ -117,6 +117,164 @@ fn per_second_bucket_matches_existing_float_algorithm() {
 fn count(n: usize) -> NonZeroUsize {
     NonZeroUsize::new(n).unwrap()
 }
+
+#[test]
+fn outcome_windows_expire_from_first_failure_not_threshold() {
+    let mut window = FailureWindow::new(2, sec(60));
+    assert!(window.check_at(sec(0)).is_ok());
+    window.record_failure_at(sec(0));
+    assert!(window.check_at(sec(58)).is_ok());
+    window.record_failure_at(sec(59));
+    assert_eq!(
+        window.check_at(sec(59)).unwrap_err().retry_after,
+        Some(sec(1))
+    );
+    window.record_failure_at(sec(59));
+    assert!(window.check_at(sec(60)).is_ok());
+    assert!(window.is_expired_at(sec(60)));
+    window.record_failure_at(sec(60));
+    assert!(!window.is_expired_at(sec(60)));
+    assert!(window.check_at(sec(60)).is_ok());
+    window.record_failure_at(sec(61));
+    assert!(window.check_at(sec(61)).is_err());
+    window.reset();
+    assert!(window.check_at(sec(61)).is_ok());
+}
+
+#[test]
+fn outcome_compatibility_zero_and_clock_range_edges() {
+    let mut zero_limit = FailureWindow::new(0, sec(10));
+    assert!(zero_limit.check_at(sec(0)).is_ok());
+    zero_limit.record_failure_at(sec(1));
+    assert!(zero_limit.check_at(sec(1)).is_err());
+    let mut zero_window = FailureWindow::new(0, sec(0));
+    zero_window.record_failure_at(sec(1));
+    assert!(zero_window.check_at(sec(1)).is_ok());
+    assert!(zero_window.is_expired_at(sec(1)));
+    let mut zero_cooldown = FailureLatch::new(n(1), sec(0));
+    assert!(zero_cooldown.record_failure_at(sec(0)).is_ok());
+    assert!(zero_cooldown.is_expired_at(sec(0)));
+    let mut overflow = FailureLatch::new(n(1), sec(1));
+    assert_eq!(
+        overflow
+            .record_failure_at(Duration::MAX)
+            .unwrap_err()
+            .reason,
+        Reason::ClockRange
+    );
+    // Overflow must not consume the threshold or leave an unrepresentable latch.
+    assert!(overflow.check_at(sec(0)).is_ok());
+    assert_eq!(
+        overflow.record_failure_at(sec(0)).unwrap_err().retry_after,
+        Some(sec(1))
+    );
+}
+
+#[test]
+fn latched_outcomes_require_explicit_expiry_cleanup() {
+    let mut latch = FailureLatch::new(n(2), sec(10));
+    assert!(latch.record_failure_at(sec(0)).is_ok());
+    assert_eq!(
+        latch.record_failure_at(sec(1)).unwrap_err().retry_after,
+        Some(sec(10))
+    );
+    assert_eq!(
+        latch.record_failure_at(sec(5)).unwrap_err().retry_after,
+        Some(sec(6))
+    );
+    assert!(latch.record_failure_at(sec(12)).is_ok());
+    assert!(latch.record_failure_at(sec(13)).is_ok());
+    assert!(latch.is_expired_at(sec(13)));
+    // Even a late observation can still see the original deadline.
+    assert_eq!(
+        latch.check_at(sec(10)).unwrap_err().retry_after,
+        Some(sec(1))
+    );
+    latch.reset();
+    assert!(latch.record_failure_at(sec(13)).is_ok());
+    assert_eq!(
+        latch.record_failure_at(sec(14)).unwrap_err().retry_after,
+        Some(sec(10))
+    );
+}
+
+#[test]
+fn failure_window_and_latch_match_existing_preflight_cleanup() {
+    // Independent model of an application's IP window and email lockout. Cleanup
+    // runs only on preflight; outcomes may arrive during or after lockout expiry.
+    for threshold in [0u32, 1, 3] {
+        for period in [0u64, 2, 60] {
+            let mut shared_window = FailureWindow::new(threshold, sec(period));
+            let mut shared_latch = FailureLatch::new(n(threshold.max(1)), sec(period));
+            let mut old_ip: Option<(u32, Duration)> = None;
+            let mut old_email: Option<(u32, Option<Duration>)> = None;
+            let mut seed = 53u64;
+            let mut now = sec(0);
+            for i in 0..4000 {
+                seed = seed.wrapping_mul(6364136223846793005).wrapping_add(1);
+                if i % 5 == 0 {
+                    now += Duration::from_millis(seed % 3000);
+                }
+                match seed % 8 {
+                    0 => {
+                        old_ip = None;
+                        old_email = None;
+                        shared_window.reset();
+                        shared_latch.reset();
+                    }
+                    1..=3 => {
+                        if old_ip.is_some_and(|(_, start)| now - start >= sec(period)) {
+                            old_ip = None;
+                        }
+                        if old_email.is_some_and(|(_, until)| until.is_some_and(|u| now >= u)) {
+                            old_email = None;
+                        }
+                        if shared_window.is_expired_at(now) {
+                            shared_window.reset();
+                        }
+                        if shared_latch.is_expired_at(now) {
+                            shared_latch.reset();
+                        }
+                        let old_ip_retry = old_ip.and_then(|(count, start)| {
+                            (count >= threshold && now - start < sec(period))
+                                .then(|| sec(period) - (now - start))
+                        });
+                        let old_email_retry = old_email
+                            .and_then(|(_, until)| until)
+                            .filter(|until| now < *until)
+                            .map(|until| until - now);
+                        assert_eq!(
+                            shared_window
+                                .check_at(now)
+                                .err()
+                                .and_then(|e| e.retry_after),
+                            old_ip_retry
+                        );
+                        assert_eq!(
+                            shared_latch.check_at(now).err().and_then(|e| e.retry_after),
+                            old_email_retry
+                        );
+                    }
+                    _ => {
+                        let (count, start) = old_ip.get_or_insert((0, now));
+                        if now - *start >= sec(period) {
+                            *count = 0;
+                            *start = now;
+                        }
+                        *count += 1;
+                        let (count, until) = old_email.get_or_insert((0, None));
+                        *count += 1;
+                        if *count >= threshold && until.is_none() {
+                            *until = Some(now + sec(period));
+                        }
+                        shared_window.record_failure_at(now);
+                        let _ = shared_latch.record_failure_at(now);
+                    }
+                }
+            }
+        }
+    }
+}
 fn sec(n: u64) -> Duration {
     Duration::from_secs(n)
 }
