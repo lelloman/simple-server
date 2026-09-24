@@ -170,15 +170,37 @@ impl Budget {
     }
 }
 
-/// Outcome-driven failure counter. `check_at` does not charge an attempt.
-/// `record_failure_at` blocks at the threshold; blocked failures do not extend
-/// the cooldown. Successful authentication resets only the counters explicitly
-/// selected by the application. `window = None` accumulates until reset/cooldown.
+/// Whether outcomes arriving during a cooldown are counted. Counting supports
+/// authentication attempts that were admitted concurrently before a block began.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum BlockedFailures {
+    #[default]
+    Ignore,
+    Count,
+}
+/// Whether cooldown expiry resets the independent failure window and count.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum CooldownExpiry {
+    #[default]
+    Reset,
+    PreserveWindow,
+}
+#[derive(Clone, Copy, Debug, Default)]
+pub struct FailurePolicy {
+    pub blocked_failures: BlockedFailures,
+    pub cooldown_expiry: CooldownExpiry,
+}
+
+/// Outcome-driven failure counter. `check_at` never charges an attempt.
+/// Defaults ignore blocked failures and reset on cooldown expiry. An explicit
+/// policy can count in-flight outcomes during cooldown and retain the independent
+/// window after expiry. Success resets only counters selected by the application.
 #[derive(Clone, Debug)]
 pub struct FailureCounter {
     threshold: NonZeroU32,
     window: Option<Duration>,
     cooldown: Duration,
+    policy: FailurePolicy,
     started: Option<Duration>,
     blocked: Option<Duration>,
     failures: u32,
@@ -190,6 +212,14 @@ impl FailureCounter {
         window: Option<Duration>,
         cooldown: Duration,
     ) -> Result<Self, ConfigError> {
+        Self::with_policy(threshold, window, cooldown, FailurePolicy::default())
+    }
+    pub fn with_policy(
+        threshold: NonZeroU32,
+        window: Option<Duration>,
+        cooldown: Duration,
+        policy: FailurePolicy,
+    ) -> Result<Self, ConfigError> {
         if window.is_some_and(|w| w.is_zero()) || cooldown.is_zero() {
             return Err(ConfigError("failure window and cooldown must be positive"));
         }
@@ -197,20 +227,21 @@ impl FailureCounter {
             threshold,
             window,
             cooldown,
+            policy,
             started: None,
             blocked: None,
             failures: 0,
             last_now: Duration::ZERO,
         })
     }
-    pub fn check_at(&mut self, now: Duration) -> Result<(), Rejection> {
+    fn observe(&mut self, now: Duration) -> Duration {
         let now = now.max(self.last_now);
         self.last_now = now;
-        if let Some(until) = self.blocked {
-            if now < until {
-                return Err(Rejection::new(Reason::Cooldown, Some(until - now)));
+        if self.blocked.is_some_and(|until| now >= until) {
+            match self.policy.cooldown_expiry {
+                CooldownExpiry::Reset => self.reset(),
+                CooldownExpiry::PreserveWindow => self.blocked = None,
             }
-            self.reset();
         }
         if self
             .window
@@ -220,11 +251,24 @@ impl FailureCounter {
             self.failures = 0;
             self.started = None;
         }
+        now
+    }
+    pub fn check_at(&mut self, now: Duration) -> Result<(), Rejection> {
+        let now = self.observe(now);
+        if let Some(until) = self.blocked {
+            return Err(Rejection::new(Reason::Cooldown, Some(until - now)));
+        }
         Ok(())
     }
+    /// With `BlockedFailures::Count`, records even while blocked and returns a
+    /// cooldown rejection only when this outcome reaches the threshold again.
+    /// `Ok` then means no new block was triggered, not that preflight would allow
+    /// an attempt. Use `check_at` for preflight under every policy.
     pub fn record_failure_at(&mut self, now: Duration) -> Result<(), Rejection> {
-        self.check_at(now)?;
-        let now = self.last_now;
+        let now = self.observe(now);
+        if self.policy.blocked_failures == BlockedFailures::Ignore {
+            self.check_at(now)?;
+        }
         self.started.get_or_insert(now);
         if self.failures == self.threshold.get() - 1 {
             let until = now

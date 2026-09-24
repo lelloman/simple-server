@@ -68,8 +68,14 @@ provides its own atomic callback. There are no queues or implicit waiting.
 
 `FailureCounter` separates `check_at` from `record_failure_at` and `reset`.
 Preflight checks do not charge attempts. Counters can use a failure window or
-accumulate until reset. Reaching the threshold starts a cooldown; failures while
-blocked do not extend it. Expired cooldown resets the counter. Successful login
+accumulate until reset. By default, reaching the threshold starts a cooldown;
+failures while blocked do not extend it and expired cooldown resets the counter.
+`with_policy` makes two choices explicit: `BlockedFailures::Count` records outcomes
+already in flight during cooldown, retriggering the block at each threshold;
+`CooldownExpiry::PreserveWindow` retains the independent failure window/count after
+cooldown expiry. With counted outcomes, successful recording means no *new* block
+was triggered, not that preflight would allow a request. Always use `check_at` for
+preflight. This preserves services with independent outcome/window policies. Successful login
 resets only the dimensions explicitly selected by the service. Key normalization,
 IP/account association, alerting, audit and storage stay application-owned.
 

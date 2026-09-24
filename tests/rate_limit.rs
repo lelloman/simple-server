@@ -376,3 +376,74 @@ fn fractional_bucket_handles_weight_capacity_refill_and_backward_time() {
     bucket.check_at(sec(100), n(3)).unwrap();
     assert!(bucket.check_at(sec(100), n(1)).is_err());
 }
+
+#[test]
+fn independent_failure_window_matches_existing_outcome_policy() {
+    // Model the old Crumbles counter, including outcomes arriving while blocked.
+    for (threshold, window, cooldown) in [(2, 10, 20), (3, 60, 2), (1, 7, 7)] {
+        let mut shared = FailureCounter::with_policy(
+            n(threshold),
+            Some(sec(window)),
+            sec(cooldown),
+            FailurePolicy {
+                blocked_failures: BlockedFailures::Count,
+                cooldown_expiry: CooldownExpiry::PreserveWindow,
+            },
+        )
+        .unwrap();
+        let mut start = None;
+        let mut failures = 0_u32;
+        let mut blocked = None;
+        let mut now = Duration::ZERO;
+        for i in 0..5_000_u64 {
+            now += Duration::from_millis((i * 137) % 3_000);
+            if i % 3 != 0 {
+                let start = start.get_or_insert(now);
+                if now - *start >= sec(window) {
+                    *start = now;
+                    failures = 0;
+                }
+                failures += 1;
+                let triggered = failures >= threshold;
+                if triggered {
+                    failures = 0;
+                    blocked = Some(now + sec(cooldown));
+                }
+                assert_eq!(shared.record_failure_at(now).is_err(), triggered);
+            }
+            let expected = blocked
+                .and_then(|until: Duration| until.checked_sub(now))
+                .filter(|d| !d.is_zero());
+            let actual = shared.check_at(now).err().and_then(|e| e.retry_after);
+            assert_eq!(actual, expected, "threshold={threshold}, step={i}");
+        }
+    }
+}
+
+#[test]
+fn counted_outcomes_extend_blocks_and_preserve_counts_after_expiry() {
+    let mut counter = FailureCounter::with_policy(
+        n(2),
+        Some(sec(100)),
+        sec(10),
+        FailurePolicy {
+            blocked_failures: BlockedFailures::Count,
+            cooldown_expiry: CooldownExpiry::PreserveWindow,
+        },
+    )
+    .unwrap();
+    counter.record_failure_at(sec(0)).unwrap();
+    assert!(counter.record_failure_at(sec(1)).is_err());
+    counter.record_failure_at(sec(2)).unwrap();
+    assert_eq!(
+        counter.check_at(sec(2)).unwrap_err().retry_after,
+        Some(sec(9))
+    );
+    assert!(counter.record_failure_at(sec(3)).is_err());
+    counter.record_failure_at(sec(4)).unwrap();
+    counter.check_at(sec(13)).unwrap();
+    assert!(counter.record_failure_at(sec(14)).is_err());
+    counter.reset();
+    counter.check_at(sec(14)).unwrap();
+    counter.record_failure_at(sec(14)).unwrap();
+}

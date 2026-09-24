@@ -2721,3 +2721,31 @@ after recording evidence. HTML script execution, local links and Markdown/HTML
 status parity were checked: 17 services, 15 step columns, with combined auth
 unchanged at 16 Done / 1 N/A. No push or deployment was performed. Consumer Axum
 removal remains a later milestone; Step 07 remains deferred.
+
+
+## Step 10: first parallel rollout — 2026-09-24
+
+Four service assignments: Favzetto, Lello Auth, Meteonesto and Crumbles, using
+GPT-6-sol workers. Three workers can run alongside the coordinator in this
+session; Crumbles starts when a slot is free. Service migrations remain pending
+until tested integration. The coordinator owns this record and the HTML matrix.
+
+Compatibility extensions were required before changing consumer semantics:
+
+- `8392ef42a686261fa12ca48e83ecbe290f965bb8` adds caller-owned `TokenBucket`,
+  preserving the gateway's fractional `elapsed * per_minute / 60` accounting and
+  ceiling retry durations. Refill can precede a concurrency gate. The existing
+  heterogeneous store, global capacity and permit lifetime remain service-owned.
+  50,000 differential attempts include concurrency-denied observations; focused
+  tests also cover weighted charges, invalid cost, refill caps and backward time.
+- `FailureCounter::with_policy` adds explicit blocked-outcome counting and
+  independent failure-window retention on cooldown expiry. Defaults stay intact.
+  This preserves Crumbles' already-in-flight failed attempts and independent
+  window/cooldown behavior. 15,000 differential transitions plus explicit block
+  extension, expiry and reset checks cover the compatibility policy.
+
+Shared focused baseline: 12 tests passed. After both extensions, 16 focused tests
+and **167 full-suite tests/doctests** pass. Strict all-feature/all-target Clippy
+and formatting pass. Shared source changes are isolated in the coordinator's
+worktree; workers use immutable reviewed library revisions. This checkpoint
+records library capability, not completed service adoption.
