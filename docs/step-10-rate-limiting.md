@@ -243,15 +243,20 @@ EOF/drop guard release, inner readiness, untouched bodies, explicit OPTIONS poli
 backend errors and real HTTP public/protected/key isolation and Retry-After.
 
 Minimal-feature tests verify operation without Axum; the production dependency
-tree contains only HTTP/Tower/body primitives, not governor or Tokio. Full-suite,
+tree for the base policy and HTTP features contains HTTP/Tower/body primitives,
+without governor or Tokio. The later opt-in `rate-limit-async` adapter adds Tokio
+waiting and release timers. Full-suite,
 strict Clippy, formatting and canary evidence are recorded in the
 [migration tracker](migration-status.md#step-10-rate-limiting--2026-09-24).
 
 
 Initial canaries are integrated: Simple AI uses shared backend budgets; Pezzottify
 uses shared budgets and HTTP admission throughout its previously Governor-backed
-routes. Pezzottify remains Partial because its MCP categories share a legacy
-window anchor/boundary and allow zero limits; the independent fixed-window
-primitive cannot preserve those semantics by direct substitution. Both canaries
+routes. At that checkpoint, Pezzottify was Partial because its MCP categories shared a
+legacy window anchor/boundary and allowed zero limits; the independent fixed-window
+primitive could not preserve those semantics by direct substitution. The completion
+pass adds compatible grouped counters, durable snapshot policies and optional
+waiting adapters. Both canaries
 explicitly retain unbounded stores to avoid introducing an unapproved capacity
-policy. See the tracker for revisions, tests and remaining scope.
+policy. See the [completion evidence](migration-status.md#step-10-final-five-partial-consumers--2026-09-24)
+for current adoption, revisions, tests and application-owned storage boundaries.

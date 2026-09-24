@@ -59,9 +59,9 @@ references remain valid. The execution order after Step 06 is:
    Completed locally: 16 adopted and one N/A; see the
    [auth rollout evidence](migration-status.md#steps-0809-final-auth-rollout--2026-09-23).
 2. Step 10: rate limiting. Shared budgets, admission policies and HTTP adapter
-   are implemented; consumer adoption is tracked in the
-   [rate-limit rollout](migration-status.md#step-10-rate-limiting--2026-09-24).
-3. Complete the public HTTP interfaces, migrate all remaining consumer Axum
+   are implemented. Completed locally: 12 adopted, five N/A, no Partial or Pending;
+   see the [completion evidence](migration-status.md#step-10-final-five-partial-consumers--2026-09-24).
+3. **Next:** complete the public HTTP interfaces, migrate all remaining consumer Axum
    usage, and verify the end-goal criteria above before removing the transitional
    Axum re-export. This includes production code and tests across all services.
 4. Revisit Step 07: optional database setup and migration helpers.

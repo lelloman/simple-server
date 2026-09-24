@@ -9,7 +9,7 @@ Axum can remain an internal implementation detail. See the
 [design and completion criteria](docs/design.md#end-goal-completely-abstract-axum-away).
 
 **Status:** Axum dependency centralization and opt-in lifecycle, logging,
-correlation, HTTP tracing, body limits, response-header helpers, CORS, health checks, task ownership, scheduling, execution policies and combined auth are implemented. All 17 inventoried products have adopted lifecycle helpers locally
+correlation, HTTP tracing, body limits, response-header helpers, CORS, health checks, task ownership, scheduling, execution policies, combined auth and rate limiting are implemented. All 17 inventoried products have adopted lifecycle helpers locally
 with documented application scopes. Crumbles and SCT include those migrations on local `master`. Publication to crates.io remains disabled.
 
 Open the [HTML migration matrix](docs/migration-status.html) in a browser for adoption status
@@ -72,8 +72,8 @@ tracked separately for each module.
 - Health and readiness endpoint plumbing with application-provided checks.
 - Optional rate limiting with application-defined keys and route placement.
 
-Metrics, database helpers, authentication, and
-authorization are follow-up modules, shaped by real service integrations.
+Metrics and database helpers are follow-up modules, shaped by real service
+integrations. Authentication and authorization share the optional `auth` module.
 
 Applications own their routes, state, configuration loading, database setup,
 authorization rules, background jobs, and domain logic. Capabilities should be
@@ -257,4 +257,8 @@ budgets, outcome-driven cooldown counters, keyed stores, rate/concurrency admiss
 and ordered sync/async policy callbacks. An HTTP layer preserves streaming and
 holds admission guards until completion or drop. No Axum, Tokio, database or auth
 provider is required; services own identity, proxy trust, route policy and errors.
+Caller-owned grouped windows, calendar counters, persisted polling gates and
+rolling-window/snapshot policies preserve durable service accounting. The separate
+`rate-limit-async` feature opts into Tokio FIFO admission with delayed permit
+release; it preserves burst-and-hold pacing without changing the base feature.
 See the [Step 10 contract](docs/step-10-rate-limiting.md).

@@ -1,8 +1,10 @@
 //! Optional rate budgets, durable quota policies, outcome counters and admission.
 //!
 //! Keys, proxy trust, route scope, identity and durable transactions belong to the
-//! application. Checks never sleep or spawn work. Rate charges are not refunded;
-//! concurrency guards are released on drop. The HTTP adapter preserves streaming.
+//! application. Base policy checks never sleep or spawn work. The opt-in
+//! `rate-limit-async` adapter explicitly waits and schedules permit release.
+//! Rate charges are not refunded; concurrency guards are released on drop.
+//! The HTTP adapter preserves streaming.
 mod budget;
 mod flow;
 mod layer;

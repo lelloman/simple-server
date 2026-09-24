@@ -14,12 +14,12 @@ Optional modules do not have to be adopted by every product.
 
 **Combined auth (08/09):** complete locally — 16 Done, 1 N/A, 0 Pending.
 
-**Rate limiting (10):** 7 Done, 5 Partial, 5 N/A, 0 Pending. All 17 services
-have been assessed. Androidoscopy’s device pairing and Downloader’s Python/SQLite
-quotas now use shared policies through language bridges. Five Partial services
-still retain documented gaps; Step 10 is not yet fully complete.
+**Rate limiting (10):** complete locally — 12 Done, 0 Partial, 5 N/A, 0 Pending.
+All 17 services have been assessed. The five final consumers now use shared
+policies for their remaining quotas and pacing; application storage and transaction
+ownership are preserved. Test limitations are recorded in the completion evidence.
 
-**Next execution order:** Step 10 rate limiting → complete and verify Axum removal from every consumer →
+**Next execution order:** complete and verify Axum removal from every consumer →
 revisit Step 07 database helpers. Step numbers are retained; Step 07 is deferred,
 not required for the Axum abstraction. Database setup and migrations remain local
 to services. The Axum-removal milestone includes production code, tests and removal
@@ -30,18 +30,18 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 
 | Project | Server components | 1. Axum centralization | 2. Lifecycle / main() | 03a. Logging | 03b. Correlation | 03c. HTTP tracing | 04a. Body limits | 04b. Response headers | 04c. CORS | 05. Health/readiness | 06a. Task ownership | 06b. Scheduling | 06c. Execution policies | 08/09. Auth | 10. Rate limiting |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local canary)** | **Done (local; scoped canary)** | N/A (assessed) | N/A (no served probe) | **Done (local; scoped canary)** | **Done (local; primitives)** | **Done (local; primitives)** | **Done (local; sessions + route permissions)** | **Partial (HTTP done; MCP pending)** |
+| pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local canary)** | **Done (local; scoped canary)** | N/A (assessed) | N/A (no served probe) | **Done (local; scoped canary)** | **Done (local; primitives)** | **Done (local; primitives)** | **Done (local; sessions + route permissions)** | **Done (HTTP, MCP, durable quotas + outbound pacing)** |
 | favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local canary)** | **Done (local; request work)** | **Done (local; bounded batches)** | **Done (local; retry scope)** | **Done (local canary)** | **Done (local; global + endpoint budgets)** |
 | androidoscopy | `server`; Android SDK pairing | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (no served probe) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; controller + LAN access)** | **Done (local; device JNI pairing gate)** |
 | crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; durable primitives)** | **Done (local; retry primitives)** | **Done (local; main + integration)** | **Done (local; HTTP + MCP + durable dispatcher)** |
 | fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; dynamic cron)** | N/A (assessed) | **Done (local; HTTP + WebSocket + admin/write)** | **Done (local; five API tiers)** |
-| lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (Rust; Caddy owns CORS) | **Done (local; scoped)** | **Done (local; webhook scope)** | **Done (local; capacity)** | **Done (local; retry scope)** | **Done (local; sessions + resource/admin access)** | **Partial (endpoint budgets done; device polling pending)** |
+| lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (Rust; Caddy owns CORS) | **Done (local; scoped)** | **Done (local; webhook scope)** | **Done (local; capacity)** | **Done (local; retry scope)** | **Done (local; sessions + resource/admin access)** | **Done (endpoint budgets + persisted device polling)** |
 | lellostore | `backend` | **Done** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; OIDC + admin)** | N/A (no inbound admission policy) |
 | meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; pipeline/gateway)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; weighted claims)** | **Done (local; budgets/retry)** | **Done (local; all three services)** | **Done (local; gateway budgets)** |
 | observo | `observo-server`; standalone extractor logging | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (no served probe) | **Done (local; scoped)** | **Done (local; primitives)** | N/A (assessed) | **Done (local; IP/key/JWT access)** | N/A (no request quota) |
 | paranza | `apps/paranza-server` | **Done** | **Done (local; scoped)** | N/A (no logger) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; runner + PCM access)** | N/A (no implemented request quota) |
-| peerlo | `peerlo-api` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; retry primitives)** | **Done (local; bearer + Torznab keys)** | **Partial (API done; crawler/DHT pending)** |
-| pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local; main HTTP)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; socket scope)** | **Done (local; durable queue cadence)** | N/A (assessed) | **Done (local; sessions + permissions + WebSocket)** | **Partial (login done; durable/outbound limits pending)** |
+| peerlo | `peerlo-api` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; retry primitives)** | **Done (local; bearer + Torznab keys)** | **Done (local; API + crawler + durable DHT)** |
+| pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local; main HTTP)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; socket scope)** | **Done (local; durable queue cadence)** | N/A (assessed) | **Done (local; sessions + permissions + WebSocket)** | **Done (login, durable daily quota + TMDB pacing)** |
 | pezzottify-downloader | Puppeteer API, downloader HTTP server and Python cron | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; Puppeteer)** | **Done (local; both HTTP routers)** | N/A (assessed) | N/A (assessed) | **Done (local; both routers)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; priority admission)** | N/A (assessed) | N/A (no application caller gate) | **Done (local; Python/SQLite quota bridge)** |
 | quentin-torrentino | `crates/server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; stage capacity)** | N/A (assessed) | **Done (local; API access)** | **Done (local; MusicBrainz pacing)** |
 | sct | `sct-server` | **Done** | **Done (scoped)** | N/A (no logger) | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; worker scope)** | **Done (local; durable worker cadence)** | **Done (local; retry scope)** | **Done (local; tokens/sessions + transactional access)** | N/A (durable state caps, no request quota) |
@@ -3377,18 +3377,18 @@ both exhaustion and replenishment as events age out (five rolling tests and
 strict targeted Clippy pass). Tracker script/rendering, row counts, local links
 and Markdown/HTML status parity are verified before integration and cleanup.
 
-Current Step 10 totals: **7 Done, 5 Partial, 5 N/A, 0 Pending**. The formerly
+Cross-language checkpoint: **7 Done, 5 Partial, 5 N/A, 0 Pending**. The formerly
 Pending cross-language consumers are now adopted; remaining work belongs to the
 five explicitly Partial services. No push or deployment. Step 07 remains deferred
 until after rate limiting and verified consumer Axum removal.
 
 ## Step 10: final five partial consumers — 2026-09-24
 
-Five dedicated GPT-6-sol assignments cover Pezzottify, Crumbles, Peerlo, Lello
-Auth and Pezzottflix. Three workers run alongside the coordinator; the remaining
-two start when slots become available. The coordinator owns shared API changes
-and both trackers. Consumer statuses stay Partial until production adoption,
-verification and base-branch integration are complete.
+Five dedicated GPT-6-sol assignments completed Pezzottify, Crumbles, Peerlo, Lello
+Auth and Pezzottflix, running at most three workers alongside the coordinator.
+The coordinator owned shared API changes and both trackers. All five remaining
+Partial scopes are adopted and integrated: **12 Done, 0 Partial, 5 N/A, 0 Pending**
+across all 17 services. This supersedes earlier Step 10 rollout checkpoints.
 
 The shared worktree starts from clean `main` at
 `73d841398523423dc77154f7a8bac6140e6a77ef`. Baseline policy suites pass 33 tests.
@@ -3404,7 +3404,7 @@ and ordered signed/projected snapshot checks add eight contract/model tests.
 All 42 policy tests pass without default/HTTP features, covering strict/exact
 boundaries, idle ticks, separate attempt charging, zero limits, backward samples,
 category resets, persisted snapshots, date rollover and error precedence.
-Consumer source snapshots will use the committed extension revision.
+Consumer source snapshots used the committed extension revision.
 
 The persisted signed-epoch `PollingGate` and opt-in Tokio
 `DelayedReleaseLimiter` complete the remaining shared API requirements. The base
@@ -3434,3 +3434,126 @@ worktree (the initial missing-dist error was a fixture issue). Strict core
 Clippy, formatting and diff checks pass. Original master was rebased onto the
 tested branch, tree/ancestry verified and clean; owned branch/worktrees, snapshot,
 dist and build artifacts were removed. No push or deployment.
+
+### Peerlo — Done, crawler and persisted bootstrap
+
+Clean `master` advanced from `861552bddca4a2da303036d532ac81cf39ef6274` to
+`f4fa36767a5133109f2edc3b11ef2bc6654ac36d`, pinned to shared
+`799e94b47ddab1c04ce908c2afa6ea1c28e6e5d4`. The BEP51 crawler uses shared
+`WindowCounters<1>` with a loop-initialized anchor, >=60-second reset on every
+tick, non-consuming preflight, zero-limit denial and recording after actual
+query attempts. RoutingTable owns `CalendarGate<String>` for the persisted
+600-second gap followed by the 24-per-date quota. Snapshot JSON fields and
+missing-field compatibility are preserved; calendar formatting stays local.
+A pathological persisted `u32::MAX` counter now saturates rather than wrapping
+or panicking; ordinary admission behavior and check/record separation remain.
+
+Baseline: 282 DHT library and 82 binary tests passed, two ignored. Final full
+workspace: **796 passed, six ignored**. Oracle/snapshot tests cover exact minute
+and gap boundaries, idle ticks, attempted/denied/no-candidate accounting,
+backward clocks/date changes, quota exhaustion and snapshot restoration.
+Formatting, diff checks and all-target Clippy pass with existing warnings.
+Original master was rebased onto the tested branch, exact hash/tree/ancestry
+verified and clean. Owned worktree/branch, frozen shared worktree, archive and
+build target were removed; unrelated worktrees were preserved. No push/deployment.
+
+
+### Pezzottify — Done, grouped MCP, durable quotas and enrichment pacing
+
+Clean `dev` advanced from `e428bd67a15ce91e3fd89a56b31ac207ea45eab6` to
+`4a7e9ee190820352ba278fa663da1f11666432ef`, pinned to shared
+`799e94b47ddab1c04ce908c2afa6ea1c28e6e5d4`. MCP uses shared grouped counters
+with the existing strict-after-60-second boundary, shared category anchor,
+zero-limit behavior and rounded Retry-After. Download admission uses ordered
+signed snapshot checks; local-day SQL and the separate enqueue/count sequence
+remain application-owned. Report quotas use shared rolling and projected checks
+inside the existing immediate transaction, preserving strict cutoffs, future-row
+accounting, replay precedence and metadata/attachment capacity reservations.
+MusicBrainz and LastFM use a shared single-slot budget under the existing mutex;
+first admission is immediate, actual post-wake admission sets the next deadline,
+and failed HTTP requests still consume admission. The OIDC JWKS refresh cooldown
+remains an auth cache recovery policy, outside this quota rollout.
+
+Baseline MCP/report/download suites: 5/11/189 passed; three new MCP oracle cases
+also passed against the original code. Final focused suites: 9/13/190 passed.
+Full suite: **1,440 passed, 36 existing ignored**. After the final deterministic
+pacing test seam, both pacing tests and all-target Clippy passed; existing lint
+warnings remain. Formatting and diff checks pass. Docker/release builds were not
+rerun. Original dev was rebased onto the tested branch, exact tree/ancestry
+verified and clean. Owned worktree, branch, frozen snapshot and build target were
+removed; pre-existing Paravoid worktrees were preserved. No push or deployment.
+
+
+### Pezzottflix — Done, durable daily quota and delayed-release pacing
+
+Clean `master` advanced from `06824916af4ef8c9ae7f6da6539c507659c9d151` to
+`b507fe91fb2ffb683bdf0d0cacb8538a397698d2`, pinned to shared
+`c07bb5f5d3ccb4da75bb33d5568781df22857d63`. TMDB uses the optional shared
+`DelayedReleaseLimiter`: 45 immediate slots, each returned after a 22 ms timer,
+independent of HTTP completion. This preserves the existing pacing; it does not
+claim a sustained 45 requests/second ceiling. Throughput logging remains local.
+SQLite download counts are passed to `CalendarCounter`, retaining the UTC date,
+legacy signed-to-unsigned cast and separate check/increment/request-insert order.
+A failed request insert still consumes quota; the existing non-atomic sequence
+is unchanged. Unregistered Governor middleware is not a production quota.
+
+Before edits, the two existing TMDB pacing tests and daily quota test passed
+against the frozen shared snapshot. Final full server suite: **501 library tests
+passed, one ignored**, all integration groups passed, two doctests ignored.
+Cases cover actual HTTP 500 charging, persisted quota after recreation, exact
+exhaustion, other dates, zero limits, negative stored counters and failed inserts.
+The focused HTTP test passed again after isolating its fixture from the periodic
+logger. All-target Clippy passed with existing warnings; targeted Rustfmt and
+diff checks passed. Repository-wide Rustfmt retains unrelated existing differences.
+Original master was rebased onto the migration branch, exact tree/ancestry
+verified and clean; owned worktree, branch, shared snapshot and build artifacts
+were removed. No push or deployment.
+
+
+### Lello Auth — Done, persisted device-code polling
+
+`master` advanced from `1533adb24dc0d1a2d33e730eb600064919e32937` to
+`dee2d2bac70d46c235a0ba5fd12155cf95b8f107`, pinned to shared
+`c07bb5f5d3ccb4da75bb33d5568781df22857d63` in active CI and build instructions.
+`PollingGate` reconstructs stored interval/timestamp state, admits with the existing
+signed-second clock and supplies the timestamp for the existing repository write.
+Lookup and expiry checks still precede clock sampling; denied polls do not mutate
+stored state. The service retains interval validation, status precedence, database
+errors and OAuth `slow_down` mapping, without automatic interval escalation.
+
+Baseline focused device-code suite: 30 passed; final: **34 passed**, plus one
+production HTTP token regression test. Cases cover exact boundaries, backward
+time, reconstructed state, denied timestamp stability, missing/expired/status
+precedence, invalid persisted intervals and a failed database write. Rust **1.88.0**
+workspace formatting and strict all-target Clippy pass. With loopback access, the
+full all-target run passed **191 axum unit tests** and all completed HTTP integration
+suites, then core passed **559/560**: the untouched
+`token_manager::tests::test_concurrent_refresh_creates_exactly_one_successor`
+failed with `grace-period retry failed`. That test passed on an isolated rerun;
+this suggests timing sensitivity but is not a baseline-confirmed failure. The
+full workspace gate is therefore not claimed green or complete. Optional PostgreSQL
+fixtures were not exercised. The initial sandbox HTTP failure was a loopback
+permission issue.
+
+Original master was rebased onto the migration branch and the exact tested tree
+and ancestry verified. Owned worktree, branch, frozen snapshot and build target
+were removed; an unrelated pre-existing prunable worktree was preserved. Three pre-existing
+untracked `docs/IDENTITY_PROVIDER_*` research files were preserved, so the original
+checkout is not wholly clean. No push or deployment.
+
+
+### Final integration checkpoint
+
+All five consumer commits above are on their active development branches. The
+coordinator verified the original checkouts and worktree registrations; only
+pre-existing unrelated untracked files/worktrees remain. Shared API commits
+`340e17c`, `799e94b` and `c07bb5f` are integrated on `main`. Both status matrices
+agree on **12 Done, 0 Partial, 5 N/A, 0 Pending**. HTML script rendering, table
+dimensions, local links, Markdown parity and summary counts were checked.
+Final tracker and roadmap changes add no runtime behavior; the shared 198-test
+suite and strict Clippy results remain applicable.
+
+Next is completing the public HTTP abstraction and removing consumer Axum usage
+and the transitional re-export, including tests. Step 07 database helpers remains
+deferred until after that milestone. No agent or coordinator push or deployment
+was performed for this work.
