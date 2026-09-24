@@ -1,6 +1,17 @@
 use super::{Reason, Rejection};
 use std::{num::NonZeroU32, time::Duration};
 
+/// Policy for caller-supplied timestamps observed out of order.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum ClockRegression {
+    /// Preserve a monotonic refill anchor.
+    #[default]
+    Clamp,
+    /// Observe zero elapsed on a backward sample, then retain that older anchor.
+    /// Later samples refill from it, preserving legacy pre-lock sampling behavior.
+    Reanchor,
+}
+
 /// Caller-owned floating-point token accounting for services that already use
 /// fractional refill. Unlike GCRA, this deliberately retains the arithmetic
 /// `elapsed_seconds * per_minute / 60.0` and rounds retry times to whole seconds.
@@ -11,6 +22,7 @@ pub struct TokenBucket {
     burst: NonZeroU32,
     tokens: f64,
     last_refill: Duration,
+    clock_regression: ClockRegression,
 }
 impl TokenBucket {
     /// Starts full. Times passed to this bucket must share one monotonic origin.
@@ -20,15 +32,26 @@ impl TokenBucket {
             burst,
             tokens: f64::from(burst.get()),
             last_refill: Duration::ZERO,
+            clock_regression: ClockRegression::default(),
         }
+    }
+
+    /// Select timestamp behavior before using this bucket. Reanchoring is an
+    /// explicit compatibility choice for observations delivered out of order.
+    pub fn with_clock_regression(mut self, policy: ClockRegression) -> Self {
+        self.clock_regression = policy;
+        self
     }
 
     /// Observe elapsed time without charging. This permits a service to refill
     /// before its concurrency gate, including on attempts denied by that gate.
-    /// Backward observations clamp to the last sample.
+    /// Backward observations follow the explicitly selected clock policy.
     pub fn refill_at(&mut self, now: Duration) {
-        let now = now.max(self.last_refill);
-        let elapsed = (now - self.last_refill).as_secs_f64();
+        let now = match self.clock_regression {
+            ClockRegression::Clamp => now.max(self.last_refill),
+            ClockRegression::Reanchor => now,
+        };
+        let elapsed = now.saturating_sub(self.last_refill).as_secs_f64();
         self.tokens = (self.tokens + elapsed * f64::from(self.per_minute.get()) / 60.0)
             .min(f64::from(self.burst.get()));
         self.last_refill = now;

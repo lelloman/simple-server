@@ -447,3 +447,49 @@ fn counted_outcomes_extend_blocks_and_preserve_counts_after_expiry() {
     counter.check_at(sec(14)).unwrap();
     counter.record_failure_at(sec(14)).unwrap();
 }
+
+#[test]
+fn fractional_bucket_can_preserve_out_of_order_observations() {
+    let mut legacy =
+        TokenBucket::per_minute(n(60), n(1)).with_clock_regression(ClockRegression::Reanchor);
+    let mut monotonic = TokenBucket::per_minute(n(60), n(1));
+    for bucket in [&mut legacy, &mut monotonic] {
+        bucket.check_at(sec(10), n(1)).unwrap();
+        assert!(bucket.check_at(sec(9), n(1)).is_err());
+    }
+    // Legacy behavior anchors at 9 after the backward observation; default
+    // behavior retains 10. A later observation exposes that deliberate choice.
+    legacy.check_at(sec(10), n(1)).unwrap();
+    assert!(monotonic.check_at(sec(10), n(1)).is_err());
+
+    let mut shared =
+        TokenBucket::per_minute(n(120), n(8)).with_clock_regression(ClockRegression::Reanchor);
+    let mut tokens = 8.0_f64;
+    let mut last = Duration::ZERO;
+    for i in 0..20_000_u64 {
+        let now = Duration::from_millis(i * 37).saturating_sub(if i % 13 == 0 {
+            Duration::from_millis(500)
+        } else {
+            Duration::ZERO
+        });
+        tokens = (tokens + now.saturating_sub(last).as_secs_f64() * 120.0 / 60.0).min(8.0);
+        last = now;
+        shared.refill_at(now);
+        if i % 7 == 0 {
+            continue;
+        } // Concurrency gate rejects after observing time.
+        let expected = if tokens < 1.0 {
+            Some(((1.0 - tokens) * 60.0 / 120.0).ceil().max(1.0) as u64)
+        } else {
+            tokens -= 1.0;
+            None
+        };
+        assert_eq!(
+            shared
+                .check_at(now, n(1))
+                .err()
+                .and_then(|e| e.retry_after_seconds()),
+            expected
+        );
+    }
+}

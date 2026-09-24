@@ -22,6 +22,11 @@ This is local implementation, not deployment or completion of consumer Axum remo
   `refill_at(now)` lets a service update allowance before checking concurrency;
   `check_at(now, cost)` charges after that gate, under the service's lock. Storage,
   heterogeneous quota selection, cleanup and permit ownership remain local.
+  Timestamps normally clamp backward samples. Explicit
+  `with_clock_regression(ClockRegression::Reanchor)` instead observes zero elapsed
+  and stores the older timestamp, preserving services that sample time before
+  acquiring a mutex and can receive observations out of order. Later samples
+  refill from that older anchor. This is a deliberate compatibility policy.
   It does not replace the integer GCRA default or silently change its semantics.
 - `Budget` is caller-owned state. `check_at(now, cost)` consumes a positive cost
   atomically under the caller's exclusive access. Rejection does not consume;

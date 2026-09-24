@@ -2738,14 +2738,18 @@ Compatibility extensions were required before changing consumer semantics:
   heterogeneous store, global capacity and permit lifetime remain service-owned.
   50,000 differential attempts include concurrency-denied observations; focused
   tests also cover weighted charges, invalid cost, refill caps and backward time.
+  Explicit `ClockRegression::Reanchor` additionally preserves timestamps sampled
+  before a mutex and delivered out of order; 20,000 differential observations
+  cover this choice. The default remains monotonic clamping.
 - `FailureCounter::with_policy` adds explicit blocked-outcome counting and
   independent failure-window retention on cooldown expiry. Defaults stay intact.
   This preserves Crumbles' already-in-flight failed attempts and independent
   window/cooldown behavior. 15,000 differential transitions plus explicit block
   extension, expiry and reset checks cover the compatibility policy.
 
-Shared focused baseline: 12 tests passed. After both extensions, 16 focused tests
-and **167 full-suite tests/doctests** pass. Strict all-feature/all-target Clippy
+Shared focused baseline: 12 tests passed. After the compatibility extensions, 17 focused tests
+and **168 full-suite tests/doctests** pass. The no-default-feature rate suite
+passes **22** tests without enabling Axum. Strict all-feature/all-target Clippy
 and formatting pass. Shared source changes are isolated in the coordinator's
 worktree; workers use immutable reviewed library revisions. This checkpoint
 records library capability, not completed service adoption.
