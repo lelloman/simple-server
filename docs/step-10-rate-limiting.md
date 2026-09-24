@@ -155,6 +155,31 @@ limits and Pezzottify's database-backed download/report quotas are not replaced
 with an in-memory limiter. Remaining unsupported behavior stays Pending/Partial,
 not N/A.
 
+### Anchored, calendar and composite snapshot policies
+
+`WindowCounters<N>` keeps category counts under one caller-provided monotonic
+anchor. Choose `WindowBoundary::AtOrAfter` or `After` explicitly. Refresh and
+non-consuming preflight can run on idle ticks; `record` accounts for actual
+attempts later, while `admit_at` combines checking and charging. Zero limits
+and durations are supported. Observing counts/anchor does not refresh them.
+Rejections expose exact remaining time; the application owns wire rounding.
+Counters saturate at their integer maximum instead of wrapping.
+
+`CalendarCounter<D>` uses equality of application-provided period keys, including
+backward calendar changes. Preflight never resets stored state; recording updates
+period/count. `CalendarGate<D>` adds a persisted minimum gap checked before the
+calendar quota, with saturating backward elapsed time. Snapshot getters and
+`from_parts` preserve durable storage ownership; dates, time zones and
+serialization remain local. Recording is independent of preflight and saturates
+at `u32::MAX` for pathological overflows instead of wrapping/panicking.
+
+`LimitCheck::below` evaluates signed current-count limits; `projected` evaluates
+usize resource usage plus cost and reserved space with saturating arithmetic.
+`evaluate_limits` returns the first failed key in declaration order, preserving
+quota-before-capacity error precedence. All of these policies are caller-owned,
+read-only or explicit-record operations: no database, transaction, atomic commit,
+queue, identity or persistence is installed implicitly.
+
 ## 10c — HTTP adaptation
 
 `RateLimitLayer` evaluates an `AsyncPolicy<http::request::Parts,E>`. Applications

@@ -3398,3 +3398,10 @@ without blocking an async runtime or duplicating cutoff/remaining arithmetic.
 The existing evaluator reuses those methods. All 34 policy tests pass with
 only `rate-limit` enabled, including split-phase parity and range/error cases.
 Further shared extensions and final consumer evidence follow below.
+
+Shared anchored/grouped window counters, persisted calendar counters/gap gates,
+and ordered signed/projected snapshot checks add eight contract/model tests.
+All 42 policy tests pass without default/HTTP features, covering strict/exact
+boundaries, idle ticks, separate attempt charging, zero limits, backward samples,
+category resets, persisted snapshots, date rollover and error precedence.
+Consumer source snapshots will use the committed extension revision.
