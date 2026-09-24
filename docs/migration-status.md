@@ -3381,3 +3381,20 @@ Current Step 10 totals: **7 Done, 5 Partial, 5 N/A, 0 Pending**. The formerly
 Pending cross-language consumers are now adopted; remaining work belongs to the
 five explicitly Partial services. No push or deployment. Step 07 remains deferred
 until after rate limiting and verified consumer Axum removal.
+
+## Step 10: final five partial consumers — 2026-09-24
+
+Five dedicated GPT-6-sol assignments cover Pezzottify, Crumbles, Peerlo, Lello
+Auth and Pezzottflix. Three workers run alongside the coordinator; the remaining
+two start when slots become available. The coordinator owns shared API changes
+and both trackers. Consumer statuses stay Partial until production adoption,
+verification and base-branch integration are complete.
+
+The shared worktree starts from clean `main` at
+`73d841398523423dc77154f7a8bac6140e6a77ef`. Baseline policy suites pass 33 tests.
+`RollingWindow::cutoff_at` and `remaining` now expose the existing policy in two
+phases, allowing asynchronous SQL queries inside caller-owned transactions
+without blocking an async runtime or duplicating cutoff/remaining arithmetic.
+The existing evaluator reuses those methods. All 34 policy tests pass with
+only `rate-limit` enabled, including split-phase parity and range/error cases.
+Further shared extensions and final consumer evidence follow below.

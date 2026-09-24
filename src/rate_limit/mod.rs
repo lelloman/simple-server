@@ -25,6 +25,6 @@ pub use store::{Clock, KeyedLimiter, Overflow, StoreConfig, StoreStats, SystemCl
 pub use token_bucket::{ClockRegression, TokenBucket};
 
 pub use rolling::{
-    RollingBudget, RollingWindow, RollingWindowError, RollingWindowStore, RollingWindowUsage,
-    evaluate_rolling_windows,
+    RollingBudget, RollingCutoffError, RollingWindow, RollingWindowError, RollingWindowStore,
+    RollingWindowUsage, evaluate_rolling_windows,
 };

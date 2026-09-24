@@ -10,6 +10,32 @@ pub struct RollingWindow {
     pub limit: u64,
 }
 
+/// A cutoff cannot be represented in the caller's signed time domain.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct RollingCutoffError;
+
+impl fmt::Display for RollingCutoffError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str("rolling-window cutoff out of range")
+    }
+}
+impl std::error::Error for RollingCutoffError {}
+
+impl RollingWindow {
+    /// Compute the strict lower boundary for a caller-owned (possibly async)
+    /// store query. Count events strictly after this cutoff, with no upper bound.
+    pub fn cutoff_at(&self, now_micros: i128) -> Result<i128, RollingCutoffError> {
+        now_micros
+            .checked_sub(i128::from(self.window_micros))
+            .ok_or(RollingCutoffError)
+    }
+
+    /// Finish evaluation after the store query. Does not reserve or consume.
+    pub fn remaining(&self, used: u64) -> u64 {
+        self.limit.saturating_sub(used)
+    }
+}
+
 /// Application-owned time and durable event storage.
 ///
 /// Implementations must count only the events belonging to this policy, strictly
@@ -88,13 +114,13 @@ pub fn evaluate_rolling_windows<S: RollingWindowStore>(
     };
     for (window_index, window) in windows.iter().enumerate() {
         let now = store.now_micros().map_err(RollingWindowError::Backend)?;
-        let cutoff_micros = now
-            .checked_sub(i128::from(window.window_micros))
-            .ok_or(RollingWindowError::TimestampRange { window_index })?;
+        let cutoff_micros = window
+            .cutoff_at(now)
+            .map_err(|_| RollingWindowError::TimestampRange { window_index })?;
         let used = store
             .count_after(window_index, cutoff_micros)
             .map_err(RollingWindowError::Backend)?;
-        let remaining = window.limit.saturating_sub(used);
+        let remaining = window.remaining(used);
         result.remaining = result.remaining.min(remaining);
         result.windows.push(RollingWindowUsage {
             cutoff_micros,

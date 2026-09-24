@@ -84,6 +84,10 @@ bound, and propagates clock/database failures. All windows are read, including
 ones following an exhausted quota, so diagnostics stay complete and errors
 cannot silently become quota results. Zero limits and durations are supported.
 
+`RollingWindow::cutoff_at` and `remaining` also expose the two phases separately
+for asynchronous database queries inside an existing transaction. They use the
+same cutoff and saturation rules as the synchronous evaluator.
+
 This is a read-only policy: the service owns its database, transaction, event
 selection, locking and success accounting. Evaluation does not reserve quota;
 concurrent callers needing atomic admission must supply the transaction/lock.

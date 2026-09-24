@@ -180,3 +180,17 @@ fn repeated_evaluations_match_direct_history_model_across_rolling_boundaries() {
         "exercise replenishment as history ages out"
     );
 }
+
+#[test]
+fn split_evaluation_matches_store_evaluation_for_async_transactions() {
+    let window = window(30, 3);
+    let mut db = store(&[20]);
+    db.events = vec![(-10, true), (-9, true), (20, true)];
+    let cutoff = window.cutoff_at(20).unwrap();
+    let count = db.count_after(0, cutoff).unwrap();
+    let expected = evaluate_rolling_windows(&[window], 100, &mut db).unwrap();
+    assert_eq!(cutoff, -10);
+    assert_eq!(window.remaining(count), expected.remaining);
+    assert_eq!(window.remaining(u64::MAX), 0);
+    assert!(window.cutoff_at(i128::MIN).is_err());
+}
