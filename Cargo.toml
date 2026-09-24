@@ -47,6 +47,7 @@ tracing-subscriber = { version = "0.3", default-features = false, features = ["f
 [dev-dependencies]
 bytes = "1"
 governor = { version = "0.10", default-features = false, features = ["std"] }
+governor_06 = { package = "governor", version = "0.6", default-features = false, features = ["std"] }
 governor_08 = { package = "governor", version = "0.8", default-features = false, features = ["std"] }
 http-body-util = "0.1"
 tracing-subscriber = { version = "0.3", default-features = false, features = ["fmt", "json"] }

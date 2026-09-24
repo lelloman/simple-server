@@ -12,6 +12,12 @@ This is local implementation, not deployment or completion of consumer Axum remo
   matches governor 0.8 and 0.10 in differential tests. Governor is a test-only
   dependency. There is no floating-point refill drift or implicit rounding of
   application configuration: callers supply the exact interval they require.
+- `Quota::replenishing_with_policy(interval, burst, RefillPolicy::ExtraIdleCredit)`
+  preserves governor 0.6's initial one-interval debt and full-burst tolerance.
+  Fresh budgets admit the configured burst; a retained budget can admit one
+  extra unit after a long idle interval. Single-check cost is still capped at
+  the configured burst. This option is explicit; `replenishing` stays strict.
+  The legacy policy is tested against governor 0.6 across idle and weighted checks.
 - `Quota::fixed_window(window, limit)` starts its window on first admission and
   resets at elapsed time **greater than or equal to** the window. This differs
   from calendar-aligned and sliding-window quotas. Do not silently substitute it

@@ -493,3 +493,62 @@ fn fractional_bucket_can_preserve_out_of_order_observations() {
         );
     }
 }
+
+#[test]
+fn legacy_governor_06_exposes_extra_idle_credit() {
+    let clock = governor_06::clock::FakeRelativeClock::default();
+    let limiter = governor_06::RateLimiter::direct_with_clock(
+        governor_06::Quota::with_period(sec(1))
+            .unwrap()
+            .allow_burst(n(2)),
+        &clock,
+    );
+    assert!(limiter.check().is_ok());
+    assert!(limiter.check().is_ok());
+    assert!(limiter.check().is_err());
+    clock.advance(sec(10));
+    assert!(limiter.check().is_ok());
+    assert!(limiter.check().is_ok());
+    assert!(limiter.check().is_ok()); // Extra unit after idle, distinct from 0.8+.
+    assert!(limiter.check().is_err());
+}
+
+#[test]
+fn explicit_idle_credit_matches_governor_06_through_idle_and_weighted_checks() {
+    use governor_06::clock::Clock as _;
+    for (interval, burst) in [(Duration::from_nanos(13), 7), (sec(60), 10), (sec(1), 1)] {
+        let clock = governor_06::clock::FakeRelativeClock::default();
+        let old = governor_06::RateLimiter::direct_with_clock(
+            governor_06::Quota::with_period(interval)
+                .unwrap()
+                .allow_burst(n(burst)),
+            &clock,
+        );
+        let mut shared = Budget::new(
+            Quota::replenishing_with_policy(interval, n(burst), RefillPolicy::ExtraIdleCredit)
+                .unwrap(),
+        );
+        let mut now = Duration::ZERO;
+        for i in 0..5_000_u32 {
+            let advance = if i % 37 == 0 {
+                interval * (burst + 2)
+            } else if i % 4 == 0 {
+                interval / 3
+            } else {
+                Duration::ZERO
+            };
+            now += advance;
+            clock.advance(advance);
+            let cost = n(1 + i % burst);
+            let expected = old.check_n(cost).unwrap();
+            let actual = shared.check_at(now, cost);
+            assert_eq!(actual.is_ok(), expected.is_ok(), "burst={burst}, step={i}");
+            if let Err(denial) = actual {
+                assert_eq!(
+                    denial.retry_after.unwrap(),
+                    expected.unwrap_err().wait_time_from(clock.now())
+                );
+            }
+        }
+    }
+}

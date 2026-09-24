@@ -53,8 +53,21 @@ impl std::error::Error for Rejection {}
 
 #[derive(Clone, Copy, Debug)]
 enum Algorithm {
-    Replenishing,
+    Replenishing(RefillPolicy),
     FixedWindow,
+}
+
+/// Replenishment behavior when a GCRA budget becomes idle.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum RefillPolicy {
+    /// Enforce the configured burst even after complete replenishment.
+    #[default]
+    Strict,
+    /// Compatibility with governor 0.6: one interval of initial debt and a full
+    /// burst of tolerance. Fresh budgets admit the configured burst; stored
+    /// budgets can admit an extra unit after becoming idle. Maximum single-check
+    /// cost remains the configured burst.
+    ExtraIdleCredit,
 }
 
 /// Immutable policy. A replenishing interval restores ONE unit, not an entire
@@ -67,13 +80,20 @@ pub struct Quota {
 }
 impl Quota {
     pub fn replenishing(interval: Duration, burst: NonZeroU32) -> Result<Self, ConfigError> {
+        Self::replenishing_with_policy(interval, burst, RefillPolicy::Strict)
+    }
+    pub fn replenishing_with_policy(
+        interval: Duration,
+        burst: NonZeroU32,
+        policy: RefillPolicy,
+    ) -> Result<Self, ConfigError> {
         if interval.is_zero() || interval.checked_mul(burst.get()).is_none() {
             return Err(ConfigError(
                 "refill interval must be positive and burst duration representable",
             ));
         }
         Ok(Self {
-            algorithm: Algorithm::Replenishing,
+            algorithm: Algorithm::Replenishing(policy),
             period: interval,
             capacity: burst,
         })
@@ -120,8 +140,14 @@ impl Budget {
         let now = now.max(self.last_now);
         self.last_now = now;
         match self.quota.algorithm {
-            Algorithm::Replenishing => {
-                let tat = self.time.unwrap_or(now).max(now);
+            Algorithm::Replenishing(policy) => {
+                let initial = match policy {
+                    RefillPolicy::Strict => now,
+                    RefillPolicy::ExtraIdleCredit => now
+                        .checked_add(self.quota.period)
+                        .ok_or_else(|| Rejection::new(Reason::ClockRange, None))?,
+                };
+                let tat = self.time.unwrap_or(initial).max(now);
                 let weight = self
                     .quota
                     .period
@@ -130,7 +156,10 @@ impl Budget {
                 let tolerance = self
                     .quota
                     .period
-                    .checked_mul(self.quota.capacity.get() - cost.get())
+                    .checked_mul(
+                        self.quota.capacity.get() - cost.get()
+                            + u32::from(policy == RefillPolicy::ExtraIdleCredit),
+                    )
                     .expect("validated capacity");
                 let earliest = tat.saturating_sub(tolerance);
                 if now < earliest {
@@ -162,7 +191,7 @@ impl Budget {
     pub fn is_replenished_at(&self, now: Duration) -> bool {
         let now = now.max(self.last_now);
         self.time.is_none_or(|time| match self.quota.algorithm {
-            Algorithm::Replenishing => now >= time,
+            Algorithm::Replenishing(_) => now >= time,
             Algorithm::FixedWindow => {
                 self.count == 0 || now.saturating_sub(time) >= self.quota.period
             }

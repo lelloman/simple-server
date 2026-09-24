@@ -2747,9 +2747,15 @@ Compatibility extensions were required before changing consumer semantics:
   window/cooldown behavior. 15,000 differential transitions plus explicit block
   extension, expiry and reset checks cover the compatibility policy.
 
-Shared focused baseline: 12 tests passed. After the compatibility extensions, 17 focused tests
-and **168 full-suite tests/doctests** pass. The no-default-feature rate suite
-passes **22** tests without enabling Axum. Strict all-feature/all-target Clippy
+Lello Auth additionally uses governor 0.6. Its full-burst tolerance and initial
+one-interval debt differ from 0.8+: after long idle it can admit an extra unit.
+`RefillPolicy::ExtraIdleCredit` explicitly preserves this behavior, while the
+shared default remains strict. A direct old-version regression and 15,000
+weighted/idle differential transitions validate the compatibility mode.
+
+Shared focused baseline: 12 tests passed. After the compatibility extensions, 19 focused tests
+and **170 full-suite tests/doctests** pass. The no-default-feature rate suite
+passes **24** tests without enabling Axum. Strict all-feature/all-target Clippy
 and formatting pass. Shared source changes are isolated in the coordinator's
 worktree; workers use immutable reviewed library revisions. This checkpoint
 records library capability, not completed service adoption.

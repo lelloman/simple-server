@@ -11,7 +11,7 @@ mod token_bucket;
 
 pub use budget::{
     BlockedFailures, Budget, ConfigError, CooldownExpiry, FailureCounter, FailurePolicy, Quota,
-    Reason, Rejection,
+    Reason, RefillPolicy, Rejection,
 };
 pub use flow::{Admission, AdmissionFuture, AsyncPolicy, Policy};
 pub use layer::{RateLimitBody, RateLimitLayer, RateLimitService, rejection_response};
