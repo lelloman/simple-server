@@ -48,7 +48,7 @@ framework-independent public types and explicit policy.
 application checks and a framework-independent endpoint adapter. Applications
 retain dependency policy and response contracts.
 
-## Next milestones (updated 2026-09-23)
+## Next milestones (updated 2026-09-24)
 
 Step 07 (optional database helpers) is deferred until after Step 10 and the
 consumer Axum-removal milestone. Keep the existing step numbers so historical
@@ -58,7 +58,9 @@ references remain valid. The execution order after Step 06 is:
    designed and migrated together. Step 09 is absorbed; there is no second rollout.
    Completed locally: 16 adopted and one N/A; see the
    [auth rollout evidence](migration-status.md#steps-0809-final-auth-rollout--2026-09-23).
-2. Step 10: rate limiting (next).
+2. Step 10: rate limiting. Shared budgets, admission policies and HTTP adapter
+   are implemented; consumer adoption is tracked in the
+   [rate-limit rollout](migration-status.md#step-10-rate-limiting--2026-09-24).
 3. Complete the public HTTP interfaces, migrate all remaining consumer Axum
    usage, and verify the end-goal criteria above before removing the transitional
    Axum re-export. This includes production code and tests across all services.

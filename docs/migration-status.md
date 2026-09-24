@@ -25,7 +25,7 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 
 | Project | Server components | 1. Axum centralization | 2. Lifecycle / main() | 03a. Logging | 03b. Correlation | 03c. HTTP tracing | 04a. Body limits | 04b. Response headers | 04c. CORS | 05. Health/readiness | 06a. Task ownership | 06b. Scheduling | 06c. Execution policies | 08/09. Auth | 10. Rate limiting |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local canary)** | **Done (local; scoped canary)** | N/A (assessed) | N/A (no served probe) | **Done (local; scoped canary)** | **Done (local; primitives)** | **Done (local; primitives)** | **Done (local; sessions + route permissions)** | Pending (assessment/migration) |
+| pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local canary)** | **Done (local; scoped canary)** | N/A (assessed) | N/A (no served probe) | **Done (local; scoped canary)** | **Done (local; primitives)** | **Done (local; primitives)** | **Done (local; sessions + route permissions)** | **Partial (HTTP done; MCP pending)** |
 | favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local canary)** | **Done (local; request work)** | **Done (local; bounded batches)** | **Done (local; retry scope)** | **Done (local canary)** | Pending (assessment/migration) |
 | androidoscopy | `server` | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (no served probe) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; controller + LAN access)** | Pending (assessment/migration) |
 | crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; durable primitives)** | **Done (local; retry primitives)** | **Done (local; main + integration)** | Pending (assessment/migration) |
@@ -41,7 +41,7 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | quentin-torrentino | `crates/server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; stage capacity)** | N/A (assessed) | **Done (local; API access)** | Pending (assessment/migration) |
 | sct | `sct-server` | **Done** | **Done (scoped)** | N/A (no logger) | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; worker scope)** | **Done (local; durable worker cadence)** | **Done (local; retry scope)** | **Done (local; tokens/sessions + transactional access)** | Pending (assessment/migration) |
 | simple-agents | `simple-agents-service`; runner-shell logging; associated coding test servers | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local pilot; service routes)** | **Done (local; scoped canary)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; transactional capacity)** | **Done (local; retry scope)** | **Done (local; caller + transactional access)** | Pending (assessment/migration) |
-| simple-ai | `backend`, `inference-runner` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local; backend)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; batch readiness)** | N/A (assessed) | **Done (local; backend user/admin)** | Pending (assessment/migration) |
+| simple-ai | `backend`, `inference-runner` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local; backend)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; batch readiness)** | N/A (assessed) | **Done (local; backend user/admin)** | **Done (local; backend budgets)** |
 
 ## Step 1: Axum centralization
 
@@ -1472,7 +1472,7 @@ establish adoption. Their application-owned browser/CSRF boundaries remain intac
 
 | Product | Inspected development branch / HEAD | Applicability evidence |
 | --- | --- | --- |
-| pezzottify | `dev` / `a25b0c3a` | `pezzottify-server/src/server/route_builder.rs` installs authentication, CSRF, rate limits, tracing and cache policy, but no CORS layer or allow-origin response policy. |N/A (no served probe) |
+| pezzottify | `dev` / `a25b0c3a` | `pezzottify-server/src/server/route_builder.rs` installs authentication, CSRF, rate limits, tracing and cache policy, but no CORS layer or allow-origin response policy. |N/A (no served probe) |**Partial (HTTP done; MCP pending)** |
 | favzetto | `master` / `47c8fe67` | Backend production router has body/header/auth policy but no CORS middleware or Access-Control-Allow headers. |**Done (local canary)** |
 | androidoscopy | `master` / `f4461a81` | `server/src/main.rs` HTTP/WS router setup and legacy server have no CORS response policy. |
 | lello-auth | `master` / `b1827fdd` | CORS managed by Caddy; not migrated into Rust. `homelab/caddy/Caddyfile` permits selected application origins with credentials and OPTIONS 204. Server, integration crate and examples install no Rust CORS layer. Moving ownership needs coordinated proxy/application changes; live deployment not probed. |
@@ -1621,7 +1621,7 @@ Favzetto's canary evidence remains above.
 | meteonesto | `master` / `6d0eb45` | `6d032afedc8ee948be47dd6aeeec916a2d9a382c` | API 2 health tests, gateway 1 health-boundary test, pipeline liveness 1 and readiness recovery/shutdown 1 passed. Component checks passed with Rust 1.97.1; pipeline lock updated offline. Metrics, OIDC/upstream timeout and correlation preserved. |
 | sct | `master` / `b7d8230` | `b34840dbf7dbf1939426565acedd068916bf20b4` | Baseline HTTP test compiled but sandbox denied bind; permitted final HTTP test 1/1 and server check passed. Database timeout, writer readiness, 204/503 and text liveness preserved. Changed-file formatting passed. |
 | simple-agents | `main` / `0cf88e2` | `3a106d9efac3852146ff10d74bda924830a7281c` | Focused real-router database readiness/liveness regression 1/1 before and after; formatting passed. Replayed concurrent UI commit; tested Cargo/crates tree unchanged by replay. |
-| simple-ai | `master` / `30ed3ea` | `0523c03277930f2e8bc64ff715779d16e600541c` | Baseline runner health 2; final backend 1 and runner 4. Fake engines verify complete mixed/unhealthy reports, every-engine polling, empty/OCR behavior; GET/HEAD/POST verified. Existing ignored rtx.toml copied unchanged after missing-fixture compile failure; final rerun passed. |
+| simple-ai | `master` / `30ed3ea` | `0523c03277930f2e8bc64ff715779d16e600541c` | Baseline runner health 2; final backend 1 and runner 4. Fake engines verify complete mixed/unhealthy reports, every-engine polling, empty/OCR behavior; GET/HEAD/POST verified. Existing ignored rtx.toml copied unchanged after missing-fixture compile failure; final rerun passed. |**Done (local; backend budgets)** |
 | peerlo | `master` / `067c2a7` | `e51e4b7444f17073d509d04ca88f531d204a5f5e` | Baseline health 4; final 165 unit + 2 tracing tests. Always-200 degraded/healthy response, uptime, routing, auth, metrics, rate limits and CORS retained. Formatting/diff passed. |
 | paranza | `master` / `2bd528f` | `1c559ee7bde3b510177f93dc979bfe02335d9842` | Baseline health test passed; final full server suite 54 passed, including new real-router success and poisoned-mutex 500 test. Single detailed snapshot and original error mapping retained. Incidental formatting excluded. |
 | pezzottflix | `master` / `1e1a94a` | `f8159f0e19436d5cfba6a785d255a3f0b74bc3ab` | Health-filter baseline/final each 14 passed. Final full API health suite 12 passed (overlaps filter), with added storage failure, database failure vs independent liveness, HEAD/POST tests. Both aggregate dependency results retained. Formatting/diff passed. |
@@ -2635,8 +2635,9 @@ policies and 10c HTTP adaptation. The contract is in
 [step-10-rate-limiting.md](step-10-rate-limiting.md). Built-in budgets are local to
 one process. Services retain identity/proxy trust, route placement, wire errors,
 cryptographic protocols and transactional business quotas. Existing governor
-versions are differential-test dependencies only. Canary work is in progress;
-no consumer is marked adopted until its tested migration is integrated.
+versions are differential-test dependencies only. Simple AI and Pezzottify HTTP
+canaries are integrated. Step 10 status: **1 Done, 1 Partial, 15 Pending**. Remaining
+services await individual applicability and behavior review.
 
 Library verification: baseline **145** tests/doctests pass; final **163** pass,
 including 18 new rate/admission/HTTP tests. The differential test compares 6,000
@@ -2646,3 +2647,77 @@ all-target Clippy and formatting pass. The normal minimal dependency tree has
 HTTP, body, Tower and pin-projection primitives only; no Tokio or governor.
 Socket tests run outside the sandbox; the initial sandbox baseline failed at
 listener binding, not at a library assertion.
+
+### Simple AI canary
+
+`master` advanced from `739cccc` to `f6455b67c6e14fb900c4540902ad0159825aa178`,
+pinned to library `925ea25153a35e1fdb748add4880bc0e7d384ae6`. Backend `/v1`
+rate middleware now uses shared GCRA budgets and keyed storage. Startup enablement,
+configured rate/burst, forwarded-header/peer/unknown key precedence, route scope,
+429 body, floor-with-minimum-one Retry-After and logging remain unchanged. The
+existing local HTTP wrapper remains; Pezzottify exercises the shared HTTP layer.
+The inference runner has no corresponding inbound rate limit. Storage explicitly
+preserves the old unbounded policy; a capacity cap is a separate policy change.
+
+Baseline four rate tests passed. Two new identity and real-HTTP tests passed on
+the original governor implementation before migration; all six passed afterwards.
+Full backend suite: **319 passed**, one pre-existing ignored doctest. All-target
+Clippy passes with existing findings in untouched common/backend code; changed
+Rust formatting and diff checks pass. Direct governor dependency is removed.
+Active build revision and README checkout instructions are updated.
+
+The original development branch was rebased onto the committed worktree branch;
+the integrated tree equals the tested tree. Original README edits were restored
+and their diff verified; every original untracked file hash was preserved. The
+owned worktree, branch and temporary README preservation stash were removed.
+See `simple-ai/docs/step-10-rate-limiting.md` in that repository.
+
+### Pezzottify HTTP canary
+
+`dev` advanced from `3f2271ff` to `e428bd67a15ce91e3fd89a56b31ac207ea45eab6`,
+pinned to library `925ea25153a35e1fdb748add4880bc0e7d384ae6`. All formerly
+Governor-backed HTTP gates now use shared keyed budgets and `RateLimitLayer`:
+global, stream, catalog/content, search, writes, user content, per-device analytics
+and login IP/account burst/sustained limits. Existing shared instances, integer
+millisecond intervals, burst sizes, application identities, route placement and
+layer order are retained. Password and OIDC routes still share the IP budgets.
+Login cleanup retains its 600-second schedule and only drops replenished keys.
+The previous unbounded storage policy is explicit, rather than silently capped.
+The local adapter owns only identity and legacy error rendering.
+
+Before migration, **33** focused tests passed. Two new missing-identity and real
+HTTP contract tests passed with the old implementation; all **35** passed after
+migration. They retain 500/missing-key text, 429/default body, both Retry-After and
+X-RateLimit-After with floor rounding, body forwarding and public-route behavior.
+Existing tests cover reconnects, cross-IP account limits, user/device identity
+and login body restoration. Full backend suite: **1,432 passed**, zero failed,
+**36 existing ignored** (including two doctests). This covers real production
+routers, auth/permissions, MCP, reports, streaming, sync, WebSocket, lifecycle and
+mixed workloads. All-target Clippy passes with findings only in untouched
+enrichment/background-task tests and an existing transitive future-compatibility
+notice. Formatting and diff checks pass. Docker/release builds were not rerun.
+Direct governor/tower_governor dependencies are removed; build revision is updated.
+
+Overall status is **Partial**, not Done: MCP counters share one per-user anchor
+across three categories, reset at strictly `elapsed > 60s`, accept zero limits
+and expose existing usage counters. Shared fixed windows use independent anchors
+and `elapsed >= window`. Migration needs a compatible grouped-window API or
+application-owned policy callback; existing MCP behavior remains intact.
+Database-backed download/report quotas and outbound enrichment pacing remain
+application-owned and are not claimed adopted by this HTTP canary. See
+`pezzottify/docs/step-10-rate-limiting.md` in that repository.
+
+The original `dev` branch was rebased onto the committed migration branch; its
+tree equals the tested tree. The owned worktree and branch were removed. All
+pre-existing Pezzottify worktrees/branches were preserved.
+
+### Integration and cleanup
+
+Shared implementation checkpoint `925ea25153a35e1fdb748add4880bc0e7d384ae6` is
+integrated into `main`; the final tracker/roadmap record follows on that branch.
+All three repositories used dedicated migration worktrees. Owned worktrees,
+branches, temporary build directories, symlinks, scripts and logs were removed
+after recording evidence. HTML script execution, local links and Markdown/HTML
+status parity were checked: 17 services, 15 step columns, with combined auth
+unchanged at 16 Done / 1 N/A. No push or deployment was performed. Consumer Axum
+removal remains a later milestone; Step 07 remains deferred.

@@ -122,3 +122,12 @@ Minimal-feature tests verify operation without Axum; the production dependency
 tree contains only HTTP/Tower/body primitives, not governor or Tokio. Full-suite,
 strict Clippy, formatting and canary evidence are recorded in the
 [migration tracker](migration-status.md#step-10-rate-limiting--2026-09-24).
+
+
+Initial canaries are integrated: Simple AI uses shared backend budgets; Pezzottify
+uses shared budgets and HTTP admission throughout its previously Governor-backed
+routes. Pezzottify remains Partial because its MCP categories share a legacy
+window anchor/boundary and allow zero limits; the independent fixed-window
+primitive cannot preserve those semantics by direct substitution. Both canaries
+explicitly retain unbounded stores to avoid introducing an unapproved capacity
+policy. See the tracker for revisions, tests and remaining scope.
