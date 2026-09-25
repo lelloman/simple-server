@@ -19,21 +19,20 @@ All 17 services have been assessed. The five final consumers now use shared
 policies for their remaining quotas and pacing; application storage and transaction
 ownership are preserved. Test limitations are recorded in the completion evidence.
 
-**Routing / HTTP core (11):** **3 Done, 0 Partial, 14 Pending**. Pezzottify, Androidoscopy and Crumbles now
+**Routing / HTTP core (11):** **4 Done, 0 Partial, 13 Pending**. Pezzottify, Androidoscopy, Crumbles and Fausto now
 use shared APIs for all production route groups, ordinary handlers, built-in
 extractors, response adapters and router assembly. Done excludes explicitly
 tracked protocol compatibility boundaries. Pending records unverified adoption,
 not a claim that the shared API already supports every service's needs.
 See the [contract](web-core.md) and [completion evidence](#pezzottify-routing-completion--2026-09-25).
 
-**Latest integration (2026-09-25):** Crumbles `master` at `23e47e0`, using shared
-`347e06e`, completes routing in both the main and integration servers. MCP and
-health mount as standard services; correlation supports shared HTTP bodies.
-Workspace: **1,444 passed, two existing ignores**, strict Clippy; production
-correlation smoke: **15 rejection cases**, tracing and clean shutdown pass.
-Shared: **239 tests/doctests**, strict Clippy and minimal-web checks. Multipart,
-WebSocket and tracing compatibility boundaries remain explicit.
-See the [Crumbles verification record](#crumbles-routing-completion--2026-09-25).
+**Latest integration (2026-09-25):** Fausto `master` at `b106e99`, using shared
+`5deb6de`, completes server and plugin routing. Plugin API version 2 requires
+rebuilding dynamic plugins. Workspace: **663 passed, ten existing ignores**;
+Swagger-enabled contracts: **four passed**; real dynamic-plugin smoke passes.
+Shared: **243 tests/doctests**, strict Clippy and minimal-feature build pass.
+Owned multipart, WebSocket, tracing and test compatibility boundaries remain.
+See the [Fausto verification record](#fausto-routing-completion--2026-09-25).
 
 **Next execution order:** complete and verify Axum removal from every consumer →
 revisit Step 07 database helpers. Step numbers are retained; Step 07 is deferred,
@@ -53,7 +52,7 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local canary)** | **Done (local; request work)** | **Done (local; bounded batches)** | **Done (local; retry scope)** | **Done (local canary)** | **Done (local; global + endpoint budgets)** | Pending | Multipart fields used across application modules; WebSockets; file responses; custom error and rate-limit middleware; real HTTP/WebSocket tests. |
 | androidoscopy | `server`; Android SDK pairing | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (no served probe) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; controller + LAN access)** | **Done (local; device JNI pairing gate)** | **Done (all production route groups)** | Controller and legacy WebSocket protocol types/upgrade compatibility; axum-server TLS configuration, serving and shutdown handle, including TLS test fixture. Production routing, dashboard responses and ordinary HTTP tests now use shared APIs. |
 | crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; durable primitives)** | **Done (local; retry primitives)** | **Done (local; main + integration)** | **Done (local; HTTP + MCP + durable dispatcher)** | **Done (both servers)** | Multipart fields/errors; realtime WebSocket socket/message types; explicit tracing compatibility adapter. Both servers, MCP/health service mounting, auth/CSRF, metrics, static responses and HTTP fixtures now use shared APIs. |
-| fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; dynamic cron)** | N/A (assessed) | **Done (local; HTTP + WebSocket + admin/write)** | **Done (local; five API tiers)** | Pending | Public plugin interface returns an Axum Router; validated JSON/rejections; axum-extra multipart; streamed downloads/federation; WebSockets; axum-test. |
+| fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; dynamic cron)** | N/A (assessed) | **Done (local; HTTP + WebSocket + admin/write)** | **Done (local; five API tiers)** | **Done (local)** | Owned multipart fields/errors; WebSocket socket/message types; tracing compatibility; axum-test transport and parser oracles. Server, plugin API v2, both plugins, Swagger, validation and streamed responses use shared routing APIs. Dynamic plugins require rebuilding. |
 | lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (Rust; Caddy owns CORS) | **Done (local; scoped)** | **Done (local; webhook scope)** | **Done (local; capacity)** | **Done (local; retry scope)** | **Done (local; sessions + resource/admin access)** | **Done (endpoint budgets + persisted device polling)** | Pending | Public integration crate returns Axum routers; OAuth/OIDC forms, redirects, templates and cookies; trusted-proxy extractors; embedded examples and axum-test. |
 | lellostore | `backend` | **Done** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; OIDC + admin)** | N/A (no inbound admission policy) | Pending | Custom auth extractors; multipart uploads; streamed downloads; catalog WebSockets; static files; axum-test multipart/WebSocket helpers and OIDC mocks. |
 | meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; pipeline/gateway)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; weighted claims)** | **Done (local; budgets/retry)** | **Done (local; all three services)** | **Done (local; gateway budgets)** | Pending | API, gateway and pipeline control routers; proxy headers/client identity; byte responses and static fallbacks; custom middleware and mock upstreams. |
@@ -3910,3 +3909,54 @@ this is a partial rollout of the HTTP abstraction, not full Axum removal.
 - Original `master` and shared `main` rebased onto dedicated migration branches;
   ancestry and tested trees verified. Owned worktrees/branches and
   `/tmp/crumbles-routing` build/log files removed. No push or deployment.
+
+
+## Fausto routing completion — 2026-09-25
+
+- Applicability: server route groups, plugin API and both blog/test-echo plugins
+  still exposed backend routers/extractors/responses. Active branch `master`
+  started clean at `2adbdcf`; shared `main` started clean at `9d8c7e1`.
+- Implemented in sibling isolated worktrees, based on those branches. Shared
+  source commit `5deb6debd98a1ec4912824656d857799a0088b16`; consumer `b106e99`.
+  README and CI sibling-checkout references now select the tested shared source.
+- Migrated ordinary routing/handlers, authentication extraction, validated JSON
+  and canonical error rendering, rate-limit/correlation middleware, static files,
+  health, streamed blob/federation responses, and peer-aware HTTP startup.
+- Plugin API and both plugins return shared routers. API version advances to 2;
+  the loader's existing version gate rejects old binaries before constructing
+  their plugin instance. Dynamic plugins must be rebuilt with matching sources.
+- Swagger uses its independent asset API through shared GET/HEAD handlers, with
+  slash redirect, wildcard assets, OpenAPI and static fallback preserved. The
+  optional utoipa Swagger Axum feature and direct axum-extra dependency are removed.
+- Shared extensions: `Correlation::run_selected` now accepts arbitrary standard
+  HTTP bodies; WebSocket compatibility forwards subprotocol selection; optional
+  `multipart-owned` supplies owned fields with runtime exclusivity, retaining the
+  prior parser, limits and rejection semantics rather than changing consumers.
+- Baseline workspace: **660 passed, ten existing ignores**. Final workspace:
+  **663 passed, the same ten ignores**. Existing auth, CORS, rate limit, tracing,
+  correlation, CRUD, query, lifecycle and process suites pass. Additional direct
+  shared-router checks cover plugin GET/HEAD/405, validation envelopes, exact
+  legacy parser error messages and structured validator details.
+- Optional Swagger routing contract: **four passed**, including redirect, HTML,
+  CSS and OpenAPI. Server all-features check passes with a temporary compile-only
+  `web/dist/index.html` fixture, removed afterwards; no frontend build is claimed.
+  Workspace all-features is invalid because core storage backends are exclusive.
+- Built the server and test-echo cdylib together. An isolated loopback process
+  loaded the API v2 plugin, served ping/info with correlation headers, and exited
+  cleanly on SIGTERM. Temporary database/blob/plugin directories were removed.
+- Shared baseline **239**, final **243 tests/doctests**. New differential checks
+  cover multipart fields, malformed/missing boundaries, 2 MiB limits and owned
+  field exclusivity; real HTTP verifies WebSocket server-preference negotiation.
+  Standard-body opaque correlation preserves body and task-local scope.
+- Formatting/diff checks pass. Shared strict all-target/all-feature Clippy and
+  minimal `multipart-owned` build pass. Fausto workspace/all-target Clippy passes
+  with warnings; it is not a strict warnings-as-errors pass. Docker/browser E2E
+  was not rerun; historical Step 01 results are not current verification.
+- Remaining: owned multipart field/error types, WebSocket socket/message types,
+  tracing compatibility, axum-test transport and legacy parser test oracle. No
+  production router conversion back to Axum. Step 11 is Done; complete protocol
+  abstraction is still pending.
+- Integration: Fausto `master` rebased onto `b106e99`; shared `main` rebased onto
+  its source/tracker migration commits. Verified ancestry and equality with the
+  tested trees. Owned worktrees/branches and `/tmp/fausto-routing` targets/logs
+  removed. No push or deployment; unrelated branches/worktrees preserved.
