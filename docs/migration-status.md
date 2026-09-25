@@ -19,19 +19,20 @@ All 17 services have been assessed. The five final consumers now use shared
 policies for their remaining quotas and pacing; application storage and transaction
 ownership are preserved. Test limitations are recorded in the completion evidence.
 
-**Routing / HTTP core (11):** **1 Done, 0 Partial, 16 Pending**. Pezzottify now
-uses shared APIs for all production route groups, ordinary handlers, built-in
+**Routing / HTTP core (11):** **2 Done, 0 Partial, 15 Pending**. Pezzottify and Androidoscopy now
+use shared APIs for all production route groups, ordinary handlers, built-in
 extractors, response adapters and router assembly. Done excludes explicitly
 tracked protocol compatibility boundaries. Pending records unverified adoption,
 not a claim that the shared API already supports every service's needs.
 See the [contract](web-core.md) and [completion evidence](#pezzottify-routing-completion--2026-09-25).
 
-**Latest integration (2026-09-25):** Pezzottify `dev` at `fd6585e2` uses shared
-`d3b559a` for routing, middleware composition, static fallback, streaming bodies,
-connection metadata and main/metrics serving. Legacy embedding-router conversions
-are removed. Full consumer suite: **1,449 passed, 36 existing ignored**; shared:
-**231 tests/doctests**, strict Clippy and minimal-feature checks. Protocol and
-observer boundaries remain explicit; this is not full Axum removal.
+**Latest integration (2026-09-25):** Androidoscopy `master` at `5e9a396`, using
+shared `cdb9e63`, completes controller, dashboard and legacy WebSocket routing.
+Shared Tower factories support its existing TLS adapter without router conversion.
+Server: **78 passed**; full-stack mock clients: **12 passed**; pairing bridge:
+**2 passed**. Shared: **234 tests/doctests**, strict Clippy and minimal-web tests.
+WebSocket protocol types and the TLS adapter remain explicit Axum exposure.
+See the [Androidoscopy verification record](#androidoscopy-routing-completion--2026-09-25).
 
 **Next execution order:** complete and verify Axum removal from every consumer →
 revisit Step 07 database helpers. Step numbers are retained; Step 07 is deferred,
@@ -49,7 +50,7 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local canary)** | **Done (local; scoped canary)** | N/A (assessed) | N/A (no served probe) | **Done (local; scoped canary)** | **Done (local; primitives)** | **Done (local; primitives)** | **Done (local; sessions + route permissions)** | **Done (HTTP, MCP, durable quotas + outbound pacing)** | **Done (all production route groups)** | Multipart fields/errors; SSE search producers; MCP and sync WebSocket protocol types; backend tracing observer; independent HTTP mocks and error-renderer differential test. |
 | favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local canary)** | **Done (local; request work)** | **Done (local; bounded batches)** | **Done (local; retry scope)** | **Done (local canary)** | **Done (local; global + endpoint budgets)** | Pending | Multipart fields used across application modules; WebSockets; file responses; custom error and rate-limit middleware; real HTTP/WebSocket tests. |
-| androidoscopy | `server`; Android SDK pairing | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (no served probe) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; controller + LAN access)** | **Done (local; device JNI pairing gate)** | Pending | Controller and legacy WebSockets; dashboard responses; axum-server TLS serving and shutdown controls; TLS/WebSocket test fixtures. |
+| androidoscopy | `server`; Android SDK pairing | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (no served probe) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; controller + LAN access)** | **Done (local; device JNI pairing gate)** | **Done (all production route groups)** | Controller and legacy WebSocket protocol types/upgrade compatibility; axum-server TLS configuration, serving and shutdown handle, including TLS test fixture. Production routing, dashboard responses and ordinary HTTP tests now use shared APIs. |
 | crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; durable primitives)** | **Done (local; retry primitives)** | **Done (local; main + integration)** | **Done (local; HTTP + MCP + durable dispatcher)** | Pending | Auth/session/CSRF extractors; multipart attachments; WebSockets; route-aware metrics; MCP service mounting; static bodies and HTTP test fixtures. |
 | fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; dynamic cron)** | N/A (assessed) | **Done (local; HTTP + WebSocket + admin/write)** | **Done (local; five API tiers)** | Pending | Public plugin interface returns an Axum Router; validated JSON/rejections; axum-extra multipart; streamed downloads/federation; WebSockets; axum-test. |
 | lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (Rust; Caddy owns CORS) | **Done (local; scoped)** | **Done (local; webhook scope)** | **Done (local; capacity)** | **Done (local; retry scope)** | **Done (local; sessions + resource/admin access)** | **Done (endpoint budgets + persisted device polling)** | Pending | Public integration crate returns Axum routers; OAuth/OIDC forms, redirects, templates and cookies; trusted-proxy extractors; embedded examples and axum-test. |
@@ -3831,3 +3832,42 @@ this is a partial rollout of the HTTP abstraction, not full Axum removal.
 - Integration: original `main` and `dev` rebased onto their dedicated migration
   branches; tested trees and ancestry verified. Owned worktrees, branches and
   `/tmp/pezzottify-routing` build/log files removed. Unrelated worktrees preserved.
+
+## Androidoscopy routing completion — 2026-09-25
+
+- Applicability: controller API, dashboard asset/SPA responses, legacy app and
+  dashboard WebSocket routes, public router factory and HTTP/TLS entry points
+  required shared routing. Active branch `master` started clean at `ca813fe`.
+- Shared source `cdb9e6304811d7cb0ae8de8333d4975a00597f42`: standard HTTP request
+  bodies and a shared Tower service factory support the existing TLS server
+  directly. Header-array response tuples preserve login cookies, replacement
+  semantics and invalid-header response contracts. No backend router conversion.
+- Baseline test commit `1f19ad0`; consumer integration `5e9a396` on `master`.
+  `simple-server.rev` and active README build instructions use the reviewed source.
+- All production route groups, ordinary handlers, State/Path/Json, response
+  adapters, auth middleware, asset fallback and HTTP serving/test helpers use
+  shared APIs. Bearer/cookie fallback, Host/Origin policy, route placement, TLS
+  certificates/settings, lifecycle shutdown and task ownership are preserved.
+- Baseline **76 server tests**; two new real HTTP contract tests passed before
+  migration; final **78 server tests**. Covers login cookie attributes, malformed
+  JSON/media types, 405/Allow/HEAD, dashboard assets/SPA fallback and invalid
+  upgrades, plus existing controller auth, TLS registration, WebSocket message
+  flows, ownership drain/late-upgrade rejection, logging and UDP discovery.
+- Full-stack crate: **12 passed before and after** with mock Android/dashboard
+  clients. It has no tracked lockfile; an ignored local lockfile was generated
+  offline. Pairing-rate-limit Rust bridge: **2 passed** after the shared pin update.
+- Shared baseline **231**, final **234 tests/doctests**; strict all-feature,
+  all-target Clippy and **3 minimal-web tests** pass. New differential tests check
+  valid/invalid header arrays; service-factory test uses standard request bodies.
+- Normal consumer all-target Clippy passes with existing warnings. Strict Clippy
+  remains blocked by unchanged Default/dead-code/PathBuf/test-conversion debt.
+  Changed Rust files pass formatting; unrelated protocol/session/TLS formatting
+  remains untouched. Diff and dependency checks pass: Axum 0.8.9 via simple-server.
+- Remaining exposure: backend WebSocket Message/WebSocket and upgrade adapter;
+  axum-server TLS configuration/server/handle and its TLS fixture. Step 11 is Done;
+  full Axum removal is not claimed. Android SDK/device and browser suites were
+  not run; those sources are unchanged and committed dashboard assets were used.
+- Both original development branches (`master`, shared `main`) rebased onto the
+  dedicated migration branches; ancestry and tested trees verified. Owned
+  worktrees, branches and `/tmp/androidoscopy-routing` targets/logs removed.
+  No push or deployment; unrelated user work preserved.
