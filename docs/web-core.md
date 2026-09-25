@@ -185,3 +185,16 @@ task-local context for arbitrary standard HTTP request/response bodies. It neith
 inspects nor converts those bodies. The existing backend `run` and `run_selected`
 APIs remain compatible. Crumbles uses the new method with shared requests and
 retains an explicit tracing compatibility boundary.
+
+### Fausto compatibility requirements
+
+`Correlation::run_selected` accepts standard HTTP request/response body types,
+including the shared web body, while preserving application-selected opaque IDs.
+`web::compat::WebSocketUpgrade::protocols` preserves server preference order when
+negotiating a client-offered subprotocol.
+
+The optional `multipart-owned` feature adds `web::compat::OwnedMultipart` for
+consumers requiring owned multipart fields. It retains axum-extra parsing,
+extractor body limits, rejection text, and runtime field exclusivity. Its field
+and error types remain an explicit protocol compatibility boundary; this is not
+yet complete multipart abstraction. The existing borrowed `Multipart` is unchanged.

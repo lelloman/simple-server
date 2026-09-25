@@ -203,16 +203,17 @@ impl Correlation {
     /// the validated [`RequestId`] extension and makes [`current_id`] return
     /// `None` within this scope: opaque values must not masquerade as validated
     /// IDs. The callback may add the application's own extension or span.
-    pub async fn run_selected<F, Fut>(
+    /// Accepts standard HTTP request/response bodies without consuming them.
+    pub async fn run_selected<B, R, F, Fut>(
         &self,
-        request: Request,
+        request: http::Request<B>,
         id: HeaderRequestId,
         propagation: Propagation,
         next: F,
-    ) -> Response
+    ) -> http::Response<R>
     where
-        F: FnOnce(Request) -> Fut,
-        Fut: Future<Output = Response>,
+        F: FnOnce(http::Request<B>) -> Fut,
+        Fut: Future<Output = http::Response<R>>,
     {
         self.run_inner(
             request,

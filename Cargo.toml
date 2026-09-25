@@ -30,10 +30,12 @@ cors = ["dep:http", "dep:tower-layer", "dep:tower-service", "dep:tower-http", "d
 http-tracing = ["http", "dep:tracing", "dep:http-body"]
 http2 = ["http", "axum/http2"]
 macros = ["http", "axum/macros"]
+multipart-owned = ["web-compat", "dep:axum-extra"]
 multipart = ["http", "axum/multipart"]
 ws = ["http", "axum/ws"]
 
 [dependencies]
+axum-extra = { version = "0.10", features = ["multipart"], optional = true }
 tower = { version = "0.5", features = ["util"], optional = true }
 serde = { version = "1", optional = true }
 bytes = { version = "1", optional = true }

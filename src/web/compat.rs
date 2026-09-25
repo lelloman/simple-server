@@ -51,6 +51,15 @@ impl<S: Send + Sync> super::FromRequestParts<S> for WebSocketUpgrade {
 }
 #[cfg(feature = "ws")]
 impl WebSocketUpgrade {
+    /// Select the first offered subprotocol supported by the client.
+    pub fn protocols<I>(self, protocols: I) -> Self
+    where
+        I: IntoIterator,
+        I::Item: Into<std::borrow::Cow<'static, str>>,
+    {
+        Self(self.0.protocols(protocols))
+    }
+
     pub fn on_upgrade<C, F>(self, callback: C) -> Response
     where
         C: FnOnce(axum::extract::ws::WebSocket) -> F + Send + 'static,
@@ -83,4 +92,31 @@ where
     )
     .await
     .map(Body)
+}
+
+/// Multipart parsing with owned fields and runtime field exclusivity.
+/// Retains axum-extra's upload and rejection behavior for migrating consumers.
+#[cfg(feature = "multipart-owned")]
+pub struct OwnedMultipart(axum_extra::extract::Multipart);
+#[cfg(feature = "multipart-owned")]
+impl<S: Send + Sync> super::FromRequest<S> for OwnedMultipart {
+    type Rejection = super::RejectionResponse;
+    async fn from_request(request: super::Request, state: &S) -> Result<Self, Self::Rejection> {
+        use axum::extract::FromRequest;
+        axum_extra::extract::Multipart::from_request(request.map(|body| body.0), state)
+            .await
+            .map(Self)
+            .map_err(|error| super::extract::rejection(error.status(), error.body_text()))
+    }
+}
+#[cfg(feature = "multipart-owned")]
+impl OwnedMultipart {
+    pub async fn next_field(
+        &mut self,
+    ) -> Result<
+        Option<axum_extra::extract::multipart::Field>,
+        axum_extra::extract::multipart::MultipartError,
+    > {
+        self.0.next_field().await
+    }
 }
