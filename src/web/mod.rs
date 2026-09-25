@@ -20,6 +20,8 @@ pub mod body;
 pub mod extract;
 mod handler;
 pub mod middleware;
+#[cfg(any(feature = "multipart", feature = "multipart-owned"))]
+pub mod multipart;
 pub mod response;
 pub mod routing;
 mod service;
@@ -28,7 +30,8 @@ pub use crate::extract::{Extract, FromRequestParts, IntoRejectionResponse, Rejec
 pub use body::{Body, BodyError};
 pub use bytes::Bytes;
 pub use extract::{
-    ConnectInfo, Extension, Form, FromRequest, FromState, Json, MatchedPath, Path, Query, State,
+    ConnectInfo, Extension, Form, FromRequest, FromState, Json, MatchedPath, Path, Query, RawQuery,
+    State,
 };
 pub use handler::Handler;
 pub use http;

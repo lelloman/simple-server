@@ -51,6 +51,15 @@ impl<S: Send + Sync> super::FromRequestParts<S> for WebSocketUpgrade {
 }
 #[cfg(feature = "ws")]
 impl WebSocketUpgrade {
+    /// Set the maximum incoming message size, preserving backend enforcement.
+    pub fn max_message_size(self, max: usize) -> Self {
+        Self(self.0.max_message_size(max))
+    }
+    /// Set the maximum incoming frame size, preserving backend enforcement.
+    pub fn max_frame_size(self, max: usize) -> Self {
+        Self(self.0.max_frame_size(max))
+    }
+
     /// Select the first offered subprotocol supported by the client.
     pub fn protocols<I>(self, protocols: I) -> Self
     where

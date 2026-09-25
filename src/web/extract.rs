@@ -304,3 +304,21 @@ impl<T> std::ops::DerefMut for Json<T> {
         &mut self.0
     }
 }
+
+#[cfg(any(feature = "multipart", feature = "multipart-owned"))]
+pub use super::multipart;
+#[cfg(feature = "multipart")]
+pub use super::multipart::Multipart;
+#[cfg(feature = "multipart-owned")]
+pub use super::multipart::OwnedMultipart;
+
+/// Preserve the raw, undecoded query, including the distinction between no
+/// query and an explicitly empty query.
+#[derive(Debug, Clone)]
+pub struct RawQuery(pub Option<String>);
+impl<S: Send + Sync> FromRequestParts<S> for RawQuery {
+    type Rejection = Infallible;
+    async fn from_request_parts(parts: &mut Parts, _: &S) -> Result<Self, Self::Rejection> {
+        Ok(Self(parts.uri.query().map(str::to_owned)))
+    }
+}

@@ -9,7 +9,7 @@ use tower::ServiceExt;
 
 #[tokio::test]
 async fn owned_multipart_preserves_parser_results_and_rejections() {
-    async fn shared(mut upload: web::compat::OwnedMultipart) -> String {
+    async fn shared(mut upload: web::multipart::OwnedMultipart) -> String {
         let mut out = String::new();
         loop {
             match upload.next_field().await {
@@ -62,7 +62,7 @@ async fn owned_fields_enforce_runtime_exclusivity() {
             "--x\r\nContent-Disposition: form-data; name=\"a\"\r\n\r\none\r\n--x--\r\n",
         ))
         .unwrap();
-    let mut upload = web::compat::OwnedMultipart::from_request(request, &())
+    let mut upload = web::multipart::OwnedMultipart::from_request(request, &())
         .await
         .unwrap();
     let field = upload.next_field().await.unwrap().unwrap();
@@ -124,4 +124,65 @@ async fn websocket_negotiates_server_preference_on_real_http() {
     );
     shutdown.request();
     task.await.unwrap().unwrap();
+}
+
+#[tokio::test]
+async fn websocket_limits_reject_large_frames_and_fragmented_messages() {
+    use std::sync::{
+        Arc,
+        atomic::{AtomicUsize, Ordering},
+    };
+    use tokio::io::{AsyncReadExt, AsyncWriteExt};
+    let failures = Arc::new(AtomicUsize::new(0));
+    let count = failures.clone();
+    let app = Router::new().route(
+        "/",
+        web::routing::get(move |ws: web::compat::WebSocketUpgrade| {
+            let count = count.clone();
+            async move {
+                ws.max_frame_size(4)
+                    .max_message_size(6)
+                    .on_upgrade(move |mut socket| async move {
+                        if let Some(Err(_)) = socket.recv().await {
+                            count.fetch_add(1, Ordering::SeqCst);
+                        }
+                    })
+            }
+        }),
+    );
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+    let address = listener.local_addr().unwrap();
+    let shutdown = simple_server::lifecycle::Shutdown::new();
+    let task = tokio::spawn(web::serve(listener, app, shutdown.clone()));
+    for frames in [vec![(0x82u8, 5usize)], vec![(0x02, 4), (0x80, 4)]] {
+        let mut socket = tokio::net::TcpStream::connect(address).await.unwrap();
+        socket.write_all(b"GET / HTTP/1.1\r\nHost: localhost\r\nConnection: upgrade\r\nUpgrade: websocket\r\nSec-WebSocket-Version: 13\r\nSec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==\r\n\r\n").await.unwrap();
+        let mut header = Vec::new();
+        tokio::time::timeout(std::time::Duration::from_secs(2), async {
+            while !header.ends_with(b"\r\n\r\n") {
+                header.push(socket.read_u8().await.unwrap());
+            }
+        })
+        .await
+        .unwrap();
+        assert!(header.starts_with(b"HTTP/1.1 101"));
+        let mut wire = Vec::new();
+        for (opcode, len) in frames {
+            wire.extend_from_slice(&[opcode, 0x80 | len as u8, 1, 2, 3, 4]);
+            for i in 0..len {
+                wire.push(b'x' ^ [1, 2, 3, 4][i % 4]);
+            }
+        }
+        socket.write_all(&wire).await.unwrap();
+        let mut rest = Vec::new();
+        let _ = tokio::time::timeout(
+            std::time::Duration::from_secs(2),
+            socket.read_to_end(&mut rest),
+        )
+        .await
+        .unwrap();
+    }
+    shutdown.request();
+    task.await.unwrap().unwrap();
+    assert_eq!(failures.load(Ordering::SeqCst), 2);
 }

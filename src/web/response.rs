@@ -1,5 +1,6 @@
+use super::Body;
+pub use super::Json;
 pub use super::Response;
-use super::{Body, Json};
 use crate::extract::RejectionResponse;
 use http::{HeaderMap, StatusCode};
 

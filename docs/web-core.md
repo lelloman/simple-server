@@ -225,3 +225,32 @@ text; no authentication policy or cookie defaults are introduced. Consumers can
 disable tower-cookies' Axum extractor feature. This adapter is separate from
 `auth` credential selection: it also serves unauthenticated browser flows and
 response cookie mutations.
+
+### Shared multipart interfaces
+
+With `web` + `multipart`, use `web::multipart::{Multipart, Field,
+MultipartError}` (also `web::extract::Multipart`). These are shared types with
+private parser storage. A borrowed field enforces exclusivity at compile time.
+With `multipart-owned`, `web::multipart::{OwnedMultipart, OwnedField}` provides
+owned fields and runtime exclusivity, preserving the existing owned parser.
+Both styles expose shared bytes, standard HTTP headers and shared errors only.
+
+Fields expose `name`, `file_name`, `content_type`, `headers`, `chunk`, `bytes`,
+`text`, and the standard `Stream<Item = Result<Bytes, MultipartError>>` contract.
+`chunk`/`Stream` preserve lazy reads; dropping an upload releases its body.
+`bytes`/`text` intentionally collect the field and remain subject to the request
+body limit. Set `BodyLimit` on the route for the total request; application-specific
+file/metadata limits, storage, validation and cleanup remain application-owned.
+Missing/invalid boundary extraction returns the shared `RejectionResponse`.
+Field/parser failures expose `status`, `body_text`, `Display`, an error source,
+and shared response/rejection conversion without a backend error type.
+
+The existing `web::compat::{Multipart, OwnedMultipart}` remain available with
+their old field/error contracts for unmigrated consumers. They are distinct from
+the new owned interfaces; changing the shared library does not automatically
+remove remaining multipart exposure in other services. Lellostore uses the new
+borrowed shared API for streamed uploads and bounded metadata.
+
+`RawQuery` preserves the undecoded query and distinguishes absence from an empty
+query. The WebSocket compatibility adapter now forwards `max_frame_size` and
+`max_message_size`; the socket/message protocol types remain compatibility gaps.
