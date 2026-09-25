@@ -101,6 +101,30 @@ impl<S: Clone + Send + Sync + 'static> Router<S> {
         self
     }
 
+    /// Mount a standard Tower service below a prefix, stripping that prefix.
+    pub fn nest_service<T, B>(mut self, path: &str, service: T) -> Self
+    where
+        T: Service<Request, Response = http::Response<B>, Error = Infallible>
+            + Clone
+            + Send
+            + Sync
+            + 'static,
+        T::Future: Send + 'static,
+        B: http_body::Body<Data = bytes::Bytes> + Send + 'static,
+        B::Error: Into<super::body::BoxError>,
+    {
+        self.inner = self
+            .inner
+            .nest_service(path, super::service::BackendService(service));
+        self
+    }
+
+    /// Fallback constrained by HTTP method, preserving HEAD/405/Allow behavior.
+    pub fn fallback_methods(mut self, methods: MethodRouter<S>) -> Self {
+        self.inner = self.inner.fallback(methods.inner);
+        self
+    }
+
     pub fn with_state<S2: Clone + Send + Sync + 'static>(self, state: S) -> Router<S2> {
         Router {
             inner: self.inner.with_state(state),
@@ -235,5 +259,23 @@ impl<T> Service<T> for MakeService {
     }
     fn call(&mut self, _: T) -> Self::Future {
         std::future::ready(Ok(self.0.clone()))
+    }
+}
+
+/// Register a standard Tower service for GET and HEAD.
+pub fn get_service<T, B, S>(service: T) -> MethodRouter<S>
+where
+    T: Service<Request, Response = http::Response<B>, Error = Infallible>
+        + Clone
+        + Send
+        + Sync
+        + 'static,
+    T::Future: Send + 'static,
+    B: http_body::Body<Data = bytes::Bytes> + Send + 'static,
+    B::Error: Into<super::body::BoxError>,
+    S: Clone + Send + Sync + 'static,
+{
+    MethodRouter {
+        inner: axum::routing::get_service(super::service::BackendService(service)),
     }
 }

@@ -157,6 +157,20 @@ impl Correlation {
         F: FnOnce(Request) -> Fut,
         Fut: Future<Output = Response>,
     {
+        self.run_http(request, next).await
+    }
+
+    /// Establish the same task-local/header contract for any standard HTTP bodies.
+    /// Bodies are neither inspected nor converted; streaming remains caller-owned.
+    pub async fn run_http<B, R, F, Fut>(
+        &self,
+        request: http::Request<B>,
+        next: F,
+    ) -> http::Response<R>
+    where
+        F: FnOnce(http::Request<B>) -> Fut,
+        Fut: Future<Output = http::Response<R>>,
+    {
         let id = if self.incoming == IncomingIds::AcceptValidated {
             request
                 .headers()
@@ -212,16 +226,16 @@ impl Correlation {
         .await
     }
 
-    async fn run_inner<F, Fut>(
+    async fn run_inner<B, R, F, Fut>(
         &self,
-        mut request: Request,
+        mut request: http::Request<B>,
         context: Context,
         propagation: Propagation,
         next: F,
-    ) -> Response
+    ) -> http::Response<R>
     where
-        F: FnOnce(Request) -> Fut,
-        Fut: Future<Output = Response>,
+        F: FnOnce(http::Request<B>) -> Fut,
+        Fut: Future<Output = http::Response<R>>,
     {
         request.extensions_mut().remove::<RequestId>();
         if let Some(id) = &context.validated {

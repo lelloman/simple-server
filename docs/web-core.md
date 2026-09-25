@@ -166,3 +166,22 @@ bounds. Entries replace matching headers in order; use HeaderMap append for
 multiple cookie fields. Invalid conversions preserve the existing error response
 contract. Androidoscopy exercises this with its controller login cookie and
 shared routes served through its existing TLS adapter.
+
+## Nested services, method fallbacks and request metadata
+
+`Router::nest_service(prefix, service)` mounts a standard Tower service and strips
+its prefix while preserving the query string. Route layers still run before that
+service. This supports Crumbles' MCP transport without a backend router escape.
+`routing::get_service` mounts standard services such as the shared health endpoint
+with GET/HEAD semantics. `fallback_methods(MethodRouter)` preserves method-aware
+fallback behavior, including HEAD stripping and 405/Allow responses.
+
+`Uri` is a shared head extractor. `Option<Extension<T>>` distinguishes an absent
+request extension from a present value; it does not suppress authentication or
+other extractor errors. Required `Extension<T>` retains its missing-value error.
+
+With `correlation`, `Correlation::run_http` establishes the existing ID/header and
+task-local context for arbitrary standard HTTP request/response bodies. It neither
+inspects nor converts those bodies. The existing backend `run` and `run_selected`
+APIs remain compatible. Crumbles uses the new method with shared requests and
+retains an explicit tracing compatibility boundary.

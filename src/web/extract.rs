@@ -243,3 +243,17 @@ where
         self.inner.call(request)
     }
 }
+
+// Only absence is optional here; authentication/extractor errors are not swallowed.
+impl<S: Sync, T: Clone + Send + Sync + 'static> FromRequestParts<S> for Option<Extension<T>> {
+    type Rejection = Infallible;
+    async fn from_request_parts(parts: &mut Parts, _: &S) -> Result<Self, Self::Rejection> {
+        Ok(parts.extensions.get::<T>().cloned().map(Extension))
+    }
+}
+impl<S: Sync> FromRequestParts<S> for http::Uri {
+    type Rejection = Infallible;
+    async fn from_request_parts(parts: &mut Parts, _: &S) -> Result<Self, Self::Rejection> {
+        Ok(parts.uri.clone())
+    }
+}
