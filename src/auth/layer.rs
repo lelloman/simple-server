@@ -1,4 +1,7 @@
-use super::{AsyncAccess, AuthFuture};
+use super::{
+    AsyncAccess, AuthFuture, Authentication, CredentialAuthError, CredentialSelectionError,
+    CredentialSource, CredentialSources, SelectedCredential,
+};
 use http::{Request, Response, request::Parts};
 use std::task::{Context, Poll};
 use tower_layer::Layer;
@@ -8,24 +11,45 @@ use tower_service::Service;
 /// construction is intentionally absent. This is a request-local result, not a
 /// durable authorization grant; resource-specific checks may still be required.
 #[derive(Clone)]
-pub struct Identity<P>(P);
+pub struct Identity<P> {
+    principal: P,
+    source: Option<CredentialSource>,
+}
 impl<P> Identity<P> {
+    /// None for the legacy application-owned Parts verifier; Some for credential selection.
+    pub fn source(&self) -> Option<&CredentialSource> {
+        self.source.as_ref()
+    }
     pub fn principal(&self) -> &P {
-        &self.0
+        &self.principal
     }
     pub fn into_principal(self) -> P {
-        self.0
+        self.principal
+    }
+}
+
+enum Gate<P, E> {
+    Legacy(AsyncAccess<Parts, P, E>),
+    Credentials(AsyncAccess<Parts, Option<Identity<P>>, E>),
+}
+impl<P, E> Clone for Gate<P, E> {
+    fn clone(&self) -> Self {
+        match self {
+            Self::Legacy(a) => Self::Legacy(a.clone()),
+            Self::Credentials(a) => Self::Credentials(a.clone()),
+        }
     }
 }
 
 /// Framework-independent HTTP gate using `http` and Tower. Mount explicitly on
-/// protected routes. Public routes should be mounted outside this layer. It never
+/// protected routes, or choose Optional for explicit anonymous access when no
+/// credential is supplied. Public routes can stay outside this layer. It never
 /// reads or buffers the body, logs credentials, redirects, or chooses status codes.
 /// Rendering failures, including provider outages, is application-owned.
 /// A pre-existing `Identity<P>` is removed before verification to prevent stale
 /// identity reuse when stacking gates. Other request extensions are preserved.
 pub struct AuthLayer<P, E, R> {
-    access: AsyncAccess<Parts, P, E>,
+    access: Gate<P, E>,
     reject: R,
 }
 impl<P, E, R: Clone> Clone for AuthLayer<P, E, R> {
@@ -38,7 +62,73 @@ impl<P, E, R: Clone> Clone for AuthLayer<P, E, R> {
 }
 impl<P, E, R> AuthLayer<P, E, R> {
     pub fn new(access: AsyncAccess<Parts, P, E>, reject: R) -> Self {
-        Self { access, reject }
+        Self {
+            access: Gate::Legacy(access),
+            reject,
+        }
+    }
+}
+
+impl<P: Send + Sync + 'static, E: 'static, R> AuthLayer<P, CredentialAuthError<E>, R> {
+    /// Select a header/cookie credential, then invoke the supplied verifier and
+    /// access checks exactly once. Only absent credentials may pass anonymously.
+    /// The layer adds source metadata beside the application principal; it does
+    /// not attach the selected secret to request extensions.
+    /// For policies needing full request Parts, use CredentialSources::extract
+    /// from an application-owned verifier with AuthLayer::new instead.
+    ///
+    /// ```
+    /// use simple_server::auth::*;
+    /// let sources = CredentialSources::header(
+    ///     HeaderCredential::new(http::header::AUTHORIZATION)
+    ///         .with_scheme("Bearer", SchemeCase::AsciiInsensitive),
+    /// ).or_cookie(CookieCredential::new("session_token")?);
+    /// // Supply your real database/provider verifier in place of this fixture.
+    /// let access = AsyncAccess::new(|credential: &SelectedCredential| {
+    ///     Box::pin(async move {
+    ///         if credential.expose() == "fixture-token" { Ok(42u64) }
+    ///         else { Err(()) }
+    ///     })
+    /// });
+    /// let layer = AuthLayer::credentials(sources, Authentication::Required, access,
+    ///     |_: CredentialAuthError<()>| http::Response::builder()
+    ///         .status(401).body("unauthorized").unwrap());
+    /// # let _ = layer;
+    /// # Ok::<(), InvalidCookieName>(())
+    /// ```
+    pub fn credentials(
+        sources: CredentialSources,
+        authentication: Authentication,
+        access: AsyncAccess<SelectedCredential, P, E>,
+        reject: R,
+    ) -> Self {
+        let access = AsyncAccess::new(move |parts: &Parts| {
+            let selected = sources.extract(&parts.headers);
+            let access = access.clone();
+            Box::pin(async move {
+                let selected = match selected {
+                    Ok(selected) => selected,
+                    Err(CredentialSelectionError::Missing)
+                        if matches!(authentication, Authentication::Optional) =>
+                    {
+                        return Ok(None);
+                    }
+                    Err(error) => return Err(CredentialAuthError::Selection(error)),
+                };
+                let principal = access
+                    .evaluate(&selected)
+                    .await
+                    .map_err(CredentialAuthError::Access)?;
+                Ok(Some(Identity {
+                    principal,
+                    source: Some(selected.source().clone()),
+                }))
+            })
+        });
+        Self {
+            access: Gate::Credentials(access),
+            reject,
+        }
     }
 }
 impl<S, P, E, R: Clone> Layer<S> for AuthLayer<P, E, R> {
@@ -53,7 +143,7 @@ impl<S, P, E, R: Clone> Layer<S> for AuthLayer<P, E, R> {
 }
 pub struct AuthService<S, P, E, R> {
     inner: S,
-    access: AsyncAccess<Parts, P, E>,
+    access: Gate<P, E>,
     reject: R,
 }
 impl<S: Clone, P, E, R: Clone> Clone for AuthService<S, P, E, R> {
@@ -91,9 +181,20 @@ where
         Box::pin(async move {
             let (mut parts, body) = request.into_parts();
             parts.extensions.remove::<Identity<P>>();
-            match access.evaluate(&parts).await {
-                Ok(principal) => {
-                    parts.extensions.insert(Identity(principal));
+            let result = match access {
+                Gate::Legacy(access) => access.evaluate(&parts).await.map(|principal| {
+                    Some(Identity {
+                        principal,
+                        source: None,
+                    })
+                }),
+                Gate::Credentials(access) => access.evaluate(&parts).await,
+            };
+            match result {
+                Ok(identity) => {
+                    if let Some(identity) = identity {
+                        parts.extensions.insert(identity);
+                    }
                     inner.call(Request::from_parts(parts, body)).await
                 }
                 Err(error) => Ok(reject(error)),

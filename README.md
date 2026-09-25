@@ -250,6 +250,12 @@ body-preserving Tower gate with application-owned failure responses. The feature
 works without default features, Axum or Tokio. See the [auth contract](docs/step-08-auth.md)
 for ownership boundaries, provider integration and verification evidence.
 
+Cookie/header authentication can use `auth::AuthLayer::credentials` with ordered
+`CredentialSources`, explicit required/optional mode and an application verifier.
+Verified `Identity` values retain their credential source. See the
+[cookie/header contract](docs/step-08-auth.md#cookie-and-header-credentials--2026-09-25)
+for fallback, parsing and error behavior.
+
 ## Rate limiting
 
 The optional `rate-limit` feature provides explicit replenishing and fixed-window

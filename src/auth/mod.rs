@@ -2,10 +2,18 @@
 //!
 //! Verifiers run first; access checks run in order and stop on the first error.
 //! No identity is returned or propagated until every check succeeds. Callers own
-//! credential precedence, session/token validation, revocation, resource policy,
-//! CSRF, error responses and audit side effects. There is no implicit anonymous
+//! credential precedence (optionally through CredentialSources), session/token
+//! validation, revocation, resource policy, CSRF, error responses and audit side
+//! effects. There is no implicit anonymous
 //! access, caching, retry, timeout, logging, or spawned work.
+mod cookie;
 mod credential;
+mod selection;
+pub use cookie::{CookieCredential, CookieCredentialError, InvalidCookieName, RepeatedCookies};
+pub use selection::{
+    Authentication, CredentialAuthError, CredentialSelectionError, CredentialSource,
+    CredentialSources, MalformedCredentials, SelectedCredential,
+};
 mod layer;
 pub use credential::{Credential, CredentialError, HeaderCredential, RepeatedHeaders, SchemeCase};
 pub use http::{HeaderMap, HeaderName};

@@ -111,3 +111,113 @@ async fn real_http_access_failures_never_reach_handler_and_public_routes_stay_pu
     stop.send(()).unwrap();
     server.await.unwrap();
 }
+
+#[tokio::test]
+async fn real_http_cookie_selection_preserves_source_and_rejects_ambiguous_requests() {
+    use simple_server::auth::{
+        Authentication, CookieCredential, CredentialAuthError, CredentialSource, CredentialSources,
+        HeaderCredential, SchemeCase, SelectedCredential,
+    };
+    let access = AsyncAccess::new(|credential: &SelectedCredential| {
+        Box::pin(async move {
+            if credential.expose() == "valid" {
+                Ok(7u64)
+            } else {
+                Err(())
+            }
+        })
+    });
+    let layer = AuthLayer::credentials(
+        CredentialSources::header(
+            HeaderCredential::new(http::header::AUTHORIZATION)
+                .with_scheme("Bearer", SchemeCase::AsciiInsensitive),
+        )
+        .or_cookie(CookieCredential::new("session").unwrap()),
+        Authentication::Optional,
+        access,
+        |_: CredentialAuthError<()>| {
+            Response::builder()
+                .status(401)
+                .body(Body::from("denied"))
+                .unwrap()
+        },
+    );
+    let app = Router::new()
+        .route(
+            "/",
+            post(|req: Request<Body>| async move {
+                let source = match req
+                    .extensions()
+                    .get::<Identity<u64>>()
+                    .and_then(Identity::source)
+                {
+                    Some(CredentialSource::Cookie(_)) => "cookie",
+                    Some(CredentialSource::Header(_)) => "header",
+                    None => "anonymous",
+                };
+                let body = axum::body::to_bytes(req.into_body(), 1024).await.unwrap();
+                assert_eq!(&body[..], b"payload");
+                source
+            }),
+        )
+        .layer(layer);
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+    let addr = listener.local_addr().unwrap();
+    let (stop, stopped) = tokio::sync::oneshot::channel();
+    let server = tokio::spawn(async move {
+        axum::serve(listener, app)
+            .with_graceful_shutdown(async {
+                let _ = stopped.await;
+            })
+            .await
+            .unwrap();
+    });
+    for (headers, status, body) in [
+        ("", 200, "anonymous"),
+        (
+            "Cookie: unrelated=x\r\nCookie: session=valid\r\n",
+            200,
+            "cookie",
+        ),
+        (
+            "Authorization: Bearer valid\r\nCookie: session=invalid\r\n",
+            200,
+            "header",
+        ),
+        (
+            "Authorization: Basic wrong\r\nCookie: session=valid\r\n",
+            401,
+            "denied",
+        ),
+        (
+            "Authorization: Bearer invalid\r\nCookie: session=valid\r\n",
+            401,
+            "denied",
+        ),
+        (
+            "Cookie: session=valid\r\nCookie: session=other\r\n",
+            401,
+            "denied",
+        ),
+        ("Cookie: session=\r\n", 401, "denied"),
+    ] {
+        let mut socket = tokio::net::TcpStream::connect(addr).await.unwrap();
+        socket.write_all(format!("POST / HTTP/1.1\r\nHost: localhost\r\n{headers}Content-Length: 7\r\nConnection: close\r\n\r\npayload").as_bytes()).await.unwrap();
+        let mut bytes = Vec::new();
+        tokio::time::timeout(
+            std::time::Duration::from_secs(5),
+            socket.read_to_end(&mut bytes),
+        )
+        .await
+        .unwrap()
+        .unwrap();
+        let response = String::from_utf8(bytes).unwrap();
+        assert!(
+            response.starts_with(&format!("HTTP/1.1 {status}")),
+            "{response}"
+        );
+        assert!(response.ends_with(body), "{response}");
+    }
+    stop.send(()).unwrap();
+    server.await.unwrap();
+}

@@ -62,6 +62,50 @@ with default features disabled, without Axum or Tokio. Public types and bounds
 contain no Axum APIs. The HTTP layer is optional to use; handlers/CLI/background
 work can evaluate the same access flows directly.
 
+## Cookie and header credentials — 2026-09-25
+
+`AuthLayer::credentials(sources, authentication, access, reject)` adds explicit
+credential selection to the existing layer. `AuthLayer::new` remains unchanged
+for application policies that need full request parts. The new constructor takes
+`AsyncAccess<SelectedCredential, P, E>`: capture application state in the verifier,
+read the opaque credential through `expose()`, and return the application's own
+principal/session type. Authorization checks still run after verification.
+
+Build a nonempty ordered `CredentialSources` with `header(...)` or `cookie(...)`,
+then `or_header(...)` / `or_cookie(...)`. Missing sources try the next source.
+Malformed input rejects by default. `on_malformed(MalformedCredentials::TryNext)`
+is an explicit compatibility policy; if no later source succeeds, the first
+syntax error is retained. Once a source is selected, verification/access failures
+never try another source. Lower-priority credentials are not parsed after selection.
+`HeaderCredential` retains its existing opaque-value parsing; token-specific
+syntax/signature validation belongs to the supplied verifier.
+
+`CookieCredential::new(name)` validates a nonempty ASCII token name. Extraction
+checks all Cookie header lines for that case-sensitive name. Values remain opaque
+(no percent decoding, signing or decryption); surrounding double quotes are
+removed and cookie-octets validated. Unrelated cookie pairs are ignored. Invalid
+header text or malformed matching pairs fail. Empty credentials and duplicate
+matching cookies reject by default; `allow_empty` and `RepeatedCookies::First/Last`
+are explicit compatibility options. This is a strict credential parser, not a
+replacement general cookie jar, so consumer migrations must compare existing
+parser behavior before adopting it.
+
+`Authentication::Required` rejects absent credentials. `Optional` permits only
+absence; malformed, invalid, denied and unavailable-backend results still reject.
+`CredentialAuthError::Selection` and `Access` let applications retain distinct
+HTTP responses. A successful `Identity<P>` includes `source()` with the actual
+header or cookie name. Anonymous requests have no identity, including after a
+same-principal-type outer layer authenticated them. The legacy constructor sets
+source to None; that means unspecified provenance, not proof of header auth.
+Selected secrets and wrapper errors redact Debug output. Applications still own
+logging of errors/credentials explicitly obtained through their accessors.
+
+CSRF policy remains explicit and may inspect verified source metadata; this change
+does not install CSRF checks. Cookie issuance, renewal and expiration also remain
+separate from incoming authentication. The feature adds no dependencies and stays
+usable without Axum, Tokio or default features. Consumer adoption, including
+Pezzottify's handler/extractor migration, is pending.
+
 ## Example
 
 ```rust

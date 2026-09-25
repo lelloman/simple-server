@@ -30,6 +30,9 @@ pub enum SchemeCase {
 /// No normalization or validation of the credential itself is performed.
 pub struct Credential<'a>(&'a str);
 impl<'a> Credential<'a> {
+    pub(super) fn from_cookie(value: &'a str) -> Self {
+        Self(value)
+    }
     pub fn expose(&self) -> &'a str {
         self.0
     }
@@ -44,8 +47,8 @@ impl std::fmt::Debug for Credential<'_> {
 /// remaining bytes are opaque: never trimmed, split, decoded, or used to decide
 /// another credential source. Default: reject repeated headers and empty values.
 /// `First` and `allow_empty` are explicit compatibility options. Source fallback
-/// remains caller-owned so an invalid supplied credential never silently falls
-/// back to a weaker identity inside this module.
+/// is configured separately with CredentialSources or application policy; this
+/// parser never attempts another source.
 #[derive(Clone, Debug)]
 pub struct HeaderCredential {
     name: HeaderName,
@@ -61,6 +64,9 @@ impl HeaderCredential {
             repeated: RepeatedHeaders::Reject,
             allow_empty: false,
         }
+    }
+    pub fn name(&self) -> &HeaderName {
+        &self.name
     }
     pub fn with_scheme(mut self, scheme: impl Into<String>, case: SchemeCase) -> Self {
         self.scheme = Some((scheme.into(), case));

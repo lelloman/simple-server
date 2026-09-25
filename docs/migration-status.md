@@ -3592,3 +3592,24 @@ Next is completing the public HTTP abstraction and removing consumer Axum usage
 and the transitional re-export, including tests. Step 07 database helpers remains
 deferred until after that milestone. No agent or coordinator push or deployment
 was performed for this work.
+
+
+## AuthLayer cookie/header selection — 2026-09-25
+
+Shared implementation adds ordered header/cookie credential sources, explicit
+malformed-input fallback, required/optional authentication and verified identity
+source metadata. The existing Parts-based constructor remains available. The
+strict credential cookie parser adds no dependency; feature-only builds remain
+Axum/Tokio independent. No consumer was migrated in this change. All existing
+module statuses and the Axum exposure observations remain unchanged; Pezzottify
+still needs integration and a framework-independent handler/extractor interface.
+See the [contract](step-08-auth.md#cookie-and-header-credentials--2026-09-25).
+
+Validation: baseline auth suite 7/7; final minimal-feature auth suites 13/13.
+The full all-feature suite passes **206 tests/doctests**, including real HTTP
+cookie/header admission, duplicate cookies and body preservation. All-feature,
+all-target strict Clippy, formatting and diff checks pass. The normal dependency
+graph with only `auth` contains HTTP/Tower primitives and no Axum/Tokio. The
+initial sandbox run could not bind loopback; the full suite passed with socket
+access. HTML rendering, observation parity and links were checked. No consumer
+adoption or deployment is claimed.
