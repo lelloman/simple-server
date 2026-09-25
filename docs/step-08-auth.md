@@ -106,6 +106,28 @@ separate from incoming authentication. The feature adds no dependencies and stay
 usable without Axum, Tokio or default features. Consumer adoption, including
 Pezzottify's handler/extractor migration, is pending.
 
+### Decoded cookie compatibility and lazy authentication
+
+The opt-in `auth-cookies` feature adds the framework-independent `cookie` crate
+with percent decoding, and exposes its `Cookie`/`SameSite` value types for issuance
+and expiration. The base `auth` feature keeps its existing HTTP/Tower-only graph.
+`CookieCredential::decoded_compatibility(name)` matches the existing decoded cookie
+jar policy used by Pezzottify: skip invalid header text and unparseable pairs,
+decode names/values, allow empty values and use the last matching name across
+headers. Duplicate/empty handling can still be explicitly overridden. Strict
+`CookieCredential::new` remains unchanged. Cookie extraction returns a redacted
+`CookieValue`, borrowed for strict parsing or owned after decoding;
+`HeaderCredential` retains its existing borrowed `Credential` interface.
+
+`AuthLayer::authenticate(&mut Parts)` runs the same authentication/access gate as
+the Tower service at an existing lazy extraction boundary. It clears stale
+`Identity<P>`, returns the verified identity or absence, and leaves installation
+and error rendering to its caller. It avoids globally authenticating public
+requests or adding new database side effects when a service currently extracts
+sessions lazily. The caller may preserve its existing optional-session error
+mapping; the layer's own Optional mode still admits only missing credentials.
+Fresh checks run on every invocation; no identity caching is introduced.
+
 ## Example
 
 ```rust

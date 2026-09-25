@@ -6,10 +6,16 @@
 //! validation, revocation, resource policy, CSRF, error responses and audit side
 //! effects. There is no implicit anonymous
 //! access, caching, retry, timeout, logging, or spawned work.
+/// Framework-independent cookie values for issuance/expiration. Parsing policy
+/// lives in CookieCredential; applications own security attributes and headers.
+#[cfg(feature = "auth-cookies")]
+pub use ::cookie::{Cookie, SameSite};
 mod cookie;
 mod credential;
 mod selection;
-pub use cookie::{CookieCredential, CookieCredentialError, InvalidCookieName, RepeatedCookies};
+pub use cookie::{
+    CookieCredential, CookieCredentialError, CookieValue, InvalidCookieName, RepeatedCookies,
+};
 pub use selection::{
     Authentication, CredentialAuthError, CredentialSelectionError, CredentialSource,
     CredentialSources, MalformedCredentials, SelectedCredential,

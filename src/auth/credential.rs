@@ -30,9 +30,6 @@ pub enum SchemeCase {
 /// No normalization or validation of the credential itself is performed.
 pub struct Credential<'a>(&'a str);
 impl<'a> Credential<'a> {
-    pub(super) fn from_cookie(value: &'a str) -> Self {
-        Self(value)
-    }
     pub fn expose(&self) -> &'a str {
         self.0
     }

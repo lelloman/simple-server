@@ -254,7 +254,9 @@ Cookie/header authentication can use `auth::AuthLayer::credentials` with ordered
 `CredentialSources`, explicit required/optional mode and an application verifier.
 Verified `Identity` values retain their credential source. See the
 [cookie/header contract](docs/step-08-auth.md#cookie-and-header-credentials--2026-09-25)
-for fallback, parsing and error behavior.
+for fallback, parsing and error behavior. Optional `auth-cookies` adds decoded
+cookie compatibility and cookie value types. `AuthLayer::authenticate` supports
+existing lazy extraction boundaries without a global middleware change.
 
 ## Rate limiting
 

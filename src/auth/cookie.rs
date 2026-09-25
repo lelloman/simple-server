@@ -1,5 +1,26 @@
 use http::{HeaderMap, header::COOKIE};
 
+/// Cookie credential bytes, borrowed for strict parsing or owned after decoding.
+/// Debug redacts the value; exposure borrows this value, not the original headers.
+pub struct CookieValue<'a>(std::borrow::Cow<'a, str>);
+impl<'a> CookieValue<'a> {
+    fn borrowed(value: &'a str) -> Self {
+        Self(std::borrow::Cow::Borrowed(value))
+    }
+    #[cfg(feature = "auth-cookies")]
+    fn owned(value: String) -> Self {
+        Self(std::borrow::Cow::Owned(value))
+    }
+    pub fn expose(&self) -> &str {
+        &self.0
+    }
+}
+impl std::fmt::Debug for CookieValue<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str("CookieValue([REDACTED])")
+    }
+}
+
 /// Cookie extraction failure. Contains no cookie values.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum CookieCredentialError {
@@ -45,6 +66,8 @@ pub struct CookieCredential {
     name: String,
     repeated: RepeatedCookies,
     allow_empty: bool,
+    #[cfg(feature = "auth-cookies")]
+    decoded: bool,
 }
 impl CookieCredential {
     pub fn new(name: impl Into<String>) -> Result<Self, InvalidCookieName> {
@@ -60,8 +83,55 @@ impl CookieCredential {
             name,
             repeated: RepeatedCookies::Reject,
             allow_empty: false,
+            #[cfg(feature = "auth-cookies")]
+            decoded: false,
         })
     }
+    /// Explicit compatibility with a decoded request cookie jar: use cookie's
+    /// parse_encoded grammar, ignore invalid header lines/unparseable pairs,
+    /// allow empty values and take the last matching name. No signature or
+    /// decryption is performed. Duplicate/empty policy may be overridden after
+    /// construction. Requires auth-cookies; strict parsing remains the default.
+    #[cfg(feature = "auth-cookies")]
+    pub fn decoded_compatibility(name: impl Into<String>) -> Result<Self, InvalidCookieName> {
+        let mut parser = Self::new(name)?;
+        parser.decoded = true;
+        parser.repeated = RepeatedCookies::Last;
+        parser.allow_empty = true;
+        Ok(parser)
+    }
+
+    #[cfg(feature = "auth-cookies")]
+    fn extract_decoded(
+        &self,
+        headers: &HeaderMap,
+    ) -> Result<CookieValue<'static>, CookieCredentialError> {
+        let mut found = None;
+        for cookie in headers
+            .get_all(COOKIE)
+            .iter()
+            .filter_map(|h| h.to_str().ok())
+            .flat_map(|h| h.split(';'))
+            .filter_map(|pair| ::cookie::Cookie::parse_encoded(pair.to_owned()).ok())
+        {
+            if cookie.name() != self.name {
+                continue;
+            }
+            if cookie.value().is_empty() && !self.allow_empty {
+                return Err(CookieCredentialError::Empty);
+            }
+            if found.is_some() {
+                match self.repeated {
+                    RepeatedCookies::Reject => return Err(CookieCredentialError::Repeated),
+                    RepeatedCookies::First => continue,
+                    RepeatedCookies::Last => {}
+                }
+            }
+            found = Some(CookieValue::owned(cookie.value().to_owned()));
+        }
+        found.ok_or(CookieCredentialError::Missing)
+    }
+
     pub fn name(&self) -> &str {
         &self.name
     }
@@ -76,7 +146,11 @@ impl CookieCredential {
     pub fn extract<'a>(
         &self,
         headers: &'a HeaderMap,
-    ) -> Result<super::Credential<'a>, CookieCredentialError> {
+    ) -> Result<CookieValue<'a>, CookieCredentialError> {
+        #[cfg(feature = "auth-cookies")]
+        if self.decoded {
+            return self.extract_decoded(headers);
+        }
         let mut found = None;
         for line in headers.get_all(COOKIE) {
             let line = line
@@ -118,7 +192,7 @@ impl CookieCredential {
                         RepeatedCookies::Last => {}
                     }
                 }
-                found = Some(super::Credential::from_cookie(value));
+                found = Some(CookieValue::borrowed(value));
             }
         }
         found.ok_or(CookieCredentialError::Missing)

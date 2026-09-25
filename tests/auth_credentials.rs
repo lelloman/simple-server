@@ -336,3 +336,107 @@ async fn anonymous_inner_gate_clears_outer_identity_and_source() {
         "anonymous"
     );
 }
+
+#[cfg(feature = "auth-cookies")]
+#[test]
+fn decoded_cookie_compatibility_matches_cookie_jar_and_keeps_strict_default() {
+    for lines in [
+        vec!["session=%61%2F%3D; other=x"],
+        vec!["session=first", "session=last"],
+        vec![" malformed ; session = spaced ; other=x"],
+        vec!["session=valid; session="],
+        vec!["ses%73ion=encoded-name"],
+        vec!["session=\"quoted\""],
+        vec!["session=%FF"],
+        vec!["session=valid; broken"],
+        vec!["session=plus+literal"],
+    ] {
+        let h = headers(None, &lines);
+        let mut oracle = cookie::CookieJar::new();
+        for pair in h
+            .get_all(COOKIE)
+            .iter()
+            .filter_map(|v| v.to_str().ok())
+            .flat_map(|v| v.split(';'))
+        {
+            if let Ok(cookie) = cookie::Cookie::parse_encoded(pair.to_owned()) {
+                oracle.add_original(cookie);
+            }
+        }
+        let parsed = CookieCredential::decoded_compatibility("session")
+            .unwrap()
+            .extract(&h)
+            .ok();
+        assert_eq!(
+            parsed.as_ref().map(|v| v.expose()),
+            oracle.get("session").map(|v| v.value()),
+            "{lines:?}"
+        );
+    }
+    let mut h = headers(None, &["session=%61"]);
+    h.append(COOKIE, HeaderValue::from_bytes(b"session=\xff").unwrap());
+    assert_eq!(
+        CookieCredential::decoded_compatibility("session")
+            .unwrap()
+            .extract(&h)
+            .unwrap()
+            .expose(),
+        "a"
+    );
+    assert_eq!(
+        cookie().extract(&h).unwrap_err(),
+        CookieCredentialError::InvalidText
+    );
+    assert_eq!(
+        cookie()
+            .extract(&headers(None, &["session=%61"]))
+            .unwrap()
+            .expose(),
+        "%61"
+    );
+    assert_eq!(
+        CookieCredential::decoded_compatibility("session")
+            .unwrap()
+            .repeated(RepeatedCookies::Reject)
+            .extract(&headers(None, &["session=one; session=two"]))
+            .unwrap_err(),
+        CookieCredentialError::Repeated
+    );
+    let secret = CookieCredential::decoded_compatibility("session")
+        .unwrap()
+        .extract(&headers(None, &["session=TOP_SECRET"]))
+        .unwrap()
+        .expose()
+        .to_owned();
+    assert_eq!(secret, "TOP_SECRET");
+}
+
+#[tokio::test]
+async fn lazy_authentication_has_same_policy_and_clears_stale_identity() {
+    let calls = Arc::new(AtomicUsize::new(0));
+    let layer = AuthLayer::credentials(
+        sources(),
+        Authentication::Optional,
+        verifier(calls.clone()),
+        reject,
+    );
+    let (mut parts, _) = Request::new(()).into_parts();
+    parts.headers = headers(None, &["session=valid"]);
+    parts.extensions.insert(42usize);
+    let identity = layer.authenticate(&mut parts).await.unwrap().unwrap();
+    assert_eq!(
+        identity.source(),
+        Some(&CredentialSource::Cookie("session".into()))
+    );
+    parts.extensions.insert(identity);
+    parts.headers = headers(None, &[]);
+    assert!(layer.authenticate(&mut parts).await.unwrap().is_none());
+    assert!(parts.extensions.get::<Identity<String>>().is_none());
+    assert_eq!(parts.extensions.get::<usize>(), Some(&42));
+    parts.headers = headers(Some("Bearer invalid"), &["session=valid"]);
+    assert!(matches!(
+        layer.authenticate(&mut parts).await,
+        Err(CredentialAuthError::Access("invalid"))
+    ));
+    assert_eq!(calls.load(Ordering::SeqCst), 2);
+}

@@ -8,6 +8,7 @@ readme = "README.md"
 publish = false
 
 [features]
+auth-cookies = ["auth", "dep:cookie"]
 rate-limit-async = ["rate-limit", "dep:tokio", "tokio/rt"]
 rate-limit = ["dep:http", "dep:http-body", "dep:tower-layer", "dep:tower-service", "dep:pin-project-lite"]
 auth = ["dep:http", "dep:tower-layer", "dep:tower-service"]
@@ -30,6 +31,7 @@ multipart = ["http", "axum/multipart"]
 ws = ["http", "axum/ws"]
 
 [dependencies]
+cookie = { version = "0.18", features = ["percent-encode"], optional = true }
 cron = { version = "0.15", optional = true }
 chrono = { version = "0.4", default-features = false, features = ["std"], optional = true }
 pin-project-lite = { version = "0.2", optional = true }

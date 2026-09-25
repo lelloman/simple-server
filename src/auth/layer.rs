@@ -41,6 +41,21 @@ impl<P, E> Clone for Gate<P, E> {
     }
 }
 
+impl<P: Send + Sync + 'static, E> Gate<P, E> {
+    async fn authenticate(&self, parts: &mut Parts) -> Result<Option<Identity<P>>, E> {
+        parts.extensions.remove::<Identity<P>>();
+        match self {
+            Self::Legacy(access) => access.evaluate(parts).await.map(|principal| {
+                Some(Identity {
+                    principal,
+                    source: None,
+                })
+            }),
+            Self::Credentials(access) => access.evaluate(parts).await,
+        }
+    }
+}
+
 /// Framework-independent HTTP gate using `http` and Tower. Mount explicitly on
 /// protected routes, or choose Optional for explicit anonymous access when no
 /// credential is supplied. Public routes can stay outside this layer. It never
@@ -66,6 +81,17 @@ impl<P, E, R> AuthLayer<P, E, R> {
             access: Gate::Legacy(access),
             reject,
         }
+    }
+}
+
+impl<P: Send + Sync + 'static, E, R> AuthLayer<P, E, R> {
+    /// Run this layer's authentication/access policy at an existing lazy
+    /// extraction boundary, without a Tower service or response rendering.
+    /// Removes any previous Identity<P> before evaluation. Returns the verified
+    /// identity (or anonymous None); the caller may insert it into extensions.
+    /// This never caches results, consumes a body, or changes the response.
+    pub async fn authenticate(&self, parts: &mut Parts) -> Result<Option<Identity<P>>, E> {
+        self.access.authenticate(parts).await
     }
 }
 
@@ -180,16 +206,7 @@ where
         let reject = self.reject.clone();
         Box::pin(async move {
             let (mut parts, body) = request.into_parts();
-            parts.extensions.remove::<Identity<P>>();
-            let result = match access {
-                Gate::Legacy(access) => access.evaluate(&parts).await.map(|principal| {
-                    Some(Identity {
-                        principal,
-                        source: None,
-                    })
-                }),
-                Gate::Credentials(access) => access.evaluate(&parts).await,
-            };
+            let result = access.authenticate(&mut parts).await;
             match result {
                 Ok(identity) => {
                     if let Some(identity) = identity {
