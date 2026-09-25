@@ -19,21 +19,20 @@ All 17 services have been assessed. The five final consumers now use shared
 policies for their remaining quotas and pacing; application storage and transaction
 ownership are preserved. Test limitations are recorded in the completion evidence.
 
-**Routing / HTTP core (11):** **6 Done, 0 Partial, 11 Pending**. Pezzottify, Androidoscopy, Crumbles, Fausto, lello-auth and lellostore now
+**Routing / HTTP core (11):** **7 Done, 0 Partial, 10 Pending**. Pezzottify, Androidoscopy, Crumbles, Fausto, lello-auth, lellostore and Favzetto now
 use shared APIs for all production route groups, ordinary handlers, built-in
 extractors, response adapters and router assembly. Done excludes explicitly
 tracked protocol compatibility boundaries. Pending records unverified adoption,
 not a claim that the shared API already supports every service's needs.
 See the [contract](web-core.md) and [completion evidence](#pezzottify-routing-completion--2026-09-25).
 
-**Latest integration (2026-09-25):** lellostore `master` at `af3661e`, using shared
-`4db2399`, completes routing and streamed multipart adoption. Multipart readers,
-fields and errors now have fully shared public types, with borrowed and owned
-field variants available. LelloStore: **190 passed, eight existing ignores**,
-strict all-feature Clippy. Shared: **254 tests/doctests**, strict Clippy and both
-minimal multipart feature builds pass. WebSocket, tracing and test-transport
-compatibility boundaries remain; multipart is no longer a production gap here.
-See the [lellostore verification record](#lellostore-routing-completion--2026-09-25).
+**Latest integration (2026-09-25):** Favzetto `master` at `685c55a`, using shared
+`c5ffbf2`, completes routing and multipart adoption. Optional JSON extraction now
+preserves its existing body contract. Favzetto: **239 passed, two reproduced
+baseline API failures**; Clippy completes with existing warnings. Shared:
+**255 tests/doctests**, strict Clippy and minimal web build pass. WebSocket
+socket/message types remain an explicit compatibility boundary.
+See the [Favzetto verification record](#favzetto-routing-completion--2026-09-25).
 
 **Next execution order:** complete and verify Axum removal from every consumer →
 revisit Step 07 database helpers. Step numbers are retained; Step 07 is deferred,
@@ -50,7 +49,7 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | Project | Server components | 1. Axum centralization | 2. Lifecycle / main() | 03a. Logging | 03b. Correlation | 03c. HTTP tracing | 04a. Body limits | 04b. Response headers | 04c. CORS | 05. Health/readiness | 06a. Task ownership | 06b. Scheduling | 06c. Execution policies | 08/09. Auth | 10. Rate limiting | 11. Routing / HTTP core | Remaining Axum exposure |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local canary)** | **Done (local; scoped canary)** | N/A (assessed) | N/A (no served probe) | **Done (local; scoped canary)** | **Done (local; primitives)** | **Done (local; primitives)** | **Done (local; sessions + route permissions)** | **Done (HTTP, MCP, durable quotas + outbound pacing)** | **Done (all production route groups)** | Multipart fields/errors; SSE search producers; MCP and sync WebSocket protocol types; backend tracing observer; independent HTTP mocks and error-renderer differential test. |
-| favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local canary)** | **Done (local; request work)** | **Done (local; bounded batches)** | **Done (local; retry scope)** | **Done (local canary)** | **Done (local; global + endpoint budgets)** | Pending | Multipart fields used across application modules; WebSockets; file responses; custom error and rate-limit middleware; real HTTP/WebSocket tests. |
+| favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local canary)** | **Done (local; request work)** | **Done (local; bounded batches)** | **Done (local; retry scope)** | **Done (local canary)** | **Done (local; global + endpoint budgets)** | **Done (local)** | WebSocket socket/message types and upgrade compatibility remain. Production routing, extractors, responses, middleware, serving, multipart readers/fields/errors and HTTP test fixtures use shared APIs. |
 | androidoscopy | `server`; Android SDK pairing | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (no served probe) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; controller + LAN access)** | **Done (local; device JNI pairing gate)** | **Done (all production route groups)** | Controller and legacy WebSocket protocol types/upgrade compatibility; axum-server TLS configuration, serving and shutdown handle, including TLS test fixture. Production routing, dashboard responses and ordinary HTTP tests now use shared APIs. |
 | crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; durable primitives)** | **Done (local; retry primitives)** | **Done (local; main + integration)** | **Done (local; HTTP + MCP + durable dispatcher)** | **Done (both servers)** | Multipart fields/errors; realtime WebSocket socket/message types; explicit tracing compatibility adapter. Both servers, MCP/health service mounting, auth/CSRF, metrics, static responses and HTTP fixtures now use shared APIs. |
 | fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; dynamic cron)** | N/A (assessed) | **Done (local; HTTP + WebSocket + admin/write)** | **Done (local; five API tiers)** | **Done (local)** | Owned multipart fields/errors; WebSocket socket/message types; tracing compatibility; axum-test transport and parser oracles. Server, plugin API v2, both plugins, Swagger, validation and streamed responses use shared routing APIs. Dynamic plugins require rebuilding. |
@@ -1529,7 +1528,7 @@ establish adoption. Their application-owned browser/CSRF boundaries remain intac
 | Product | Inspected development branch / HEAD | Applicability evidence |
 | --- | --- | --- |
 | pezzottify | `dev` / `a25b0c3a` | `pezzottify-server/src/server/route_builder.rs` installs authentication, CSRF, rate limits, tracing and cache policy, but no CORS layer or allow-origin response policy. |
-| favzetto | `master` / `47c8fe67` | Backend production router has body/header/auth policy but no CORS middleware or Access-Control-Allow headers. |
+| favzetto | **Done (local)** | WebSocket socket/message types and upgrade compatibility remain. Production routing, extractors, responses, middleware, serving, multipart readers/fields/errors and HTTP test fixtures use shared APIs. |
 | androidoscopy | `master` / `f4461a81` | `server/src/main.rs` HTTP/WS router setup and legacy server have no CORS response policy. |
 | lello-auth | `master` / `b1827fdd` | CORS managed by Caddy; not migrated into Rust. `homelab/caddy/Caddyfile` permits selected application origins with credentials and OPTIONS 204. Server, integration crate and examples install no Rust CORS layer. Moving ownership needs coordinated proxy/application changes; live deployment not probed. |
 | meteonesto | `master` / `6d0eb458` | Weather API, gateway and pipeline control routers implement their own HTTP policies, with no application CORS layer. Infrastructure/auth-edge documentation is not application adoption. |
@@ -4068,3 +4067,41 @@ this is a partial rollout of the HTTP abstraction, not full Axum removal.
   tree equality. Owned worktrees/branches and `/tmp/lellostore-routing` targets,
   copied assets and logs removed. Existing backup branch preserved. Nothing
   pushed or deployed.
+
+## Favzetto routing completion — 2026-09-25
+
+- Applicability: production routes/handlers, rate-limit middleware, file/static
+  responses, multipart fields passed across ingestion/assistant/research modules,
+  WebSocket upgrades and HTTP fixtures used backend types. Clean `master` started
+  at `3339c4a`; shared `main` at `b9ed649`. Isolated worktrees used throughout.
+- Shared source `c5ffbf21bee1b84dfbd065970f59842c2466024b`; consumer `685c55a`.
+  Current lifecycle build instructions and the new consumer Step 11 record pin
+  the reviewed sibling source. No root README or CI checkout pin exists.
+- All ordinary routing, extraction, response conversion, middleware, server
+  lifecycle and mock/test HTTP serving use shared APIs. Static fallback remains
+  GET/HEAD-only. Multipart readers/fields/errors are shared public types;
+  application buffering, storage, authorization and 128 MiB limit are preserved.
+- Shared `Option<Json<T>>` added instead of changing the consumer contract.
+  Absence requires missing Content-Type; declared invalid JSON still rejects.
+  Differential tests compare exact status/headers/body for absence, valid JSON,
+  +json, syntax/shape errors, unsupported media types and body limits.
+- Consumer baseline **238 passed, two failed**; final **239 passed, the same two
+  failed**, zero ignored. Known failures are
+  `catalog_research_runtime_bridge_approves_runtime_draft` and
+  `catalog_research_runtime_bridge_rejects_runtime_draft`: terminal transitions
+  completed→completed/waiting_user return 400. Reproduced before edits.
+- New real-HTTP contract verifies static POST rejection, missing multipart
+  boundary, missing file, empty file and graceful shutdown. Existing suite covers
+  successful upload/storage/approval, auth/rate limits and actual WebSocket flows;
+  lifecycle/logging process tests pass. Final full run uses `--no-fail-fast`.
+- Shared baseline **254**, final **255 tests/doctests**; strict all-feature,
+  all-target Clippy and minimal `web` build pass. Consumer Clippy completes with
+  existing warnings; full formatting has pre-existing differences. No broad
+  reformat. Existing ignored web/dist assets copied unchanged for compilation;
+  frontend, Android and Docker builds were not run.
+- Remaining boundary: WebSocket socket/message types and upgrade compatibility.
+  There is no remaining multipart field/error or HTTP fixture Axum exposure.
+- Integration: Favzetto `master` rebased onto `685c55a`; shared `main` rebased onto
+  source/tracker migration commits. Ancestry and exact tested source trees
+  verified; temporary worktrees/branches and `/tmp/favzetto-routing` removed.
+  Existing backup and Android branches preserved. Nothing pushed or deployed.
