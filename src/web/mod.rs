@@ -16,17 +16,22 @@
 //! let _: Router = Router::new().route("/", post(invalid));
 //! ```
 
-mod body;
-mod extract;
+pub mod body;
+pub mod extract;
 mod handler;
-mod response;
+pub mod middleware;
+pub mod response;
 pub mod routing;
+mod service;
 
 pub use crate::extract::{Extract, FromRequestParts, IntoRejectionResponse, RejectionResponse};
 pub use body::{Body, BodyError};
 pub use bytes::Bytes;
-pub use extract::{FromRequest, FromState, Json, Path, Query, State};
+pub use extract::{
+    ConnectInfo, Extension, FromRequest, FromState, Json, MatchedPath, Path, Query, State,
+};
 pub use handler::Handler;
+pub use http;
 pub use http::{Extensions, HeaderMap, HeaderValue, Method, StatusCode, Uri, header};
 pub use response::IntoResponse;
 pub use routing::Router;
@@ -44,15 +49,24 @@ pub async fn serve(
     crate::http::serve(listener, router.inner, shutdown).await
 }
 
-/// Temporary, explicitly enabled migration boundary for legacy applications.
-/// Remove these calls when the parent application uses shared routing as well.
-#[cfg(feature = "web-compat")]
-pub mod compat {
-    use super::Router;
-
-    /// Compose a migrated route group into an existing backend router. This is
-    /// the only intentional backend type escape in the shared web API.
-    pub fn into_axum_router<S>(router: Router<S>) -> axum::Router<S> {
-        router.inner
-    }
+/// Serve with the direct TCP peer address in `ConnectInfo<SocketAddr>`.
+/// Forwarded headers are deliberately not interpreted.
+#[cfg(feature = "lifecycle")]
+pub async fn serve_with_connect_info(
+    listener: tokio::net::TcpListener,
+    router: Router,
+    shutdown: crate::lifecycle::Shutdown,
+) -> std::io::Result<()> {
+    crate::http::serve(
+        listener,
+        router
+            .inner
+            .into_make_service_with_connect_info::<std::net::SocketAddr>(),
+        shutdown,
+    )
+    .await
 }
+
+/// Explicit migration boundaries for protocols not yet owned by the shared API.
+#[cfg(feature = "web-compat")]
+pub mod compat;

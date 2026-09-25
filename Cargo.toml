@@ -8,7 +8,7 @@ readme = "README.md"
 publish = false
 
 [features]
-web = ["http", "extract", "dep:serde", "dep:bytes", "dep:http-body"]
+web = ["http", "extract", "dep:serde", "dep:bytes", "dep:http-body", "dep:tower-layer", "dep:tower", "dep:futures-util"]
 web-compat = ["web"]
 extract = ["dep:http"]
 auth-cookies = ["auth", "dep:cookie"]
@@ -34,6 +34,7 @@ multipart = ["http", "axum/multipart"]
 ws = ["http", "axum/ws"]
 
 [dependencies]
+tower = { version = "0.5", features = ["util"], optional = true }
 serde = { version = "1", optional = true }
 bytes = { version = "1", optional = true }
 cookie = { version = "0.18", features = ["percent-encode"], optional = true }

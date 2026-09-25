@@ -1,4 +1,4 @@
-use bytes::Bytes;
+pub use bytes::Bytes;
 use http_body::{Frame, SizeHint};
 use std::{
     fmt,
@@ -26,7 +26,31 @@ impl std::error::Error for BodyError {
     }
 }
 
+pub type BoxError = Box<dyn std::error::Error + Send + Sync>;
+
+pub async fn to_bytes(body: Body, limit: usize) -> Result<Bytes, BodyError> {
+    body.collect(limit).await
+}
+
 impl Body {
+    pub fn new<B>(body: B) -> Self
+    where
+        B: http_body::Body<Data = Bytes> + Send + 'static,
+        B::Error: Into<BoxError>,
+    {
+        Self(axum::body::Body::new(body))
+    }
+
+    /// Forward a stream lazily, preserving backpressure and cancellation.
+    pub fn from_stream<S>(stream: S) -> Self
+    where
+        S: futures_util::TryStream + Send + 'static,
+        S::Ok: Into<Bytes>,
+        S::Error: Into<BoxError>,
+    {
+        Self(axum::body::Body::from_stream(stream))
+    }
+
     pub fn empty() -> Self {
         Self(axum::body::Body::empty())
     }

@@ -80,34 +80,72 @@ contract. Response maps preserve extensions, headers (including repeated cookies
 status and body. Applications implement the trait for domain errors; there is no
 blanket assumption about error status or disclosure.
 
-## Incremental compatibility and canary
+## Router composition and middleware
 
-The separately enabled `web-compat` feature exposes one explicitly transitional
-function, `web::compat::into_axum_router`, to mount shared route groups inside a
-legacy router. This is an intentional temporary backend type escape; it is not
-required by a standalone shared router and will be removed with the Axum re-export.
-Keep these conversions at application assembly boundaries, outside shared handlers.
-Existing outer middleware and extractor-limit extensions continue to apply.
+`Router::layer` applies a Tower layer to existing routes and fallbacks;
+`route_layer` applies it only to matched routes, preserving unmatched 404s.
+Layers receive the shared `routing::Route` service and operate on shared
+`Request` / `Response` bodies. The last installed layer runs first. Requests,
+headers, extensions and body streams cross the internal adapter without buffering.
 
-Pezzottify's five embedding endpoints are the first canary: list, get, upsert,
-delete and search. Its embedding module uses shared routers, state/path/query/JSON,
-session extraction, response traits and standard status codes. Two conversions
-at the legacy route assembly boundary preserve existing auth, permissions, rate
-limits, CSRF and route placement. Its ApiError adapter delegates to the existing
-single buffered renderer. New real HTTP embedding tests passed before migration
-and again afterward; central trackers contain commits and test evidence.
+`middleware::from_fn` and `from_fn_with_state` accept async functions with up to
+eight shared head extractors followed by `Request` and `Next`. Extractors run in
+order and can reject before the middleware or downstream handler runs. `Next::run`
+waits for downstream readiness. State here is the explicitly supplied middleware
+state, independent of the router's handler state.
 
-## Remaining scope
+`Extension<T>` installs a cloned request-scoped value as a Tower layer and reads
+it as an extractor. A missing required extension is a server error. `MatchedPath`
+contains the bounded route template; it is also available from request extensions
+inside middleware. Unmatched fallback requests have no matched path.
 
-This is the ordinary HTTP foundation, not completion of Axum removal. General
-middleware/route layers, connection metadata, redirects/forms, additional
-extractors, multipart, SSE, streaming producers/ranges, WebSocket protocols,
-alternate listeners/TLS and framework-independent integration test fixtures still
-need APIs as their consumers migrate. Existing middleware remains at the legacy
-assembly boundary in this canary. The other Pezzottify route groups still use
-transitional APIs. Module status totals do not imply full abstraction.
+`fallback_service` accepts a standard Tower service over shared requests and any
+standard HTTP response body. This supports static-file services without exposing
+backend router types. Service readiness is preserved. `routing::any` registers a
+handler for all methods.
+
+`Body::new` wraps a standard HTTP body; `Body::from_stream` forwards a fallible
+byte stream lazily. Dropping the response drops its stream. Bounded collection
+is available through `Body::collect` and `body::to_bytes`.
+
+With `lifecycle`, `serve_with_connect_info` inserts the direct TCP peer address as
+`ConnectInfo<SocketAddr>` for handlers and middleware. It deliberately ignores
+forwarded headers. Both serving functions use the existing graceful shutdown
+contract; neither installs signal handlers.
+
+## Explicit protocol compatibility
+
+`web-compat` also supplies transitional `Multipart` and `WebSocketUpgrade`
+extractors (requiring the respective features), `response` for legacy streaming
+responses, and `trace_with_observer` for existing tracing observers. These keep
+ordinary handler signatures and router composition shared, but intentionally
+retain backend multipart field/error, WebSocket and observer contracts. They are
+migration boundaries, not completed protocol abstractions. SSE producers can use
+`compat::response` without buffering their event stream.
+
+## Pezzottify adoption
+
+The five embedding endpoints were the first canary. Pezzottify now composes all
+route groups, ordinary handlers, custom byte-range extraction, middleware,
+static-file fallback, main/metrics serving and its shared HTTP test fixture using
+`web`. The legacy embedding-router conversions and application `FromRef`
+implementations are gone. Permissions, rate limits, CSRF, report admission,
+caching, task ownership and range policies remain application-owned and unchanged.
+
+The remaining explicit backend contracts are SSE event production, WebSocket
+messages/sockets, multipart fields/errors, the tracing observer and independent
+mock HTTP fixtures. Step 11 completion means shared routing and ordinary HTTP
+contracts; it does not imply these remaining protocol abstractions are complete.
+
+## Remaining shared scope
+
+Forms, redirects, more extractors, fully shared multipart/SSE/WebSocket protocols,
+backend-free tracing observers, alternate listeners/TLS and independent mock
+fixtures still need APIs as consumers migrate. `compat::into_axum_router` remains
+available for other incremental migrations, but Pezzottify no longer uses it.
 
 Validation includes differential request/response checks against the prior router,
-before/after consumer HTTP tests, head-before-body ordering, explicit rejection
-capture, substate extraction, sixteen-argument handlers, compile-fail body ordering,
-shared body limits, Tower composition and real HTTP serving/shutdown.
+before/after consumer HTTP tests, extraction ordering, explicit rejection capture,
+substate extraction, sixteen-argument handlers, compile-fail body ordering, body
+limits, layer ordering, early rejection, service readiness, connection metadata,
+body cancellation/trailers/errors and real HTTP serving/shutdown.

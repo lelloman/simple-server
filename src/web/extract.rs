@@ -1,5 +1,5 @@
-use super::Request;
-use crate::extract::{FromRequestParts, IntoRejectionResponse, Parts, RejectionResponse};
+pub use super::Request;
+pub use crate::extract::{FromRequestParts, IntoRejectionResponse, Parts, RejectionResponse};
 use std::{convert::Infallible, future::Future};
 
 /// Select application substate without a framework-specific state trait.
@@ -58,7 +58,7 @@ impl<S: Sync, T: FromState<S> + Send> FromRequestParts<S> for State<T> {
     }
 }
 
-fn rejection(status: http::StatusCode, text: String) -> RejectionResponse {
+pub(super) fn rejection(status: http::StatusCode, text: String) -> RejectionResponse {
     let mut response = status.into_rejection_response();
     response.headers_mut().insert(
         http::header::CONTENT_TYPE,
@@ -163,5 +163,83 @@ where
     type Rejection = Infallible;
     async fn from_request(request: Request, state: &S) -> Result<Self, Self::Rejection> {
         Ok(T::from_request(request, state).await)
+    }
+}
+
+/// Request-scoped value installed by a Tower layer or earlier middleware.
+#[derive(Debug, Clone, Copy)]
+pub struct Extension<T>(pub T);
+#[derive(Debug, Clone, Copy)]
+pub struct ConnectInfo<T>(pub T);
+/// A bounded route template, never the concrete URL or query string.
+#[derive(Debug, Clone)]
+pub struct MatchedPath(pub(super) std::sync::Arc<str>);
+impl MatchedPath {
+    pub fn as_str(&self) -> &str {
+        &self.0
+    }
+}
+
+impl<S: Send + Sync, T: Clone + Send + Sync + 'static> FromRequestParts<S> for Extension<T> {
+    type Rejection = RejectionResponse;
+    async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
+        <axum::Extension<T> as axum::extract::FromRequestParts<S>>::from_request_parts(parts, state)
+            .await
+            .map(|value| Self(value.0))
+            .map_err(|error| rejection(error.status(), error.body_text()))
+    }
+}
+impl<S: Sync, T: Clone + Send + Sync + 'static> FromRequestParts<S> for ConnectInfo<T> {
+    type Rejection = RejectionResponse;
+    async fn from_request_parts(parts: &mut Parts, _: &S) -> Result<Self, Self::Rejection> {
+        parts.extensions.get::<Self>().cloned().ok_or_else(|| {
+            rejection(
+                http::StatusCode::INTERNAL_SERVER_ERROR,
+                "Missing connection information".into(),
+            )
+        })
+    }
+}
+impl<S: Sync> FromRequestParts<S> for MatchedPath {
+    type Rejection = RejectionResponse;
+    async fn from_request_parts(parts: &mut Parts, _: &S) -> Result<Self, Self::Rejection> {
+        parts.extensions.get::<Self>().cloned().ok_or_else(|| {
+            rejection(
+                http::StatusCode::INTERNAL_SERVER_ERROR,
+                "Matched route unavailable".into(),
+            )
+        })
+    }
+}
+impl<T: Clone + Send + Sync + 'static, I> tower_layer::Layer<I> for Extension<T> {
+    type Service = AddExtension<I, T>;
+    fn layer(&self, inner: I) -> Self::Service {
+        AddExtension {
+            inner,
+            value: self.0.clone(),
+        }
+    }
+}
+#[derive(Clone)]
+pub struct AddExtension<I, T> {
+    inner: I,
+    value: T,
+}
+impl<I, T: Clone + Send + Sync + 'static> tower_service::Service<Request> for AddExtension<I, T>
+where
+    I: tower_service::Service<Request>,
+{
+    type Response = I::Response;
+    type Error = I::Error;
+    type Future = I::Future;
+    fn poll_ready(
+        &mut self,
+        cx: &mut std::task::Context<'_>,
+    ) -> std::task::Poll<Result<(), Self::Error>> {
+        self.inner.poll_ready(cx)
+    }
+    fn call(&mut self, mut request: Request) -> Self::Future {
+        request.extensions_mut().insert(self.value.clone());
+        self.inner.call(request)
     }
 }

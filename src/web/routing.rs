@@ -50,6 +50,57 @@ impl<S: Clone + Send + Sync + 'static> Router<S> {
         self
     }
 
+    /// Apply a Tower layer to existing routes and fallbacks.
+    pub fn layer<L, B>(mut self, layer: L) -> Self
+    where
+        L: tower_layer::Layer<Route> + Clone + Send + Sync + 'static,
+        L::Service: Service<Request, Response = http::Response<B>, Error = Infallible>
+            + Clone
+            + Send
+            + Sync
+            + 'static,
+        <L::Service as Service<Request>>::Future: Send + 'static,
+        B: http_body::Body<Data = bytes::Bytes> + Send + 'static,
+        B::Error: Into<super::body::BoxError>,
+    {
+        self.inner = self.inner.layer(super::service::BackendLayer(layer));
+        self
+    }
+
+    /// Apply a layer only after a route matches (does not intercept a 404).
+    pub fn route_layer<L, B>(mut self, layer: L) -> Self
+    where
+        L: tower_layer::Layer<Route> + Clone + Send + Sync + 'static,
+        L::Service: Service<Request, Response = http::Response<B>, Error = Infallible>
+            + Clone
+            + Send
+            + Sync
+            + 'static,
+        <L::Service as Service<Request>>::Future: Send + 'static,
+        B: http_body::Body<Data = bytes::Bytes> + Send + 'static,
+        B::Error: Into<super::body::BoxError>,
+    {
+        self.inner = self.inner.route_layer(super::service::BackendLayer(layer));
+        self
+    }
+
+    pub fn fallback_service<T, B>(mut self, service: T) -> Self
+    where
+        T: Service<Request, Response = http::Response<B>, Error = Infallible>
+            + Clone
+            + Send
+            + Sync
+            + 'static,
+        T::Future: Send + 'static,
+        B: http_body::Body<Data = bytes::Bytes> + Send + 'static,
+        B::Error: Into<super::body::BoxError>,
+    {
+        self.inner = self
+            .inner
+            .fallback_service(super::service::BackendService(service));
+        self
+    }
+
     pub fn with_state<S2: Clone + Send + Sync + 'static>(self, state: S) -> Router<S2> {
         Router {
             inner: self.inner.with_state(state),
@@ -91,7 +142,7 @@ where
 {
     type Future = Pin<Box<dyn Future<Output = axum::response::Response> + Send>>;
     fn call(self, request: axum::extract::Request, state: S) -> Self::Future {
-        let future = self.0.call(request.map(Body), state);
+        let future = self.0.call(super::service::request(request), state);
         Box::pin(async move { future.await.map(|body| body.0) })
     }
 }
@@ -129,5 +180,32 @@ impl Service<Request> for Router {
         let future =
             Service::<axum::extract::Request>::call(&mut self.inner, request.map(|body| body.0));
         Box::pin(async move { future.await.map(|response| response.map(Body)) })
+    }
+}
+
+/// The shared service passed to router layers. Backend route types stay private.
+#[derive(Clone, Debug)]
+pub struct Route(pub(crate) axum::routing::Route);
+impl Service<Request> for Route {
+    type Response = Response;
+    type Error = Infallible;
+    type Future = Pin<Box<dyn Future<Output = Result<Response, Infallible>> + Send>>;
+    fn poll_ready(&mut self, cx: &mut Context<'_>) -> Poll<Result<(), Infallible>> {
+        Service::<axum::extract::Request>::poll_ready(&mut self.0, cx)
+    }
+    fn call(&mut self, request: Request) -> Self::Future {
+        let future = self.0.call(request.map(|body| body.0));
+        Box::pin(async move { future.await.map(|response| response.map(Body)) })
+    }
+}
+
+pub fn any<H, T, S>(handler: H) -> MethodRouter<S>
+where
+    H: Handler<T, S>,
+    T: 'static,
+    S: Clone + Send + Sync + 'static,
+{
+    MethodRouter {
+        inner: axum::routing::any(Adapter(handler)),
     }
 }
