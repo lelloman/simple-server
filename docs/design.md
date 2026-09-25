@@ -136,7 +136,7 @@ in one optional, Axum-independent module with application-owned providers and po
 outcome counters, bounded storage and streaming-preserving HTTP admission.
 
 
-The [shared HTTP core](web-core.md) is now implemented with Pezzottify's five
+**Step 11 — Routing / HTTP core:** the [shared foundation](web-core.md) is implemented with Pezzottify's five
 embedding endpoints as its first canary. It supplies ordinary routing, handler,
 state/path/query/JSON and response contracts. The optional compatibility boundary
 is temporary; completing other route groups and middleware/streaming interfaces
