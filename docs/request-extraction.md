@@ -65,11 +65,12 @@ handlers and permission/rate middleware use `Extract<Session>` or
 `Extract<Option<Session>>`. Direct extraction in report admission calls the same
 trait. Its session source file no longer imports Axum.
 
-This is the custom-extraction foundation, not the complete public HTTP API.
-Routing, built-in state/path/query/body extractors, successful responses and
-middleware still use the transitional APIs. Buffered extraction rejections do
-not establish the streaming-response contract. Multipart, SSE, WebSockets and
-streaming need their own APIs before the Axum re-export can be removed.
+The [shared HTTP core](web-core.md) now adds routing, built-in state/path/query/JSON
+extractors and ordinary successful responses. Pezzottify's embedding endpoints
+are its first canary; other routes still use transitional APIs. General middleware,
+multipart, SSE, WebSockets and streaming need further interfaces before the Axum
+re-export can be removed. Buffered extraction rejections do not establish the
+streaming-response contract.
 
 Validation covers a standalone `extract` build, application state borrowed across
 an await, required/optional policy, repeated extraction, request-head mutations,

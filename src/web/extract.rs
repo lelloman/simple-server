@@ -1,0 +1,167 @@
+use super::Request;
+use crate::extract::{FromRequestParts, IntoRejectionResponse, Parts, RejectionResponse};
+use std::{convert::Infallible, future::Future};
+
+/// Select application substate without a framework-specific state trait.
+pub trait FromState<S> {
+    fn from_state(state: &S) -> Self;
+}
+
+impl<T: Clone> FromState<T> for T {
+    fn from_state(state: &T) -> Self {
+        state.clone()
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct State<T>(pub T);
+#[derive(Debug, Clone, Copy)]
+pub struct Path<T>(pub T);
+#[derive(Debug, Clone, Copy)]
+pub struct Query<T>(pub T);
+#[derive(Debug, Clone, Copy)]
+pub struct Json<T>(pub T);
+
+// Public only to permit inference of the body-vs-parts coherence marker. These
+// contain no framework types and applications normally never name them.
+#[doc(hidden)]
+pub enum ViaBody {}
+#[doc(hidden)]
+pub enum ViaParts {}
+
+/// A body-consuming extractor, permitted only as the final handler argument.
+/// Head-only extractors automatically implement this through a separate marker.
+pub trait FromRequest<S, M = ViaBody>: Sized {
+    type Rejection: IntoRejectionResponse;
+    fn from_request(
+        request: Request,
+        state: &S,
+    ) -> impl Future<Output = Result<Self, Self::Rejection>> + Send;
+}
+
+impl<S, T> FromRequest<S, ViaParts> for T
+where
+    S: Send + Sync,
+    T: FromRequestParts<S>,
+{
+    type Rejection = T::Rejection;
+    async fn from_request(request: Request, state: &S) -> Result<Self, Self::Rejection> {
+        let (mut parts, _) = request.into_parts();
+        T::from_request_parts(&mut parts, state).await
+    }
+}
+
+impl<S: Sync, T: FromState<S> + Send> FromRequestParts<S> for State<T> {
+    type Rejection = Infallible;
+    async fn from_request_parts(_: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
+        Ok(Self(T::from_state(state)))
+    }
+}
+
+fn rejection(status: http::StatusCode, text: String) -> RejectionResponse {
+    let mut response = status.into_rejection_response();
+    response.headers_mut().insert(
+        http::header::CONTENT_TYPE,
+        http::HeaderValue::from_static("text/plain; charset=utf-8"),
+    );
+    *response.body_mut() = text.into_bytes();
+    response
+}
+
+macro_rules! head_extractor {
+    ($name:ident) => {
+        impl<S, T> FromRequestParts<S> for $name<T>
+        where
+            S: Send + Sync,
+            T: serde::de::DeserializeOwned + Send,
+        {
+            type Rejection = RejectionResponse;
+            async fn from_request_parts(
+                parts: &mut Parts,
+                state: &S,
+            ) -> Result<Self, Self::Rejection> {
+                <axum::extract::$name<T> as axum::extract::FromRequestParts<S>>::from_request_parts(
+                    parts, state,
+                )
+                .await
+                .map(|value| Self(value.0))
+                .map_err(|error| rejection(error.status(), error.body_text()))
+            }
+        }
+    };
+}
+head_extractor!(Path);
+head_extractor!(Query);
+
+impl<S, T> FromRequest<S> for Json<T>
+where
+    S: Send + Sync,
+    T: serde::de::DeserializeOwned,
+{
+    type Rejection = RejectionResponse;
+    async fn from_request(request: Request, state: &S) -> Result<Self, Self::Rejection> {
+        <axum::Json<T> as axum::extract::FromRequest<S>>::from_request(
+            request.map(|body| body.0),
+            state,
+        )
+        .await
+        .map(|value| Self(value.0))
+        .map_err(|error| rejection(error.status(), error.body_text()))
+    }
+}
+
+impl<S: Sync> FromRequest<S> for Request {
+    type Rejection = Infallible;
+    async fn from_request(request: Request, _: &S) -> Result<Self, Self::Rejection> {
+        Ok(request)
+    }
+}
+
+macro_rules! body_extractor {
+    ($ty:ty) => {
+        impl<S: Send + Sync> FromRequest<S> for $ty {
+            type Rejection = RejectionResponse;
+            async fn from_request(request: Request, state: &S) -> Result<Self, Self::Rejection> {
+                <$ty as axum::extract::FromRequest<S>>::from_request(
+                    request.map(|body| body.0),
+                    state,
+                )
+                .await
+                .map_err(|error| rejection(error.status(), error.body_text()))
+            }
+        }
+    };
+}
+body_extractor!(String);
+body_extractor!(bytes::Bytes);
+
+impl<S: Sync> FromRequestParts<S> for http::HeaderMap {
+    type Rejection = Infallible;
+    async fn from_request_parts(parts: &mut Parts, _: &S) -> Result<Self, Self::Rejection> {
+        Ok(parts.headers.clone())
+    }
+}
+
+// Result captures a rejection explicitly, for applications that need to render
+// a custom error envelope. It does not suppress the error or turn it anonymous.
+impl<S, T> FromRequestParts<S> for Result<T, T::Rejection>
+where
+    S: Send + Sync,
+    T: FromRequestParts<S>,
+{
+    type Rejection = Infallible;
+    async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
+        Ok(T::from_request_parts(parts, state).await)
+    }
+}
+
+impl<S, T> FromRequest<S> for Result<T, T::Rejection>
+where
+    S: Send + Sync,
+    T: FromRequest<S>,
+{
+    type Rejection = Infallible;
+    async fn from_request(request: Request, state: &S) -> Result<Self, Self::Rejection> {
+        Ok(T::from_request(request, state).await)
+    }
+}

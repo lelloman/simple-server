@@ -8,6 +8,8 @@ readme = "README.md"
 publish = false
 
 [features]
+web = ["http", "extract", "dep:serde", "dep:bytes", "dep:http-body"]
+web-compat = ["web"]
 extract = ["dep:http"]
 auth-cookies = ["auth", "dep:cookie"]
 rate-limit-async = ["rate-limit", "dep:tokio", "tokio/rt"]
@@ -32,6 +34,8 @@ multipart = ["http", "axum/multipart"]
 ws = ["http", "axum/ws"]
 
 [dependencies]
+serde = { version = "1", optional = true }
+bytes = { version = "1", optional = true }
 cookie = { version = "0.18", features = ["percent-encode"], optional = true }
 cron = { version = "0.15", optional = true }
 chrono = { version = "0.4", default-features = false, features = ["std"], optional = true }
@@ -49,6 +53,7 @@ tracing = { version = "0.1", default-features = false, features = ["std"], optio
 tracing-subscriber = { version = "0.3", default-features = false, features = ["fmt", "env-filter", "ansi", "json"], optional = true }
 
 [dev-dependencies]
+serde = { version = "1", features = ["derive"] }
 bytes = "1"
 governor = { version = "0.10", default-features = false, features = ["std"] }
 governor_06 = { package = "governor", version = "0.6", default-features = false, features = ["std"] }

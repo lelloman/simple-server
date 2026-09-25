@@ -109,6 +109,18 @@ impl<T> Extract<T> {
     }
 }
 
+impl<S, T: FromRequestParts<S>> FromRequestParts<S> for Extract<T> {
+    type Rejection = T::Rejection;
+
+    fn from_request_parts(
+        parts: &mut Parts,
+        state: &S,
+    ) -> impl Future<Output = Result<Self, Self::Rejection>> + Send {
+        let future = T::from_request_parts(parts, state);
+        async move { future.await.map(Self) }
+    }
+}
+
 #[cfg(feature = "http")]
 impl<S, T> axum::extract::FromRequestParts<S> for Extract<T>
 where

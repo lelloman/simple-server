@@ -17,6 +17,10 @@
 #[cfg(feature = "http")]
 pub use axum;
 
+/// Framework-independent HTTP routing, handlers, extractors and responses.
+#[cfg(feature = "web")]
+pub mod web;
+
 /// Application-owned request extraction with an internal HTTP framework adapter.
 #[cfg(feature = "extract")]
 pub mod extract;

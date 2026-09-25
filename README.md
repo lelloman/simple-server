@@ -56,6 +56,12 @@ versions. Exact Axum uniformity requires the same pin across the adopted
 
 ## Initial scope
 
+The optional [`web` module](docs/web-core.md) provides shared routers, function
+handlers, state/path/query/JSON extraction and response/body types. Pezzottify's
+embedding endpoints are the first canary. The separately enabled `web-compat`
+feature supports temporary composition into existing routers; standalone shared
+routers do not need it.
+
 The optional [`extract` module](docs/request-extraction.md) provides a shared
 request-extraction trait and `Extract<T>` handler arguments. Applications own
 required/optional policies and rejection responses; the framework adapter lives
