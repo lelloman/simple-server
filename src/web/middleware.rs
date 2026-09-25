@@ -136,3 +136,25 @@ middleware!(A, B, C, D, E);
 middleware!(A, B, C, D, E, F1);
 middleware!(A, B, C, D, E, F1, G);
 middleware!(A, B, C, D, E, F1, G, H);
+
+/// Map downstream responses, including handler extraction failures.
+pub fn map_response<F, Fut, R>(function: F) -> FromFnLayer<ResponseMapper<F>, (), ()>
+where
+    F: FnOnce(Response) -> Fut + Clone + Send + Sync + 'static,
+    Fut: Future<Output = R> + Send + 'static,
+    R: IntoResponse,
+{
+    from_fn(ResponseMapper(function))
+}
+#[derive(Clone)]
+pub struct ResponseMapper<F>(F);
+impl<F, Fut, R> Middleware<(), ()> for ResponseMapper<F>
+where
+    F: FnOnce(Response) -> Fut + Clone + Send + Sync + 'static,
+    Fut: Future<Output = R> + Send + 'static,
+    R: IntoResponse,
+{
+    fn call(self, request: Request, _: (), next: Next) -> ResponseFuture {
+        Box::pin(async move { (self.0)(next.run(request).await).await.into_response() })
+    }
+}

@@ -28,7 +28,7 @@ pub use crate::extract::{Extract, FromRequestParts, IntoRejectionResponse, Rejec
 pub use body::{Body, BodyError};
 pub use bytes::Bytes;
 pub use extract::{
-    ConnectInfo, Extension, FromRequest, FromState, Json, MatchedPath, Path, Query, State,
+    ConnectInfo, Extension, Form, FromRequest, FromState, Json, MatchedPath, Path, Query, State,
 };
 pub use handler::Handler;
 pub use http;

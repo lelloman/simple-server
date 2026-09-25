@@ -1,4 +1,5 @@
 pub use bytes::Bytes;
+pub use http_body::Body as HttpBody;
 use http_body::{Frame, SizeHint};
 use std::{
     fmt,

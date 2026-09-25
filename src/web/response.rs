@@ -119,3 +119,61 @@ where
         axum::response::IntoResponse::into_response((self.0, self.1, response)).map(Body)
     }
 }
+
+/// HTML bytes with the HTML UTF-8 content type.
+#[derive(Debug, Clone, Copy)]
+pub struct Html<T>(pub T);
+impl<T> IntoResponse for Html<T>
+where
+    Body: From<T>,
+{
+    fn into_response(self) -> Response {
+        (
+            [("content-type", "text/html; charset=utf-8")],
+            Body::from(self.0),
+        )
+            .into_response()
+    }
+}
+
+/// An HTTP redirect with a validated Location response header.
+#[derive(Debug, Clone)]
+pub struct Redirect(axum::response::Redirect);
+impl Redirect {
+    pub fn to(uri: &str) -> Self {
+        Self(axum::response::Redirect::to(uri))
+    }
+    pub fn temporary(uri: &str) -> Self {
+        Self(axum::response::Redirect::temporary(uri))
+    }
+    pub fn permanent(uri: &str) -> Self {
+        Self(axum::response::Redirect::permanent(uri))
+    }
+    pub fn status_code(&self) -> StatusCode {
+        self.0.status_code()
+    }
+    pub fn location(&self) -> &str {
+        self.0.location()
+    }
+}
+impl IntoResponse for Redirect {
+    fn into_response(self) -> Response {
+        axum::response::IntoResponse::into_response(self.0).map(Body)
+    }
+}
+impl<T: serde::Serialize> IntoResponse for super::Form<T> {
+    fn into_response(self) -> Response {
+        axum::response::IntoResponse::into_response(axum::Form(self.0)).map(Body)
+    }
+}
+impl<K, V, const N: usize> IntoResponse for [(K, V); N]
+where
+    K: TryInto<http::header::HeaderName>,
+    K::Error: std::fmt::Display,
+    V: TryInto<http::HeaderValue>,
+    V::Error: std::fmt::Display,
+{
+    fn into_response(self) -> Response {
+        (self, ()).into_response()
+    }
+}

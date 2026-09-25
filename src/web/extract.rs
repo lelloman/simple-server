@@ -257,3 +257,50 @@ impl<S: Sync> FromRequestParts<S> for http::Uri {
         Ok(parts.uri.clone())
     }
 }
+
+/// URL-encoded forms: GET/HEAD read the query; other methods read the body.
+#[derive(Debug, Clone, Copy)]
+pub struct Form<T>(pub T);
+impl<S, T> FromRequest<S> for Form<T>
+where
+    S: Send + Sync,
+    T: serde::de::DeserializeOwned,
+{
+    type Rejection = RejectionResponse;
+    async fn from_request(request: Request, state: &S) -> Result<Self, Self::Rejection> {
+        <axum::Form<T> as axum::extract::FromRequest<S>>::from_request(
+            request.map(|body| body.0),
+            state,
+        )
+        .await
+        .map(|value| Self(value.0))
+        .map_err(|error| rejection(error.status(), error.body_text()))
+    }
+}
+
+/// Extract the cookie jar installed by Tower's CookieManagerLayer.
+/// Cookie policy, parsing and response deltas remain owned by tower-cookies.
+#[cfg(feature = "tower-cookies")]
+impl<S: Send + Sync> FromRequestParts<S> for tower_cookies::Cookies {
+    type Rejection = RejectionResponse;
+    async fn from_request_parts(parts: &mut Parts, _: &S) -> Result<Self, Self::Rejection> {
+        parts.extensions.get::<Self>().cloned().ok_or_else(|| {
+            rejection(
+                http::StatusCode::INTERNAL_SERVER_ERROR,
+                "Can't extract cookies. Is `CookieManagerLayer` enabled?".to_owned(),
+            )
+        })
+    }
+}
+
+impl<T> std::ops::Deref for Json<T> {
+    type Target = T;
+    fn deref(&self) -> &T {
+        &self.0
+    }
+}
+impl<T> std::ops::DerefMut for Json<T> {
+    fn deref_mut(&mut self) -> &mut T {
+        &mut self.0
+    }
+}

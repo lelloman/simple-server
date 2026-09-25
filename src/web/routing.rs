@@ -279,3 +279,22 @@ where
         inner: axum::routing::get_service(super::service::BackendService(service)),
     }
 }
+
+impl<S: Clone + Send + Sync + 'static> MethodRouter<S> {
+    /// Apply a Tower layer to this method router, including its method fallback.
+    pub fn layer<L, B>(mut self, layer: L) -> Self
+    where
+        L: tower_layer::Layer<Route> + Clone + Send + Sync + 'static,
+        L::Service: Service<Request, Response = http::Response<B>, Error = Infallible>
+            + Clone
+            + Send
+            + Sync
+            + 'static,
+        <L::Service as Service<Request>>::Future: Send + 'static,
+        B: http_body::Body<Data = bytes::Bytes> + Send + 'static,
+        B::Error: Into<super::body::BoxError>,
+    {
+        self.inner = self.inner.layer(super::service::BackendLayer(layer));
+        self
+    }
+}

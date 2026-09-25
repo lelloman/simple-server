@@ -198,3 +198,30 @@ consumers requiring owned multipart fields. It retains axum-extra parsing,
 extractor body limits, rejection text, and runtime field exclusivity. Its field
 and error types remain an explicit protocol compatibility boundary; this is not
 yet complete multipart abstraction. The existing borrowed `Multipart` is unchanged.
+
+### Browser and OAuth consumers
+
+`web::Form<T>` preserves URL-encoded form behavior: GET/HEAD parse the query;
+other methods require the form content type and parse the limited request body.
+Parsing errors retain their HTTP status and text through `RejectionResponse`.
+`Form<T>` can also render an encoded response. `Json<T>` supports field access
+through `Deref`/`DerefMut` in addition to tuple destructuring.
+
+`web::response::Html<T>` sets the HTML UTF-8 content type. `Redirect` provides
+303 (`to`), 307 (`temporary`) and 308 (`permanent`) responses, retaining an HTTP
+500 for a Location value invalid as a header. Header arrays may be returned
+without an explicit body, including `(StatusCode, headers)` OAuth redirects.
+
+`MethodRouter::layer` scopes a standard Tower layer to an individual method
+router. `middleware::map_response` maps the downstream response, including
+extractor failures; its function takes a shared `Response` and returns an async
+shared `IntoResponse` value. Readiness remains handled by the existing `Next`
+adapter, and bodies are not collected or otherwise inspected.
+
+The opt-in `tower-cookies` feature implements the shared head-extraction trait
+for `tower_cookies::Cookies`. The existing `CookieManagerLayer` owns parsing,
+jar mutation and `Set-Cookie` output. A missing layer returns the same HTTP 500
+text; no authentication policy or cookie defaults are introduced. Consumers can
+disable tower-cookies' Axum extractor feature. This adapter is separate from
+`auth` credential selection: it also serves unauthenticated browser flows and
+response cookie mutations.

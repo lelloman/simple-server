@@ -8,6 +8,7 @@ readme = "README.md"
 publish = false
 
 [features]
+tower-cookies = ["web", "dep:tower-cookies"]
 web = ["http", "extract", "dep:serde", "dep:bytes", "dep:http-body", "dep:tower-layer", "dep:tower", "dep:futures-util"]
 web-compat = ["web"]
 extract = ["dep:http"]
@@ -35,6 +36,7 @@ multipart = ["http", "axum/multipart"]
 ws = ["http", "axum/ws"]
 
 [dependencies]
+tower-cookies = { version = "0.11", default-features = false, optional = true }
 axum-extra = { version = "0.10", features = ["multipart"], optional = true }
 tower = { version = "0.5", features = ["util"], optional = true }
 serde = { version = "1", optional = true }

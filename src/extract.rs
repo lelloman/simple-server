@@ -137,3 +137,15 @@ where
             .map_err(IntoRejectionResponse::into_rejection_response)
     }
 }
+
+impl IntoRejectionResponse for (StatusCode, &'static str) {
+    fn into_rejection_response(self) -> RejectionResponse {
+        let mut response = RejectionResponse::new(self.1.as_bytes().to_vec());
+        *response.status_mut() = self.0;
+        response.headers_mut().insert(
+            header::CONTENT_TYPE,
+            HeaderValue::from_static("text/plain; charset=utf-8"),
+        );
+        response
+    }
+}
