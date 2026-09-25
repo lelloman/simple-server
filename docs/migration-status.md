@@ -19,20 +19,21 @@ All 17 services have been assessed. The five final consumers now use shared
 policies for their remaining quotas and pacing; application storage and transaction
 ownership are preserved. Test limitations are recorded in the completion evidence.
 
-**Routing / HTTP core (11):** **4 Done, 0 Partial, 13 Pending**. Pezzottify, Androidoscopy, Crumbles and Fausto now
+**Routing / HTTP core (11):** **5 Done, 0 Partial, 12 Pending**. Pezzottify, Androidoscopy, Crumbles, Fausto and lello-auth now
 use shared APIs for all production route groups, ordinary handlers, built-in
 extractors, response adapters and router assembly. Done excludes explicitly
 tracked protocol compatibility boundaries. Pending records unverified adoption,
 not a claim that the shared API already supports every service's needs.
 See the [contract](web-core.md) and [completion evidence](#pezzottify-routing-completion--2026-09-25).
 
-**Latest integration (2026-09-25):** Fausto `master` at `b106e99`, using shared
-`5deb6de`, completes server and plugin routing. Plugin API version 2 requires
-rebuilding dynamic plugins. Workspace: **663 passed, ten existing ignores**;
-Swagger-enabled contracts: **four passed**; real dynamic-plugin smoke passes.
-Shared: **243 tests/doctests**, strict Clippy and minimal-feature build pass.
-Owned multipart, WebSocket, tracing and test compatibility boundaries remain.
-See the [Fausto verification record](#fausto-routing-completion--2026-09-25).
+**Latest integration (2026-09-25):** lello-auth `master` at `3d9569f`, using shared
+`18482f4`, completes the server, public embedding API and three HTTP examples.
+No direct Axum interfaces remain in its Rust code or tests. Workspace:
+**989 passed, 22 existing ignores**, strict Rust 1.88 Clippy with CI allowances;
+all examples compile. Shared: **248 tests/doctests**, strict Clippy and minimal
+cookie-feature build pass. The initial baseline SQLite concurrency failure passed
+on rerun and in the final full suite. Axum remains internal to simple-server.
+See the [lello-auth verification record](#lello-auth-routing-completion--2026-09-25).
 
 **Next execution order:** complete and verify Axum removal from every consumer →
 revisit Step 07 database helpers. Step numbers are retained; Step 07 is deferred,
@@ -53,7 +54,7 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | androidoscopy | `server`; Android SDK pairing | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (no served probe) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; controller + LAN access)** | **Done (local; device JNI pairing gate)** | **Done (all production route groups)** | Controller and legacy WebSocket protocol types/upgrade compatibility; axum-server TLS configuration, serving and shutdown handle, including TLS test fixture. Production routing, dashboard responses and ordinary HTTP tests now use shared APIs. |
 | crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; durable primitives)** | **Done (local; retry primitives)** | **Done (local; main + integration)** | **Done (local; HTTP + MCP + durable dispatcher)** | **Done (both servers)** | Multipart fields/errors; realtime WebSocket socket/message types; explicit tracing compatibility adapter. Both servers, MCP/health service mounting, auth/CSRF, metrics, static responses and HTTP fixtures now use shared APIs. |
 | fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; dynamic cron)** | N/A (assessed) | **Done (local; HTTP + WebSocket + admin/write)** | **Done (local; five API tiers)** | **Done (local)** | Owned multipart fields/errors; WebSocket socket/message types; tracing compatibility; axum-test transport and parser oracles. Server, plugin API v2, both plugins, Swagger, validation and streamed responses use shared routing APIs. Dynamic plugins require rebuilding. |
-| lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (Rust; Caddy owns CORS) | **Done (local; scoped)** | **Done (local; webhook scope)** | **Done (local; capacity)** | **Done (local; retry scope)** | **Done (local; sessions + resource/admin access)** | **Done (endpoint budgets + persisted device polling)** | Pending | Public integration crate returns Axum routers; OAuth/OIDC forms, redirects, templates and cookies; trusted-proxy extractors; embedded examples and axum-test. |
+| lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (Rust; Caddy owns CORS) | **Done (local; scoped)** | **Done (local; webhook scope)** | **Done (local; capacity)** | **Done (local; retry scope)** | **Done (local; sessions + resource/admin access)** | **Done (endpoint budgets + persisted device polling)** | **Done (local)** | No direct Axum interfaces remain in production Rust, examples or tests. Server, embedding API and all three HTTP examples use shared routing, forms, HTML/redirects, cookie extraction and peer-aware serving. The lello-auth-axum crate name is retained; Axum is internal to simple-server. |
 | lellostore | `backend` | **Done** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; OIDC + admin)** | N/A (no inbound admission policy) | Pending | Custom auth extractors; multipart uploads; streamed downloads; catalog WebSockets; static files; axum-test multipart/WebSocket helpers and OIDC mocks. |
 | meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; pipeline/gateway)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; weighted claims)** | **Done (local; budgets/retry)** | **Done (local; all three services)** | **Done (local; gateway budgets)** | Pending | API, gateway and pipeline control routers; proxy headers/client identity; byte responses and static fallbacks; custom middleware and mock upstreams. |
 | observo | `observo-server`; standalone extractor logging | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (no served probe) | **Done (local; scoped)** | **Done (local; primitives)** | N/A (assessed) | **Done (local; IP/key/JWT access)** | N/A (no request quota) | Pending | JSON/HTML/forms and redirects; auth middleware; client-address access; plugin request/body proxying and bounded body reads. |
@@ -3960,3 +3961,57 @@ this is a partial rollout of the HTTP abstraction, not full Axum removal.
   its source/tracker migration commits. Verified ancestry and equality with the
   tested trees. Owned worktrees/branches and `/tmp/fausto-routing` targets/logs
   removed. No push or deployment; unrelated branches/worktrees preserved.
+
+
+## lello-auth routing completion — 2026-09-25
+
+- Applicability: standalone server, public `lello-auth-axum` integration crate,
+  embedded example, external OIDC example and webhook example exposed backend
+  routers, handlers, extractors and responses. The independent auth-helper has no
+  HTTP server and is outside this migration. Active branch `master` started at
+  `dee2d2b`; shared `main` started at `a2270c2`.
+- Implemented in isolated sibling worktrees. Shared source revision:
+  `18482f43f705c27c336fa9ebd0a6812ce957d566`; consumer commit `3d9569f`.
+  Active README and all CI sibling-checkout pins select that shared revision.
+- All route assembly, OAuth/OIDC forms, JSON, redirects, Askama HTML, static files,
+  health/metrics, authentication/session middleware and custom request extractors
+  now use shared contracts. Server and HTTP test harness retain direct transport
+  peer metadata for the unchanged trusted-proxy policy. All three examples use
+  shared routing and lifecycle serving.
+- Extended simple-server with `Form`, `Html`, `Redirect`, standalone header-array
+  responses, method-router layers, response mapping, tuple text rejections and
+  JSON field access. Optional `tower-cookies` extracts the existing jar without
+  changing cookie policy or response delta handling. Its backend extractor
+  feature is disabled; unused axum-test/Axum macros/body-test dependencies removed.
+- No direct Axum interfaces remain in production Rust, examples or tests. The
+  reverse normal dependency tree shows Axum 0.8.9 only under simple-server. The
+  public crate name remains `lello-auth-axum`; consumers must now compose its
+  routes with `simple_server::web::Router`. No legacy router adapter is used.
+- Baseline initially encountered SQLite `database is locked` in
+  `sqlite_native_approval_contract`, before any source edits. Targeted rerun passed
+  and all initially skipped suites were completed. Completed baseline: **989
+  passed, 22 ignored**, including doctests. Final full `cargo test --workspace
+  --no-fail-fast`: **989 passed, 22 ignored**, including that concurrency test.
+  Existing external PostgreSQL fixtures and ignored doctests were not enabled.
+- Existing real-HTTP suites cover login/logout, consent, OAuth/device/token flows,
+  account/profile/admin operations, cookies/CSRF, trusted proxies and lifecycle.
+  All three standalone examples compile before/after using offline resolution;
+  they have no tracked lockfiles. Existing external-OIDC example warnings remain.
+- Strict workspace/all-target Clippy passes on declared Rust **1.88.0**, using
+  CI's existing `large_enum_variant` and `too_many_arguments` allowances. Full
+  tests used the installed stable toolchain. Formatting/diff checks and all four
+  `tests/ci_contract.py` checks pass.
+- Shared baseline **243**, final **248 tests/doctests**. Five new contracts cover
+  GET/HEAD/body form parsing, missing/wrong content type, malformed/duplicate
+  fields, limits, HTML/encoded forms, redirect/error responses, multiple cookies,
+  removal/attributes, missing cookie layer, response mapping on extractor failure
+  and per-method body-limit scope. Strict all-feature/all-target Clippy and a
+  minimal `tower-cookies` feature build pass.
+- Docker/browser release gates, external PostgreSQL fixtures and unrelated
+  auth-helper suites were not run; previous migration E2E results are historical.
+- Integration: `master` rebased onto `3d9569f`; shared `main` rebased onto its
+  source/tracker migration commits. Ancestry and tested-tree equality verified.
+  Three pre-existing untracked identity-provider research files were preserved
+  byte-for-byte. The existing release branch and old detached worktree record
+  were preserved. Owned worktrees/branches and `/tmp/lello-auth-routing` build/log
+  artifacts removed. Nothing pushed or deployed.
