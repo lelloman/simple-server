@@ -33,7 +33,7 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 
 | Project | Server components | 1. Axum centralization | 2. Lifecycle / main() | 03a. Logging | 03b. Correlation | 03c. HTTP tracing | 04a. Body limits | 04b. Response headers | 04c. CORS | 05. Health/readiness | 06a. Task ownership | 06b. Scheduling | 06c. Execution policies | 08/09. Auth | 10. Rate limiting | Remaining Axum exposure |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local canary)** | **Done (local; scoped canary)** | N/A (assessed) | N/A (no served probe) | **Done (local; scoped canary)** | **Done (local; primitives)** | **Done (local; primitives)** | **Done (local; sessions + route permissions)** | **Done (HTTP, MCP, durable quotas + outbound pacing)** | Cookies/session extractors; multipart ingestion; range-based audio streaming; SSE search; MCP and sync WebSockets; body-sensitive middleware and state extraction. |
+| pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local canary)** | **Done (local; scoped canary)** | N/A (assessed) | N/A (no served probe) | **Done (local; scoped canary)** | **Done (local; primitives)** | **Done (local; primitives)** | **Done (local; sessions + route permissions)** | **Done (HTTP, MCP, durable quotas + outbound pacing)** | Cookie/header authentication shared (25 Sep); Session extractor bridges still use Axum. Multipart ingestion; range-based audio streaming; SSE search; MCP and sync WebSockets; body-sensitive middleware and state extraction. |
 | favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local canary)** | **Done (local; request work)** | **Done (local; bounded batches)** | **Done (local; retry scope)** | **Done (local canary)** | **Done (local; global + endpoint budgets)** | Multipart fields used across application modules; WebSockets; file responses; custom error and rate-limit middleware; real HTTP/WebSocket tests. |
 | androidoscopy | `server`; Android SDK pairing | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (no served probe) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; controller + LAN access)** | **Done (local; device JNI pairing gate)** | Controller and legacy WebSockets; dashboard responses; axum-server TLS serving and shutdown controls; TLS/WebSocket test fixtures. |
 | crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; durable primitives)** | **Done (local; retry primitives)** | **Done (local; main + integration)** | **Done (local; HTTP + MCP + durable dispatcher)** | Auth/session/CSRF extractors; multipart attachments; WebSockets; route-aware metrics; MCP service mounting; static bodies and HTTP test fixtures. |
@@ -3613,3 +3613,55 @@ graph with only `auth` contains HTTP/Tower primitives and no Axum/Tokio. The
 initial sandbox run could not bind loopback; the full suite passed with socket
 access. HTML rendering, observation parity and links were checked. No consumer
 adoption or deployment is claimed.
+
+
+## Pezzottify cookie auth integration — 2026-09-25
+
+Clean `dev` advanced from `4a7e9ee190820352ba278fa663da1f11666432ef` to
+`5a1db7c95d4a0c8dddfe3c3c4d91b7881ab63d06`. Its active CI/build pin is shared
+`d7e8d133bfc67b62b93d2679fe27610de0dfda99`, already integrated on simple-server
+`main`. `AuthLayer::credentials` now owns header/cookie selection and calls the
+existing Pezzottify verifier through `authenticate` at the current lazy Session
+extraction points. Source metadata is retained as `Identity<Session>` and fresh
+validation runs each time; public requests do not gain global auth side effects.
+
+Authorization retains priority, duplicate/invalid-text rejection without cookie
+fallback, token68 grammar, extra Bearer spaces and the legacy-raw setting.
+Application validation still tries OIDC then database sessions. Required sessions
+retain 401 behavior; optional sessions retain anonymous invalid-credential behavior;
+database failures still use the existing error responses. Shared Optional mode
+itself remains strict about supplied invalid credentials; the consumer explicitly
+maps errors at its existing extraction boundary.
+
+The optional `auth-cookies` feature supplies decoded cookie compatibility and
+framework-independent Cookie/SameSite values. Percent decoding, empty values,
+ignored malformed pairs and last-duplicate selection match the original cookie
+jar. Session/CSRF reads and cookie issuance/expiration no longer require
+`axum-extra`; that dependency is removed from source, manifest and lockfile.
+Cookie attributes, CSRF checks/exemptions and login/logout response contracts
+remain application-owned and unchanged. The Axum Session/Option<Session> bridges
+and error response traits remain until the public handler API exists; this is
+not complete consumer Axum removal.
+
+Baseline unchanged consumer code against shared `9ff4476`: 32 session-focused
+tests and auth/MCP/permission HTTP suites 22/5/22 passed. Two added HTTP regressions
+passed before migration, covering encoded cookies, duplicate order, whitespace,
+empty cookies, extra Bearer spaces and optional anonymous sessions. Final full
+Rust suite with `fast` fixture features: **1,443 passed, 36 existing ignored**.
+This includes auth 22, MCP 5, permissions 22, CSRF, login/logout, executor error
+mapping, streaming, lifecycle and WebSocket checks. Production-target strict
+Clippy passed; all-target Clippy passed with warnings in unchanged enrichment
+and background-task tests plus the existing num-bigint-dig compatibility notice.
+Formatting and diff checks passed. Docker/browser/Android and external OIDC
+provider deployments were not run.
+
+Shared extension: **208 tests/doctests** and all-target strict Clippy passed;
+minimal auth tests also pass and the base auth dependency graph remains HTTP/Tower
+only. The new decoded mode is opt-in; strict cookie parsing remains the default.
+Its CookieValue can own decoded bytes without changing HeaderCredential's borrowed
+Credential interface. Lazy authenticate and Tower serving use the same gate.
+
+The original dev branch was rebased onto the migration branch and exact tree and
+ancestry verified. Its owned migration worktree/branch were removed; pre-existing
+Paravoid worktrees were preserved. Both observation columns now distinguish
+completed cookie authentication from remaining Axum bridges. No push/deployment.
