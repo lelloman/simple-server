@@ -19,13 +19,13 @@ All 17 services have been assessed. The five final consumers now use shared
 policies for their remaining quotas and pacing; application storage and transaction
 ownership are preserved. Test limitations are recorded in the completion evidence.
 
-**Latest integration (2026-09-25):** Pezzottify session extraction is complete
-on `dev` at `c27e1bdc`, using shared `ce37b3d`. Required/optional Session
-implementations now use the shared extraction trait and handler wrapper; the
-session module has no Axum imports. Cookie/header selection remains shared.
-Consumer full suite: **1,443 passed, 36 existing ignored**; error-renderer suite:
-**7 passed**, including one new regression; shared: **211 passed**.
-See the [integration evidence](#pezzottify-session-extraction--2026-09-25).
+**Latest integration (2026-09-25):** shared HTTP core implemented; Pezzottify's
+five embedding endpoints migrated on `dev` at `bf825a5d`, using shared
+`64f31b4`. Their routers, handlers, state/path/query/JSON extraction and responses
+now use shared APIs. Two temporary compatibility conversions remain at the legacy
+router assembly boundary. Other route groups remain pending; this is a canary,
+not full Axum removal. See the [verification record](#pezzottify-http-core-canary--2026-09-25)
+and [API contract](web-core.md).
 
 **Next execution order:** complete and verify Axum removal from every consumer →
 revisit Step 07 database helpers. Step numbers are retained; Step 07 is deferred,
@@ -41,7 +41,7 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 
 | Project | Server components | 1. Axum centralization | 2. Lifecycle / main() | 03a. Logging | 03b. Correlation | 03c. HTTP tracing | 04a. Body limits | 04b. Response headers | 04c. CORS | 05. Health/readiness | 06a. Task ownership | 06b. Scheduling | 06c. Execution policies | 08/09. Auth | 10. Rate limiting | Remaining Axum exposure |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local canary)** | **Done (local; scoped canary)** | N/A (assessed) | N/A (no served probe) | **Done (local; scoped canary)** | **Done (local; primitives)** | **Done (local; primitives)** | **Done (local; sessions + route permissions)** | **Done (HTTP, MCP, durable quotas + outbound pacing)** | Routing, state/path/query extraction and response adapters; multipart ingestion; range-based audio streaming; SSE search; MCP and sync WebSockets; body-sensitive middleware and HTTP test fixtures. |
+| pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local canary)** | **Done (local; scoped canary)** | N/A (assessed) | N/A (no served probe) | **Done (local; scoped canary)** | **Done (local; primitives)** | **Done (local; primitives)** | **Done (local; sessions + route permissions)** | **Done (HTTP, MCP, durable quotas + outbound pacing)** | Routing, built-in extraction and response adapters outside the embedding API; legacy router assembly; multipart ingestion; range-based audio streaming; SSE search; MCP and sync WebSockets; body-sensitive middleware and HTTP test fixtures. |
 | favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local canary)** | **Done (local; request work)** | **Done (local; bounded batches)** | **Done (local; retry scope)** | **Done (local canary)** | **Done (local; global + endpoint budgets)** | Multipart fields used across application modules; WebSockets; file responses; custom error and rate-limit middleware; real HTTP/WebSocket tests. |
 | androidoscopy | `server`; Android SDK pairing | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (no served probe) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; controller + LAN access)** | **Done (local; device JNI pairing gate)** | Controller and legacy WebSockets; dashboard responses; axum-server TLS serving and shutdown controls; TLS/WebSocket test fixtures. |
 | crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; durable primitives)** | **Done (local; retry primitives)** | **Done (local; main + integration)** | **Done (local; HTTP + MCP + durable dispatcher)** | Auth/session/CSRF extractors; multipart attachments; WebSockets; route-aware metrics; MCP service mounting; static bodies and HTTP test fixtures. |
@@ -3734,7 +3734,55 @@ integration trees/ancestry verified, and owned worktrees, branches, build target
 and logs removed. Unrelated Pezzottify Paravoid worktrees are preserved. Both
 observation columns list only remaining exposure. No push or deployment.
 
-This completes the custom Session extraction slice, not full Axum removal.
-Routing, built-in state/path/query/body extraction, successful-response adapters,
-body-sensitive middleware, multipart, range streaming, SSE, WebSockets and HTTP
-test fixtures still require shared interfaces. Step/module totals are unchanged.
+This checkpoint completed the custom Session extraction slice, not full Axum
+removal. The HTTP-core canary below subsequently adds ordinary routing, built-in
+extraction and responses for the embedding API. Other route groups, general
+middleware and streaming remain outstanding. Step/module totals are unchanged.
+
+
+## Pezzottify HTTP core canary — 2026-09-25
+
+Shared implementation **`64f31b41f36617f0269d14248f284c34c7dffe17`** adds opt-in
+`web`: owned Router/MethodRouter and Handler contracts, state/substate, path/query,
+JSON/bytes/string/raw-request extraction, response conversion, private body
+representation and Tower serving. With lifecycle enabled, the shared router serves
+HTTP with explicit graceful shutdown. Existing shared body limits can be applied
+without backend types. See the [contract and remaining scope](web-core.md).
+
+Pezzottify `dev` is integrated at **`bf825a5d`** from clean `c27e1bdc`; its
+active checkout/CI pin is `64f31b4`. Five embedding handlers and both route
+constructors now use shared APIs. The embedding source has no Axum imports or
+public type/trait exposure. An ApiError implementation delegates to the existing
+single buffered renderer. Two opt-in `web-compat` conversions remain only at
+legacy route assembly, preserving state, permissions, rate limits, CSRF and route
+placement. No other services were changed.
+
+Verification:
+
+- Baseline consumer `c27e1bdc` with shared `9e1c067`: auth **22**, permissions **22**,
+  route composition **3**, all passed. Three new real HTTP embedding contract
+  tests were committed first as `f85af6a3` and passed against the original handlers.
+- The same **50** targeted tests pass after migration. New coverage exercises
+  CRUD/search, percent-encoded namespace, optional vector query, response data,
+  204/404/error IDs, anonymous/permission/CSRF rejection, media type/JSON/query
+  errors, body limits and application validation.
+- Final full consumer suite: **1,447 passed, 36 existing ignored**, no failures. Production strict Clippy passed;
+  all-target Clippy passed with existing warnings in unchanged enrichment and
+  background-task tests plus the num-bigint-dig compatibility notice. Changed-file
+  formatting and both repositories’ diff checks passed. Tests use private targets,
+  two jobs, disabled dev debug information, offline locked dependencies and the
+  `fast` fixture feature. Docker/browser/Android and deployed OIDC providers were
+  not exercised.
+- Shared full suite: **222 tests/doctests passed**, including nine new HTTP-core
+  tests and two compile-fail body-ordering checks. Strict all-target Clippy,
+  formatting, standalone `web` and standalone `extract` checks passed.
+  Differential tests preserve nested routing, HEAD/405/Allow, static route
+  priority, JSON/path/query error bytes, limits and response metadata. Tests also
+  cover ordered custom extraction, early rejection without body reads, explicit
+  rejection capture, substate, sixteen arguments and real HTTP serving/shutdown.
+
+Both base branches were rebased onto their worktree branches and exact trees and
+ancestry verified. Owned worktrees, branches, build targets and logs were removed;
+unrelated Pezzottify worktrees remain. Both tracker observations list outstanding
+scope only. No push or deployment. Existing numbered-step totals are unchanged:
+this is a partial rollout of the HTTP abstraction, not full Axum removal.

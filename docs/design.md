@@ -134,3 +134,10 @@ in one optional, Axum-independent module with application-owned providers and po
 
 [Step 10: rate limiting](step-10-rate-limiting.md) supplies optional budgets,
 outcome counters, bounded storage and streaming-preserving HTTP admission.
+
+
+The [shared HTTP core](web-core.md) is now implemented with Pezzottify's five
+embedding endpoints as its first canary. It supplies ordinary routing, handler,
+state/path/query/JSON and response contracts. The optional compatibility boundary
+is temporary; completing other route groups and middleware/streaming interfaces
+remains necessary before removing the Axum re-export.
