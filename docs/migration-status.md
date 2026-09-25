@@ -19,20 +19,21 @@ All 17 services have been assessed. The five final consumers now use shared
 policies for their remaining quotas and pacing; application storage and transaction
 ownership are preserved. Test limitations are recorded in the completion evidence.
 
-**Routing / HTTP core (11):** **2 Done, 0 Partial, 15 Pending**. Pezzottify and Androidoscopy now
+**Routing / HTTP core (11):** **3 Done, 0 Partial, 14 Pending**. Pezzottify, Androidoscopy and Crumbles now
 use shared APIs for all production route groups, ordinary handlers, built-in
 extractors, response adapters and router assembly. Done excludes explicitly
 tracked protocol compatibility boundaries. Pending records unverified adoption,
 not a claim that the shared API already supports every service's needs.
 See the [contract](web-core.md) and [completion evidence](#pezzottify-routing-completion--2026-09-25).
 
-**Latest integration (2026-09-25):** Androidoscopy `master` at `5e9a396`, using
-shared `cdb9e63`, completes controller, dashboard and legacy WebSocket routing.
-Shared Tower factories support its existing TLS adapter without router conversion.
-Server: **78 passed**; full-stack mock clients: **12 passed**; pairing bridge:
-**2 passed**. Shared: **234 tests/doctests**, strict Clippy and minimal-web tests.
-WebSocket protocol types and the TLS adapter remain explicit Axum exposure.
-See the [Androidoscopy verification record](#androidoscopy-routing-completion--2026-09-25).
+**Latest integration (2026-09-25):** Crumbles `master` at `23e47e0`, using shared
+`347e06e`, completes routing in both the main and integration servers. MCP and
+health mount as standard services; correlation supports shared HTTP bodies.
+Workspace: **1,444 passed, two existing ignores**, strict Clippy; production
+correlation smoke: **15 rejection cases**, tracing and clean shutdown pass.
+Shared: **239 tests/doctests**, strict Clippy and minimal-web checks. Multipart,
+WebSocket and tracing compatibility boundaries remain explicit.
+See the [Crumbles verification record](#crumbles-routing-completion--2026-09-25).
 
 **Next execution order:** complete and verify Axum removal from every consumer →
 revisit Step 07 database helpers. Step numbers are retained; Step 07 is deferred,
@@ -51,7 +52,7 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local canary)** | **Done (local; scoped canary)** | N/A (assessed) | N/A (no served probe) | **Done (local; scoped canary)** | **Done (local; primitives)** | **Done (local; primitives)** | **Done (local; sessions + route permissions)** | **Done (HTTP, MCP, durable quotas + outbound pacing)** | **Done (all production route groups)** | Multipart fields/errors; SSE search producers; MCP and sync WebSocket protocol types; backend tracing observer; independent HTTP mocks and error-renderer differential test. |
 | favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local canary)** | **Done (local; request work)** | **Done (local; bounded batches)** | **Done (local; retry scope)** | **Done (local canary)** | **Done (local; global + endpoint budgets)** | Pending | Multipart fields used across application modules; WebSockets; file responses; custom error and rate-limit middleware; real HTTP/WebSocket tests. |
 | androidoscopy | `server`; Android SDK pairing | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (no served probe) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; controller + LAN access)** | **Done (local; device JNI pairing gate)** | **Done (all production route groups)** | Controller and legacy WebSocket protocol types/upgrade compatibility; axum-server TLS configuration, serving and shutdown handle, including TLS test fixture. Production routing, dashboard responses and ordinary HTTP tests now use shared APIs. |
-| crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; durable primitives)** | **Done (local; retry primitives)** | **Done (local; main + integration)** | **Done (local; HTTP + MCP + durable dispatcher)** | Pending | Auth/session/CSRF extractors; multipart attachments; WebSockets; route-aware metrics; MCP service mounting; static bodies and HTTP test fixtures. |
+| crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; durable primitives)** | **Done (local; retry primitives)** | **Done (local; main + integration)** | **Done (local; HTTP + MCP + durable dispatcher)** | **Done (both servers)** | Multipart fields/errors; realtime WebSocket socket/message types; explicit tracing compatibility adapter. Both servers, MCP/health service mounting, auth/CSRF, metrics, static responses and HTTP fixtures now use shared APIs. |
 | fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; dynamic cron)** | N/A (assessed) | **Done (local; HTTP + WebSocket + admin/write)** | **Done (local; five API tiers)** | Pending | Public plugin interface returns an Axum Router; validated JSON/rejections; axum-extra multipart; streamed downloads/federation; WebSockets; axum-test. |
 | lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (Rust; Caddy owns CORS) | **Done (local; scoped)** | **Done (local; webhook scope)** | **Done (local; capacity)** | **Done (local; retry scope)** | **Done (local; sessions + resource/admin access)** | **Done (endpoint budgets + persisted device polling)** | Pending | Public integration crate returns Axum routers; OAuth/OIDC forms, redirects, templates and cookies; trusted-proxy extractors; embedded examples and axum-test. |
 | lellostore | `backend` | **Done** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; OIDC + admin)** | N/A (no inbound admission policy) | Pending | Custom auth extractors; multipart uploads; streamed downloads; catalog WebSockets; static files; axum-test multipart/WebSocket helpers and OIDC mocks. |
@@ -3871,3 +3872,41 @@ this is a partial rollout of the HTTP abstraction, not full Axum removal.
   dedicated migration branches; ancestry and tested trees verified. Owned
   worktrees, branches and `/tmp/androidoscopy-routing` targets/logs removed.
   No push or deployment; unrelated user work preserved.
+
+## Crumbles routing completion — 2026-09-25
+
+- Applicability: main API/metrics/static/WebSocket routes, MCP service mounting,
+  and crumbles-integration control routes still exposed backend routing. Active
+  `master` started clean at `25a7ef1`; integration commit **`23e47e0`**.
+- Shared source **`347e06efcdef9423b481922dce929014db3f281d`** adds `nest_service`,
+  `get_service`, method-specific fallbacks, Uri/optional Extension extraction and
+  `Correlation::run_http` over arbitrary standard bodies. Existing backend
+  correlation entry points remain compatible. Shared pin/README updated.
+- Both production servers, ordinary handlers/extractors/responses, auth/CSRF
+  middleware, metrics/peer metadata, static/SPA responses, health, HTTP fixtures
+  and mocks now use shared APIs. MCP mounts its standard RMCP Tower service with
+  unchanged auth, quotas, host/origin and body policy. No legacy router conversion.
+- AuthError implements shared rejection rendering; ordinary errors and extractor
+  errors use the same canonical buffered JSON payload. Required/optional session
+  policy, database lookups, permissions and correlation IDs are preserved.
+- Workspace baseline/final: **1,444 passed, two existing ignores**. Includes main
+  server, core and integration suites, generated method/path route contracts,
+  MCP auth/tools, multipart failure/rollback/limits, downloads, browser CSRF,
+  login abuse/peer rates, metrics, headers/CORS, WebSockets and tracing.
+- Strict `cargo clippy --offline --locked --workspace --all-targets -- -D warnings`,
+  formatting and diff checks pass. Production-process correlation script passes
+  **15 rejection cases**, safe HTTP tracing, query redaction and clean shutdown.
+- Shared: baseline **234**, final **239 tests/doctests**, strict all-feature,
+  all-target Clippy; **three minimal-web tests** pass. Five new regression tests
+  cover nested service prefix/query/auth behavior, fallback HEAD/405 contracts,
+  optional extensions, opaque-body correlation and shared health-service routing.
+- Remaining exposure: multipart field/error types, realtime WebSocket socket and
+  message types, and the explicit tracing compatibility adapter. Full Axum removal
+  remains incomplete; Step 11 production routing is Done for both components.
+- Builds used offline/locked dependencies, two jobs, isolated targets and disabled
+  dev debug information. Existing local frontend build assets were copied into
+  the worktree and used unchanged before/after. Browser/Android suites were not
+  run. Dependency tree confirms Axum 0.8.9 via simple-server.
+- Original `master` and shared `main` rebased onto dedicated migration branches;
+  ancestry and tested trees verified. Owned worktrees/branches and
+  `/tmp/crumbles-routing` build/log files removed. No push or deployment.
