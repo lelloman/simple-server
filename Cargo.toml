@@ -8,6 +8,7 @@ readme = "README.md"
 publish = false
 
 [features]
+extract = ["dep:http"]
 auth-cookies = ["auth", "dep:cookie"]
 rate-limit-async = ["rate-limit", "dep:tokio", "tokio/rt"]
 rate-limit = ["dep:http", "dep:http-body", "dep:tower-layer", "dep:tower-service", "dep:pin-project-lite"]

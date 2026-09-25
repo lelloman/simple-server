@@ -56,6 +56,12 @@ versions. Exact Axum uniformity requires the same pin across the adopted
 
 ## Initial scope
 
+The optional [`extract` module](docs/request-extraction.md) provides a shared
+request-extraction trait and `Extract<T>` handler arguments. Applications own
+required/optional policies and rejection responses; the framework adapter lives
+inside simple-server. This is the first custom-extraction foundation toward the
+complete HTTP abstraction, not a replacement for routing or streaming APIs yet.
+
 Lifecycle, logging, request correlation and HTTP tracing helpers are available now.
 
 [Step 03: observability](docs/step-03-observability.md) is split into independently

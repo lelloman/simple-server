@@ -17,6 +17,10 @@
 #[cfg(feature = "http")]
 pub use axum;
 
+/// Application-owned request extraction with an internal HTTP framework adapter.
+#[cfg(feature = "extract")]
+pub mod extract;
+
 #[cfg(feature = "lifecycle")]
 pub mod lifecycle;
 
