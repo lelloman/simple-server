@@ -19,21 +19,21 @@ All 17 services have been assessed. The five final consumers now use shared
 policies for their remaining quotas and pacing; application storage and transaction
 ownership are preserved. Test limitations are recorded in the completion evidence.
 
-**Routing / HTTP core (11):** **5 Done, 0 Partial, 12 Pending**. Pezzottify, Androidoscopy, Crumbles, Fausto and lello-auth now
+**Routing / HTTP core (11):** **6 Done, 0 Partial, 11 Pending**. Pezzottify, Androidoscopy, Crumbles, Fausto, lello-auth and lellostore now
 use shared APIs for all production route groups, ordinary handlers, built-in
 extractors, response adapters and router assembly. Done excludes explicitly
 tracked protocol compatibility boundaries. Pending records unverified adoption,
 not a claim that the shared API already supports every service's needs.
 See the [contract](web-core.md) and [completion evidence](#pezzottify-routing-completion--2026-09-25).
 
-**Latest integration (2026-09-25):** lello-auth `master` at `3d9569f`, using shared
-`18482f4`, completes the server, public embedding API and three HTTP examples.
-No direct Axum interfaces remain in its Rust code or tests. Workspace:
-**989 passed, 22 existing ignores**, strict Rust 1.88 Clippy with CI allowances;
-all examples compile. Shared: **248 tests/doctests**, strict Clippy and minimal
-cookie-feature build pass. The initial baseline SQLite concurrency failure passed
-on rerun and in the final full suite. Axum remains internal to simple-server.
-See the [lello-auth verification record](#lello-auth-routing-completion--2026-09-25).
+**Latest integration (2026-09-25):** lellostore `master` at `af3661e`, using shared
+`4db2399`, completes routing and streamed multipart adoption. Multipart readers,
+fields and errors now have fully shared public types, with borrowed and owned
+field variants available. LelloStore: **190 passed, eight existing ignores**,
+strict all-feature Clippy. Shared: **254 tests/doctests**, strict Clippy and both
+minimal multipart feature builds pass. WebSocket, tracing and test-transport
+compatibility boundaries remain; multipart is no longer a production gap here.
+See the [lellostore verification record](#lellostore-routing-completion--2026-09-25).
 
 **Next execution order:** complete and verify Axum removal from every consumer →
 revisit Step 07 database helpers. Step numbers are retained; Step 07 is deferred,
@@ -55,7 +55,7 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; durable primitives)** | **Done (local; retry primitives)** | **Done (local; main + integration)** | **Done (local; HTTP + MCP + durable dispatcher)** | **Done (both servers)** | Multipart fields/errors; realtime WebSocket socket/message types; explicit tracing compatibility adapter. Both servers, MCP/health service mounting, auth/CSRF, metrics, static responses and HTTP fixtures now use shared APIs. |
 | fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; dynamic cron)** | N/A (assessed) | **Done (local; HTTP + WebSocket + admin/write)** | **Done (local; five API tiers)** | **Done (local)** | Owned multipart fields/errors; WebSocket socket/message types; tracing compatibility; axum-test transport and parser oracles. Server, plugin API v2, both plugins, Swagger, validation and streamed responses use shared routing APIs. Dynamic plugins require rebuilding. |
 | lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (Rust; Caddy owns CORS) | **Done (local; scoped)** | **Done (local; webhook scope)** | **Done (local; capacity)** | **Done (local; retry scope)** | **Done (local; sessions + resource/admin access)** | **Done (endpoint budgets + persisted device polling)** | **Done (local)** | No direct Axum interfaces remain in production Rust, examples or tests. Server, embedding API and all three HTTP examples use shared routing, forms, HTML/redirects, cookie extraction and peer-aware serving. The lello-auth-axum crate name is retained; Axum is internal to simple-server. |
-| lellostore | `backend` | **Done** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; OIDC + admin)** | N/A (no inbound admission policy) | Pending | Custom auth extractors; multipart uploads; streamed downloads; catalog WebSockets; static files; axum-test multipart/WebSocket helpers and OIDC mocks. |
+| lellostore | `backend` | **Done** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; OIDC + admin)** | N/A (no inbound admission policy) | **Done (local)** | WebSocket socket/message types; tracing compatibility adapter; axum-test transport and multipart/WebSocket helpers. Routing, auth extraction, streamed downloads, static files and OIDC mocks use shared APIs. Multipart readers, fields and errors are now fully shared types. |
 | meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; pipeline/gateway)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; weighted claims)** | **Done (local; budgets/retry)** | **Done (local; all three services)** | **Done (local; gateway budgets)** | Pending | API, gateway and pipeline control routers; proxy headers/client identity; byte responses and static fallbacks; custom middleware and mock upstreams. |
 | observo | `observo-server`; standalone extractor logging | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (no served probe) | **Done (local; scoped)** | **Done (local; primitives)** | N/A (assessed) | **Done (local; IP/key/JWT access)** | N/A (no request quota) | Pending | JSON/HTML/forms and redirects; auth middleware; client-address access; plugin request/body proxying and bounded body reads. |
 | paranza | `apps/paranza-server` | **Done** | **Done (local; scoped)** | N/A (no logger) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; runner + PCM access)** | N/A (no implemented request quota) | Pending | Private router; state/path/query/raw-body extraction; response conversion and test helpers. Smallest core HTTP pilot; no observed WebSocket, SSE or multipart use. |
@@ -4015,3 +4015,56 @@ this is a partial rollout of the HTTP abstraction, not full Axum removal.
   byte-for-byte. The existing release branch and old detached worktree record
   were preserved. Owned worktrees/branches and `/tmp/lello-auth-routing` build/log
   artifacts removed. Nothing pushed or deployed.
+
+
+## lellostore routing completion — 2026-09-25
+
+- Applicability: API/metrics servers, public/admin upload and delivery routes,
+  custom auth extractors, static/range responses, mock OIDC binary and fixtures
+  used backend interfaces. Active `master` started clean at `2292617`; shared
+  `main` started clean at `4a28159`. Isolated sibling worktrees used throughout.
+- Shared source commit `4db239946d21d385d8c8835538710aff6c322189`; consumer
+  `af3661e`. README and CI sibling-source references updated to the tested source.
+- Migrated all ordinary routes/handlers, custom and built-in extraction, response
+  rendering, auth/metrics middleware, static fallbacks, health, streaming/range
+  downloads and API/metrics serving. Mock OIDC routes and fixture serving use
+  shared APIs; axum-test router conversion is confined to test transport.
+- Added `web::multipart::{Multipart, Field, OwnedMultipart, OwnedField,
+  MultipartError}`. Public parser/field/error contracts no longer name Axum or
+  axum-extra. Borrowed fields enforce exclusivity statically; owned fields retain
+  runtime exclusivity. Both expose metadata, standard headers, bytes/text,
+  chunks and Stream with shared errors. Limits and parser wire behavior preserved.
+- LelloStore APK/AAB, icon and VPK handlers use the new borrowed field API.
+  Streamed file writes, bounded metadata reads, file/application limits,
+  validation, storage and temporary-file cleanup remain consumer-owned. No
+  complete-upload buffering is introduced. Legacy compatibility multipart
+  adapters remain unchanged for consumers not yet migrated to the new API.
+- Added shared RawQuery preserving undecoded query strings and absence/empty
+  distinctions. WebSocket compatibility forwards existing frame/message limits
+  and retains subprotocol selection; socket/message types remain a separate gap.
+- Baseline default and all-feature suites: **189 passed, eight ignored** each.
+  Final all-feature suite: **190 passed, the same eight ignores**. Added real-HTTP
+  contract covers over-64-KiB metadata, duplicate files, missing files, invalid
+  UTF-8 and temporary-directory cleanup after every rejected upload. Existing
+  suites verify authenticated uploads/catalog events, publication/acquisition
+  policy, ranges, delivery WebSockets, OIDC and tracing.
+- All-target/all-feature strict Clippy, formatting and diff checks pass. Embedded
+  builds use an unchanged copy of the original ignored frontend/dist assets;
+  frontend sources were not rebuilt or changed. Six Android/toolchain/upstream
+  integration cases and two doctests remain ignored. Docker, Android and frontend
+  suites were not run.
+- Shared baseline **248**, final **254 tests/doctests**. Differential borrowed and
+  owned parser tests preserve metadata, binary content, malformed/boundary errors
+  and body limits. Streaming/drop test proves early chunk delivery and body
+  release. Raw query tests preserve encoding/duplicates; real HTTP tests verify
+  both oversized frames and fragmented-message limits. Strict Clippy and minimal
+  `web,multipart` / `multipart-owned` builds pass independently.
+- Remaining observations: WebSocket protocol types, tracing compatibility and
+  axum-test transport/helpers. Multipart is no longer a production Axum exposure
+  in lellostore; other services retain their current multipart observations until
+  they adopt the new shared field/error API.
+- Integration: lellostore `master` rebased onto `af3661e`; shared `main` rebased
+  onto its source/tracker migration commits. Verified ancestry and exact tested
+  tree equality. Owned worktrees/branches and `/tmp/lellostore-routing` targets,
+  copied assets and logs removed. Existing backup branch preserved. Nothing
+  pushed or deployed.
