@@ -434,3 +434,61 @@ async fn shared_router_serves_real_http_and_shuts_down() {
         .unwrap()
         .unwrap();
 }
+
+#[cfg(feature = "body-limit")]
+#[tokio::test]
+async fn optional_json_matches_backend_presence_errors_and_limits() {
+    use simple_server::axum as old;
+    async fn shared(value: Option<Json<Payload>>) -> Json<Option<Payload>> {
+        Json(value.map(|v| v.0))
+    }
+    async fn legacy(value: Option<old::Json<Payload>>) -> old::Json<Option<Payload>> {
+        old::Json(value.map(|v| v.0))
+    }
+    let shared = Router::new()
+        .route("/", post(shared))
+        .layer(simple_server::body_limit::BodyLimit::max(32));
+    let legacy: old::Router = old::Router::new()
+        .route("/", old::routing::post(legacy))
+        .layer(simple_server::body_limit::BodyLimit::max(32));
+    for (mime, body, expected) in [
+        (None, "", 200),
+        (None, "ignored without content type", 200),
+        (Some("application/json"), r#"{"value":"ok"}"#, 200),
+        (
+            Some("application/vnd.example+json"),
+            r#"{"value":"ok"}"#,
+            200,
+        ),
+        (Some("application/json"), "", 400),
+        (Some("application/json"), "{", 400),
+        (Some("application/json"), r#"{"value":42}"#, 422),
+        (Some("text/plain"), "", 415),
+        (
+            Some("application/json"),
+            r#"{"value":"this value exceeds the body limit"}"#,
+            413,
+        ),
+    ] {
+        let request = || {
+            let mut builder = Request::builder().method("POST").uri("/");
+            if let Some(mime) = mime {
+                builder = builder.header("content-type", mime);
+            }
+            builder.body(Body::from(body)).unwrap()
+        };
+        let actual = snapshot(shared.clone().oneshot(request()).await.unwrap()).await;
+        let old_response = legacy.clone().oneshot(request()).await.unwrap();
+        let (parts, body) = old_response.into_parts();
+        let expected_snapshot = (
+            parts.status,
+            parts.headers,
+            old::body::to_bytes(body, usize::MAX)
+                .await
+                .unwrap()
+                .to_vec(),
+        );
+        assert_eq!(actual.0.as_u16(), expected, "{mime:?}");
+        assert_eq!(actual, expected_snapshot);
+    }
+}

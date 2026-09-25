@@ -254,3 +254,7 @@ borrowed shared API for streamed uploads and bounded metadata.
 `RawQuery` preserves the undecoded query and distinguishes absence from an empty
 query. The WebSocket compatibility adapter now forwards `max_frame_size` and
 `max_message_size`; the socket/message protocol types remain compatibility gaps.
+
+`Option<Json<T>>` preserves optional-body semantics: absent `Content-Type`
+produces `None`; declared JSON still validates syntax, shape and body limits.
+Unsupported content types reject with 415 rather than silently becoming absent.

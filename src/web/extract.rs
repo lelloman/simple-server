@@ -322,3 +322,22 @@ impl<S: Send + Sync> FromRequestParts<S> for RawQuery {
         Ok(Self(parts.uri.query().map(str::to_owned)))
     }
 }
+
+/// Optional JSON is absent only when Content-Type is absent. Invalid declared
+/// JSON, unsupported media types and body-limit errors still reject the request.
+impl<S, T> FromRequest<S> for Option<Json<T>>
+where
+    S: Send + Sync,
+    T: serde::de::DeserializeOwned,
+{
+    type Rejection = RejectionResponse;
+    async fn from_request(request: Request, state: &S) -> Result<Self, Self::Rejection> {
+        <Option<axum::Json<T>> as axum::extract::FromRequest<S>>::from_request(
+            request.map(|body| body.0),
+            state,
+        )
+        .await
+        .map(|value| value.map(|value| Json(value.0)))
+        .map_err(|error| rejection(error.status(), error.body_text()))
+    }
+}
