@@ -19,6 +19,12 @@ All 17 services have been assessed. The five final consumers now use shared
 policies for their remaining quotas and pacing; application storage and transaction
 ownership are preserved. Test limitations are recorded in the completion evidence.
 
+**Latest integration (2026-09-25):** Pezzottify cookie/header authentication is
+complete on `dev` at `5a1db7c9`, using shared `d7e8d13`. `axum-extra` is removed;
+Axum Session extractor bridges remain pending the shared handler API. Consumer
+verification: **1,443 passed, 36 existing ignored**; shared: **208 passed**.
+See the [integration evidence](#pezzottify-cookie-auth-integration--2026-09-25).
+
 **Next execution order:** complete and verify Axum removal from every consumer →
 revisit Step 07 database helpers. Step numbers are retained; Step 07 is deferred,
 not required for the Axum abstraction. Database setup and migrations remain local
@@ -3600,9 +3606,10 @@ Shared implementation adds ordered header/cookie credential sources, explicit
 malformed-input fallback, required/optional authentication and verified identity
 source metadata. The existing Parts-based constructor remains available. The
 strict credential cookie parser adds no dependency; feature-only builds remain
-Axum/Tokio independent. No consumer was migrated in this change. All existing
-module statuses and the Axum exposure observations remain unchanged; Pezzottify
-still needs integration and a framework-independent handler/extractor interface.
+Axum/Tokio independent. This paragraph records the initial library-only checkpoint.
+Pezzottify integration subsequently completed; see the
+[follow-up evidence](#pezzottify-cookie-auth-integration--2026-09-25). Its remaining
+Axum Session bridges still need the framework-independent handler/extractor API.
 See the [contract](step-08-auth.md#cookie-and-header-credentials--2026-09-25).
 
 Validation: baseline auth suite 7/7; final minimal-feature auth suites 13/13.
@@ -3611,8 +3618,9 @@ cookie/header admission, duplicate cookies and body preservation. All-feature,
 all-target strict Clippy, formatting and diff checks pass. The normal dependency
 graph with only `auth` contains HTTP/Tower primitives and no Axum/Tokio. The
 initial sandbox run could not bind loopback; the full suite passed with socket
-access. HTML rendering, observation parity and links were checked. No consumer
-adoption or deployment is claimed.
+access. HTML rendering, observation parity and links were checked. These are the
+initial library checkpoint results; the follow-up below records consumer adoption
+and the expanded shared suite. No deployment was performed.
 
 
 ## Pezzottify cookie auth integration — 2026-09-25
