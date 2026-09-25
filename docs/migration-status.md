@@ -19,11 +19,13 @@ All 17 services have been assessed. The five final consumers now use shared
 policies for their remaining quotas and pacing; application storage and transaction
 ownership are preserved. Test limitations are recorded in the completion evidence.
 
-**Latest integration (2026-09-25):** Pezzottify cookie/header authentication is
-complete on `dev` at `5a1db7c9`, using shared `d7e8d13`. `axum-extra` is removed;
-Axum Session extractor bridges remain pending the shared handler API. Consumer
-verification: **1,443 passed, 36 existing ignored**; shared: **208 passed**.
-See the [integration evidence](#pezzottify-cookie-auth-integration--2026-09-25).
+**Latest integration (2026-09-25):** Pezzottify session extraction is complete
+on `dev` at `c27e1bdc`, using shared `ce37b3d`. Required/optional Session
+implementations now use the shared extraction trait and handler wrapper; the
+session module has no Axum imports. Cookie/header selection remains shared.
+Consumer full suite: **1,443 passed, 36 existing ignored**; error-renderer suite:
+**7 passed**, including one new regression; shared: **211 passed**.
+See the [integration evidence](#pezzottify-session-extraction--2026-09-25).
 
 **Next execution order:** complete and verify Axum removal from every consumer →
 revisit Step 07 database helpers. Step numbers are retained; Step 07 is deferred,
@@ -39,7 +41,7 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 
 | Project | Server components | 1. Axum centralization | 2. Lifecycle / main() | 03a. Logging | 03b. Correlation | 03c. HTTP tracing | 04a. Body limits | 04b. Response headers | 04c. CORS | 05. Health/readiness | 06a. Task ownership | 06b. Scheduling | 06c. Execution policies | 08/09. Auth | 10. Rate limiting | Remaining Axum exposure |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local canary)** | **Done (local; scoped canary)** | N/A (assessed) | N/A (no served probe) | **Done (local; scoped canary)** | **Done (local; primitives)** | **Done (local; primitives)** | **Done (local; sessions + route permissions)** | **Done (HTTP, MCP, durable quotas + outbound pacing)** | Axum-specific Session extractor bridges (credential selection is already shared). Multipart ingestion; range-based audio streaming; SSE search; MCP and sync WebSockets; body-sensitive middleware and state extraction. |
+| pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local canary)** | **Done (local; scoped canary)** | N/A (assessed) | N/A (no served probe) | **Done (local; scoped canary)** | **Done (local; primitives)** | **Done (local; primitives)** | **Done (local; sessions + route permissions)** | **Done (HTTP, MCP, durable quotas + outbound pacing)** | Routing, state/path/query extraction and response adapters; multipart ingestion; range-based audio streaming; SSE search; MCP and sync WebSockets; body-sensitive middleware and HTTP test fixtures. |
 | favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local canary)** | **Done (local; request work)** | **Done (local; bounded batches)** | **Done (local; retry scope)** | **Done (local canary)** | **Done (local; global + endpoint budgets)** | Multipart fields used across application modules; WebSockets; file responses; custom error and rate-limit middleware; real HTTP/WebSocket tests. |
 | androidoscopy | `server`; Android SDK pairing | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (no served probe) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; controller + LAN access)** | **Done (local; device JNI pairing gate)** | Controller and legacy WebSockets; dashboard responses; axum-server TLS serving and shutdown controls; TLS/WebSocket test fixtures. |
 | crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; durable primitives)** | **Done (local; retry primitives)** | **Done (local; main + integration)** | **Done (local; HTTP + MCP + durable dispatcher)** | Auth/session/CSRF extractors; multipart attachments; WebSockets; route-aware metrics; MCP service mounting; static bodies and HTTP test fixtures. |
@@ -3608,8 +3610,9 @@ source metadata. The existing Parts-based constructor remains available. The
 strict credential cookie parser adds no dependency; feature-only builds remain
 Axum/Tokio independent. This paragraph records the initial library-only checkpoint.
 Pezzottify integration subsequently completed; see the
-[follow-up evidence](#pezzottify-cookie-auth-integration--2026-09-25). Its remaining
-Axum Session bridges still need the framework-independent handler/extractor API.
+[follow-up evidence](#pezzottify-cookie-auth-integration--2026-09-25). The subsequent
+[session extraction migration](#pezzottify-session-extraction--2026-09-25) also
+removes its Axum Session bridges.
 See the [contract](step-08-auth.md#cookie-and-header-credentials--2026-09-25).
 
 Validation: baseline auth suite 7/7; final minimal-feature auth suites 13/13.
@@ -3671,5 +3674,67 @@ Credential interface. Lazy authenticate and Tower serving use the same gate.
 
 The original dev branch was rebased onto the migration branch and exact tree and
 ancestry verified. Its owned migration worktree/branch were removed; pre-existing
-Paravoid worktrees were preserved. Both observation columns now distinguish
-completed cookie authentication from remaining Axum bridges. No push/deployment.
+Paravoid worktrees were preserved. At this checkpoint, the observation columns
+distinguished completed cookie authentication from remaining Axum bridges; the
+subsequent extraction migration below removes those bridges. No push/deployment.
+
+
+## Pezzottify session extraction — 2026-09-25
+
+Shared source **`ce37b3dc80e2c7bd334898e79c0f2e6eceacf38c`** introduces the opt-in
+`extract` module: `FromRequestParts<S>`, `Extract<T>`, `IntoRejectionResponse` and
+buffered `RejectionResponse`. Application contracts use standard HTTP parts,
+borrowed application state and a Send future. Only the internal adapter depends
+on Axum. With default features disabled, `extract` depends only on `http`, `bytes`
+and `itoa`. See the [contract](request-extraction.md).
+
+Pezzottify `dev` is integrated at **`c27e1bdc`**, from clean **`5a1db7c9`**,
+and its active checkout/CI pin is `ce37b3d`. Both required and optional Session
+implementations now implement the shared trait. All session handler arguments,
+permission and rate-limit identity middleware, MCP/sync WebSocket upgrades and
+direct extraction in report admission use this path. `session.rs`, including
+its tests, contains no Axum import or trait implementation.
+
+Existing behavior remains: fresh validation at each extraction, no identity
+cache, OIDC-first legacy fallback, credential priority, missing/invalid required
+session → 401, missing/invalid optional session → anonymous, database failure →
+existing 503/500. CSRF, permissions, public routes and transport revalidation
+remain application-owned. ApiError renders one buffered response for extraction
+and its existing transitional response adapter, preserving JSON bytes, content
+type, request ID, Retry-After and opaque internal errors.
+
+Verification:
+
+- Baseline consumer `5a1db7c9` against shared `2c63c61` (documentation descendant
+  of the old pin): **32** session-focused library tests; real HTTP auth **22**,
+  MCP **5**, permissions **22**, all passed before consumer edits.
+- Final full consumer `cargo test --offline --locked --features fast`:
+  **1,443 passed, 36 existing ignored**, no failures. This includes required and
+  optional cookie/header admission, CSRF, permission concealment, revocation,
+  streaming, WebSockets, signals/restarts and mixed workloads.
+- Separately after that run, the ApiError suite passed **7** tests, including one
+  new differential test comparing the previous JSON renderer's status, complete
+  headers and exact body bytes for executor failures and escaped/Unicode errors.
+  Subsequent source cleanup preserved existing handler-fragment formatting.
+- Strict production-target Clippy passed. All-target Clippy completed with
+  existing warnings in unchanged enrichment/background-task tests and the
+  existing num-bigint-dig future-compatibility notice. Changed standalone Rust
+  modules pass formatting; existing included-handler formatting is preserved.
+  Both repositories pass diff checks.
+- Shared all-feature suite **211 tests/doctests**, strict all-target Clippy,
+  formatting and standalone extraction checks passed. New contracts cover
+  borrowed state across await, optional error policy, repeated extraction,
+  request-head mutations, body preservation and exact rejection metadata/bytes.
+- Builds use private targets, two jobs and disabled dev debug info. Runtime tests
+  use local loopback fixtures. Docker/browser/Android and deployed OIDC providers
+  were not exercised.
+
+Both base branches were rebased onto their dedicated migration branches, exact
+integration trees/ancestry verified, and owned worktrees, branches, build targets
+and logs removed. Unrelated Pezzottify Paravoid worktrees are preserved. Both
+observation columns list only remaining exposure. No push or deployment.
+
+This completes the custom Session extraction slice, not full Axum removal.
+Routing, built-in state/path/query/body extraction, successful-response adapters,
+body-sensitive middleware, multipart, range streaming, SSE, WebSockets and HTTP
+test fixtures still require shared interfaces. Step/module totals are unchanged.

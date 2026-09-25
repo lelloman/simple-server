@@ -103,8 +103,9 @@ logging of errors/credentials explicitly obtained through their accessors.
 CSRF policy remains explicit and may inspect verified source metadata; this change
 does not install CSRF checks. Cookie issuance, renewal and expiration also remain
 separate from incoming authentication. The feature adds no dependencies and stays
-usable without Axum, Tokio or default features. Consumer adoption, including
-Pezzottify's handler/extractor migration, is pending.
+usable without Axum, Tokio or default features. Pezzottify has adopted credential
+selection and the [shared session extraction contract](request-extraction.md);
+its remaining HTTP abstractions are tracked separately in the migration matrix.
 
 ### Decoded cookie compatibility and lazy authentication
 
