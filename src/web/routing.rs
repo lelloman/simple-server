@@ -167,7 +167,11 @@ macro_rules! methods {
 }
 methods!(get, post, put, patch, delete, head, options, trace);
 
-impl Service<Request> for Router {
+impl<B> Service<http::Request<B>> for Router
+where
+    B: http_body::Body<Data = bytes::Bytes> + Send + 'static,
+    B::Error: Into<super::body::BoxError>,
+{
     type Response = Response;
     type Error = Infallible;
     type Future = Pin<Box<dyn Future<Output = Result<Response, Infallible>> + Send>>;
@@ -176,9 +180,11 @@ impl Service<Request> for Router {
         Service::<axum::extract::Request>::poll_ready(&mut self.inner, cx)
     }
 
-    fn call(&mut self, request: Request) -> Self::Future {
-        let future =
-            Service::<axum::extract::Request>::call(&mut self.inner, request.map(|body| body.0));
+    fn call(&mut self, request: http::Request<B>) -> Self::Future {
+        let future = Service::<axum::extract::Request>::call(
+            &mut self.inner,
+            request.map(axum::body::Body::new),
+        );
         Box::pin(async move { future.await.map(|response| response.map(Body)) })
     }
 }
@@ -207,5 +213,27 @@ where
 {
     MethodRouter {
         inner: axum::routing::any(Adapter(handler)),
+    }
+}
+
+/// Factory for servers that request one Tower service per accepted connection.
+/// Connection targets are ignored; use `serve_with_connect_info` when peer
+/// metadata is needed. TLS configuration and shutdown remain server-owned.
+#[derive(Clone, Debug)]
+pub struct MakeService(Router);
+impl Router {
+    pub fn into_make_service(self) -> MakeService {
+        MakeService(self)
+    }
+}
+impl<T> Service<T> for MakeService {
+    type Response = Router;
+    type Error = Infallible;
+    type Future = std::future::Ready<Result<Router, Infallible>>;
+    fn poll_ready(&mut self, _: &mut Context<'_>) -> Poll<Result<(), Infallible>> {
+        Poll::Ready(Ok(()))
+    }
+    fn call(&mut self, _: T) -> Self::Future {
+        std::future::ready(Ok(self.0.clone()))
     }
 }

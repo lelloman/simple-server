@@ -149,3 +149,20 @@ before/after consumer HTTP tests, extraction ordering, explicit rejection captur
 substate extraction, sixteen-argument handlers, compile-fail body ordering, body
 limits, layer ordering, early rejection, service readiness, connection metadata,
 body cancellation/trailers/errors and real HTTP serving/shutdown.
+
+## Standard server integration and header arrays
+
+A configured `Router` accepts standard `http::Request<B>` bodies with byte data,
+not only the shared Body type. `Router::into_make_service()` returns an owned
+Tower service factory that clones the router for each connection target. This
+lets existing TLS servers consume shared routes directly without converting to
+a backend router. It ignores connection targets and installs no peer metadata;
+use `serve_with_connect_info` when that metadata is required. TLS configuration,
+accept policy and shutdown remain owned by the calling server.
+
+Response tuples also accept header arrays: `([(name, value); N], response)` and
+`(status, [(name, value); N], response)`. Names/values use standard HTTP conversion
+bounds. Entries replace matching headers in order; use HeaderMap append for
+multiple cookie fields. Invalid conversions preserve the existing error response
+contract. Androidoscopy exercises this with its controller login cookie and
+shared routes served through its existing TLS adapter.

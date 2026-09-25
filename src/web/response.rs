@@ -90,3 +90,32 @@ impl IntoResponse for std::convert::Infallible {
         match self {}
     }
 }
+
+/// Header arrays replace existing values, matching the HTTP tuple contract.
+/// Use HeaderMap with append for repeated fields such as multiple cookies.
+impl<K, V, R, const N: usize> IntoResponse for ([(K, V); N], R)
+where
+    K: TryInto<http::header::HeaderName>,
+    K::Error: std::fmt::Display,
+    V: TryInto<http::HeaderValue>,
+    V::Error: std::fmt::Display,
+    R: IntoResponse,
+{
+    fn into_response(self) -> Response {
+        let response = self.1.into_response().map(|body| body.0);
+        axum::response::IntoResponse::into_response((self.0, response)).map(Body)
+    }
+}
+impl<K, V, R, const N: usize> IntoResponse for (StatusCode, [(K, V); N], R)
+where
+    K: TryInto<http::header::HeaderName>,
+    K::Error: std::fmt::Display,
+    V: TryInto<http::HeaderValue>,
+    V::Error: std::fmt::Display,
+    R: IntoResponse,
+{
+    fn into_response(self) -> Response {
+        let response = self.2.into_response().map(|body| body.0);
+        axum::response::IntoResponse::into_response((self.0, self.1, response)).map(Body)
+    }
+}
