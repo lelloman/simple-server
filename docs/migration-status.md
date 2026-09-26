@@ -19,20 +19,21 @@ All 17 services have been assessed. The five final consumers now use shared
 policies for their remaining quotas and pacing; application storage and transaction
 ownership are preserved. Test limitations are recorded in the completion evidence.
 
-**Routing / HTTP core (11):** **11 Done, 0 Partial, 6 Pending**. Pezzottify, Androidoscopy, Crumbles, Fausto, lello-auth, lellostore, Favzetto, Observo, Paranza, Peerlo and Meteonesto now
+**Routing / HTTP core (11):** **12 Done, 0 Partial, 5 Pending**. Pezzottify, Androidoscopy, Crumbles, Fausto, lello-auth, lellostore, Favzetto, Observo, Paranza, Peerlo, Meteonesto and Pezzottflix now
 use shared APIs for all production route groups, ordinary handlers, built-in
 extractors, response adapters and router assembly. Done excludes explicitly
 tracked protocol compatibility boundaries. Pending records unverified adoption,
 not a claim that the shared API already supports every service's needs.
 See the [contract](web-core.md) and [completion evidence](#pezzottify-routing-completion--2026-09-25).
 
-**Latest integration (2026-09-26):** Meteonesto master at `b9381ae` (migration
-`e69685f`), using shared `364f576`, completes HTTP adoption in its API, gateway
-and pipeline control plane. No direct Axum API or compatibility adapter remains
-in Rust sources/manifests. Baseline/final: **268 Rust tests passed**, one existing
-ignore, plus **six Python lifecycle/map-sync checks**. All three Rust components
-pass strict Clippy and formatting. See the
-[Meteonesto verification record](#meteonesto-routing-completion--2026-09-26).
+**Latest integration (2026-09-26):** Pezzottflix `master` at `c60517a`,
+using shared `982df26`, completes HTTP/metrics routing, custom extractors,
+middleware, responses and streaming adoption. Baseline/final: **598/599 tests
+passed**, three existing ignores; shared **259 passed**, strict Clippy passes.
+Both signal drain diagnostics pass; the unchanged close-reason assertion has
+an existing baseline race. WebSocket protocol types and tracing observer
+callback compatibility remain. See the
+[Pezzottflix verification record](#pezzottflix-routing-completion--2026-09-26).
 
 **Next execution order:** complete and verify Axum removal from every consumer →
 revisit Step 07 database helpers. Step numbers are retained; Step 07 is deferred,
@@ -59,7 +60,7 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | observo | `observo-server`; standalone extractor logging | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (no served probe) | **Done (local; scoped)** | **Done (local; primitives)** | N/A (assessed) | **Done (local; IP/key/JWT access)** | N/A (no request quota) | **Done (local)** | No remaining direct Axum API usage in Rust sources/manifests. Routing, forms/HTML/redirects, auth middleware, peer-aware serving, plugin request/body proxying and HTTP tests use shared APIs; Axum remains internal to simple-server. |
 | paranza | `apps/paranza-server` | **Done** | **Done (local; scoped)** | N/A (no logger) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; runner + PCM access)** | N/A (no implemented request quota) | **Done (local)** | No remaining direct Axum API usage in Rust sources/manifests. Private routing, state/path/query/raw-body extraction, response conversion, HTTP serving and test helpers use shared APIs; Axum remains internal to simple-server. |
 | peerlo | `peerlo-api` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; retry primitives)** | **Done (local; bearer + Torznab keys)** | **Done (local; API + crawler + durable DHT)** | **Done (local)** | Tracing observer response type and compatibility adapter remain. Public routing, REST handlers/extractors/responses, auth/rate-limit/metrics middleware, peer-aware serving and HTTP test helpers use shared APIs. |
-| pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local; main HTTP)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; socket scope)** | **Done (local; durable queue cadence)** | N/A (assessed) | **Done (local; sessions + permissions + WebSocket)** | **Done (login, durable daily quota + TMDB pacing)** | Pending | Stateful subrouters; auth/language/pagination extractors; video streaming; WebSocket sync; client-address extraction; static/compression integration and HTTP tests. |
+| pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local; main HTTP)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; socket scope)** | **Done (local; durable queue cadence)** | N/A (assessed) | **Done (local; sessions + permissions + WebSocket)** | **Done (login, durable daily quota + TMDB pacing)** | **Done (local; HTTP core)** | Shared routing, handlers, built-in/custom extractors, responses, streaming bodies and HTTP/metrics serving complete (master c60517a; shared 982df26). Remaining: WebSocket upgrade compatibility and socket/message/close-frame types; tracing observer backend response callback. Existing shutdown close-reason race reproduced on baseline; both signal drain diagnostics pass. |
 | pezzottify-downloader | Puppeteer API, downloader HTTP server and Python cron | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; Puppeteer)** | **Done (local; both HTTP routers)** | N/A (assessed) | N/A (assessed) | **Done (local; both routers)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; priority admission)** | N/A (assessed) | N/A (no application caller gate) | **Done (local; Python/SQLite quota bridge)** | Pending | Parent and child HTTP routers; Unix-socket serving; streamed audio/proxy responses; WebSocket proxying; correlation/tracing and admission middleware; proxy tests. |
 | quentin-torrentino | `crates/server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; stage capacity)** | N/A (assessed) | **Done (local; API access)** | **Done (local; MusicBrainz pacing)** | Pending | Public router composition; multipart torrent uploads; SSE chat; dashboard WebSockets; static-file services; custom middleware and HTTP test fixtures. |
 | sct | `sct-server` | **Done** | **Done (scoped)** | N/A (no logger) | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; worker scope)** | **Done (local; durable worker cadence)** | **Done (local; retry scope)** | **Done (local; tokens/sessions + transactional access)** | N/A (durable state caps, no request quota) | Pending | Custom JSON/query rejection mapping; auth extractors and matched-route metadata; archive/checkpoint/transfer streams; range/HEAD behavior; HTTP tests and example. |
@@ -4245,3 +4246,43 @@ this is a partial rollout of the HTTP abstraction, not full Axum removal.
   onto source/tracker commits. Ancestry and exact integrated-tree equality
   verified. Both original worktrees clean; owned worktrees/branches and
   /tmp/meteonesto-routing build/log/temp files removed. Nothing pushed or deployed.
+
+## Pezzottflix routing completion — 2026-09-26
+
+- Active development branch: `master`, clean baseline `cd5eb29`; migration
+  `c60517a9bcb186e3c7ef3ccba049062fffe703cc`, integrated into `master` with
+  matching trees and verified ancestry.
+- Reviewed shared source: `982df2612c08035b65f8dab4f3d86c4025fe9c40`.
+  Root `simple-server.rev` updates the existing CI/Docker checkout workflows.
+- All production route groups, HTTP/metrics serving, ordinary handlers,
+  custom authentication/language/pagination extractors, middleware, response
+  adapters, streaming bodies and HTTP tests use `simple_server::web`.
+  Existing authorization, peer addresses, upload headers, compression/static
+  middleware and JSON error contracts are preserved.
+- Shared extensions: lazy `Body::into_data_stream`, per-method `route_layer`
+  preserving 405 fallbacks, and header-only `IntoResponse`. Differential tests
+  verify chunks/errors/trailers, cancellation, middleware and repeated headers.
+  A consumer test verifies streaming permits survive until EOF or cancellation.
+- Baseline: **598 passed**, three ignores. Final: **599 passed**, same ignores.
+  Shared baseline/final: **255/259 passed**. Shared formatting, strict
+  all-feature/all-target Clippy and minimal `web` feature check pass.
+  Consumer Clippy completes with warnings; workspace formatting already fails
+  on the untouched baseline, and unrelated formatting is preserved.
+- Debug server build passes. Real-server diagnostics pass SIGINT and SIGTERM:
+  HTTP/metrics, request IDs, log redaction, authenticated socket draining,
+  worker shutdown and port release. The unchanged lifecycle script fails
+  intermittently on the shutdown close-reason assertion, reproduced on clean
+  baseline: unregister closes the event channel and races the send-task close
+  notification, producing either an empty close or the shutdown reason.
+  A separate temporary diagnostic accepted both baseline variants; the
+  original script and application behavior were not changed to mask the issue.
+- Remaining compatibility: WebSocket upgrade adapter/socket/message/close-frame
+  protocol types and tracing observer's backend response callback. HTTP core
+  Done does not claim complete Axum removal.
+- Release/frontend builds and Docker E2E were not run; debug build retains its
+  existing frontend compilation skip. Details are in consumer
+  `docs/step-11-routing.md`.
+- Both development branches rebased onto isolated migration branches;
+  ancestry/tree equality verified. Owned migration/baseline worktrees,
+  temporary branches, build outputs and scratch files removed after integration.
+  Nothing pushed or deployed.
