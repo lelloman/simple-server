@@ -341,3 +341,15 @@ where
         .map_err(|error| rejection(error.status(), error.body_text()))
     }
 }
+
+impl<T> std::ops::Deref for State<T> {
+    type Target = T;
+    fn deref(&self) -> &T {
+        &self.0
+    }
+}
+impl<T> std::ops::DerefMut for State<T> {
+    fn deref_mut(&mut self) -> &mut T {
+        &mut self.0
+    }
+}

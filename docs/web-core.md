@@ -45,7 +45,9 @@ default for JSON, bytes and string extraction.
 ## Extraction
 
 - `State<T>` clones application state, or obtains substate via the shared
-  `FromState<S>` trait. It does not use the backend's FromRef trait.
+  `FromState<S>` trait. It supports `Deref`/`DerefMut` to the extracted value;
+  mutating a cloned value does not replace router state. It does not use the
+  backend's FromRef trait.
 - `Path<T>` and `Query<T>` deserialize request-head values using serde.
 - `Json<T>`, `String`, `Bytes` and raw `Request` can consume the body. Only the
   last handler argument may consume it; invalid signatures fail to compile.
