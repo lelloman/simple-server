@@ -282,6 +282,13 @@ where
 }
 
 impl<S: Clone + Send + Sync + 'static> MethodRouter<S> {
+    /// Supply this method group's state independently of its enclosing router.
+    pub fn with_state<S2: Clone + Send + Sync + 'static>(self, state: S) -> MethodRouter<S2> {
+        MethodRouter {
+            inner: self.inner.with_state(state),
+        }
+    }
+
     /// Apply a Tower layer to this method router, including its method fallback.
     pub fn layer<L, B>(mut self, layer: L) -> Self
     where

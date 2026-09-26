@@ -634,3 +634,74 @@ async fn method_extraction_observes_prior_request_head_mutation() {
         .unwrap();
     assert_eq!(snapshot(response).await.2, b"GET:PATCH");
 }
+
+#[tokio::test]
+async fn method_group_state_is_independent_and_matches_backend() {
+    async fn local(State(state): State<String>) -> String {
+        state
+    }
+    async fn outer(State(state): State<AppState>) -> String {
+        state.name
+    }
+    async fn old_local(
+        simple_server::axum::extract::State(state): simple_server::axum::extract::State<String>,
+    ) -> String {
+        state
+    }
+    async fn old_outer(
+        simple_server::axum::extract::State(state): simple_server::axum::extract::State<AppState>,
+    ) -> String {
+        state.name
+    }
+    let shared = Router::new()
+        .route(
+            "/mixed",
+            get(local).with_state("method-state".to_owned()).post(outer),
+        )
+        .with_state(AppState {
+            name: "router-state".into(),
+        });
+    let backend = simple_server::axum::Router::new()
+        .route(
+            "/mixed",
+            simple_server::axum::routing::get(old_local)
+                .with_state("method-state".to_owned())
+                .post(old_outer),
+        )
+        .with_state(AppState {
+            name: "router-state".into(),
+        });
+    for (method, expected_body) in [
+        ("GET", "method-state"),
+        ("POST", "router-state"),
+        ("HEAD", ""),
+        ("PUT", ""),
+    ] {
+        let actual = shared
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(method)
+                    .uri("/mixed")
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let expected = backend
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(method)
+                    .uri("/mixed")
+                    .body(simple_server::axum::body::Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap()
+            .map(Body::new);
+        let actual = snapshot(actual).await;
+        assert_eq!(actual.2, expected_body.as_bytes());
+        assert_eq!(actual, snapshot(expected).await);
+    }
+}

@@ -274,3 +274,7 @@ HeaderMap)` tuples, retaining repeated header values for upload/HEAD contracts.
 `http::Method` is a shared head extractor. It clones the current method without
 reading the body, including custom methods and changes by earlier extractors.
 HEAD retains its original method while normal router response stripping applies.
+
+`MethodRouter::with_state` binds one method group independently of the enclosing
+router state. Methods added afterwards may use the outer state. Existing method
+fallbacks, GET/HEAD semantics and middleware placement are retained.
