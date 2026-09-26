@@ -26,20 +26,13 @@ tracked protocol compatibility boundaries. Pending records unverified adoption,
 not a claim that the shared API already supports every service's needs.
 See the [contract](web-core.md) and [completion evidence](#pezzottify-routing-completion--2026-09-25).
 
-**Latest integration (2026-09-26):** SimpleAI `master` at `672c586` and
-simple-agents `main` at `0efa5a7`, reviewed shared `fb6a9e5`, complete ordinary
-HTTP adoption. SimpleAI **462 Rust tests** and simple-agents **368 Rust tests**
-pass (one ignore each); shared **262 tests** pass. Agent strict checks, five
-signed-asset and 19 frontend tests pass; deterministic frontend build passes.
-SimpleAI multipart is shared, and method-specific runner state is preserved.
-SSE/WebSocket compatibility and SimpleAI tracing callback remain. Original work
-is preserved. Quentin Torrentino remains pending at user request. See the
-[SimpleAI record](#simpleai-routing-completion--2026-09-26) and
-[agent record](#simple-agents-routing-completion--2026-09-26).
+**Latest integration (2026-09-26):** Pezzottify's sync and MCP endpoints now
+use the owned WebSocket API. Consumer `dev` at `9115a8a4`, reviewed
+shared `46c7243`. See the [verification record](#pezzottify-owned-websockets--2026-09-26).
 
 **Shared WebSocket API (2026-09-26):** owned upgrades, sockets, messages, close
 frames and errors are available with `web` + `ws`, including split streams,
-subprotocol negotiation and transport configuration. Consumer WebSocket
+subprotocol negotiation and transport configuration. Pezzottify has adopted both endpoints; other consumer WebSocket
 observations remain pending until verified adoption. See the
 [contract](web-core.md#owned-websockets) and
 [verification record](#owned-websocket-api--2026-09-26).
@@ -58,7 +51,7 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 
 | Project | Server components | 1. Axum centralization | 2. Lifecycle / main() | 03a. Logging | 03b. Correlation | 03c. HTTP tracing | 04a. Body limits | 04b. Response headers | 04c. CORS | 05. Health/readiness | 06a. Task ownership | 06b. Scheduling | 06c. Execution policies | 08/09. Auth | 10. Rate limiting | 11. Routing / HTTP core | Remaining Axum exposure |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local canary)** | **Done (local; scoped canary)** | N/A (assessed) | N/A (no served probe) | **Done (local; scoped canary)** | **Done (local; primitives)** | **Done (local; primitives)** | **Done (local; sessions + route permissions)** | **Done (HTTP, MCP, durable quotas + outbound pacing)** | **Done (all production route groups)** | Multipart fields/errors; SSE search producers; MCP and sync WebSocket protocol types; backend tracing observer; independent HTTP mocks and error-renderer differential test. |
+| pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local canary)** | **Done (local; scoped canary)** | N/A (assessed) | N/A (no served probe) | **Done (local; scoped canary)** | **Done (local; primitives)** | **Done (local; primitives)** | **Done (local; sessions + route permissions)** | **Done (HTTP, MCP, durable quotas + outbound pacing)** | **Done (all production route groups)** | Sync and MCP WebSocket upgrades, sockets and messages use shared APIs (dev 9115a8a4; shared 46c7243). Remaining: multipart fields/errors; SSE search producers; backend tracing observer; independent HTTP mocks and error-renderer differential test. |
 | favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local canary)** | **Done (local; request work)** | **Done (local; bounded batches)** | **Done (local; retry scope)** | **Done (local canary)** | **Done (local; global + endpoint budgets)** | **Done (local)** | WebSocket socket/message types and upgrade compatibility remain. Production routing, extractors, responses, middleware, serving, multipart readers/fields/errors and HTTP test fixtures use shared APIs. |
 | androidoscopy | `server`; Android SDK pairing | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (no served probe) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; controller + LAN access)** | **Done (local; device JNI pairing gate)** | **Done (all production route groups)** | Controller and legacy WebSocket protocol types/upgrade compatibility; axum-server TLS configuration, serving and shutdown handle, including TLS test fixture. Production routing, dashboard responses and ordinary HTTP tests now use shared APIs. |
 | crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; durable primitives)** | **Done (local; retry primitives)** | **Done (local; main + integration)** | **Done (local; HTTP + MCP + durable dispatcher)** | **Done (both servers)** | Multipart fields/errors; realtime WebSocket socket/message types; explicit tracing compatibility adapter. Both servers, MCP/health service mounting, auth/CSRF, metrics, static responses and HTTP fixtures now use shared APIs. |
@@ -4471,3 +4464,42 @@ links, service counts and matching observations validated.
 Library capability only: no consumer has been migrated in this change, and the
 service observations/counts remain unchanged. Consumer authentication, heartbeat
 policy and lifecycle ownership remain local. Nothing pushed or deployed.
+
+## Pezzottify owned WebSockets — 2026-09-26
+
+Applicability: production `/v1/ws` synchronization and `/v1/mcp` both used the
+compatibility upgrade extractor and backend socket/message types. Both now use
+`web::ws::{WebSocketUpgrade, WebSocket, Message}`, including their split streams.
+No backend WebSocket imports or compatibility upgrades remain in the service.
+Session/device checks, MCP lifetime authorization, payload schemas, sync broadcasts,
+connection registration, control-message handling and tracked shutdown are preserved.
+Transport defaults are unchanged.
+
+Reviewed shared source: `46c724315a3ed35e35cb086b2328bb4040cd0531`.
+Consumer commit: `9115a8a4`, integrated into **dev**, based on
+`fd6585e2`. `simple-server.rev` updates the existing CI/Docker checkout mechanism.
+The independent Tungstenite client and dependency lockfile remain unchanged.
+
+Verification:
+
+- Baseline pinned-source suite: **1,449 passed, 36 existing ignores**.
+- Two new real-TCP tests pass before and after migration: Ping/Pong payloads,
+  ignored binary messages, malformed-JSON errors and subsequent valid requests
+  on both endpoints.
+- Final `cargo test --locked --features fast`: **1,451 passed, 36 ignores**.
+  Includes sync/reconnect/auth, MCP permission refresh/session revocation, and
+  real-process SIGINT/SIGTERM/admin reboot closing both WebSocket endpoints.
+- Formatting, strict production Clippy, default-feature debug build and
+  database-boundary checks pass. The existing num-bigint-dig future-compatibility
+  notice and test-suite unused-import warnings remain. Docker and Android
+  qualification were not repeated for this migration.
+
+Multipart fields/errors, SSE producers, tracing observer and independent HTTP
+mock/differential tests remain explicit Axum exposure. Other services' WebSocket
+adoption has not changed. The HTML and Markdown observations match, and the
+routing count stays 16 Done / 1 Pending (Quentin Torrentino remains skipped).
+
+The original clean `dev` branch was rebased onto the committed migration branch;
+ancestry and tree equality were verified. The consumer worktree, temporary branch
+and build artifacts were removed. Pre-existing Paravoid worktrees and branches
+were preserved. Nothing pushed or deployed.
