@@ -8,6 +8,7 @@ use std::{
 use tower_service::Service;
 
 /// Route collection whose missing application state is `S`.
+#[must_use]
 #[derive(Clone, Debug)]
 pub struct Router<S = ()> {
     pub(super) inner: axum::Router<S>,
