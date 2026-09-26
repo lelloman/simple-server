@@ -126,6 +126,10 @@ Use Partial for an explicitly incomplete component scope, Pending for unresolved
 work, and N/A only for a capability not used/needed, with the reason recorded.
 Do not mark other modules in an umbrella step done automatically.
 
+Keep the remaining Axum exposure cells limited to work still pending. Remove
+completed items from those cells; record adoption and verification evidence in
+the detailed migration records instead.
+
 Record service, module, applicability evidence, development branch, reviewed
 library revision, consumer commit, tests and limitations, and cleanup outcome.
 Validate tracker links and HTML script syntax, then commit the tracker updates.
