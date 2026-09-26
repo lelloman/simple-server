@@ -53,7 +53,7 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 
 | Project | Server components | 1. Axum centralization | 2. Lifecycle / main() | 03a. Logging | 03b. Correlation | 03c. HTTP tracing | 04a. Body limits | 04b. Response headers | 04c. CORS | 05. Health/readiness | 06a. Task ownership | 06b. Scheduling | 06c. Execution policies | 08/09. Auth | 10. Rate limiting | 11. Routing / HTTP core | Remaining Axum exposure |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local canary)** | **Done (local; scoped canary)** | N/A (assessed) | N/A (no served probe) | **Done (local; scoped canary)** | **Done (local; primitives)** | **Done (local; primitives)** | **Done (local; sessions + route permissions)** | **Done (HTTP, MCP, durable quotas + outbound pacing)** | **Done (all production route groups)** | Multipart fields/errors; SSE search producers; backend tracing observer; independent HTTP mocks and error-renderer differential test. |
+| pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local canary)** | **Done (local; scoped canary)** | N/A (assessed) | N/A (no served probe) | **Done (local; scoped canary)** | **Done (local; primitives)** | **Done (local; primitives)** | **Done (local; sessions + route permissions)** | **Done (HTTP, MCP, durable quotas + outbound pacing)** | **Done (all production route groups)** | Multipart fields/errors; SSE search producers; independent HTTP mocks and error-renderer differential test. |
 | favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local canary)** | **Done (local; request work)** | **Done (local; bounded batches)** | **Done (local; retry scope)** | **Done (local canary)** | **Done (local; global + endpoint budgets)** | **Done (local)** | None. |
 | androidoscopy | `server`; Android SDK pairing | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (no served probe) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; controller + LAN access)** | **Done (local; device JNI pairing gate)** | **Done (all production route groups)** | axum-server TLS configuration, serving and shutdown handle, including TLS test fixture. |
 | crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; durable primitives)** | **Done (local; retry primitives)** | **Done (local; main + integration)** | **Done (local; HTTP + MCP + durable dispatcher)** | **Done (both servers)** | Multipart fields/errors; explicit tracing compatibility adapter. |
@@ -4764,3 +4764,33 @@ cells contain pending exposure only. Quentin Torrentino remains skipped.
   passed when the full suite was rerun with local socket access.
 - Migration instructions: [Owned HTTP tracing](web-core.md#owned-http-tracing).
   Consumers have not been edited or newly marked Done. Nothing pushed or deployed.
+
+## Pezzottify owned HTTP tracing canary — 2026-09-26
+
+- Applicable production path: request logging middleware in
+  `pezzottify-server/src/server/http_layers/requests_logging.rs`. All enabled
+  logging modes now call `web::tracing::trace_with_observer` with its owned
+  `Observer` and metadata-only `ResponseInfo`. None mode still bypasses tracing.
+  INFO header events, stable target, default terminal events, metrics and
+  diagnostics remain unchanged. No shared-library changes were needed.
+- Active branch `dev`, clean baseline `9115a8a4`; isolated migration commit
+  **`ff7af524`**. Source pin **`ca98a4159e1cb0dd7b9db2faa9a076d198b7973b`**
+  recorded in `simple-server.rev`, consumed by existing CI/build scripts.
+- Baseline old pin and final new pin: **1,451 passed, 36 existing ignores** each.
+  Strengthened production-router HTTP test passed before and after: exactly one
+  INFO header event and completion for enabled modes, no events in None mode,
+  stable target, safe templates, secret exclusion, unchanged auth response and
+  authenticated 404 behavior. Existing streaming/range and process lifecycle
+  suites also pass in the full run.
+- Strict production Clippy, formatting, database-boundary checks and the
+  default-feature debug build pass. Existing test unused-import warnings and
+  num-bigint-dig future-compatibility notice remain. Docker, browser, Android and
+  release builds were not rerun. Consumer evidence:
+  `docs/step-03c-http-tracing.md` and `docs/simple-server-migration.md`.
+- Rebased original `dev` onto the migration branch; exact tested tree and
+  ancestry verified, original checkout clean. Temporary service worktree,
+  migration branch and pinned dependency worktree removed; existing Paravoid
+  worktrees/refs preserved. Nothing pushed or deployed.
+- Remaining exposure: multipart fields/errors, SSE search producers,
+  independent HTTP mocks and error-renderer differential test. Other services'
+  tracing adoption remains pending.
