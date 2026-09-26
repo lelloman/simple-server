@@ -19,21 +19,23 @@ All 17 services have been assessed. The five final consumers now use shared
 policies for their remaining quotas and pacing; application storage and transaction
 ownership are preserved. Test limitations are recorded in the completion evidence.
 
-**Routing / HTTP core (11):** **14 Done, 0 Partial, 3 Pending**. Pezzottify, Androidoscopy, Crumbles, Fausto, lello-auth, lellostore, Favzetto, Observo, Paranza, Peerlo, Meteonesto, Pezzottflix, Pezzottify-downloader and SCT now
+**Routing / HTTP core (11):** **16 Done, 0 Partial, 1 Pending**. Pezzottify, Androidoscopy, Crumbles, Fausto, lello-auth, lellostore, Favzetto, Observo, Paranza, Peerlo, Meteonesto, Pezzottflix, Pezzottify-downloader, SCT, SimpleAI and simple-agents now
 use shared APIs for all production route groups, ordinary handlers, built-in
 extractors, response adapters and router assembly. Done excludes explicitly
 tracked protocol compatibility boundaries. Pending records unverified adoption,
 not a claim that the shared API already supports every service's needs.
 See the [contract](web-core.md) and [completion evidence](#pezzottify-routing-completion--2026-09-25).
 
-**Latest integration (2026-09-26):** SCT `master` at `2a33b85`, using
-shared `23626b2`, completes routing, extraction/rejections, response/body contracts,
-middleware, serving and HTTP test/example fixtures. Baseline/final workspace:
-**55/56 pass**, 91 explicit ignores; PostgreSQL integration: **83 pass each**.
-Shared **261 tests**, strict Clippy, formatting, debug build, contract drift and
-real-process lifecycle checks pass. Tracing observer compatibility remains.
-Original untracked work is preserved. Quentin Torrentino remains pending,
-skipped at user request. See the [SCT verification record](#sct-routing-completion--2026-09-26).
+**Latest integration (2026-09-26):** SimpleAI `master` at `672c586` and
+simple-agents `main` at `0efa5a7`, reviewed shared `fb6a9e5`, complete ordinary
+HTTP adoption. SimpleAI **462 Rust tests** and simple-agents **368 Rust tests**
+pass (one ignore each); shared **262 tests** pass. Agent strict checks, five
+signed-asset and 19 frontend tests pass; deterministic frontend build passes.
+SimpleAI multipart is shared, and method-specific runner state is preserved.
+SSE/WebSocket compatibility and SimpleAI tracing callback remain. Original work
+is preserved. Quentin Torrentino remains pending at user request. See the
+[SimpleAI record](#simpleai-routing-completion--2026-09-26) and
+[agent record](#simple-agents-routing-completion--2026-09-26).
 
 **Next execution order:** complete and verify Axum removal from every consumer →
 revisit Step 07 database helpers. Step numbers are retained; Step 07 is deferred,
@@ -64,8 +66,8 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | pezzottify-downloader | Puppeteer API, downloader HTTP server and Python cron | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; Puppeteer)** | **Done (local; both HTTP routers)** | N/A (assessed) | N/A (assessed) | **Done (local; both routers)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; priority admission)** | N/A (assessed) | N/A (no application caller gate) | **Done (local; Python/SQLite quota bridge)** | **Done (local; parent + child HTTP core)** | Shared parent TCP and child Unix HTTP routing, handlers, extractors, responses, proxy bodies, middleware and test routers complete (master a367fb1; shared 982df26). Unix permissions/drain, streaming activity leases and correlation preserved. Remaining: WebSocket upgrade compatibility/socket/message protocol types and tracing observer backend response callback. |
 | quentin-torrentino | `crates/server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; stage capacity)** | N/A (assessed) | **Done (local; API access)** | **Done (local; MusicBrainz pacing)** | Pending | Public router composition; multipart torrent uploads; SSE chat; dashboard WebSockets; static-file services; custom middleware and HTTP test fixtures. |
 | sct | `sct-server` | **Done** | **Done (scoped)** | N/A (no logger) | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; worker scope)** | **Done (local; durable worker cadence)** | **Done (local; retry scope)** | **Done (local; tokens/sessions + transactional access)** | N/A (durable state caps, no request quota) | **Done (local; HTTP core)** | Shared routing, handlers, extraction/rejections, middleware, response/body contracts, serving, HTTP fixtures and qualification example complete (master 2a33b85; shared 23626b2). JSON error bytes/metadata, auth/correlation, archive/checkpoint/transfer streaming and range/HEAD policies preserved. Remaining: tracing observer backend response callback through web compatibility. |
-| simple-agents | `simple-agents-service`; runner-shell logging; associated coding test servers | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local pilot; service routes)** | **Done (local; scoped canary)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; transactional capacity)** | **Done (local; retry scope)** | **Done (local; caller + transactional access)** | N/A (task/storage admission, no request quota) | Pending | Public modular router; per-route response mapping; session SSE; broker WebSockets; streamed releases; service tests and coding-crate GitHub mock servers. |
-| simple-ai | `backend`, `inference-runner` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local; backend)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; batch readiness)** | N/A (assessed) | **Done (local; backend user/admin)** | **Done (local; backend budgets)** | Pending | Backend and inference-runner routers; streamed chat/speech; multipart OCR/audio; custom errors; SSE; admin/gateway WebSockets; peer-aware tests. |
+| simple-agents | `simple-agents-service`; runner-shell logging; associated coding test servers | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local pilot; service routes)** | **Done (local; scoped canary)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; transactional capacity)** | **Done (local; retry scope)** | **Done (local; caller + transactional access)** | N/A (task/storage admission, no request quota) | **Done (local; HTTP core)** | Shared service routing, handlers, extractors, response mapping, streaming bodies, serving, service tests and coding GitHub fixtures complete (main 0efa5a7; shared fb6a9e5). Restart fixtures drain before database reopen; identity assertion matches existing nullable display_name. Remaining: session SSE event/keepalive producer and broker WebSocket upgrade/socket/message compatibility. |
+| simple-ai | `backend`, `inference-runner` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local; backend)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; batch readiness)** | N/A (assessed) | **Done (local; backend user/admin)** | **Done (local; backend budgets)** | **Done (local; HTTP core)** | Shared gateway and inference-runner routing, handlers, extractors, multipart fields/errors, responses, middleware, serving and HTTP fixtures complete (master 672c586; shared fb6a9e5). Peer metadata and method-specific runner state preserved. Remaining: gateway WebSocket socket/message types, admin SSE event/keepalive compatibility and tracing observer backend response callback. |
 
 ## Axum exposure audit — 2026-09-24
 
@@ -4368,3 +4370,74 @@ this is a partial rollout of the HTTP abstraction, not full Axum removal.
   ancestry/tree equality verified. Owned worktrees, branches, test containers,
   build outputs and scratch files removed after integration. Nothing pushed
   or deployed. Quentin Torrentino remains pending at the user's request.
+
+## SimpleAI routing completion — 2026-09-26
+
+- Active branch `master`, baseline `9648e2d`; consumer
+  `672c586d0583972627732b22ef225395fc93db05` integrated with verified ancestry
+  and matching trees. Original semantic-evaluation work and modified README
+  preserved. Integration ran through the clean worktree while the original
+  checkout retained its dirty tree; the README content hash is unchanged.
+- Shared source `fb6a9e5a91f40529c761a7a7e44c33a442143ed5` is recorded in
+  `simple-server.rev` for existing CI/Docker/README checkout workflows.
+- Gateway and runner route groups, handlers, extractors, responses/bodies,
+  middleware, serving and HTTP fixtures use shared `web`. Gateway peer metadata
+  uses `serve_with_connect_info`. Multipart image/audio fields and errors use
+  shared types; auth, quotas, auditing, inference ownership and streaming persist.
+- Shared `MethodRouter::with_state` binds the runner WebSocket route independently
+  of the enclosing router, preserving application state ownership. Differential
+  coverage verifies method/outer state, GET/HEAD and method rejection behavior.
+- Baseline/final workspace: **462 pass each**, one existing ignored doctest.
+  Existing ignored `scripts/configs/rtx.toml`, referenced by a runner config test,
+  was copied from the original checkout before baseline and used unchanged.
+  It is excluded from commits; fresh checkouts without it cannot compile that
+  pre-existing test. API tests cover Responses/chat, quotas/errors, streaming,
+  multipart, health/CORS/headers and safe tracing. Real runner E2E covers mock
+  discovery/chat, SIGINT/SIGTERM draining and gateway connection behavior.
+- Debug workspace build and ordinary all-target Clippy pass with warnings.
+  Strict Clippy is blocked by unchanged common-crate warnings; full formatting
+  fails on the untouched baseline. Unrelated formatting is preserved; diff
+  whitespace checks pass. Shared 262 tests, strict Clippy and formatting pass.
+- Remaining: gateway WebSocket sockets/messages, admin SSE events/keepalive via
+  compatibility response, and tracing observer backend callback. Multipart is
+  fully shared. No ordinary backend router conversion remains.
+- Docker/browser/Android, live model downloads and GPU inference were not run.
+  Details: consumer `docs/step-11-routing.md`. Both base branches integrated;
+  owned worktrees/branches, fixture copy, build files and scratch outputs removed.
+  Nothing pushed or deployed.
+
+## Simple-agents routing completion — 2026-09-26
+
+- Active branch `main`, baseline `9ce77fb`; consumer
+  `0efa5a77c17769867b9d22d3973f2fdc90037dad` integrated with verified ancestry
+  and matching trees. Unrelated pre-existing publication worktree/ref preserved.
+- Shared source `fb6a9e5a91f40529c761a7a7e44c33a442143ed5` recorded in
+  `simple-server.rev`; README links the consumer routing record.
+- All service route groups, handlers/extractors, request/response/body contracts,
+  per-route response mapping, middleware, serving and coding-crate GitHub/GitHub
+  App HTTP fixtures use shared APIs. Browser/native/OIDC auth, cookies, capability
+  checks, SQLite transactions, no-store/body limits, release streams, session
+  admission, worker ownership and broker subprotocol remain unchanged.
+- Baseline full workspace: **367 pass, one fail, one ignore**. The stale identity
+  assertion omitted the existing `display_name: null`; its exact expected JSON
+  was corrected without changing production. Final: **368 pass, zero fail,
+  one ignore**. Public-client fixtures now request graceful shutdown and await
+  connection draining before closing/reopening SQLite; existing replay/restart
+  tests verify this. Abrupt cancellation does not promise connection-task drain.
+- Existing HTTP tests cover authorization, limits/no-store, SSE replay/revocation,
+  broker handshake/subprotocol/reconnect, releases, native/browser auth, SDK,
+  distributed work and real executable shutdown under both signals. Strict
+  all-target Clippy, formatting and debug workspace build pass. Shared **262
+  tests**, strict Clippy and formatting pass. **Five signed-runtime-asset Python
+  tests and 19 frontend Node tests** pass; frontend build reproduces tracked
+  web/dist exactly. No web source or dependency lock changes are included.
+- Remaining: session SSE event/keepalive producer via compatibility response and
+  broker WebSocket upgrade/socket/message protocol types. No ordinary backend
+  routing conversion remains.
+- Extraction-parity script fails on the unchanged stale missing `web/app.mjs`
+  destination; inventory and web sources were not changed by migration.
+  Android Gradle, Chromium and worker-image qualification were not run.
+  Details: consumer `docs/step-11-routing.md`.
+- Both base branches integrated; owned worktrees/branches, installed dependencies,
+  build files and scratch outputs removed after verification. Nothing pushed or
+  deployed. Quentin Torrentino remains pending, skipped at user request.
