@@ -19,20 +19,20 @@ All 17 services have been assessed. The five final consumers now use shared
 policies for their remaining quotas and pacing; application storage and transaction
 ownership are preserved. Test limitations are recorded in the completion evidence.
 
-**Routing / HTTP core (11):** **10 Done, 0 Partial, 7 Pending**. Pezzottify, Androidoscopy, Crumbles, Fausto, lello-auth, lellostore, Favzetto, Observo, Paranza and Peerlo now
+**Routing / HTTP core (11):** **11 Done, 0 Partial, 6 Pending**. Pezzottify, Androidoscopy, Crumbles, Fausto, lello-auth, lellostore, Favzetto, Observo, Paranza, Peerlo and Meteonesto now
 use shared APIs for all production route groups, ordinary handlers, built-in
 extractors, response adapters and router assembly. Done excludes explicitly
 tracked protocol compatibility boundaries. Pending records unverified adoption,
 not a claim that the shared API already supports every service's needs.
 See the [contract](web-core.md) and [completion evidence](#pezzottify-routing-completion--2026-09-25).
 
-**Latest integration (2026-09-26):** Peerlo master at `5c93e78`, using shared
-`75c7499`, completes routing, HTTP handling, middleware and peer-aware serving.
-Workspace baseline **796 passed**, final **797 passed**, the same six ignores.
-Real middleware composition and tracing tests pass, as does the two-process
-lifecycle smoke. Clippy completes with existing warnings; formatting passes.
-Tracing observer response compatibility remains explicit. See the
-[Peerlo verification record](#peerlo-routing-completion--2026-09-26).
+**Latest integration (2026-09-26):** Meteonesto master at `b9381ae` (migration
+`e69685f`), using shared `364f576`, completes HTTP adoption in its API, gateway
+and pipeline control plane. No direct Axum API or compatibility adapter remains
+in Rust sources/manifests. Baseline/final: **268 Rust tests passed**, one existing
+ignore, plus **six Python lifecycle/map-sync checks**. All three Rust components
+pass strict Clippy and formatting. See the
+[Meteonesto verification record](#meteonesto-routing-completion--2026-09-26).
 
 **Next execution order:** complete and verify Axum removal from every consumer →
 revisit Step 07 database helpers. Step numbers are retained; Step 07 is deferred,
@@ -55,7 +55,7 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; dynamic cron)** | N/A (assessed) | **Done (local; HTTP + WebSocket + admin/write)** | **Done (local; five API tiers)** | **Done (local)** | Owned multipart fields/errors; WebSocket socket/message types; tracing compatibility; axum-test transport and parser oracles. Server, plugin API v2, both plugins, Swagger, validation and streamed responses use shared routing APIs. Dynamic plugins require rebuilding. |
 | lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (Rust; Caddy owns CORS) | **Done (local; scoped)** | **Done (local; webhook scope)** | **Done (local; capacity)** | **Done (local; retry scope)** | **Done (local; sessions + resource/admin access)** | **Done (endpoint budgets + persisted device polling)** | **Done (local)** | No direct Axum interfaces remain in production Rust, examples or tests. Server, embedding API and all three HTTP examples use shared routing, forms, HTML/redirects, cookie extraction and peer-aware serving. The lello-auth-axum crate name is retained; Axum is internal to simple-server. |
 | lellostore | `backend` | **Done** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; OIDC + admin)** | N/A (no inbound admission policy) | **Done (local)** | WebSocket socket/message types; tracing compatibility adapter; axum-test transport and multipart/WebSocket helpers. Routing, auth extraction, streamed downloads, static files and OIDC mocks use shared APIs. Multipart readers, fields and errors are now fully shared types. |
-| meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; pipeline/gateway)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; weighted claims)** | **Done (local; budgets/retry)** | **Done (local; all three services)** | **Done (local; gateway budgets)** | Pending | API, gateway and pipeline control routers; proxy headers/client identity; byte responses and static fallbacks; custom middleware and mock upstreams. |
+| meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; pipeline/gateway)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; weighted claims)** | **Done (local; budgets/retry)** | **Done (local; all three services)** | **Done (local; gateway budgets)** | **Done (local)** | No remaining direct Axum API usage in Rust sources/manifests. API, gateway and pipeline control-plane routes, proxy/byte/static responses, client identity, auth/correlation middleware, serving and mock upstreams use shared APIs. |
 | observo | `observo-server`; standalone extractor logging | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (no served probe) | **Done (local; scoped)** | **Done (local; primitives)** | N/A (assessed) | **Done (local; IP/key/JWT access)** | N/A (no request quota) | **Done (local)** | No remaining direct Axum API usage in Rust sources/manifests. Routing, forms/HTML/redirects, auth middleware, peer-aware serving, plugin request/body proxying and HTTP tests use shared APIs; Axum remains internal to simple-server. |
 | paranza | `apps/paranza-server` | **Done** | **Done (local; scoped)** | N/A (no logger) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; runner + PCM access)** | N/A (no implemented request quota) | **Done (local)** | No remaining direct Axum API usage in Rust sources/manifests. Private routing, state/path/query/raw-body extraction, response conversion, HTTP serving and test helpers use shared APIs; Axum remains internal to simple-server. |
 | peerlo | `peerlo-api` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; retry primitives)** | **Done (local; bearer + Torznab keys)** | **Done (local; API + crawler + durable DHT)** | **Done (local)** | Tracing observer response type and compatibility adapter remain. Public routing, REST handlers/extractors/responses, auth/rate-limit/metrics middleware, peer-aware serving and HTTP test helpers use shared APIs. |
@@ -1531,7 +1531,7 @@ establish adoption. Their application-owned browser/CSRF boundaries remain intac
 | favzetto | **Done (local)** | WebSocket socket/message types and upgrade compatibility remain. Production routing, extractors, responses, middleware, serving, multipart readers/fields/errors and HTTP test fixtures use shared APIs. |
 | androidoscopy | `master` / `f4461a81` | `server/src/main.rs` HTTP/WS router setup and legacy server have no CORS response policy. |
 | lello-auth | `master` / `b1827fdd` | CORS managed by Caddy; not migrated into Rust. `homelab/caddy/Caddyfile` permits selected application origins with credentials and OPTIONS 204. Server, integration crate and examples install no Rust CORS layer. Moving ownership needs coordinated proxy/application changes; live deployment not probed. |
-| meteonesto | `master` / `6d0eb458` | Weather API, gateway and pipeline control routers implement their own HTTP policies, with no application CORS layer. Infrastructure/auth-edge documentation is not application adoption. |
+| meteonesto | **Done (local)** | No remaining direct Axum API usage in Rust sources/manifests. API, gateway and pipeline control-plane routes, proxy/byte/static responses, client identity, auth/correlation middleware, serving and mock upstreams use shared APIs. |
 | paranza | **Done (local)** | No remaining direct Axum API usage in Rust sources/manifests. Private routing, state/path/query/raw-body extraction, response conversion, HTTP serving and test helpers use shared APIs; Axum remains internal to simple-server. |
 | quentin-torrentino | `master` / `e6064149` | `crates/server` router has no CORS layer despite an enabled tower-http feature. |
 | sct | `master` / `28604f17` | Server browser-origin and CSRF checks are application security boundaries, not a CORS response policy. Existing dirty work remains untouched. |
@@ -1673,7 +1673,7 @@ Favzetto's canary evidence remains above.
 | lello-auth | `master` / `b1827fd` | `5215f6d6e55d6388072255c27f7d4f161a201a6f` | Baseline two focused tests; final 22 server tests (13 unit and 3 each configuration, lifecycle process, logging). Liveness and composite database/signing readiness retain independent result fields. Changed-file formatting passed. |
 | lellostore | `master` / `7abeb7a` | `c3a3f7f2cdc811232cfbfa8c022bd54bd32761cf` | Baseline health 1; final health 1, authentication 10, HTTP tracing 1. Failed OIDC still leaves liveness public. Formatting/diff passed. |
 | fausto | `master` / `cb8f077` | `4ccfb9cee540992aacb46511acbb0f56c2f758e7` | Baseline production health 1; final health 1 plus HTTP tracing 1. Version JSON, OpenAPI, auth exemption and middleware retained. Formatting/diff passed. |
-| meteonesto | `master` / `6d0eb45` | `6d032afedc8ee948be47dd6aeeec916a2d9a382c` | API 2 health tests, gateway 1 health-boundary test, pipeline liveness 1 and readiness recovery/shutdown 1 passed. Component checks passed with Rust 1.97.1; pipeline lock updated offline. Metrics, OIDC/upstream timeout and correlation preserved. |
+| meteonesto | `master` / `6d0eb45` | **Done (local)** | No remaining direct Axum API usage in Rust sources/manifests. API, gateway and pipeline control-plane routes, proxy/byte/static responses, client identity, auth/correlation middleware, serving and mock upstreams use shared APIs. |
 | sct | `master` / `b7d8230` | `b34840dbf7dbf1939426565acedd068916bf20b4` | Baseline HTTP test compiled but sandbox denied bind; permitted final HTTP test 1/1 and server check passed. Database timeout, writer readiness, 204/503 and text liveness preserved. Changed-file formatting passed. |
 | simple-agents | `main` / `0cf88e2` | `3a106d9efac3852146ff10d74bda924830a7281c` | Focused real-router database readiness/liveness regression 1/1 before and after; formatting passed. Replayed concurrent UI commit; tested Cargo/crates tree unchanged by replay. |
 | simple-ai | `master` / `30ed3ea` | `0523c03277930f2e8bc64ff715779d16e600541c` | Baseline runner health 2; final backend 1 and runner 4. Fake engines verify complete mixed/unhealthy reports, every-engine polling, empty/OCR behavior; GET/HEAD/POST verified. Existing ignored rtx.toml copied unchanged after missing-fixture compile failure; final rerun passed. |
@@ -4208,3 +4208,40 @@ this is a partial rollout of the HTTP abstraction, not full Axum removal.
   Ancestry and exact tested-tree equality verified. Both original worktrees
   clean; owned worktrees/branches and /tmp/peerlo-routing build/log/temp files
   removed. Nothing pushed or deployed.
+
+## Meteonesto routing completion — 2026-09-26
+
+- Clean active master started at `e39aa72`; consumer migration `e69685f` plus
+  temporary-target-link removal `b9381ae` (integrated tip). Shared source
+  `364f57688200a35c26fa159661e5a902d4f62f40`. Isolated worktrees preserved sibling
+  dependency paths. README and current lifecycle build instructions reference
+  the reviewed source; historical migration references are preserved.
+- API, gateway and pipeline control-plane routing/handlers/extraction/responses,
+  auth/correlation/deadline middleware and startup use shared HTTP APIs.
+  Gateway peer-aware serving retains loopback/forwarded-client policy. Static
+  service mounts, map-frame bytes, proxy headers, local provider fixtures and
+  HTTP test routers use shared types. No direct Axum API/import/dependency or
+  compatibility adapter remains in these Rust sources/manifests.
+- Shared Router preserves the backend's must_use annotation; no runtime behavior
+  changes. Explicit mock-server Shutdown values satisfy consumer pedantic lints.
+  The touched control-plane constructor gains required panic documentation for
+  its existing static response expect, and its prior formatting difference is
+  normalized. Application policy and protocols remain unchanged.
+- Baseline/final all-feature Rust: API **71**, gateway **33**, pipeline **164**;
+  **268 total passed**, one unchanged gateway ignore, zero failures. Existing
+  contracts verify proxy/client identity, token budgets, request correlation,
+  pipeline auth/audit, backups, conditional configuration, byte/static responses,
+  provider mocks, task drain and watchdog schedulability.
+- Baseline/final Python: four API process/map-sync tests and two pipeline process
+  lifecycle tests pass. They exercise real loopback processes with temporary
+  configuration/data, signals, listener release and administrative drain.
+- Strict all-feature/all-target Clippy and formatting pass in all three Rust
+  components; diff checks pass. Shared minimal web baseline check and final
+  strict library Clippy pass with Rust 1.97.1. Shared runtime suite was not rerun
+  for the annotation-only change; previous 255-test result remains historical.
+- Full Android/renderer/user-service/JavaScript, external providers/OIDC,
+  Docker/release/deployment checks were not run. No production data used.
+- Meteonesto master rebased onto migration/cleanup commits; shared main rebased
+  onto source/tracker commits. Ancestry and exact integrated-tree equality
+  verified. Both original worktrees clean; owned worktrees/branches and
+  /tmp/meteonesto-routing build/log/temp files removed. Nothing pushed or deployed.
