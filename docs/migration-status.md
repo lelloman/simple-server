@@ -26,16 +26,16 @@ tracked protocol compatibility boundaries. Pending records unverified adoption,
 not a claim that the shared API already supports every service's needs.
 See the [contract](web-core.md) and [completion evidence](#pezzottify-routing-completion--2026-09-25).
 
-**Latest integration (2026-09-26):** Favzetto, Androidoscopy, Crumbles and Fausto
-adopt the owned WebSocket API after Pezzottify. See the
-[rollout evidence](#owned-websocket-rollout--2026-09-26) for commits, tests,
-baseline limitations, branch integration and cleanup. Remaining-exposure cells
-list pending work only.
+**Latest integration (2026-09-26):** LelloStore, Pezzottflix,
+Pezzottify-downloader, SimpleAI and simple-agents complete the active owned
+WebSocket rollout. See the [five-service evidence](#remaining-owned-websocket-rollout--2026-09-26)
+for commits, tests, baseline limitations, integration and cleanup. Quentin
+Torrentino remains skipped; remaining-exposure cells list pending work only.
 
 **Shared WebSocket API (2026-09-26):** owned upgrades, sockets, messages, close
 frames and errors are available with `web` + `ws`, including split streams,
-subprotocol negotiation and transport configuration. Pezzottify, Favzetto, Androidoscopy, Crumbles and Fausto have adopted their
-production endpoints; other consumers remain pending verified adoption. See the
+subprotocol negotiation and transport configuration. All applicable services in the active rollout now use owned production
+WebSocket APIs. Quentin Torrentino remains pending at user request. See the
 [contract](web-core.md#owned-websockets) and
 [verification record](#owned-websocket-api--2026-09-26).
 
@@ -59,17 +59,17 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; durable primitives)** | **Done (local; retry primitives)** | **Done (local; main + integration)** | **Done (local; HTTP + MCP + durable dispatcher)** | **Done (both servers)** | Multipart fields/errors; explicit tracing compatibility adapter. |
 | fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; dynamic cron)** | N/A (assessed) | **Done (local; HTTP + WebSocket + admin/write)** | **Done (local; five API tiers)** | **Done (local)** | Owned multipart fields/errors; tracing compatibility; axum-test transport and parser oracles. |
 | lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (Rust; Caddy owns CORS) | **Done (local; scoped)** | **Done (local; webhook scope)** | **Done (local; capacity)** | **Done (local; retry scope)** | **Done (local; sessions + resource/admin access)** | **Done (endpoint budgets + persisted device polling)** | **Done (local)** | No direct Axum interfaces remain in production Rust, examples or tests. Server, embedding API and all three HTTP examples use shared routing, forms, HTML/redirects, cookie extraction and peer-aware serving. The lello-auth-axum crate name is retained; Axum is internal to simple-server. |
-| lellostore | `backend` | **Done** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; OIDC + admin)** | N/A (no inbound admission policy) | **Done (local)** | WebSocket socket/message types; tracing compatibility adapter; axum-test transport and multipart/WebSocket helpers. Routing, auth extraction, streamed downloads, static files and OIDC mocks use shared APIs. Multipart readers, fields and errors are now fully shared types. |
+| lellostore | `backend` | **Done** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; OIDC + admin)** | N/A (no inbound admission policy) | **Done (local)** | Tracing compatibility adapter; axum-test transport and multipart/WebSocket test helpers. |
 | meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; pipeline/gateway)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; weighted claims)** | **Done (local; budgets/retry)** | **Done (local; all three services)** | **Done (local; gateway budgets)** | **Done (local)** | No remaining direct Axum API usage in Rust sources/manifests. API, gateway and pipeline control-plane routes, proxy/byte/static responses, client identity, auth/correlation middleware, serving and mock upstreams use shared APIs. |
 | observo | `observo-server`; standalone extractor logging | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (no served probe) | **Done (local; scoped)** | **Done (local; primitives)** | N/A (assessed) | **Done (local; IP/key/JWT access)** | N/A (no request quota) | **Done (local)** | No remaining direct Axum API usage in Rust sources/manifests. Routing, forms/HTML/redirects, auth middleware, peer-aware serving, plugin request/body proxying and HTTP tests use shared APIs; Axum remains internal to simple-server. |
 | paranza | `apps/paranza-server` | **Done** | **Done (local; scoped)** | N/A (no logger) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; runner + PCM access)** | N/A (no implemented request quota) | **Done (local)** | No remaining direct Axum API usage in Rust sources/manifests. Private routing, state/path/query/raw-body extraction, response conversion, HTTP serving and test helpers use shared APIs; Axum remains internal to simple-server. |
 | peerlo | `peerlo-api` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; retry primitives)** | **Done (local; bearer + Torznab keys)** | **Done (local; API + crawler + durable DHT)** | **Done (local)** | Tracing observer response type and compatibility adapter remain. Public routing, REST handlers/extractors/responses, auth/rate-limit/metrics middleware, peer-aware serving and HTTP test helpers use shared APIs. |
-| pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local; main HTTP)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; socket scope)** | **Done (local; durable queue cadence)** | N/A (assessed) | **Done (local; sessions + permissions + WebSocket)** | **Done (login, durable daily quota + TMDB pacing)** | **Done (local; HTTP core)** | Shared routing, handlers, built-in/custom extractors, responses, streaming bodies and HTTP/metrics serving complete (master c60517a; shared 982df26). Remaining: WebSocket upgrade compatibility and socket/message/close-frame types; tracing observer backend response callback. Existing shutdown close-reason race reproduced on baseline; both signal drain diagnostics pass. |
-| pezzottify-downloader | Puppeteer API, downloader HTTP server and Python cron | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; Puppeteer)** | **Done (local; both HTTP routers)** | N/A (assessed) | N/A (assessed) | **Done (local; both routers)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; priority admission)** | N/A (assessed) | N/A (no application caller gate) | **Done (local; Python/SQLite quota bridge)** | **Done (local; parent + child HTTP core)** | Shared parent TCP and child Unix HTTP routing, handlers, extractors, responses, proxy bodies, middleware and test routers complete (master a367fb1; shared 982df26). Unix permissions/drain, streaming activity leases and correlation preserved. Remaining: WebSocket upgrade compatibility/socket/message protocol types and tracing observer backend response callback. |
+| pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local; main HTTP)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; socket scope)** | **Done (local; durable queue cadence)** | N/A (assessed) | **Done (local; sessions + permissions + WebSocket)** | **Done (login, durable daily quota + TMDB pacing)** | **Done (local; HTTP core)** | Tracing observer backend response callback. |
+| pezzottify-downloader | Puppeteer API, downloader HTTP server and Python cron | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; Puppeteer)** | **Done (local; both HTTP routers)** | N/A (assessed) | N/A (assessed) | **Done (local; both routers)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; priority admission)** | N/A (assessed) | N/A (no application caller gate) | **Done (local; Python/SQLite quota bridge)** | **Done (local; parent + child HTTP core)** | Tracing observer backend response callback. |
 | quentin-torrentino | `crates/server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; stage capacity)** | N/A (assessed) | **Done (local; API access)** | **Done (local; MusicBrainz pacing)** | Pending | Public router composition; multipart torrent uploads; SSE chat; dashboard WebSockets; static-file services; custom middleware and HTTP test fixtures. |
 | sct | `sct-server` | **Done** | **Done (scoped)** | N/A (no logger) | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; worker scope)** | **Done (local; durable worker cadence)** | **Done (local; retry scope)** | **Done (local; tokens/sessions + transactional access)** | N/A (durable state caps, no request quota) | **Done (local; HTTP core)** | Shared routing, handlers, extraction/rejections, middleware, response/body contracts, serving, HTTP fixtures and qualification example complete (master 2a33b85; shared 23626b2). JSON error bytes/metadata, auth/correlation, archive/checkpoint/transfer streaming and range/HEAD policies preserved. Remaining: tracing observer backend response callback through web compatibility. |
-| simple-agents | `simple-agents-service`; runner-shell logging; associated coding test servers | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local pilot; service routes)** | **Done (local; scoped canary)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; transactional capacity)** | **Done (local; retry scope)** | **Done (local; caller + transactional access)** | N/A (task/storage admission, no request quota) | **Done (local; HTTP core)** | Shared service routing, handlers, extractors, response mapping, streaming bodies, serving, service tests and coding GitHub fixtures complete (main 0efa5a7; shared fb6a9e5). Restart fixtures drain before database reopen; identity assertion matches existing nullable display_name. Remaining: session SSE event/keepalive producer and broker WebSocket upgrade/socket/message compatibility. |
-| simple-ai | `backend`, `inference-runner` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local; backend)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; batch readiness)** | N/A (assessed) | **Done (local; backend user/admin)** | **Done (local; backend budgets)** | **Done (local; HTTP core)** | Shared gateway and inference-runner routing, handlers, extractors, multipart fields/errors, responses, middleware, serving and HTTP fixtures complete (master 672c586; shared fb6a9e5). Peer metadata and method-specific runner state preserved. Remaining: gateway WebSocket socket/message types, admin SSE event/keepalive compatibility and tracing observer backend response callback. |
+| simple-agents | `simple-agents-service`; runner-shell logging; associated coding test servers | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local pilot; service routes)** | **Done (local; scoped canary)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; transactional capacity)** | **Done (local; retry scope)** | **Done (local; caller + transactional access)** | N/A (task/storage admission, no request quota) | **Done (local; HTTP core)** | Session SSE event/keepalive producer and response adapter. |
+| simple-ai | `backend`, `inference-runner` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local; backend)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; batch readiness)** | N/A (assessed) | **Done (local; backend user/admin)** | **Done (local; backend budgets)** | **Done (local; HTTP core)** | Admin SSE event/keepalive compatibility; tracing observer backend response callback. |
 
 ## Axum exposure audit — 2026-09-24
 
@@ -4602,3 +4602,137 @@ remaining-exposure cells list pending work only.
 - Original clean master rebased onto the migration; ancestry and exact tested
   tree verified. Owned service/shared worktrees, branch, builds and logs removed.
   No push/deployment.
+
+## Remaining owned WebSocket rollout — 2026-09-26
+
+Reviewed shared source: `46c724315a3ed35e35cb086b2328bb4040cd0531`.
+Five GPT-6 Sol agents own disjoint service migrations; the coordinator owns these
+trackers. Each service uses a dedicated branch/worktree, verifies protocol behavior,
+commits and rebases its active development branch onto the migration. Remaining
+cells contain pending exposure only. Quentin Torrentino remains skipped.
+
+### LelloStore
+
+- Clean `master`: `4ecc2d3` → `551054049961a239a2520175fc5fe8030685c10b`. Catalog and Paravoid delivery endpoints
+  use owned upgrade/socket/message types. README and CI pins select the reviewed
+  source. Authentication, subprotocol selection, 4096-byte limits, subscription
+  deadline, grants/revocation, reconnect hints and shutdown ownership preserved.
+- Baseline/final all-feature suite: **210 passed, eight existing ignores**.
+  Expanded real endpoint Ping/Pong and Paravoid negotiation assertions pass
+  before and after the import change. Existing auth/publication/shutdown/reconnect
+  and wrong-scope checks remain green.
+- Strict all-target/all-feature Clippy, formatting, all-feature build and diff
+  checks pass. Sandbox listener denial resolved by approved localhost testing.
+  Existing ignored frontend assets copied unchanged; frontend, Android and Docker
+  suites not rerun. Evidence: `docs/STEP_11_WEBSOCKETS.md`.
+- Remaining: tracing compatibility adapter and `axum-test` transport/helpers.
+
+- Original clean master rebased onto the migration; original ancestry and tested
+  tree verified. Service worktree and branch removed; coordinator completed
+  remaining exact-source archive cleanup. No owned scratch artifacts remain.
+  Nothing pushed or deployed.
+
+### Pezzottify-downloader
+
+- Clean `master`: `a367fb1` → `41c31bb354d6caffc92dac88a9093354d29b755a`.
+  Parent status/download proxy and child download sockets use owned upgrades,
+  sockets, messages and split sinks. Source pin and README updated. The Unix
+  Tungstenite client remains independent, with explicit owned-message conversion.
+- Baseline and final suite including new contract: **164 Rust tests and seven
+  doctests passed; one doctest ignored**. New real TCP → production proxy → Unix
+  peer check passes before/after: exact path, UTF-8 text, binary, actual forwarded
+  Ping and unsolicited Pong, echoed payloads and close. Existing process checks
+  verify status JSON and upgraded-socket closing on SIGINT/SIGTERM.
+- Both production binary builds pass. Non-strict all-target Clippy passes with
+  existing warnings; strict mode reproduces the same 12 baseline findings.
+  Existing formatting differences remain; new test and diff checks pass. Python
+  cron checks could not import pytest. Live Spotify/OAuth, release/Docker and
+  deployment checks were not run. Evidence: `docs/step-11-websockets.md`.
+- Remaining: backend response callback and compatibility adapter for HTTP tracing.
+- Original clean master rebased onto the migration; coordinator verified ancestry
+  and identical trees. Coordinator completed cleanup of the service worktree,
+  migration branch, exact-source archive and enumerated logs/build artifacts.
+  Nothing pushed or deployed.
+
+### Pezzottflix
+
+- Migration commit `19935d21da02a8d179653608c263a6e1ee9c92a5` from `c60517a`;
+  integrated `master` is `744fea60c3fea2ccfbf418829c94f7098f9b648e`. A concurrent
+  search fix (`08a0b1d`) was replayed after the migration and preserved in
+  `recovery/pre-owned-websocket-08a0b1d` before rewriting its parent.
+- Production WebSocket upgrade/socket/message/close-frame contracts adopt the
+  owned API, including the application shutdown close code. No transport defaults
+  or message policies change.
+- Baseline: **599 passed, three ignored**; production server build passes.
+  Real-server transport checks cover authentication, connected JSON, ignored
+  binary/malformed messages, subscription/progress messages, user isolation,
+  Ping/Pong and client close.
+- The unchanged lifecycle script reproduces its known close-reason race: an
+  empty close frame fails its reason assertion. An isolated diagnostic accepting
+  that existing behavior passes both SIGINT and SIGTERM drain checks.
+  Strict baseline Clippy reports 39 existing findings; formatting has baseline
+  differences. These are not treated as migration regressions.
+
+- Final migration suite: **599 passed, three ignored**; after integrating the
+  concurrent search change, **601 passed, three ignored**, with the combined
+  production build passing. Final real transport checks and both signal-drain
+  diagnostics pass; unchanged lifecycle reason assertion reproduces its baseline
+  failure. Strict Clippy/formatting retain the same baseline findings; ordinary
+  Clippy completes with warnings. README and source pin updated.
+- Remaining: tracing observer backend response callback. Evidence:
+  `docs/step-12-websocket.md` and `scripts/test-websocket.py`.
+- Clean master integration and combined tested tree verified. Migration/shared
+  worktrees and migration branch removed; coordinator removed the remaining
+  target/log/diagnostic scratch directory. The recovery branch for the concurrent
+  search commit is intentionally retained. Nothing pushed or deployed.
+
+### SimpleAI
+
+- `master`: `672c586` → `95efd02`. Gateway and admin sockets use owned
+  upgrades/sockets/messages; source pin updated. Runner outbound Tungstenite
+  remains an independent client. Auth, registration, heartbeat, subscriptions,
+  transport settings and application task/shutdown ownership preserved.
+- Baseline workspace: **462 passed, one ignored**. Final workspace: **464 passed,
+  one ignored**. Real gateway/admin checks pass before/after; final targeted
+  rerun after test formatting/assertion edits: **18 passed**. Covers rejected
+  runner secret, registration acknowledgment, peer-derived address, Ping/Pong,
+  registry cleanup and malformed/invalid admin authentication.
+- Workspace build and diff checks pass. Strict Clippy repeats three existing
+  common-crate findings; full formatting retains existing differences. The
+  ignored `scripts/configs/rtx.toml` fixture was copied unchanged for the existing
+  include-str test. Successful JWT refresh, real GPU/Wake-on-LAN and Docker
+  gateway E2E were not rerun. Evidence: `docs/simple-server-migration.md`.
+- Coordinator reviewed and committed the agent implementation, rebased master
+  through the clean linked worktree, verified tree/ancestry, and verified original
+  README and semantic-evaluation untracked files with hashes/status before and
+  after integration. Owned worktrees, branch, fixture, builds and logs removed.
+- Remaining: admin SSE event/keepalive compatibility and tracing observer
+  backend-response callback. Nothing pushed or deployed.
+
+### Simple-agents
+
+- Migration commit `3f1e013be74d86c86ee40bb927d0ab19e494cac2`, based on current
+  `main` at `2d76212`. Broker upgrade/socket/message types use the owned API;
+  active source pin updated. Auth, subprotocols, payloads, connection policy and
+  application lifecycle remain unchanged; outbound clients are independent.
+- Baseline workspace: **370 passed, one ignored**. Final workspace: **371 passed,
+  one ignored**. New real TCP regression passes before/after, covering auth and
+  subprotocol rejection/selection, Welcome/Poll messages, malformed/binary/oversized
+  messages, peer-close behavior and shutdown admission. Its initial close-frame
+  expectations were corrected on the original implementation before migration;
+  no production close policy was changed to satisfy the test.
+- Strict all-target workspace Clippy, formatting, diff checks and workspace debug
+  build pass. Remaining: session SSE event/keepalive producer and response adapter.
+
+- Original main gained an unrelated `docs/RUNNER_RELEASE_DELIVERY.md` edit during
+  execution. Integration detached the original checkout, rebased in the clean
+  linked worktree, and restored main with that edit preserved. Tested tree and
+  ancestry verified. Existing prunable publication worktree/ref preserved.
+- All five services' original branches now contain the migration commits; the
+  final source audit finds no remaining direct Axum WebSocket/compatibility
+  upgrade imports in the active rollout. Quentin Torrentino's backend dashboard
+  WebSocket remains intentionally untouched. Nothing pushed or deployed.
+- Simple-agents service/shared worktrees and migration branch removed; coordinator
+  removed the seven retained baseline/final logs. Service evidence:
+  `docs/step-12-websocket.md`. Live Runner adapters and browser/Android checks were
+  not rerun. All five owned migration scratch directories are now absent.
