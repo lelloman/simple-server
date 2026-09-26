@@ -555,3 +555,82 @@ async fn standalone_headers_preserve_empty_responses_and_repeated_values() {
         snapshot(expected).await
     );
 }
+
+#[tokio::test]
+async fn method_extraction_matches_backend_including_head_and_custom_methods() {
+    use simple_server::web::http::Method;
+    async fn method_response(method: Method) -> impl IntoResponse {
+        (
+            [("x-method", method.as_str().to_owned())],
+            method.to_string(),
+        )
+    }
+    async fn backend_response(method: Method) -> impl simple_server::axum::response::IntoResponse {
+        (
+            [("x-method", method.as_str().to_owned())],
+            method.to_string(),
+        )
+    }
+    let shared = Router::new().route("/method", web::routing::any(method_response));
+    let backend = simple_server::axum::Router::new().route(
+        "/method",
+        simple_server::axum::routing::any(backend_response),
+    );
+    for method in ["GET", "HEAD", "POST", "CUSTOM"] {
+        let actual = shared
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(method)
+                    .uri("/method")
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let expected = backend
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(method)
+                    .uri("/method")
+                    .body(simple_server::axum::body::Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        assert_eq!(actual.headers()["x-method"], method);
+        let expected = expected.map(Body::new);
+        assert_eq!(snapshot(actual).await, snapshot(expected).await);
+    }
+}
+
+#[tokio::test]
+async fn method_extraction_observes_prior_request_head_mutation() {
+    use simple_server::web::http::Method;
+    struct Rewrite;
+    impl<S: Sync> FromRequestParts<S> for Rewrite {
+        type Rejection = std::convert::Infallible;
+        async fn from_request_parts(
+            parts: &mut web::http::request::Parts,
+            _: &S,
+        ) -> Result<Self, Self::Rejection> {
+            parts.method = Method::PATCH;
+            Ok(Self)
+        }
+    }
+    let app = Router::new().route(
+        "/method",
+        get(|before: Method, _: Rewrite, after: Method| async move { format!("{before}:{after}") }),
+    );
+    let response = app
+        .oneshot(
+            Request::builder()
+                .uri("/method")
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    assert_eq!(snapshot(response).await.2, b"GET:PATCH");
+}

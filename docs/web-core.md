@@ -270,3 +270,7 @@ attach application-owned permits or other lifetime guards without buffering.
 leaving the 405 fallback unwrapped; GET also retains implicit HEAD behavior.
 `HeaderMap` itself can render an empty response, including in `(StatusCode,
 HeaderMap)` tuples, retaining repeated header values for upload/HEAD contracts.
+
+`http::Method` is a shared head extractor. It clones the current method without
+reading the body, including custom methods and changes by earlier extractors.
+HEAD retains its original method while normal router response stripping applies.

@@ -258,6 +258,14 @@ impl<S: Sync> FromRequestParts<S> for http::Uri {
     }
 }
 
+/// Extract the current request method without reading or changing the body.
+impl<S: Sync> FromRequestParts<S> for http::Method {
+    type Rejection = Infallible;
+    async fn from_request_parts(parts: &mut Parts, _: &S) -> Result<Self, Self::Rejection> {
+        Ok(parts.method.clone())
+    }
+}
+
 /// URL-encoded forms: GET/HEAD read the query; other methods read the body.
 #[derive(Debug, Clone, Copy)]
 pub struct Form<T>(pub T);
