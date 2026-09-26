@@ -33,7 +33,7 @@ http2 = ["http", "axum/http2"]
 macros = ["http", "axum/macros"]
 multipart-owned = ["web-compat", "dep:axum-extra"]
 multipart = ["http", "axum/multipart"]
-ws = ["http", "axum/ws"]
+ws = ["http", "axum/ws", "futures-util?/sink"]
 
 [dependencies]
 tower-cookies = { version = "0.11", default-features = false, optional = true }
@@ -58,6 +58,8 @@ tracing = { version = "0.1", default-features = false, features = ["std"], optio
 tracing-subscriber = { version = "0.3", default-features = false, features = ["fmt", "env-filter", "ansi", "json"], optional = true }
 
 [dev-dependencies]
+hyper = { version = "1", features = ["http1"] }
+tokio-tungstenite = "=0.29.0"
 serde = { version = "1", features = ["derive"] }
 bytes = "1"
 governor = { version = "0.10", default-features = false, features = ["std"] }

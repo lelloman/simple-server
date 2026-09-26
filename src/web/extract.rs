@@ -361,3 +361,6 @@ impl<T> std::ops::DerefMut for State<T> {
         &mut self.0
     }
 }
+
+#[cfg(feature = "ws")]
+pub use super::ws::WebSocketUpgrade;

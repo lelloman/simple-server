@@ -25,6 +25,8 @@ pub mod multipart;
 pub mod response;
 pub mod routing;
 mod service;
+#[cfg(feature = "ws")]
+pub mod ws;
 
 pub use crate::extract::{Extract, FromRequestParts, IntoRejectionResponse, RejectionResponse};
 pub use body::{Body, BodyError};

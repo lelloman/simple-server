@@ -37,6 +37,13 @@ is preserved. Quentin Torrentino remains pending at user request. See the
 [SimpleAI record](#simpleai-routing-completion--2026-09-26) and
 [agent record](#simple-agents-routing-completion--2026-09-26).
 
+**Shared WebSocket API (2026-09-26):** owned upgrades, sockets, messages, close
+frames and errors are available with `web` + `ws`, including split streams,
+subprotocol negotiation and transport configuration. Consumer WebSocket
+observations remain pending until verified adoption. See the
+[contract](web-core.md#owned-websockets) and
+[verification record](#owned-websocket-api--2026-09-26).
+
 **Next execution order:** complete and verify Axum removal from every consumer →
 revisit Step 07 database helpers. Step numbers are retained; Step 07 is deferred,
 not required for the Axum abstraction. Database setup and migrations remain local
@@ -4441,3 +4448,26 @@ this is a partial rollout of the HTTP abstraction, not full Axum removal.
 - Both base branches integrated; owned worktrees/branches, installed dependencies,
   build files and scratch outputs removed after verification. Nothing pushed or
   deployed. Quentin Torrentino remains pending, skipped at user request.
+
+## Owned WebSocket API — 2026-09-26
+
+Implemented in an isolated `feature/owned-websocket` worktree from shared `main`
+at `9f673c4`. The new `web::ws` module owns every public protocol type and wraps
+the internal transport privately; `web::extract::WebSocketUpgrade` is also
+available. Existing compatibility callers retain their API. Configuration covers
+buffers, frame/message limits, unmasked frames, requested/selected protocols,
+manual selection and failed-upgrade callbacks. Stream/Sink split operation,
+control-frame processing, error sources and application close reasons are preserved.
+
+Verification: baseline all-feature suite passed (262 tests). Eight new tests
+exercise real TCP negotiation, split text/binary echo, Ping/Pong, client/server
+close reasons, fragmented UTF-8, size limits, masking opt-in, malformed text,
+HTTP/1 and HTTP/2 rejection parity and deterministic background upgrade failure.
+Final all-feature suite: **270 tests passed**, zero failures. Strict all-feature,
+all-target Clippy and formatting pass. Production-only library checks for
+`ws` and `web,ws` with default features disabled both pass. HTML script syntax,
+links, service counts and matching observations validated.
+
+Library capability only: no consumer has been migrated in this change, and the
+service observations/counts remain unchanged. Consumer authentication, heartbeat
+policy and lifecycle ownership remain local. Nothing pushed or deployed.

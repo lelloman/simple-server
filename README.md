@@ -282,3 +282,8 @@ rolling-window/snapshot policies preserve durable service accounting. The separa
 `rate-limit-async` feature opts into Tokio FIFO admission with delayed permit
 release; it preserves burst-and-hold pacing without changing the base feature.
 See the [Step 10 contract](docs/step-10-rate-limiting.md).
+
+With `web` + `ws`, [`web::ws`](docs/web-core.md#owned-websockets) supplies owned
+WebSocket upgrades, sockets, messages, close frames and errors, including split
+read/write streams, subprotocol negotiation and configurable transport limits.
+The compatibility upgrade API remains available during consumer migration.

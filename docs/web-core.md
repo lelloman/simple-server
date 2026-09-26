@@ -141,7 +141,7 @@ contracts; it does not imply these remaining protocol abstractions are complete.
 
 ## Remaining shared scope
 
-Forms, redirects, more extractors, fully shared multipart/SSE/WebSocket protocols,
+Owned multipart and WebSocket APIs are now available (see below). SSE production,
 backend-free tracing observers, alternate listeners/TLS and independent mock
 fixtures still need APIs as consumers migrate. `compat::into_axum_router` remains
 available for other incremental migrations, but Pezzottify no longer uses it.
@@ -278,3 +278,56 @@ HEAD retains its original method while normal router response stripping applies.
 `MethodRouter::with_state` binds one method group independently of the enclosing
 router state. Methods added afterwards may use the outer state. Existing method
 fallbacks, GET/HEAD semantics and middleware placement are retained.
+
+## Owned WebSockets
+
+Enable `web` and `ws` to use `web::ws` independently of `web-compat`.
+`web::extract::WebSocketUpgrade` re-exports the owned upgrade extractor.
+No public socket, message, close frame or error contract requires Axum.
+
+```rust
+use simple_server::web::{Router, routing::get, ws::{WebSocketUpgrade, Message}};
+
+let app: Router = Router::new().route("/ws", get(|ws: WebSocketUpgrade| async {
+    ws.max_frame_size(1024 * 1024)
+        .max_message_size(4 * 1024 * 1024)
+        .on_upgrade(|mut socket| async move {
+            while let Some(Ok(message)) = socket.recv().await {
+                match message {
+                    Message::Text(_) | Message::Binary(_) => {
+                        if socket.send(message).await.is_err() { break; }
+                    }
+                    Message::Close(_) => { let _ = socket.close().await; break; }
+                    _ => {}
+                }
+            }
+        })
+}));
+```
+
+`WebSocket` implements `Stream`, `FusedStream` and `Sink<Message>`, so callers
+can split it into independently driven read/write halves with futures-util.
+`Utf8Bytes` validates UTF-8 and preserves cheaply cloned byte storage. Messages
+cover text, binary, Ping, Pong and optional close frames; close codes include
+standard constants and application codes. Transport errors retain diagnostics
+and an inspectable standard error source, without backend types in signatures.
+
+Protocol selection follows server preference among client offers. No common
+protocol permits an upgrade without a selected protocol; handlers enforce any
+required protocol. Requested/selected protocol inspection and explicit selection
+are available. Read/write buffers, maximum write buffer, message/frame limits,
+and unmasked-frame acceptance are configurable. Defaults and wire validation
+match the pinned transport. Invalid buffer settings can panic at transport
+construction; maximum write buffer must exceed the target write buffer.
+
+Ping replies and close replies are automatic but require polling/flushing the
+connection. Sending a close permits further reads, and forbids further data sends.
+Dropping a socket closes its transport without a graceful handshake. `close()`
+flushes a close frame; continue receiving to finish the handshake. Upgraded
+connections are not automatically drained by HTTP lifecycle shutdown. Auth,
+heartbeat scheduling, protocol payloads, cancellation and task tracking remain
+application-owned. `on_failed_upgrade` observes background transport failures;
+request-head validation errors are ordinary extractor rejections.
+
+The old `compat::WebSocketUpgrade` remains unchanged for existing consumers.
+Providing this API does not imply those services have migrated their socket types.
