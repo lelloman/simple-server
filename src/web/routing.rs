@@ -298,4 +298,21 @@ impl<S: Clone + Send + Sync + 'static> MethodRouter<S> {
         self.inner = self.inner.layer(super::service::BackendLayer(layer));
         self
     }
+
+    /// Apply a layer to matched methods, preserving the unwrapped 405 fallback.
+    pub fn route_layer<L, B>(mut self, layer: L) -> Self
+    where
+        L: tower_layer::Layer<Route> + Clone + Send + Sync + 'static,
+        L::Service: Service<Request, Response = http::Response<B>, Error = Infallible>
+            + Clone
+            + Send
+            + Sync
+            + 'static,
+        <L::Service as Service<Request>>::Future: Send + 'static,
+        B: http_body::Body<Data = bytes::Bytes> + Send + 'static,
+        B::Error: Into<super::body::BoxError>,
+    {
+        self.inner = self.inner.route_layer(super::service::BackendLayer(layer));
+        self
+    }
 }

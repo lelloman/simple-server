@@ -260,3 +260,13 @@ query. The WebSocket compatibility adapter now forwards `max_frame_size` and
 `Option<Json<T>>` preserves optional-body semantics: absent `Content-Type`
 produces `None`; declared JSON still validates syntax, shape and body limits.
 Unsupported content types reject with 415 rather than silently becoming absent.
+
+`Body::into_data_stream()` returns the shared `body::BodyDataStream`: a lazy
+`Stream<Item = Result<Bytes, BodyError>>`. It discards trailer frames, preserves
+chunk/error delivery and releases unread body resources when dropped. Use it to
+attach application-owned permits or other lifetime guards without buffering.
+
+`MethodRouter::route_layer` applies a Tower layer only to configured methods,
+leaving the 405 fallback unwrapped; GET also retains implicit HEAD behavior.
+`HeaderMap` itself can render an empty response, including in `(StatusCode,
+HeaderMap)` tuples, retaining repeated header values for upload/HEAD contracts.

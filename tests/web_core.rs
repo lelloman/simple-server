@@ -492,3 +492,66 @@ async fn optional_json_matches_backend_presence_errors_and_limits() {
         assert_eq!(actual, expected_snapshot);
     }
 }
+
+#[tokio::test]
+async fn method_route_layer_preserves_unmatched_method_responses() {
+    use simple_server::axum as old;
+    async fn gate(_: Request, _: web::middleware::Next) -> StatusCode {
+        StatusCode::UNAUTHORIZED
+    }
+    async fn old_gate(_: old::extract::Request, _: old::middleware::Next) -> StatusCode {
+        StatusCode::UNAUTHORIZED
+    }
+    let shared = Router::new().route(
+        "/",
+        get(|| async { "ok" }).route_layer(web::middleware::from_fn(gate)),
+    );
+    let legacy: old::Router = old::Router::new().route(
+        "/",
+        old::routing::get(|| async { "ok" }).route_layer(old::middleware::from_fn(old_gate)),
+    );
+    for (method, uri, expected) in [
+        ("GET", "/", 401),
+        ("HEAD", "/", 401),
+        ("POST", "/", 405),
+        ("GET", "/missing", 404),
+    ] {
+        let request = || {
+            Request::builder()
+                .method(method)
+                .uri(uri)
+                .body(Body::empty())
+                .unwrap()
+        };
+        let actual = snapshot(shared.clone().oneshot(request()).await.unwrap()).await;
+        let expected_response = legacy
+            .clone()
+            .oneshot(request())
+            .await
+            .unwrap()
+            .map(Body::new);
+        assert_eq!(actual.0.as_u16(), expected);
+        assert_eq!(actual, snapshot(expected_response).await);
+    }
+}
+
+#[tokio::test]
+async fn standalone_headers_preserve_empty_responses_and_repeated_values() {
+    use simple_server::axum as old;
+    let mut headers = HeaderMap::new();
+    headers.append("set-cookie", "first=1".parse().unwrap());
+    headers.append("set-cookie", "second=2".parse().unwrap());
+    headers.insert("upload-offset", "42".parse().unwrap());
+    let expected = old::response::IntoResponse::into_response(headers.clone()).map(Body::new);
+    assert_eq!(
+        snapshot(headers.clone().into_response()).await,
+        snapshot(expected).await
+    );
+    let expected =
+        old::response::IntoResponse::into_response((StatusCode::NO_CONTENT, headers.clone()))
+            .map(Body::new);
+    assert_eq!(
+        snapshot((StatusCode::NO_CONTENT, headers).into_response()).await,
+        snapshot(expected).await
+    );
+}

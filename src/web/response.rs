@@ -178,3 +178,11 @@ where
         (self, ()).into_response()
     }
 }
+
+impl IntoResponse for HeaderMap {
+    fn into_response(self) -> Response {
+        let mut response = Response::new(Body::empty());
+        *response.headers_mut() = self;
+        response
+    }
+}

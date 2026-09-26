@@ -52,6 +52,12 @@ impl Body {
         Self(axum::body::Body::from_stream(stream))
     }
 
+    /// Consume this body as a lazy data stream. Trailer frames are discarded.
+    /// Dropping the stream releases its body and attached resources.
+    pub fn into_data_stream(self) -> BodyDataStream {
+        BodyDataStream(self)
+    }
+
     pub fn empty() -> Self {
         Self(axum::body::Body::empty())
     }
@@ -95,5 +101,27 @@ impl http_body::Body for Body {
     }
     fn size_hint(&self) -> SizeHint {
         self.0.size_hint()
+    }
+}
+
+/// A lazy stream of HTTP data frames with framework-independent errors.
+#[derive(Debug)]
+pub struct BodyDataStream(Body);
+
+impl futures_util::Stream for BodyDataStream {
+    type Item = Result<Bytes, BodyError>;
+    fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
+        loop {
+            match Pin::new(&mut self.0).poll_frame(cx) {
+                Poll::Pending => return Poll::Pending,
+                Poll::Ready(None) => return Poll::Ready(None),
+                Poll::Ready(Some(Err(error))) => return Poll::Ready(Some(Err(error))),
+                Poll::Ready(Some(Ok(frame))) => {
+                    if let Ok(data) = frame.into_data() {
+                        return Poll::Ready(Some(Ok(data)));
+                    }
+                }
+            }
+        }
     }
 }
