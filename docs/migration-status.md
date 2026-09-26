@@ -19,21 +19,20 @@ All 17 services have been assessed. The five final consumers now use shared
 policies for their remaining quotas and pacing; application storage and transaction
 ownership are preserved. Test limitations are recorded in the completion evidence.
 
-**Routing / HTTP core (11):** **8 Done, 0 Partial, 9 Pending**. Pezzottify, Androidoscopy, Crumbles, Fausto, lello-auth, lellostore, Favzetto and Observo now
+**Routing / HTTP core (11):** **9 Done, 0 Partial, 8 Pending**. Pezzottify, Androidoscopy, Crumbles, Fausto, lello-auth, lellostore, Favzetto, Observo and Paranza now
 use shared APIs for all production route groups, ordinary handlers, built-in
 extractors, response adapters and router assembly. Done excludes explicitly
 tracked protocol compatibility boundaries. Pending records unverified adoption,
 not a claim that the shared API already supports every service's needs.
 See the [contract](web-core.md) and [completion evidence](#pezzottify-routing-completion--2026-09-25).
 
-**Latest integration (2026-09-26):** Observo `master` at `7217da1`, using shared
-`5ba4658`, completes routing, forms/HTML/redirects, peer-aware serving and plugin
-proxy adoption. No direct Axum API or compatibility adapter remains in its Rust
-sources/manifests. All **97 Rust tests** and both real-binary HTTP suites pass
-before and after. Shared: **255 tests/doctests**, strict Clippy and minimal web
-build pass. Consumer Clippy retains an existing denied numeric-constant lint;
-its capped-lint run completes. See the
-[Observo verification record](#observo-routing-completion--2026-09-26).
+**Latest integration (2026-09-26):** Paranza `master` at `4739150`, using shared
+`f1999c4`, completes routing, extraction, response conversion and serving.
+No direct Axum API or compatibility adapter remains in its Rust sources/manifests.
+Workspace baseline **286 passed**, final **287 passed**; new real-HTTP contract
+passes against original and migrated routing. Clippy completes with existing
+warnings. Shared code is unchanged. See the
+[Paranza verification record](#paranza-routing-completion--2026-09-26).
 
 **Next execution order:** complete and verify Axum removal from every consumer →
 revisit Step 07 database helpers. Step numbers are retained; Step 07 is deferred,
@@ -58,7 +57,7 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | lellostore | `backend` | **Done** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; OIDC + admin)** | N/A (no inbound admission policy) | **Done (local)** | WebSocket socket/message types; tracing compatibility adapter; axum-test transport and multipart/WebSocket helpers. Routing, auth extraction, streamed downloads, static files and OIDC mocks use shared APIs. Multipart readers, fields and errors are now fully shared types. |
 | meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; pipeline/gateway)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; weighted claims)** | **Done (local; budgets/retry)** | **Done (local; all three services)** | **Done (local; gateway budgets)** | Pending | API, gateway and pipeline control routers; proxy headers/client identity; byte responses and static fallbacks; custom middleware and mock upstreams. |
 | observo | `observo-server`; standalone extractor logging | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (no served probe) | **Done (local; scoped)** | **Done (local; primitives)** | N/A (assessed) | **Done (local; IP/key/JWT access)** | N/A (no request quota) | **Done (local)** | No remaining direct Axum API usage in Rust sources/manifests. Routing, forms/HTML/redirects, auth middleware, peer-aware serving, plugin request/body proxying and HTTP tests use shared APIs; Axum remains internal to simple-server. |
-| paranza | `apps/paranza-server` | **Done** | **Done (local; scoped)** | N/A (no logger) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; runner + PCM access)** | N/A (no implemented request quota) | Pending | Private router; state/path/query/raw-body extraction; response conversion and test helpers. Smallest core HTTP pilot; no observed WebSocket, SSE or multipart use. |
+| paranza | `apps/paranza-server` | **Done** | **Done (local; scoped)** | N/A (no logger) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; runner + PCM access)** | N/A (no implemented request quota) | **Done (local)** | No remaining direct Axum API usage in Rust sources/manifests. Private routing, state/path/query/raw-body extraction, response conversion, HTTP serving and test helpers use shared APIs; Axum remains internal to simple-server. |
 | peerlo | `peerlo-api` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; retry primitives)** | **Done (local; bearer + Torznab keys)** | **Done (local; API + crawler + durable DHT)** | Pending | Public REST routers; auth, rate-limit and metrics middleware; custom error responses and tracing tests. Suitable second pilot for middleware composition. |
 | pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local; main HTTP)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; socket scope)** | **Done (local; durable queue cadence)** | N/A (assessed) | **Done (local; sessions + permissions + WebSocket)** | **Done (login, durable daily quota + TMDB pacing)** | Pending | Stateful subrouters; auth/language/pagination extractors; video streaming; WebSocket sync; client-address extraction; static/compression integration and HTTP tests. |
 | pezzottify-downloader | Puppeteer API, downloader HTTP server and Python cron | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; Puppeteer)** | **Done (local; both HTTP routers)** | N/A (assessed) | N/A (assessed) | **Done (local; both routers)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; priority admission)** | N/A (assessed) | N/A (no application caller gate) | **Done (local; Python/SQLite quota bridge)** | Pending | Parent and child HTTP routers; Unix-socket serving; streamed audio/proxy responses; WebSocket proxying; correlation/tracing and admission middleware; proxy tests. |
@@ -1088,7 +1087,7 @@ source inspection, not runtime test runs. No consumer files changed.
 | --- | --- | --- |
 | androidoscopy | master `f4461a81` | Legacy WebSocket routers and control::router auth layer have no explicit extractor limit. |
 | fausto | master `7b494b7e` | server/src/api/mod.rs composes auth/rate limits, CORS, tracing and plugins without explicit extractor limits. |
-| paranza | master `2bd528f7` | apps/paranza-server/src/main.rs::api_router defines management routes and state without a body-limit layer. |
+| paranza | **Done (local)** | No remaining direct Axum API usage in Rust sources/manifests. Private routing, state/path/query/raw-body extraction, response conversion, HTTP serving and test helpers use shared APIs; Axum remains internal to simple-server. |
 | peerlo | master `907c9ad2` | peerlo-api create_router/start_server installs metrics, tracing, auth, rate limiting and optional CORS without an extractor limit. |
 | pezzottify-downloader | master `2bf0158a` | Both production HTTP routers install CORS/tracing (Puppeteer also correlation); no explicit extractor limit. Proxy body handling is separate. |
 | quentin-torrentino | master `e6064149` | crates/server/src/api/routes.rs composes auth, metrics and static fallback without an extractor limit; torrent bandwidth limits are unrelated. |
@@ -1330,7 +1329,7 @@ behavior changes are claimed for those assessments.
 | androidoscopy | master `f4461a81` | server/src/control.rs and dashboard.rs: auth/HTTP/WebSocket routes and MIME-only asset responses; no explicit cache/security-header policy. |
 | lellostore | master `54615a10` | backend/src/main.rs and api/{file_response,static_files}.rs: headers describe media type, lengths, disposition and ranges; no explicit cache/security-header policy. File/range handling remains outside 04b. |
 | observo | master `ef3bff39` | **Done (local)** | No remaining direct Axum API usage in Rust sources/manifests. Routing, forms/HTML/redirects, auth middleware, peer-aware serving, plugin request/body proxying and HTTP tests use shared APIs; Axum remains internal to simple-server. |
-| paranza | master `2bd528f7` | apps/paranza-server/src/main.rs: API and PCM protocol/header conversion, no response cache/security-header policy. |
+| paranza | **Done (local)** | No remaining direct Axum API usage in Rust sources/manifests. Private routing, state/path/query/raw-body extraction, response conversion, HTTP serving and test helpers use shared APIs; Axum remains internal to simple-server. |
 | peerlo | master `907c9ad2` | crates/peerlo-api/src/lib.rs and routes.rs: auth, rate limiting, tracing and CORS, without response cache/security-header policy. |
 | pezzottify-downloader | master `2bf0158a` | downloader/http_server.rs and puppeteer/{proxy,correlation}.rs: media/transport headers and proxy/correlation propagation; no cache/security-header policy. CORS is separate. |
 | quentin-torrentino | master `e6064149` | crates/server/src/api/{routes,middleware}.rs: auth, metrics and static-service routing, no explicit response cache/security-header policy. Outbound provider request headers are unrelated. |
@@ -1533,7 +1532,7 @@ establish adoption. Their application-owned browser/CSRF boundaries remain intac
 | androidoscopy | `master` / `f4461a81` | `server/src/main.rs` HTTP/WS router setup and legacy server have no CORS response policy. |
 | lello-auth | `master` / `b1827fdd` | CORS managed by Caddy; not migrated into Rust. `homelab/caddy/Caddyfile` permits selected application origins with credentials and OPTIONS 204. Server, integration crate and examples install no Rust CORS layer. Moving ownership needs coordinated proxy/application changes; live deployment not probed. |
 | meteonesto | `master` / `6d0eb458` | Weather API, gateway and pipeline control routers implement their own HTTP policies, with no application CORS layer. Infrastructure/auth-edge documentation is not application adoption. |
-| paranza | `master` / `2bd528f7` | `apps/paranza-server/src/main.rs` router and configuration contain no CORS policy. |
+| paranza | **Done (local)** | No remaining direct Axum API usage in Rust sources/manifests. Private routing, state/path/query/raw-body extraction, response conversion, HTTP serving and test helpers use shared APIs; Axum remains internal to simple-server. |
 | quentin-torrentino | `master` / `e6064149` | `crates/server` router has no CORS layer despite an enabled tower-http feature. |
 | sct | `master` / `28604f17` | Server browser-origin and CSRF checks are application security boundaries, not a CORS response policy. Existing dirty work remains untouched. |
 | simple-agents | `main` / `11674342` | `crates/simple-agents-service/src/ui.rs::browser_boundary` and the same-origin development proxy are outside the shared CORS scope; no installed CORS middleware. |
@@ -1679,7 +1678,7 @@ Favzetto's canary evidence remains above.
 | simple-agents | `main` / `0cf88e2` | `3a106d9efac3852146ff10d74bda924830a7281c` | Focused real-router database readiness/liveness regression 1/1 before and after; formatting passed. Replayed concurrent UI commit; tested Cargo/crates tree unchanged by replay. |
 | simple-ai | `master` / `30ed3ea` | `0523c03277930f2e8bc64ff715779d16e600541c` | Baseline runner health 2; final backend 1 and runner 4. Fake engines verify complete mixed/unhealthy reports, every-engine polling, empty/OCR behavior; GET/HEAD/POST verified. Existing ignored rtx.toml copied unchanged after missing-fixture compile failure; final rerun passed. |
 | peerlo | `master` / `067c2a7` | `e51e4b7444f17073d509d04ca88f531d204a5f5e` | Baseline health 4; final 165 unit + 2 tracing tests. Always-200 degraded/healthy response, uptime, routing, auth, metrics, rate limits and CORS retained. Formatting/diff passed. |
-| paranza | `master` / `2bd528f` | `1c559ee7bde3b510177f93dc979bfe02335d9842` | Baseline health test passed; final full server suite 54 passed, including new real-router success and poisoned-mutex 500 test. Single detailed snapshot and original error mapping retained. Incidental formatting excluded. |
+| paranza | `master` / `2bd528f` | **Done (local)** | No remaining direct Axum API usage in Rust sources/manifests. Private routing, state/path/query/raw-body extraction, response conversion, HTTP serving and test helpers use shared APIs; Axum remains internal to simple-server. |
 | pezzottflix | `master` / `1e1a94a` | `f8159f0e19436d5cfba6a785d255a3f0b74bc3ab` | Health-filter baseline/final each 14 passed. Final full API health suite 12 passed (overlaps filter), with added storage failure, database failure vs independent liveness, HEAD/POST tests. Both aggregate dependency results retained. Formatting/diff passed. |
 | pezzottify-downloader | `master` / `2210324` | `620a0af18c5918bb9383f3b57469e1c397ddcc4b` | Baseline health 6; final all-target suite 159 passed, including Unix/public probes, proxy/CORS and real process lifecycle. Both production endpoints migrated; Spotify connection policy unchanged. Existing broad formatting debt preserved. |
 | quentin-torrentino | `master` / `e606414` | `a8a921f3e8014e7996095ad5ea26bcbfc8625633` | Two health tests passed in each baseline/final phase: in-process API and real-server startup. Existing API auth and metrics placement retained. Changed-file formatting/diff passed. |
@@ -4144,3 +4143,35 @@ this is a partial rollout of the HTTP abstraction, not full Axum removal.
   and tracker commits. Ancestry and exact tested source trees verified. Owned
   worktrees/branches and `/tmp/observo-routing` build/log files removed. Both
   original worktrees clean; nothing pushed or deployed.
+
+## Paranza routing completion — 2026-09-26
+
+- Clean active master started at `4c254ff`; consumer migration `4739150`.
+  Reviewed shared source `f1999c47dc231add3ca00f236bf03e7f296cc966` is pinned in
+  simple-server.rev and referenced by the README/checkout script. Isolated
+  migration worktrees preserved sibling dependency paths.
+- Server application's private routing, state/path/query/raw-body extraction,
+  response conversion, health endpoint and lifecycle HTTP serving use shared web
+  APIs. Internal helper names no longer describe Axum. Domain dispatch, PCM
+  authorization/header precedence, query reconstruction and wire responses remain
+  unchanged. Runner TLS and binary protocols remain application-owned.
+- No direct Axum API/import/dependency or compatibility adapter remains in Rust
+  sources/manifests. Axum remains internal to simple-server. No shared API
+  extension was needed; other workspace crates do not own these HTTP routes.
+- Baseline full all-feature workspace: **286 passed**, zero failures/ignores.
+  Final: **287 passed**, zero failures/ignores. New real-HTTP regression passed
+  on original and migrated routing over loopback and temporary SQLite state:
+  health/nodes, JSON error content type/code, malformed raw JSON, PCM missing
+  credentials, authorized query pagination, message-path 404, method 405 and
+  graceful shutdown. Existing suites retain TCP/TLS/Unix-socket coverage.
+- All-feature/all-target workspace Clippy completes with existing warnings.
+  Full formatting has pre-existing differences; no broad reformat. Diff checks
+  pass. Shared library code is unchanged; its prior 255-test result is historical
+  and was not rerun for this consumer-only change.
+- Docker fleet scenarios, Android/release builds and real-machine wake/poweroff
+  operations were not run. No protocol compatibility gap remains in the audited
+  Rust scope.
+- Paranza master rebased onto `4739150`; shared main rebased onto tracker commit.
+  Ancestry and exact tested-tree equality verified. Both original worktrees clean;
+  owned worktrees/branches, temporary builds/logs and timestamped artifacts from
+  these test runs removed. Nothing pushed or deployed.
