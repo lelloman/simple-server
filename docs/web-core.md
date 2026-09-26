@@ -331,3 +331,41 @@ request-head validation errors are ordinary extractor rejections.
 
 The old `compat::WebSocketUpgrade` remains unchanged for existing consumers.
 Providing this API does not imply those services have migrated their socket types.
+
+## Owned HTTP tracing
+
+Enable `web` and `http-tracing` and use `web::tracing::{trace,
+trace_with_observer, Observer, ResponseInfo, TracingObserver, Outcome, Phase}`.
+No `web-compat` feature or backend response type is required.
+
+`Observer::on_response` receives a borrowed `&ResponseInfo<'_>` with status,
+HTTP version, headers and application extensions. It cannot consume or modify
+the body. `ResponseInfo::new` also accepts any standard HTTP response body.
+Observers retain application ownership of metrics, logging and redaction.
+
+Migration from the compatibility bridge:
+- Replace `web::compat::trace_with_observer` with
+  `web::tracing::trace_with_observer`.
+- Implement `web::tracing::Observer`; replace the callback's backend response
+  argument with `&web::tracing::ResponseInfo<'_>`.
+- Import `TracingObserver`, `Outcome` and `Phase` from `web::tracing`.
+- Remove `web-compat` only if no other compatibility APIs remain.
+
+The legacy `http_tracing` observer and `web::compat` bridge remain supported.
+Both APIs use the same lifecycle engine and default events. Completion is server
+body consumption, not client acknowledgment. Upgrades finish at handoff; HEAD,
+bodyless responses, streaming errors, cancellation and trailers retain their
+existing semantics. Correlation middleware surrounds tracing, and response
+normalization belongs inside its callback. No subscriber is installed.
+
+```rust
+use simple_server::web::{
+    Request, Response,
+    middleware::Next,
+    tracing::trace,
+};
+
+async fn request_logger(request: Request, next: Next) -> Response {
+    trace(request, |request| next.run(request)).await
+}
+```

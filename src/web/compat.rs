@@ -79,6 +79,7 @@ impl WebSocketUpgrade {
 }
 
 /// Preserve the existing tracing observer during a middleware migration.
+/// Prefer `super::tracing::trace_with_observer` for backend-independent observers.
 #[cfg(feature = "http-tracing")]
 pub async fn trace_with_observer<F, Fut, O>(
     request: super::Request,

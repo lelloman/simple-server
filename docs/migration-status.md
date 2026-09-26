@@ -4736,3 +4736,31 @@ cells contain pending exposure only. Quentin Torrentino remains skipped.
   removed the seven retained baseline/final logs. Service evidence:
   `docs/step-12-websocket.md`. Live Runner adapters and browser/Android checks were
   not rerun. All five owned migration scratch directories are now absent.
+
+## Owned HTTP tracing API — 2026-09-26
+
+- Shared library implementation only; consumer adoption remains pending.
+  Existing remaining-exposure cells are unchanged. Nine services have tracing
+  boundaries recorded: Pezzottify, Crumbles, Fausto, LelloStore, Peerlo,
+  Pezzottflix, Pezzottify-downloader, SCT and SimpleAI.
+- Added `web::tracing` behind `web,http-tracing`, without `web-compat`.
+  Owned entry points accept shared request/response bodies. Observer callbacks
+  receive read-only `ResponseInfo`: status, HTTP version, headers and application
+  extensions, without access to the backend response or body. SCT's extension
+  metadata and consumer-selected event policies remain supported.
+- Legacy observers and compatibility entry points remain source-compatible.
+  Both APIs share the existing lifecycle engine and default event implementation;
+  no buffering, event-level, target, upgrade or cancellation policy changes.
+- Isolated branch/worktree based on simple-server `main` at `39e1c17`.
+  Baseline all-feature suite passed (270 tests). Final suite: **285 passed**.
+  Fourteen existing contracts now run against both legacy and owned APIs,
+  plus a metadata-view test. Coverage includes production router templates,
+  sensitive-data exclusion, status, extensions, streaming/trailers, timing,
+  errors, cancellation, protocol-bodyless responses, upgrades and correlation.
+- Strict all-feature/all-target Clippy and formatting pass. Minimal
+  `web,http-tracing` suite: **13 passed** without compatibility or correlation.
+  Standalone `http-tracing` and `web` feature checks pass.
+  A transient linker failure cleared on retry; sandbox-blocked socket tests
+  passed when the full suite was rerun with local socket access.
+- Migration instructions: [Owned HTTP tracing](web-core.md#owned-http-tracing).
+  Consumers have not been edited or newly marked Done. Nothing pushed or deployed.

@@ -1,5 +1,8 @@
 //! Optional HTTP request spans and response-body lifecycle events.
 //!
+//! With the `web` feature, prefer `web::tracing` for backend-independent
+//! request/response and observer contracts. This legacy API remains supported.
+//!
 //! [`trace`](crate::http_tracing::trace) wraps an Axum request callback. It records safe route templates,
 //! status, header latency and body lifetime without buffering or reading bodies.
 //! It does not install a subscriber. See `docs/step-03c-http-tracing.md` for
@@ -206,13 +209,7 @@ pub trait Observer: Send + 'static {
 pub struct TracingObserver;
 impl Observer for TracingObserver {
     fn on_response(&mut self, span: &Span, response: &Response, latency: Duration) {
-        let status = response.status().as_u16();
-        let header_latency_ms = latency.as_secs_f64() * 1000.0;
-        if response.status().is_server_error() {
-            tracing::error!(parent: span, status, header_latency_ms, "http.response_headers");
-        } else {
-            tracing::debug!(parent: span, status, header_latency_ms, "http.response_headers");
-        }
+        response_event(span, response.status(), latency);
     }
     fn on_finish(&mut self, span: &Span, outcome: Outcome, phase: Phase, duration: Duration) {
         let phase = phase.as_str();
@@ -225,6 +222,18 @@ impl Observer for TracingObserver {
             }
             _ => tracing::info!(parent: span, outcome, phase, duration_ms, "http.finished"),
         }
+    }
+}
+
+// Shared by legacy and owned observers to retain identical event targets/fields.
+pub(crate) fn response_event(span: &Span, status: StatusCode, latency: Duration) {
+    let code = status;
+    let status = status.as_u16();
+    let header_latency_ms = latency.as_secs_f64() * 1000.0;
+    if code.is_server_error() {
+        tracing::error!(parent: span, status, header_latency_ms, "http.response_headers");
+    } else {
+        tracing::debug!(parent: span, status, header_latency_ms, "http.response_headers");
     }
 }
 
