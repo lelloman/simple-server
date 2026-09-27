@@ -5085,3 +5085,111 @@ Both trackers remove completed SSE items from remaining observations. Isolated
 shared-library checkouts, owned logs/snapshots/build files and temporary migration
 worktrees/branches are removed after integration. Existing user work is preserved.
 Nothing pushed or deployed.
+
+
+## Axum exposure re-audit — 2026-09-27
+
+Refreshed all 17 last-column observations after owned WebSocket, tracing and SSE
+rollouts. **11 services have no remaining direct consumer Axum API/dependency;
+5 active services still have specific boundaries; Quentin Torrentino is skipped.**
+Of the five active services, four have production boundaries and LelloStore has
+test-only boundaries. Completed features are not repeated as remaining work.
+
+### Scope and verification
+
+Inspected local active development branches, branch/tracking history, committed
+Rust source (including tests/examples/standalone manifests), all Cargo manifests
+and relevant tracked working-tree changes. Broad searches for Axum dependencies,
+re-exports, aliases and explicit compatibility bridges were followed by source
+inspection of each hit. Reviewed multipart facade definitions so shared
+Multipart/Field/Error imports are not mistaken for backend types. No consumer
+files, refs or user work were changed. No builds, Cargo dependency-resolution
+commands or runtime tests were rerun; this is a source/manifest audit, not a new
+runtime qualification. Generated outputs, ignored artifacts and unrelated
+untracked work are outside the source snapshot.
+
+The table below records the inspected branch tips. simple-agents advanced during
+the audit to its release-preflight commit; its newer committed tree was rechecked
+and still has no Axum/compatibility imports. Existing dirty/untracked work in
+other services is preserved.
+
+| Service | Active branch | Inspected commit | Remaining Axum exposure |
+| --- | --- | --- | --- |
+| pezzottify | `dev` | `df37837e` | Production: compatibility Multipart for ingestion uploads (backend fields/errors). Tests: raw Axum media/source/work-knowledge mocks and legacy JSON error-renderer oracle. |
+| favzetto | `master` | `d8cadbd9` | None. |
+| androidoscopy | `master` | `5f25aa8a` | Production: axum-server TLS configuration, serving and graceful-shutdown handle. Tests: the same TLS adapter. |
+| crumbles | `master` | `be920825` | Production: compatibility Multipart for attachment uploads and backend MultipartError mapping. |
+| fausto | `master` | `3a7ae237` | Production: compatibility OwnedMultipart for node uploads (backend fields/errors). Tests: axum-test/router adapters and legacy JSON parser oracle. |
+| lello-auth | `master` | `e4ce30ed` | None. |
+| lellostore | `master` | `9fbf140a` | Tests only: axum-test transports, multipart/WebSocket helpers and into_axum_router adapters. |
+| meteonesto | `master` | `b9381ae4` | None. |
+| observo | `master` | `7217da13` | None. |
+| paranza | `master` | `4739150e` | None. |
+| peerlo | `master` | `5ac6afde` | None. |
+| pezzottflix | `master` | `eb9bfb5c` | None. |
+| pezzottify-downloader | `master` | `32d7ab93` | None. |
+| quentin-torrentino | `master` | `63b919f3` | Skipped: backend routing/handlers/extractors/responses, auth/metrics middleware and serving; torrent multipart, chat SSE, dashboard WebSockets, static-file routing and HTTP test fixtures. |
+| sct | `master` | `d4d5318c` | None. |
+| simple-agents | `main` | `81f5f5eb` | None. |
+| simple-ai | `master` | `f2baca18` | None. |
+
+### Exact remaining boundaries
+
+- **Pezzottify:** production ingestion imports `web::compat::Multipart` in
+  `pezzottify-server/src/server/ingestion_routes.rs:12`; returned fields/errors
+  expose the backend. Test-only direct re-exports remain in
+  `pezzottify-server/src/media/tests.rs:40`, source-knowledge mocks
+  (`pezzottify-server/src/background_jobs/jobs/source_knowledge.rs:540`), work-knowledge mocks
+  (`pezzottify-server/src/background_jobs/jobs/work_knowledge.rs:232`) and the previous JSON
+  rejection renderer (`pezzottify-server/src/server/api_error.rs:229`). The compatibility feature
+  is still used. SSE, WebSockets and tracing are absent from remaining work.
+- **Crumbles:** `crumbles/src/server/routes/attachments.rs:7` imports the
+  compatibility Multipart; `:301` explicitly accepts backend MultipartError.
+  The workspace compatibility feature is still used. Other Axum text is a
+  comment or test name, not additional API exposure.
+- **Fausto:** `server/src/api/nodes.rs:16` imports compatibility OwnedMultipart
+  for node uploads, exposing backend owned fields/errors. `server/Cargo.toml:85`
+  has dev-only `axum-test`; integration tests and
+  `server/src/plugin_files.rs:282` convert shared routers with
+  `into_axum_router`. `server/tests/routing_contract.rs:139` retains the legacy
+  JSON parser oracle. These test dependencies are separate from production
+  multipart work.
+- **Androidoscopy:** `server/Cargo.toml:26` depends on `axum-server`.
+  `server/src/main.rs:197` uses its Handle, `:208` serves TLS through
+  `from_tcp_rustls`, and the existing shutdown hook calls graceful_shutdown.
+  `server/tests/tls_websocket_integration.rs:4` exercises the same adapter.
+  Router/WS types are already shared; TLS transport/configuration/shutdown is
+  the remaining production boundary.
+- **LelloStore:** all backend Rust production code uses owned shared APIs.
+  `backend/Cargo.toml:69` has dev-only `axum-test` with WebSocket support.
+  `backend/tests/e2e_auth.rs`, `integration.rs`, `paravoid_distribution.rs`,
+  `publications.rs` and `support/paravoid_{device,http}.rs` use its transport,
+  upload forms, WebSocket helpers and explicit shared-router adapters.
+  Workspace `web-compat` supports these tests; it is not production adoption.
+- **Quentin Torrentino:** still intentionally skipped. The public router and
+  ordinary handlers/extractors/responses/middleware are backend APIs in
+  `crates/server/src/api/routes.rs` and sibling route modules. Torrent uploads
+  (`torrents.rs:6`), chat Event/Sse (`chat.rs:14`), dashboard sockets/messages
+  (`ws.rs:5`), static file route assembly and HTTP test fixtures remain.
+  Existing completed earlier modules are not reclassified.
+
+### What does not count as pending Axum work
+
+Transitive backend packages in lockfiles remain internal to simple-server and
+are not consumer API exposure. Shared owned Multipart/Field/Error, WebSocket,
+SSE and tracing facades are complete where production uses them. HTTP/Tower
+utilities and outbound tungstenite clients do not by themselves expose Axum.
+LelloAuth's retained crate name `lello-auth-axum` and its
+`axum_middleware` aliases refer to shared APIs, not pending backend integration.
+Comment-only references (including Pezzottflix's Query test comment) are omitted.
+
+The shared borrowed/owned multipart wrappers already cover the three active
+production multipart consumers: this is consumer migration work, not a missing
+module. Androidoscopy still needs a shared TLS abstraction. Test transports,
+explicit router bridges and legacy comparison oracles need a separate decision
+about replacement before declaring complete source-level Axum removal.
+
+Both trackers have matching pending-only observations. HTML links/script syntax,
+17-row consistency and documentation whitespace are checked before commit and
+integration into simple-server main; the audit worktree/branch are then removed.
+No consumer migration, push or deployment is included.
