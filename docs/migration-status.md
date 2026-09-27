@@ -67,9 +67,9 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local; main HTTP)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; socket scope)** | **Done (local; durable queue cadence)** | N/A (assessed) | **Done (local; sessions + permissions + WebSocket)** | **Done (login, durable daily quota + TMDB pacing)** | **Done (local; HTTP core)** | None. |
 | pezzottify-downloader | Puppeteer API, downloader HTTP server and Python cron | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; Puppeteer)** | **Done (local; both HTTP routers)** | N/A (assessed) | N/A (assessed) | **Done (local; both routers)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; priority admission)** | N/A (assessed) | N/A (no application caller gate) | **Done (local; Python/SQLite quota bridge)** | **Done (local; parent + child HTTP core)** | None. |
 | quentin-torrentino | `crates/server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; stage capacity)** | N/A (assessed) | **Done (local; API access)** | **Done (local; MusicBrainz pacing)** | Pending | Public router composition; multipart torrent uploads; SSE chat; dashboard WebSockets; static-file services; custom middleware and HTTP test fixtures. |
-| sct | `sct-server` | **Done** | **Done (scoped)** | N/A (no logger) | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; worker scope)** | **Done (local; durable worker cadence)** | **Done (local; retry scope)** | **Done (local; tokens/sessions + transactional access)** | N/A (durable state caps, no request quota) | **Done (local; HTTP core)** | Shared routing, handlers, extraction/rejections, middleware, response/body contracts, serving, HTTP fixtures and qualification example complete (master 2a33b85; shared 23626b2). JSON error bytes/metadata, auth/correlation, archive/checkpoint/transfer streaming and range/HEAD policies preserved. Remaining: tracing observer backend response callback through web compatibility. |
+| sct | `sct-server` | **Done** | **Done (scoped)** | N/A (no logger) | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; worker scope)** | **Done (local; durable worker cadence)** | **Done (local; retry scope)** | **Done (local; tokens/sessions + transactional access)** | N/A (durable state caps, no request quota) | **Done (local; HTTP core)** | None. |
 | simple-agents | `simple-agents-service`; runner-shell logging; associated coding test servers | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local pilot; service routes)** | **Done (local; scoped canary)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; transactional capacity)** | **Done (local; retry scope)** | **Done (local; caller + transactional access)** | N/A (task/storage admission, no request quota) | **Done (local; HTTP core)** | Session SSE event/keepalive producer and response adapter. |
-| simple-ai | `backend`, `inference-runner` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local; backend)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; batch readiness)** | N/A (assessed) | **Done (local; backend user/admin)** | **Done (local; backend budgets)** | **Done (local; HTTP core)** | Admin SSE event/keepalive compatibility; tracing observer backend response callback. |
+| simple-ai | `backend`, `inference-runner` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local; backend)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; batch readiness)** | N/A (assessed) | **Done (local; backend user/admin)** | **Done (local; backend budgets)** | **Done (local; HTTP core)** | Admin SSE event/keepalive compatibility. |
 
 ## Axum exposure audit — 2026-09-24
 
@@ -4848,8 +4848,8 @@ onto the tested migration. No push or deployment is included.
 
 The interrupted session lost uncommitted temporary directories and tracker
 drafts; these three completed migrations were recovered from their committed
-consumer evidence. LelloStore, Pezzottflix, downloader, SCT and SimpleAI remain
-pending until their development branches contain verified migrations.
+consumer evidence. LelloStore, Pezzottflix, downloader, SCT and SimpleAI were pending at recovery
+and are completed in the records below.
 
 ### Pezzottflix
 
@@ -4904,3 +4904,61 @@ pending until their development branches contain verified migrations.
   explicit test router adapters. Original master clean; tested tree/ancestry
   verified. Owned worktrees, branch, target/logs and task directory removed;
   unrelated `/tmp/cr183-release` registration preserved.
+
+### SCT
+
+- Master baseline `2a33b85`; integrated `d4d5318`.
+  Owned observer and `ResponseInfo` preserve ErrorCode extensions, exact JSON
+  schema/request IDs, bounded route/method/status metrics, histogram and
+  header-time active gauge. No subscriber is required. Source pin and README
+  updated; explicit `web` replaces unused `web-compat`.
+- Focused observability contracts: **three passed**. Baseline/final locked
+  workspace: **54 passed, 91 intentionally ignored**. PostgreSQL, S3 and extended
+  qualification tests were not rerun. Formatting, strict workspace/all-target/
+  all-feature Clippy and workspace/all-target/all-feature build pass.
+- Consumer evidence: `docs/step-03c-http-tracing.md` and routing documentation.
+  No remaining Axum/backend API exposure found in SCT production source.
+  Tested tree/ancestry verified on master; original untracked
+  `.validation-work/` and `docs/step-04c-cors.md` preserved. Owned worktrees,
+  branch, target/logs and task directory removed.
+
+### SimpleAI
+
+- Master baseline `3eedbd6`; integrated `e12969b`.
+  Backend logging uses the owned observer and metadata callback, retaining
+  all-status INFO headers and default terminal events. Active source pin and
+  README updated; compatibility remains only for the separate admin SSE boundary.
+- Baseline/final full workspace: **464 passed, one ignored**. Both focused
+  tracing tests pass status/privacy/header/response/lazy stream/completion/
+  cancellation contracts. Workspace build and warning-mode all-target Clippy pass.
+  Strict lint stops at the same three common-crate derivable_impls findings;
+  global formatting retains unrelated debt. Changed Rust/diff checks pass.
+- Sandboxed local socket/process failures cleared on an unrestricted full rerun.
+  Android/browser/GPU/model-download/Docker/deployed flows were not qualified.
+  Consumer evidence: `docs/step-03c-http-tracing.md`.
+- Original README semantic edit overlapped the file containing the pin update.
+  Clean-worktree integration followed by a README-only preservation stash restored
+  the exact semantic diff; all 18 untracked semantic-file checksums match the
+  pre-integration snapshot. The owned stash was dropped after verification.
+  Original master contains the migration; unrelated dirty/untracked work remains.
+- Owned worktrees, migration/recovery branches, build outputs, log and task
+  directory removed. Remaining exposure: admin SSE event/keepalive compatibility.
+
+### Rollout completion
+
+All eight remaining applicable services now contain the owned tracing migration
+on their established master branches, following the earlier Pezzottify dev canary.
+No legacy observer/backend response or compatibility-tracing calls remain in
+these nine consumer source trees. Completed tracing items have been removed from
+both trackers' remaining-exposure cells. Existing lint/format debt and unexecuted
+external-service qualifications are recorded above; no push/deployment performed.
+
+Final coordinator audit verifies migration ancestry and the expected active
+branch for all nine applicable consumers (Pezzottify dev, the other eight master),
+and finds no legacy tracing callbacks/compatibility calls in their Rust source.
+Crumbles has since advanced to concurrent commit `d40ef07` with additional native
+authentication/Android edits; these remain untouched and contain the migration.
+Tracker JavaScript, local links, seventeen service rows, sixteen completed routing
+rows and exact HTML/Markdown remaining-exposure agreement are verified.
+All rollout-owned service/dependency worktrees, branches, build outputs and logs
+are absent; pre-existing worktree/recovery registrations are preserved.
