@@ -4996,3 +4996,92 @@ are absent; pre-existing worktree/recovery registrations are preserved.
   Markdown trackers until production migrations and consumer checks pass.
   Quentin Torrentino remains intentionally skipped. No push or deployment.
 - API contract and consumer instructions: [Owned SSE](step-11-sse.md).
+
+## Owned SSE consumer rollout — 2026-09-27
+
+Reviewed library: `96c542c2935606cbae48573e6d5ee634ed24970c`. Active SSE
+consumers are Pezzottify search, SimpleAI admin events and simple-agents sessions.
+Quentin Torrentino remains intentionally skipped. Application auth, schemas,
+producers and replay ownership are preserved.
+
+### Pezzottify canary
+
+- Active `dev`, starting `ff7af524`; integrated migration **`df37837e`**.
+  Production search uses owned `web::sse` and direct shared response conversion.
+  The capacity-32 channel, tracked task ownership, search phases/section JSON,
+  final Done and 15-second heartbeat are unchanged. Existing multipart still
+  needs `web-compat`. CI/build pin updated in `simple-server.rev`.
+- Baseline full fast-feature suite: **1,451 passed, 36 existing ignores**.
+  Eight strengthened production real-HTTP SSE contracts pass before/after,
+  including strict auth, no missing-route skips, exact headers/framing, Unicode
+  queries, ignored reconnect header and exactly one final Done. Final suite:
+  **1,452 passed, same ignores**. Formatting, DB-boundary checks, strict
+  production Clippy and default build pass. Existing test unused imports and
+  num-bigint-dig future-compatibility notice remain. No Docker/Android/browser
+  or release rebuild is claimed. Consumer evidence: `docs/step-11-sse.md`.
+- `dev` rebased onto `migration/owned-sse`; tested tree/ancestry verified.
+  Original checkout remains clean. Owned branch/worktree/build files removed;
+  unrelated Paravoid worktrees/refs preserved. Remaining exposure: multipart
+  fields/errors, independent HTTP mocks and the error-renderer differential test.
+
+### SimpleAI
+
+- Active `master`, starting `e12969b`; integrated migration **`f2baca1`**.
+  Admin runner events use owned Event/KeepAlive/Sse and direct shared response
+  conversion. Existing query JWT/admin auth, four named JSON event types,
+  broadcast lag skipping and 15-second heartbeat are unchanged. `web-compat`
+  is replaced by `web`. Reviewed pin and active README instructions updated.
+- Baseline backend/common: **374 passed, one existing ignored doctest**.
+  Two new production admin SSE checks pass before/after: real HTTP uses signed
+  test JWTs for 401 invalid token/audience and 403 non-admin, exact headers, all
+  four named event JSON schemas including Unicode/newlines, incremental
+  delivery and shutdown after disconnect. Paused-time tests preserve heartbeat
+  defaults/reset and lagged broadcast recovery. Final: **376 passed, same
+  ignore**. Locked full workspace build and non-strict backend/common all-target
+  Clippy pass; no new SSE-test findings. Strict Clippy still stops at the three
+  unchanged common `derivable_impls` findings. Repository formatting retains
+  existing differences; new tests are rustfmt-clean and diff checks pass.
+- Full fresh-checkout workspace tests fail before SSE edits because a runner
+  test includes ignored deployment `scripts/configs/rtx.toml`. It was not copied
+  or committed; no full-workspace test pass is claimed. Docker, Android, GPU,
+  browser and deployed OIDC checks were not rerun. Evidence: consumer
+  `docs/step-11-sse.md`, routing/tracing and migration documents.
+- `master` rebased onto the migration; tested tree/ancestry verified. Only the
+  dirty README was temporarily stashed; it was restored and the owned stash
+  removed. All **20** original local files hash-verified as preserved, allowing
+  the intended source-pin change in README. Semantic-scoring edits and ignored
+  deployment configs remain untouched. Owned branch/worktree/build files
+  removed. Rust source audit finds no backend/compat imports; remaining exposure:
+  **None**.
+
+### simple-agents
+
+- Active `main`, starting `58723d4`; integrated migration **`ffdf45e`**.
+  Session events return owned Sse directly and use owned Event/KeepAlive.
+  Existing access/revocation checks, sequence IDs/JSON, Last-Event-ID fallback,
+  explicit query precedence, 250ms polling, error event then EOF, 15-second
+  keepalive and no-store policy are unchanged. Reviewed pin updated; workspace
+  `web-compat` replaced by `web`. Source audit finds no backend/compat imports.
+- Baseline service: **140 passed**. Three focused SSE checks (one existing, two
+  new) pass before/after, including exact ordered event names/IDs/JSON, resume
+  and query precedence, malformed cursor/auth rejection and real TCP delivery
+  followed by exact error/EOF after revocation. Bytes authorized and sent
+  before revocation are consumed before testing revocation; no retraction claim.
+  Final service: **142 passed**. Full final Rust workspace: **373 passed, one
+  existing ignore**. Formatting, strict all-target workspace Clippy and locked
+  workspace build pass. Browser/Android, Docker, runtime-asset packaging and
+  production Runner qualification were not rerun. Evidence: `docs/step-11-sse.md`.
+- Original dirty checkout was detached without editing its tree, and `main`
+  rebased onto the migration in the clean worktree. Original checkout restored
+  to `main`; both unrelated `main.rs`/`releases.rs` edits hash-verified unchanged.
+  Tested tree/ancestry verified. Owned worktree/branch/build files removed;
+  unrelated publication/recovery refs/worktrees preserved. Remaining exposure:
+  **None**.
+
+### Final scope
+
+**3 of 3 active SSE consumers adopted**, with Quentin Torrentino still skipped.
+Both trackers remove completed SSE items from remaining observations. Isolated
+shared-library checkouts, owned logs/snapshots/build files and temporary migration
+worktrees/branches are removed after integration. Existing user work is preserved.
+Nothing pushed or deployed.
