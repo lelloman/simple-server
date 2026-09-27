@@ -141,9 +141,9 @@ contracts; it does not imply these remaining protocol abstractions are complete.
 
 ## Remaining shared scope
 
-Owned multipart and WebSocket APIs are now available (see below). SSE production,
-backend-free tracing observers, alternate listeners/TLS and independent mock
-fixtures still need APIs as consumers migrate. `compat::into_axum_router` remains
+Owned multipart, WebSocket, HTTP tracing and SSE APIs are now available (see
+below). Alternate listeners/TLS and independent mock fixtures still need shared
+APIs as consumers migrate. `compat::into_axum_router` remains
 available for other incremental migrations, but Pezzottify no longer uses it.
 
 Validation includes differential request/response checks against the prior router,
@@ -369,3 +369,28 @@ async fn request_logger(request: Request, next: Next) -> Response {
     trace(request, |request| next.run(request)).await
 }
 ```
+
+## Owned SSE
+
+Enable the optional `sse` feature, which also enables `web`, and use
+`web::sse::{Sse, Event, KeepAlive, EventError, EventDataWriter}`. No backend types
+or `web-compat` feature are required. An `Sse` response implements the shared
+`IntoResponse`, so handlers return it directly or call `.into_response()` when
+an existing response signature is needed. Header/status tuples remain available.
+
+Streams yield `Result<Event, E>` with `E: Into<web::body::BoxError>` and must be
+Send + static; Unpin is not required. No stream is polled during conversion, and
+no buffering, producer task or subscription is installed. Each event becomes a
+body frame. Errors propagate through the shared body; dropping the body releases
+its stream. Detached producer tasks remain owned by the consumer.
+
+Defaults preserve the existing transport: HTTP 200, `text/event-stream`,
+`Cache-Control: no-cache`, no keepalive. `KeepAlive::default()` opts into an empty
+comment after 15 idle seconds; its interval, text or full event can be configured.
+Real events reset the timer and take priority over due heartbeats; EOF terminates
+rather than keeping a completed stream alive. Timers start at response conversion,
+which requires a Tokio runtime with time enabled when keepalive is configured.
+
+See [the full SSE contract](step-11-sse.md) for validation, wire semantics and
+migration instructions. Pezzottify, SimpleAI and simple-agents still require
+consumer migration; shared API availability does not mark them adopted.

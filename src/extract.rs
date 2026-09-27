@@ -1,7 +1,8 @@
 //! Application-owned request extraction without framework types.
 //!
-//! Implement [`FromRequestParts`] on an application value and request it with
-//! [`Extract`] in a handler. Extraction runs on every use; this module does not
+//! Implement [`FromRequestParts`](crate::extract::FromRequestParts) on an
+//! application value and request it with [`Extract`](crate::extract::Extract)
+//! in a handler. Extraction runs on every use; this module does not
 //! cache identities, authenticate callers, or reinterpret failures as anonymous.
 //! Implement the trait on `Option<MyValue>` explicitly if optional extraction is
 //! needed. Its policy remains application-owned, including which errors survive.

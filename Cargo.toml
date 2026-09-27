@@ -34,6 +34,7 @@ macros = ["http", "axum/macros"]
 multipart-owned = ["web-compat", "dep:axum-extra"]
 multipart = ["http", "axum/multipart"]
 ws = ["http", "axum/ws", "futures-util?/sink"]
+sse = ["web", "axum/json"]
 
 [dependencies]
 tower-cookies = { version = "0.11", default-features = false, optional = true }

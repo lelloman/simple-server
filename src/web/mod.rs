@@ -25,6 +25,8 @@ pub mod multipart;
 pub mod response;
 pub mod routing;
 mod service;
+#[cfg(feature = "sse")]
+pub mod sse;
 #[cfg(feature = "http-tracing")]
 pub mod tracing;
 #[cfg(feature = "ws")]

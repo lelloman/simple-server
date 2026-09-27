@@ -4962,3 +4962,37 @@ Tracker JavaScript, local links, seventeen service rows, sixteen completed routi
 rows and exact HTML/Markdown remaining-exposure agreement are verified.
 All rollout-owned service/dependency worktrees, branches, build outputs and logs
 are absent; pre-existing worktree/recovery registrations are preserved.
+
+## Owned SSE API — 2026-09-27
+
+- Library scope only: optional `sse` enables `web::sse` and `web`, without
+  `web-compat`. No consumer dependency or production endpoint was changed.
+- Owned `Event`, `EventError`, `EventDataWriter`, `KeepAlive` and `Sse` hide
+  backend types from public signatures. Existing wire framing, JSON failures,
+  validation, headers and keepalive behavior are preserved.
+- Streams are demand-driven and accept non-Unpin producers; each event is one
+  frame. Errors propagate through the shared body. Dropping the body releases
+  its stream; detached producer tasks, auth, replay/cursors and event schemas
+  remain application-owned. Keepalive is opt-in and starts at HTTP response
+  conversion, requiring a Tokio runtime with time enabled.
+- Before implementation: **285 all-feature tests passed**. Final: **297 passed**,
+  including **11 SSE tests** and the new API doctest. Minimal `sse` alone:
+  **10 SSE tests passed**, without lifecycle/compatibility features.
+- Tests compare exact bytes/headers to the pinned backend, cover Unicode,
+  multiline and formatted data, comments, JSON, IDs, retry bounds, duplicate
+  validation, lazy polling, backpressure, errors and drop cleanup. Paused-time
+  checks verify heartbeat defaults/customization, resets and data/error/EOF
+  priority. A real loopback HTTP router checks auth rejection, reconnect IDs,
+  named JSON events, incremental delivery and disconnect cleanup.
+- The complete `bash scripts/check` passes: formatting, strict all-target/
+  all-feature Clippy, default/all-feature/minimal-feature tests, no-default
+  feature check and warnings-denied rustdoc. Existing extraction/auth rustdoc
+  comment warnings were corrected without runtime changes. Tracker links and
+  HTML script syntax pass. See [the contract](step-11-sse.md#verification).
+- Implemented in isolated `feat/owned-sse` from `main` at `c7f1a7f`; integrated
+  locally using the development-branch rebase and worktree cleanup workflow.
+- Inspected active SSE consumers: Pezzottify search, SimpleAI admin events and
+  simple-agents session events. Their SSE observations remain in the HTML and
+  Markdown trackers until production migrations and consumer checks pass.
+  Quentin Torrentino remains intentionally skipped. No push or deployment.
+- API contract and consumer instructions: [Owned SSE](step-11-sse.md).

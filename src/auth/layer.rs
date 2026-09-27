@@ -87,7 +87,7 @@ impl<P, E, R> AuthLayer<P, E, R> {
 impl<P: Send + Sync + 'static, E, R> AuthLayer<P, E, R> {
     /// Run this layer's authentication/access policy at an existing lazy
     /// extraction boundary, without a Tower service or response rendering.
-    /// Removes any previous Identity<P> before evaluation. Returns the verified
+    /// Removes any previous `Identity<P>` before evaluation. Returns the verified
     /// identity (or anonymous None); the caller may insert it into extensions.
     /// This never caches results, consumes a body, or changes the response.
     pub async fn authenticate(&self, parts: &mut Parts) -> Result<Option<Identity<P>>, E> {

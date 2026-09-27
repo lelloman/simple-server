@@ -287,3 +287,8 @@ With `web` + `ws`, [`web::ws`](docs/web-core.md#owned-websockets) supplies owned
 WebSocket upgrades, sockets, messages, close frames and errors, including split
 read/write streams, subprotocol negotiation and configurable transport limits.
 The compatibility upgrade API remains available during consumer migration.
+
+The optional `sse` feature enables `web::sse::{Sse, Event, KeepAlive}` and `web`
+without requiring `web-compat`. It supplies owned event/JSON builders and idle
+keepalives over lazy, fallible streams, preserving disconnect cancellation.
+See the [SSE contract](docs/step-11-sse.md) for framing, defaults and migration.
