@@ -78,3 +78,7 @@ pub mod auth;
 /// Optional rate budgets, outcome counters and HTTP admission without Axum.
 #[cfg(feature = "rate-limit")]
 pub mod rate_limit;
+
+/// Optional HTTP fixtures using owned routers, requests and responses.
+#[cfg(feature = "test-harness")]
+pub mod testing;

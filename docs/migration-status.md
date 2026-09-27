@@ -5193,3 +5193,51 @@ Both trackers have matching pending-only observations. HTML links/script syntax,
 17-row consistency and documentation whitespace are checked before commit and
 integration into simple-server main; the audit worktree/branch are then removed.
 No consumer migration, push or deployment is included.
+
+## Owned HTTP test harness — 2026-09-27
+
+**Library implemented; consumer adoption pending.** Optional `test-harness`
+provides `testing::TestServer`, request builders, buffered responses/assertions
+and ordered binary multipart forms. Optional `test-harness-ws` adds a real TCP
+WebSocket client using owned `web::ws` messages. Neither enables `web-compat`.
+See [the API contract](test-harness.md) for bounds, lifecycle and limitations.
+
+Applicability was checked against actual fixtures: Fausto (`master`, `3a7ae23`)
+uses axum-test/router adapters for HTTP/auth/upload tests; LelloStore (`master`,
+`9fbf140`) uses in-process and HTTP transports, multipart forms and WebSocket
+helpers; Pezzottify (`dev`, `df37837e`) uses raw Axum upstream mocks for
+media/source/work knowledge. These consumer repositories were inspected only.
+Their test boundaries remain in both trackers. Production multipart/TLS and
+legacy parser/error comparison oracles are not marked migrated by this addition.
+
+The library work started from clean `main` at `cb25f08` in dedicated branch
+`feature/test-harness`, isolated worktree `/tmp/simple-server-test-harness`.
+Baseline all-feature suite: **297 passed**. The first sandbox run could not bind
+loopback sockets; the permitted rerun passed before implementation began.
+Final `bash scripts/check`: **passed**, including formatting, strict all-target
+all-feature Clippy, default/all-feature suites, the existing feature matrix,
+no-default build and warning-free all-feature documentation. Final all-feature
+suite: **316 passed**, including **13 HTTP harness tests**, **5 WebSocket harness
+tests** and the new API doctest. Minimal `test-harness`: **12 passed**; minimal
+`test-harness-ws`: **17 passed**, demonstrating no compatibility feature is needed.
+The multipart parsing contract additionally runs with the production multipart
+feature in the all-feature suite.
+
+Contracts cover both transports, JSON/form/query encoding, auth headers, repeated
+response headers, explicit cookie behavior, redirect suppression, raw binary
+responses, HEAD/404, invalid request metadata, bounded response size/dispatch/body
+collection, ordered repeated multipart fields and binary files, TCP external
+clients/peer information, listener release on shutdown/drop and graceful-shutdown
+deadlines. WebSocket tests cover rejected/authenticated handshakes, protocol
+headers, text/binary/ping/pong/close frames, idle deadlines and incoming limits.
+
+Finite responses are buffered (five seconds/8 MiB by default, configurable); SSE
+stream tests use an application-owned streaming client against a TCP fixture.
+WebSocket rejection body bytes may be incomplete; status/headers are available.
+Application tasks/upgraded sockets remain consumer-owned. No TLS abstraction or
+consumer integrations were performed here.
+
+Implementation, contract and both trackers are committed together, then integrated
+by rebasing original `main` onto the tested worktree branch. Integration is verified
+by ancestry and identical tree; the temporary worktree/branch and owned validation
+logs are removed. No push or deployment is part of this change.

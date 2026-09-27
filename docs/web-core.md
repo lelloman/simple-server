@@ -142,7 +142,7 @@ contracts; it does not imply these remaining protocol abstractions are complete.
 ## Remaining shared scope
 
 Owned multipart, WebSocket, HTTP tracing and SSE APIs are now available (see
-below). Alternate listeners/TLS and independent mock fixtures still need shared
+below). Alternate listeners/TLS still need shared
 APIs as consumers migrate. `compat::into_axum_router` remains
 available for other incremental migrations, but Pezzottify no longer uses it.
 
@@ -394,3 +394,11 @@ which requires a Tokio runtime with time enabled when keepalive is configured.
 See [the full SSE contract](step-11-sse.md) for validation, wire semantics and
 migration instructions. Pezzottify, SimpleAI and simple-agents still require
 consumer migration; shared API availability does not mark them adopted.
+
+## Owned test fixtures
+
+Optional `test-harness` accepts owned routers directly, with in-process and TCP
+fixtures, finite response assertions and multipart requests. `test-harness-ws`
+adds real WebSocket testing with owned messages. No compatibility router adapter
+is required. See [the harness contract](test-harness.md); consumer test adapters
+and legacy comparison oracles remain pending until separately migrated.

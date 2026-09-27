@@ -292,3 +292,9 @@ The optional `sse` feature enables `web::sse::{Sse, Event, KeepAlive}` and `web`
 without requiring `web-compat`. It supplies owned event/JSON builders and idle
 keepalives over lazy, fallible streams, preserving disconnect cancellation.
 See the [SSE contract](docs/step-11-sse.md) for framing, defaults and migration.
+
+The optional `test-harness` feature provides `testing::TestServer` for owned-router
+in-process tests and real loopback fixtures, bounded HTTP requests/responses,
+assertions and multipart uploads. `test-harness-ws` adds a client using owned
+WebSocket messages. Enable these in dev-dependencies; see the
+[test harness contract](docs/test-harness.md).
