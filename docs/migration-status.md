@@ -59,13 +59,13 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; durable primitives)** | **Done (local; retry primitives)** | **Done (local; main + integration)** | **Done (local; HTTP + MCP + durable dispatcher)** | **Done (both servers)** | Multipart fields/errors. |
 | fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; dynamic cron)** | N/A (assessed) | **Done (local; HTTP + WebSocket + admin/write)** | **Done (local; five API tiers)** | **Done (local)** | Owned multipart fields/errors; axum-test transport and parser oracles. |
 | lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (Rust; Caddy owns CORS) | **Done (local; scoped)** | **Done (local; webhook scope)** | **Done (local; capacity)** | **Done (local; retry scope)** | **Done (local; sessions + resource/admin access)** | **Done (endpoint budgets + persisted device polling)** | **Done (local)** | No direct Axum interfaces remain in production Rust, examples or tests. Server, embedding API and all three HTTP examples use shared routing, forms, HTML/redirects, cookie extraction and peer-aware serving. The lello-auth-axum crate name is retained; Axum is internal to simple-server. |
-| lellostore | `backend` | **Done** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; OIDC + admin)** | N/A (no inbound admission policy) | **Done (local)** | Tracing compatibility adapter; axum-test transport and multipart/WebSocket test helpers. |
+| lellostore | `backend` | **Done** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; OIDC + admin)** | N/A (no inbound admission policy) | **Done (local)** | axum-test transport and multipart/WebSocket test helpers; explicit test router adapters. |
 | meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; pipeline/gateway)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; weighted claims)** | **Done (local; budgets/retry)** | **Done (local; all three services)** | **Done (local; gateway budgets)** | **Done (local)** | No remaining direct Axum API usage in Rust sources/manifests. API, gateway and pipeline control-plane routes, proxy/byte/static responses, client identity, auth/correlation middleware, serving and mock upstreams use shared APIs. |
 | observo | `observo-server`; standalone extractor logging | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (no served probe) | **Done (local; scoped)** | **Done (local; primitives)** | N/A (assessed) | **Done (local; IP/key/JWT access)** | N/A (no request quota) | **Done (local)** | No remaining direct Axum API usage in Rust sources/manifests. Routing, forms/HTML/redirects, auth middleware, peer-aware serving, plugin request/body proxying and HTTP tests use shared APIs; Axum remains internal to simple-server. |
 | paranza | `apps/paranza-server` | **Done** | **Done (local; scoped)** | N/A (no logger) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; runner + PCM access)** | N/A (no implemented request quota) | **Done (local)** | No remaining direct Axum API usage in Rust sources/manifests. Private routing, state/path/query/raw-body extraction, response conversion, HTTP serving and test helpers use shared APIs; Axum remains internal to simple-server. |
 | peerlo | `peerlo-api` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; retry primitives)** | **Done (local; bearer + Torznab keys)** | **Done (local; API + crawler + durable DHT)** | **Done (local)** | None. |
-| pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local; main HTTP)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; socket scope)** | **Done (local; durable queue cadence)** | N/A (assessed) | **Done (local; sessions + permissions + WebSocket)** | **Done (login, durable daily quota + TMDB pacing)** | **Done (local; HTTP core)** | Tracing observer backend response callback. |
-| pezzottify-downloader | Puppeteer API, downloader HTTP server and Python cron | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; Puppeteer)** | **Done (local; both HTTP routers)** | N/A (assessed) | N/A (assessed) | **Done (local; both routers)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; priority admission)** | N/A (assessed) | N/A (no application caller gate) | **Done (local; Python/SQLite quota bridge)** | **Done (local; parent + child HTTP core)** | Tracing observer backend response callback. |
+| pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local; main HTTP)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; socket scope)** | **Done (local; durable queue cadence)** | N/A (assessed) | **Done (local; sessions + permissions + WebSocket)** | **Done (login, durable daily quota + TMDB pacing)** | **Done (local; HTTP core)** | None. |
+| pezzottify-downloader | Puppeteer API, downloader HTTP server and Python cron | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; Puppeteer)** | **Done (local; both HTTP routers)** | N/A (assessed) | N/A (assessed) | **Done (local; both routers)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; priority admission)** | N/A (assessed) | N/A (no application caller gate) | **Done (local; Python/SQLite quota bridge)** | **Done (local; parent + child HTTP core)** | None. |
 | quentin-torrentino | `crates/server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; stage capacity)** | N/A (assessed) | **Done (local; API access)** | **Done (local; MusicBrainz pacing)** | Pending | Public router composition; multipart torrent uploads; SSE chat; dashboard WebSockets; static-file services; custom middleware and HTTP test fixtures. |
 | sct | `sct-server` | **Done** | **Done (scoped)** | N/A (no logger) | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; worker scope)** | **Done (local; durable worker cadence)** | **Done (local; retry scope)** | **Done (local; tokens/sessions + transactional access)** | N/A (durable state caps, no request quota) | **Done (local; HTTP core)** | Shared routing, handlers, extraction/rejections, middleware, response/body contracts, serving, HTTP fixtures and qualification example complete (master 2a33b85; shared 23626b2). JSON error bytes/metadata, auth/correlation, archive/checkpoint/transfer streaming and range/HEAD policies preserved. Remaining: tracing observer backend response callback through web compatibility. |
 | simple-agents | `simple-agents-service`; runner-shell logging; associated coding test servers | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local pilot; service routes)** | **Done (local; scoped canary)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; transactional capacity)** | **Done (local; retry scope)** | **Done (local; caller + transactional access)** | N/A (task/storage admission, no request quota) | **Done (local; HTTP core)** | Session SSE event/keepalive producer and response adapter. |
@@ -4850,3 +4850,57 @@ The interrupted session lost uncommitted temporary directories and tracker
 drafts; these three completed migrations were recovered from their committed
 consumer evidence. LelloStore, Pezzottflix, downloader, SCT and SimpleAI remain
 pending until their development branches contain verified migrations.
+
+### Pezzottflix
+
+- Clean master baseline `744fea6`; integrated `eb9bfb5`.
+  Custom observer uses shared `ResponseInfo`, preserving INFO/WARN headers and
+  default terminal events. Source pin and README updated; `web-compat` removed
+  and explicit `web` enabled. Source audit finds no remaining backend tracing
+  or compatibility exposure.
+- Existing production tracing contract passes before/after. Final full suite:
+  **601 passed, three ignored**. Initial sandbox run had nine bind EPERM failures;
+  exact rerun with socket permission passed. Workspace build and changed-file
+  formatting/diff checks pass.
+- Global formatting debt and 39 strict Clippy test-target errors (34 library)
+  remain; no clean repository-wide lint/format pass is claimed. No frontend,
+  release or live deployment qualification was performed.
+- Tested tree/ancestry integrated and master clean; temporary migration/source
+  worktrees, branch, artifacts and parent directory removed. Existing
+  `recovery/pre-owned-websocket-08a0b1d` retained. Remaining exposure: None.
+
+### Pezzottify-downloader
+
+- Clean master baseline `41c31bb`; integrated `32d7ab9`.
+  Both parent Puppeteer and child Unix HTTP tracing paths use owned observers
+  and `ResponseInfo`. Existing header policy, fields, correlation and body
+  lifecycle preserved. Source pin/README updated; `web-compat` removed.
+- Baseline/final: **164 Rust tests plus seven doctests passed, one ignored**.
+  Owned telemetry contract and both production binary builds pass.
+  Socket-dependent tests pass with loopback permission.
+- Strict Clippy reproduces twelve baseline errors; repository-wide formatting
+  retains existing debt. Changed tracing module is rustfmt-clean.
+  Source and feature audits find no compatibility/backend tracing exposure;
+  intentional log target filters keep the `simple_server::http_tracing` string.
+  Spotify/OAuth, Python cron and release/deployment checks were not rerun.
+- Remaining exposure: None. Integrated master is clean; tested tree/ancestry
+  verified. Owned service/dependency worktrees, branch, target, logs and parent
+  task directory removed; no retained task scratch.
+
+### LelloStore
+
+- Clean master baseline `1097345`; integrated `9b256d5`.
+  Production routes use the owned default tracing observer with unchanged
+  events, middleware order, correlation and streaming. Active CI and README
+  source pins updated to the reviewed shared revision.
+- Baseline/final full suite: **196 passed, eight ignored**. Focused production
+  tracing contract, formatting, diff check, strict all-target/all-feature locked
+  Clippy and all-feature locked build pass. A final sandbox-only loopback bind
+  EPERM was resolved by rerunning the suite with socket permission.
+- Original ignored frontend/dist copied byte-identically before baseline and
+  unchanged. Consumer evidence: `docs/STEP_11_HTTP_TRACING.md`; routing and
+  WebSocket documents now omit the completed tracing boundary.
+- Remaining: test-only axum-test transport/multipart/WebSocket helpers and
+  explicit test router adapters. Original master clean; tested tree/ancestry
+  verified. Owned worktrees, branch, target/logs and task directory removed;
+  unrelated `/tmp/cr183-release` registration preserved.
