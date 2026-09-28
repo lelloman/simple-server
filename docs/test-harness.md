@@ -87,7 +87,8 @@ authentication or automatically accept WebSocket authorization.
 
 ## Adoption
 
-Fausto and LelloStore can replace axum-test adapters with this owned API.
-Pezzottify can replace raw Axum upstream mock listeners with TCP fixtures.
-Those consumer changes are pending; legacy parser/error comparison oracles
-remain separate decisions. Library availability does not imply adoption.
+Fausto and LelloStore have adopted owned HTTP fixtures; LelloStore also uses
+owned multipart/WebSocket test clients. Pezzottify still has raw Axum upstream
+mock listeners that could use TCP fixtures. Legacy parser/error comparison
+oracles remain separate decisions. Library availability alone does not imply
+adoption.

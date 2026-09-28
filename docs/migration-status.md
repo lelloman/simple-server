@@ -5278,3 +5278,44 @@ node uploads still carries backend fields/errors, and the legacy Axum JSON
 parser comparison oracle remains test-only. The former axum-test transport and
 router-conversion item is removed from the current HTML observation cell.
 LelloStore and Pezzottify have not adopted the harness in this canary.
+
+## LelloStore owned HTTP test harness rollout — 2026-09-28
+
+**Adopted; current remaining Axum exposure is None.** LelloStore's active
+`master` was clean at `9fbf140`. Actual test use included axum-test in-process
+and TCP fixtures, binary multipart APK/VPK uploads, authenticated catalog and
+Paravoid WebSocket clients, subprotocol/Ping/Pong/close assertions, and an opt-in
+installed-device fixture. The migration uses reviewed simple-server source
+`d61c049aa49d89de6936de9e93a68bd18685f373` with dev-only
+`test-harness-ws`. Test routers no longer pass through
+`web::compat::into_axum_router`; `axum-test` was removed from the dev manifest
+and lockfile. The unused production `web-compat` feature was replaced by `web`
+to preserve the owned production API. Active CI and README source pins were
+updated. The backend source/manifest scan found no remaining direct Axum or
+axum-test API use. Shared library internals still use their private backend.
+
+The four affected suites passed **53 tests** with **three existing ignores**
+before and after migration. The final locked full backend `--tests` run passed
+**200 tests** with **six existing ignores**. Its first run after feature cleanup
+timed out in all three real-process lifecycle tests; those same tests passed on
+untouched `master`, passed in isolation on the migration branch, and passed in
+the final full rerun. `cargo fmt --all --check`, strict offline/default-feature
+all-target Clippy (`-D warnings`) and locked offline production backend build
+passed. The opt-in device test was compiled but not run; its test fixture allows
+100 MiB responses and 120-second operations for real APKs and SDK tools.
+Frontend, Android, Docker and all-feature embedded-frontend checks were not
+rerun for this test transport migration.
+
+LelloStore commit **`63bbc54`** was created on `migration/owned-test-harness`
+in `/home/lelloman/lelloprojects/lellostore-harness-canary`. Original
+`master` was rebased onto it; ancestry and identical trees were verified. The
+owned worktree and branch were removed, leaving `master` clean at `63bbc54`.
+The pre-existing `/tmp/cr183-release/lellostore` worktree was preserved. No push
+or deployment was performed. See LelloStore's
+`docs/STEP_11_TEST_HARNESS.md` for consumer fixture detail.
+
+The 27 September audit recorded 11 services with no direct Axum exposure, five
+active services with pending boundaries and one skipped. This verified adoption
+removes LelloStore's test-only item. Current counts are **12 None, 4 active
+pending, 1 skipped**; Fausto's separate production multipart/parser items,
+Pezzottify, Crumbles and Androidoscopy remain as previously recorded.
