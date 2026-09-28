@@ -2,7 +2,8 @@
 
 Status: design survey, 2026-09-28. The first optional connection-policy
 capability is implemented and piloted in [Step 07a](step-07a-database-connections.md);
-migrations, backup and typed access remain future work. Step 07 is separate
+[07b migration planning](step-07b-database-migrations.md) is designed but not
+implemented. Backup and typed access remain future work. Step 07 is separate
 from the completed HTTP abstraction.
 
 ## Representative services
@@ -16,7 +17,7 @@ the sibling project directories in `lelloprojects`.
 | Favzetto | SQLx SQLite pool, one connection, WAL and foreign keys (`favzetto/backend/src/db/mod.rs`). | Sorted SQL files, an application-owned ledger and a transaction per file, followed by legacy schema repairs (`backend/src/db/mod.rs`). | No database backup mechanism identified in the inspected backend code. |
 | Crumbles integration runtime | SQLx SQLite pool with private directory and file rules, foreign keys, busy/acquire timeouts and bounded connections (`crumbles/crumbles-integration/src/db.rs`). | Strict version/name/checksum/dirty ledger, transactional forward migrations and rejection of unmanaged or altered state (`src/db.rs`). | Staged upgrade copies live SQLite with `VACUUM INTO`, migrates and integrity-checks the copy, and fences restoration (`src/db.rs`). |
 | Fausto | `rusqlite` connection behind a mutex; optional SQLite extension registration and WAL (`fausto/core/src/storage/sqlite/mod.rs`). | Embedded SQL files and a version table; migration metadata distinguishes transactional from nontransactional DDL; legacy unversioned data has an adoption path (`src/storage/sqlite/mod.rs`). | No generic SQLite-file backup facility identified in the inspected storage module. Domain copy/migration checkpoints are a separate concern. |
-| SCT | SQLx PostgreSQL pool with lazy connection, bounded size and acquire timeout (`sct/crates/sct-core/src/catalog.rs`). | Embedded SQLx `Migrator` with locking, transactional migrations and rejection of missing history (`src/catalog.rs`). | Application-level checkpoint/export and recovery workflows span database and payload storage (`crates/sct-server/src/checkpoint_api.rs`, `crates/sct-core/src/recovery.rs`); they are not a generic SQL backup operation. |
+| SCT | The server uses a SQLx PostgreSQL pool with lazy connection, bounded size and acquire timeout (`sct/crates/sct-core/src/catalog.rs`). The separate offline archive uses SQLx SQLite with foreign keys, DELETE journal, FULL synchronous mode and additional cache/temp-store PRAGMAs (`sct/crates/sct-archive/src/catalog.rs`). | Server catalog: embedded SQLx `Migrator` with locking, transactional migrations and rejection of missing history (`sct-core/src/catalog.rs`). Archive: a fixed format marker checked at open, not the server ledger. | Application-level checkpoint/export and recovery workflows span database and payload storage (`crates/sct-server/src/checkpoint_api.rs`, `crates/sct-core/src/recovery.rs`); they are not a generic SQL backup operation. |
 
 This is a representative design sample, not an adoption audit of every service.
 In particular, Crumbles' integration runtime is a separate database component
@@ -57,10 +58,11 @@ within the Crumbles repository.
   policy emits only selected settings and verifies effective live values. The
   application executes the statements through its own driver on each connection;
   no consumer default changes implicitly. Favzetto and Pezzottify are pilots.
-- **07b — migration planning and reporting:** compare ordered plans to recorded
-  state, detect gaps, changed migrations and newer database versions, and report
-  what would run. Implement execution only for a driver/ledger combination with
-  proven parity; never replace an existing ledger as part of a first adoption.
+- **07b — migration planning and reporting ([design](step-07b-database-migrations.md)):**
+  compare ordered plans to existing ledger observations, detect gaps, changed
+  migrations and newer database versions, and report what would run. Implement
+  execution only for a driver/ledger combination with proven parity; never
+  replace an existing ledger as part of a first adoption.
 - **07c — backup coordination:** model preparation and verification outcomes;
   prototype a SQLite-specific adapter against both Pezzottify's checkpoint
   contract and Crumbles' staged-copy contract. Treat them as distinct strategies.
