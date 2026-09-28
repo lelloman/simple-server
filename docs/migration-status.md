@@ -53,7 +53,7 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 
 | Project | Server components | 1. Axum centralization | 2. Lifecycle / main() | 03a. Logging | 03b. Correlation | 03c. HTTP tracing | 04a. Body limits | 04b. Response headers | 04c. CORS | 05. Health/readiness | 06a. Task ownership | 06b. Scheduling | 06c. Execution policies | 08/09. Auth | 10. Rate limiting | 11. Routing / HTTP core | Remaining Axum exposure |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local canary)** | **Done (local; scoped canary)** | N/A (assessed) | N/A (no served probe) | **Done (local; scoped canary)** | **Done (local; primitives)** | **Done (local; primitives)** | **Done (local; sessions + route permissions)** | **Done (HTTP, MCP, durable quotas + outbound pacing)** | **Done (all production route groups)** | Multipart fields/errors; SSE search producers; independent HTTP mocks and error-renderer differential test. |
+| pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local canary)** | **Done (local; scoped canary)** | N/A (assessed) | N/A (no served probe) | **Done (local; scoped canary)** | **Done (local; primitives)** | **Done (local; primitives)** | **Done (local; sessions + route permissions)** | **Done (HTTP, MCP, durable quotas + outbound pacing)** | **Done (all production route groups)** | None. |
 | favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local canary)** | **Done (local; request work)** | **Done (local; bounded batches)** | **Done (local; retry scope)** | **Done (local canary)** | **Done (local; global + endpoint budgets)** | **Done (local)** | None. |
 | androidoscopy | `server`; Android SDK pairing | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (no served probe) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; controller + LAN access)** | **Done (local; device JNI pairing gate)** | **Done (all production route groups)** | axum-server TLS configuration, serving and shutdown handle, including TLS test fixture. |
 | crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; durable primitives)** | **Done (local; retry primitives)** | **Done (local; main + integration)** | **Done (local; HTTP + MCP + durable dispatcher)** | **Done (both servers)** | Multipart fields/errors. |
@@ -5355,3 +5355,40 @@ remaining-exposure cell now lists only production compatibility Multipart and
 the legacy JSON error oracle; its former raw upstream-mock item is removed.
 The 27 September audit table above remains a dated snapshot. Current totals
 stay **12 None, 4 active pending, 1 skipped**.
+
+## Pezzottify direct Axum cleanup — 2026-09-28
+
+**Complete for consumer source and manifests.** Pezzottify's active `dev` branch
+was clean at `3051b5f8`. Its ingestion upload handler actually used
+`web::compat::Multipart`; `upload_file` consumes borrowed field metadata and
+bytes, preserves invalid/missing filename and empty-data responses, and applies
+the route's larger body limit. It now uses the existing owned
+`web::multipart::Multipart`, whose fields and errors are simple-server types.
+The unused `web-compat` feature was removed from the production dependency.
+The test-only JSON error comparison now uses owned `web::Json` and `web::body`
+while retaining status, headers, body-byte comparison and escaped-text checks.
+The active README was updated. The reviewed shared library source remains
+`d61c049aa49d89de6936de9e93a68bd18685f373` in `simple-server.rev`; no
+shared-library extension or pin change was required. A full Rust source and
+manifest scan found no remaining direct `axum`, `simple_server::axum`,
+`web::compat`, `web-compat` or `axum-test` usage. Axum remains internal to
+simple-server.
+
+Before and after the change, the buffered JSON contract test, actual HTTP
+upload authentication/field-error test, and actual HTTP large multipart/body
+limit test each passed. The final locked offline full library suite passed
+**1,120 tests** with **two existing ignores**; locked offline production
+library/binary check, `cargo fmt --all --check` and whitespace checks passed.
+The HTTP test builds still report a pre-existing unused `SocketAddr` import in
+the common fixture. Other Docker/browser and live external-service E2E suites
+were not rerun for this extractor and test-only API migration.
+
+Consumer commit **`3d0ef0d8`** was made on `migration/owned-multipart-cleanup`
+in isolated worktree `/home/lelloman/lelloprojects/pezzottify-multipart-cleanup`.
+Original `dev` was rebased onto the tested branch; ancestry, identical tree and
+clean status were verified. The temporary worktree and branch were removed,
+leaving `dev` at `3d0ef0d8`. Unrelated worktrees were preserved. No push or
+deployment was performed. The current HTML and summary-table Pezzottify
+remaining-exposure cells are now **None**. Across the 17 tracked services, the
+current count is **13 None, 3 active pending, 1 skipped**; the dated 27 September
+audit table above remains unchanged.
