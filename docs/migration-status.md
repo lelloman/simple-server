@@ -5319,3 +5319,39 @@ active services with pending boundaries and one skipped. This verified adoption
 removes LelloStore's test-only item. Current counts are **12 None, 4 active
 pending, 1 skipped**; Fausto's separate production multipart/parser items,
 Pezzottify, Crumbles and Androidoscopy remain as previously recorded.
+
+## Pezzottify owned HTTP test harness rollout — 2026-09-28
+
+**Adopted for upstream mock fixtures; two distinct boundaries remain.** The
+active `dev` branch was clean at `df37837e`. The media tests serve image and
+progressive audio responses; source-knowledge and work-knowledge tests serve
+Wikidata/MusicBrainz search, fact and failure fixtures over loopback HTTP. Their
+seven raw Axum mock listeners now use owned `web::Router`, handlers, extractors,
+responses and `testing::TestServer::tcp`. The fixtures retain the same URLs,
+status, JSON query assertions, streaming byte release and call-count behavior;
+`TestServer` owns listener cleanup. Optional `test-harness` is enabled only for
+dev builds. `simple-server.rev`, used by the existing checkout workflows, now
+pins reviewed library source `d61c049aa49d89de6936de9e93a68bd18685f373`.
+The lockfile update was limited to `reqwest`, `tower-http` and their necessary
+transitive changes (including `cookie_store`, `hyper` and `hyper-util`).
+
+Before migration the affected media, source-knowledge and work-knowledge suites
+passed **18 tests** with one existing live-API ignore. After migration the same
+suites passed **18**, one ignored. The final locked offline full library run
+passed **1,120 tests**, zero failures and two existing ignores. Locked offline
+production library/binary check, `cargo fmt --all --check` and the Git
+diff whitespace check passed. Live API, Docker/browser E2E and frontend builds were not run
+for these test-only fixtures. The production ingestion handler still imports
+`web::compat::Multipart` for backend field/error behavior. The test-only prior
+JSON error-renderer comparison in `server/api_error.rs` deliberately retains
+raw Axum; neither boundary is claimed migrated.
+
+Pezzottify commit **`3051b5f8`** was made on `migration/owned-test-harness` in
+`/home/lelloman/lelloprojects/pezzottify-harness-canary`. Original `dev` was
+rebased onto that tested branch; ancestry, identical tree and clean status were
+verified. The owned worktree and branch were removed; unrelated pre-existing
+worktrees were preserved. No push or deployment was performed. The current HTML
+remaining-exposure cell now lists only production compatibility Multipart and
+the legacy JSON error oracle; its former raw upstream-mock item is removed.
+The 27 September audit table above remains a dated snapshot. Current totals
+stay **12 None, 4 active pending, 1 skipped**.
