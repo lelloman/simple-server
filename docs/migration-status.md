@@ -39,11 +39,12 @@ WebSocket APIs. Quentin Torrentino remains pending at user request. See the
 [contract](web-core.md#owned-websockets) and
 [verification record](#owned-websocket-api--2026-09-26).
 
-**Next execution order:** complete and verify Axum removal from every consumer →
-revisit Step 07 database helpers. Step numbers are retained; Step 07 is deferred,
-not required for the Axum abstraction. Database setup and migrations remain local
-to services. The Axum-removal milestone includes production code, tests and removal
-of the transitional re-export; Axum can remain internal to simple-server.
+**Next execution order:** the 16 in-scope consumer migrations and shared public
+Axum removal are complete locally; revisit Step 07 database helpers. Quentin
+Torrentino remains explicitly excluded and cannot build against the revision
+without migrating its old backend imports. Step numbers are retained; Step 07
+was deferred until this milestone. Database setup and migrations remain local to
+services. Axum remains internal to simple-server.
 See the [roadmap and completion criteria](design.md).
 
 The final observations column records the [Axum exposure audit](#axum-exposure-audit--2026-09-24).
@@ -5499,3 +5500,28 @@ the tracing, correlation and body-limit consumers. The original development
 branches and working trees in those services were not changed. The
 full final API removal still awaits the Quentin decision and a final audit of
 the remaining legacy entry points. No consumer was changed in this cleanup.
+
+## In-scope public Axum removal — 2026-09-28
+
+The final read-only source/manifest audit of the 16 migrated repositories found
+no direct `axum::`, `simple_server::axum`, `axum =` or `axum-server =` use in
+Rust production code or tests. The `lello-auth-axum` crate name is its local
+package name, not an Axum dependency. The `simple_server::axum` re-export and
+public backend-facing `http::serve` have now been removed. The two legacy Axum
+trait implementations on public extraction types were also removed; the owned
+handler contract retains their extraction and rejection behavior. The transport
+serving helper remains crate-private beneath `web::serve` and
+`web::serve_with_connect_info`. The lifecycle example, serving tests and README
+use owned APIs. Internal library comparison tests may still import Axum directly
+as a backend oracle. The complete `scripts/check` matrix passed with offline
+dependencies and loopback access: formatting, strict all-target/all-feature
+Clippy, default/all-feature/minimal-feature tests and doctests, and rustdoc with
+warnings denied. The rendered public docs contain `web::serve` and `http::bind`
+but no Axum module, `http::serve` page or compatibility module. Owned extraction
+tests cover the removed backend trait implementations' rejection behavior.
+
+Quentin Torrentino remains out of scope at the user's request. Its current
+checkout imports the removed re-export and calls the removed public serving
+function, so it **will not build against this new shared revision**. No Quentin
+files, branches or pins were changed. The in-scope count remains **16 None, 1
+excluded**, and Step 07 can be considered next for those 16 services.

@@ -58,9 +58,9 @@ its job management into this library.
 ## Public surface
 
 Add an opt-in `lifecycle` Cargo feature, leaving existing defaults unchanged.
-Core coordination requires no Axum dependency; TCP/HTTP helpers are available
-when both `lifecycle` and `http` are enabled. Tokio dependencies are optional and
-enabled only for the selected capabilities.
+Core coordination requires no HTTP dependency. TCP binding is available with
+`lifecycle` and `http`; owned HTTP serving requires `web` as well. Tokio
+dependencies are optional and enabled only for the selected capabilities.
 
 The following illustrates composition with application-provided values. See
 `examples/lifecycle.rs` for a complete compiling example and the public modules
@@ -79,7 +79,7 @@ let shutdown = lifecycle.shutdown();
 // Binding happens before services run. SocketAddr and host:port are supported.
 let listener = http::bind(bind_address).await?;
 let address = listener.local_addr()?;
-let server = http::serve(listener, app, shutdown.clone());
+let server = web::serve(listener, app, shutdown.clone());
 lifecycle.service("http", server)?;
 
 // Optional: register an application-owned scheduler future as another service.
@@ -109,11 +109,10 @@ the supplied trigger. Custom triggers return `Result<ShutdownReason, E>`; use
 is process-wide and explicitly opt-in;
 dropping the helper must not be documented as restoring default OS behavior.
 
-`http::serve` must support both an ordinary Axum router and
-`into_make_service_with_connect_info::<SocketAddr>()`, and accept a pre-bound
-Tokio TCP listener. The serving future observes `Shutdown`; it does not install
-signals or choose a deadline. Applications may use this helper independently of
-the coordinator, or retain their existing Axum serving call.
+`web::serve` accepts a shared router and pre-bound Tokio TCP listener;
+`web::serve_with_connect_info` adds the direct peer address. Both observe
+`Shutdown` without installing signals or choosing a deadline, and work
+independently of the coordinator.
 
 The coordinator polls registered futures concurrently without silently spawning
 them. Registration rejects duplicate names; running with no services is an

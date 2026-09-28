@@ -16,11 +16,11 @@ use tower_service::Service;
 /// limits remain application-owned. Installing nothing keeps framework defaults.
 ///
 /// ```
-/// use simple_server::{web::{Router, routing::post}, body_limit::BodyLimit};
-/// let app: Router = Router::new()
-///     .route("/upload", post(|body: String| async move { body }))
-///     .layer(BodyLimit::max(1024));
+/// use simple_server::body_limit::BodyLimit;
+/// let limit = BodyLimit::max(1024);
+/// # let _ = limit;
 /// ```
+/// With `web`, apply the limit using `Router::body_limit` or `.layer(limit)`.
 #[derive(Debug, Clone, Copy)]
 pub struct BodyLimit {
     inner: DefaultBodyLimit,

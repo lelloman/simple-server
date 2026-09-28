@@ -8,7 +8,7 @@
 //! needed. Its policy remains application-owned, including which errors survive.
 //!
 //! The `extract` feature provides the contract without a runtime or framework.
-//! With `http`, the framework adapter is implemented inside simple-server.
+//! With `web`, the framework adapter is internal to the owned handler layer.
 
 use std::{convert::Infallible, future::Future};
 
@@ -46,13 +46,6 @@ impl std::ops::Deref for RejectionResponse {
 impl std::ops::DerefMut for RejectionResponse {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.0
-    }
-}
-
-#[cfg(feature = "http")]
-impl axum::response::IntoResponse for RejectionResponse {
-    fn into_response(self) -> axum::response::Response {
-        self.0.map(axum::body::Body::from)
     }
 }
 
@@ -119,23 +112,6 @@ impl<S, T: FromRequestParts<S>> FromRequestParts<S> for Extract<T> {
     ) -> impl Future<Output = Result<Self, Self::Rejection>> + Send {
         let future = T::from_request_parts(parts, state);
         async move { future.await.map(Self) }
-    }
-}
-
-#[cfg(feature = "http")]
-impl<S, T> axum::extract::FromRequestParts<S> for Extract<T>
-where
-    S: Send + Sync,
-    T: FromRequestParts<S>,
-{
-    // No Axum type in the public associated rejection type.
-    type Rejection = RejectionResponse;
-
-    async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
-        T::from_request_parts(parts, state)
-            .await
-            .map(Self)
-            .map_err(IntoRejectionResponse::into_rejection_response)
     }
 }
 

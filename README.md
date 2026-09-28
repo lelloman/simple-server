@@ -1,11 +1,10 @@
 # simple-server
 
-A small, modular Rust library for shared infrastructure across Axum services.
-The first stage centralizes Axum versions through a transitional re-export.
-The end goal is to completely abstract Axum away behind the library's own
-interfaces, including routing, handlers, extractors, responses, and middleware.
-The re-export is temporary and will be removed once all consumers are migrated;
-Axum can remain an internal implementation detail. See the
+A small, modular Rust library with owned server interfaces. Axum remains an
+internal HTTP implementation; consumers use the library's routing, handler,
+extractor, response, middleware and serving contracts. The transitional Axum
+re-export has been removed for the 16 migrated services. Quentin Torrentino was
+explicitly excluded and must migrate before building against this revision. See the
 [design and completion criteria](docs/design.md#end-goal-completely-abstract-axum-away).
 
 **Status:** Axum dependency centralization and opt-in lifecycle, logging,
@@ -18,31 +17,27 @@ across all 17 planned consumer projects and the completed steps for each one.
 All consumer migrations follow the [reusable worktree and verification workflow](docs/consumer-migration-workflow.md),
 including applicability checks and updates to both adoption trackers.
 
-## Axum centralization
+## Owned HTTP API
 
-`simple-server` pins Axum to **0.8.9**. Consumers replace their direct `axum`
-dependency with a dependency on this repository at a reviewed Git revision,
-using the public HTTPS mirror for builds outside the private forge:
+`simple-server` pins its internal Axum implementation to **0.8.9**. Consumers
+depend on this repository at a reviewed Git revision and enable `web` for the
+owned HTTP API. Builds outside the private forge can use the public HTTPS mirror:
 
 ```toml
 [dependencies]
-simple-server = { git = "https://github.com/lelloman/simple-server", rev = "<reviewed-commit>", features = ["ws", "multipart"] }
+simple-server = { git = "https://github.com/lelloman/simple-server", rev = "<reviewed-commit>", features = ["web", "ws", "multipart"] }
 ```
 
 ```rust
-use simple_server::axum::{Router, routing::get};
+use simple_server::web::{Router, routing::get};
 
 let app: Router = Router::new().route("/health", get(|| async { "ok" }));
 ```
 
-The default `http` feature enables Axum with its standard defaults. `ws`,
-`multipart`, `macros`, and `http2` forward optional capabilities. With
-`default-features = false`, Axum is absent unless an HTTP feature is selected.
-
-The re-export intentionally exposes Axum during migration. By itself it does not
-start a runtime, install signals, or change application startup or shutdown.
-Companion crates such as `axum-extra` must resolve against the same Axum version;
-check the resolved graph with `cargo tree -i axum` after each migration.
+The default `http` feature enables the internal HTTP backend. `web` adds owned
+routing and serving; `ws`, `multipart`, `macros`, and `http2` enable optional
+capabilities. With `default-features = false`, the backend is absent unless an
+HTTP feature is selected. No feature starts a runtime or installs signals.
 
 For coordinated development, a consumer may instead use a sibling path dependency
 (for example, `path = "../../simple-server"` from a nested server crate). Such a
@@ -51,8 +46,7 @@ reviewed `simple-server` commit used by those builds. A path dependency's Cargo
 lockfile does not pin the sibling's source revision.
 
 Independent service lockfiles can select different transitive dependency
-versions. Exact Axum uniformity requires the same pin across the adopted
-`simple-server` revisions; an Axum pin change is an explicit migration.
+versions. Use a reviewed shared-library revision for each service build.
 
 ## Initial scope
 
@@ -63,9 +57,8 @@ owned routers directly; the temporary `web-compat` feature has been removed.
 
 The optional [`extract` module](docs/request-extraction.md) provides a shared
 request-extraction trait and `Extract<T>` handler arguments. Applications own
-required/optional policies and rejection responses; the framework adapter lives
-inside simple-server. This is the first custom-extraction foundation toward the
-complete HTTP abstraction, not a replacement for routing or streaming APIs yet.
+required/optional policies and rejection responses; the owned `web` handler
+layer adapts them to the internal transport without exposing backend traits.
 
 Lifecycle, logging, request correlation and HTTP tracing helpers are available now.
 
@@ -118,7 +111,7 @@ Enable `lifecycle` explicitly. Core coordination also works with
 
 ```rust,no_run
 use std::{io, time::Duration};
-use simple_server::{axum::{Router, routing::get}, http};
+use simple_server::{http, web::{self, Router, routing::get}};
 use simple_server::lifecycle::{Lifecycle, ShutdownOptions, Signals};
 
 async fn run() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
@@ -128,7 +121,7 @@ async fn run() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     });
     let listener = http::bind("127.0.0.1:3000").await?;
     let app = Router::new().route("/", get(|| async { "hello" }));
-    lifecycle.service("http", http::serve(listener, app, lifecycle.shutdown()))?;
+    lifecycle.service("http", web::serve(listener, app, lifecycle.shutdown()))?;
     lifecycle.run(signals.wait(), async { Ok::<_, io::Error>(()) }).await?;
     Ok(())
 }
@@ -136,8 +129,8 @@ async fn run() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 
 See the runnable [example](examples/lifecycle.rs). `Shutdown::request()` also
 triggers shutdown, and callers can supply their own trigger future instead of
-OS signals. Standalone `Shutdown` and `http::serve` do not require the coordinator.
-The HTTP adapter also accepts make-services carrying connection information.
+OS signals. Standalone `Shutdown` and `web::serve` do not require the coordinator.
+Use `web::serve_with_connect_info` when handlers need the direct TCP peer address.
 
 The coordinator drains registered futures concurrently, then polls application
 cleanup with the remaining budget. Service failures, early service exits, and

@@ -5,7 +5,7 @@ API specification.
 
 ## End goal: completely abstract Axum away
 
-Consumer services must eventually use only `simple-server`'s public HTTP
+In-scope consumer services use only `simple-server`'s public HTTP
 interfaces. Axum may remain the internal implementation, but consumers must not
 need to import, name, implement, or understand Axum APIs to build their services.
 This includes routing, handlers, state, extractors, responses, errors, middleware,
@@ -21,10 +21,11 @@ The abstraction is complete when:
 - The transitional Axum re-export and any temporary Axum escape hatches are
   removed. Missing capabilities are addressed by extending the shared API.
 
-Dependency centralization and completion of the infrastructure modules are
-intermediate milestones. A final consumer/API audit must verify these criteria
-before the overall abstraction is marked complete. The API design and migration
-sequence remain incremental; this goal does not require replacing Axum internally.
+Dependency centralization and completion of the infrastructure modules were
+intermediate milestones. The final audit covers the 16 migrated service branches.
+Quentin Torrentino remains explicitly excluded; its older checkout still relies
+on the removed re-export and must migrate before using this revision. The
+abstraction does not require replacing Axum internally.
 
 The [Step 02 lifecycle contract](step-02-lifecycle.md) defines the first capability
 extraction, its implemented API, shutdown contract, and pilot acceptance checks.
@@ -48,7 +49,7 @@ framework-independent public types and explicit policy.
 application checks and a framework-independent endpoint adapter. Applications
 retain dependency policy and response contracts.
 
-## Next milestones (updated 2026-09-24)
+## Next milestones (updated 2026-09-28)
 
 Step 07 (optional database helpers) is deferred until after Step 10 and the
 consumer Axum-removal milestone. Keep the existing step numbers so historical
@@ -61,10 +62,10 @@ references remain valid. The execution order after Step 06 is:
 2. Step 10: rate limiting. Shared budgets, admission policies and HTTP adapter
    are implemented. Completed locally: 12 adopted, five N/A, no Partial or Pending;
    see the [completion evidence](migration-status.md#step-10-final-five-partial-consumers--2026-09-24).
-3. **Next:** complete the public HTTP interfaces, migrate all remaining consumer Axum
-   usage, and verify the end-goal criteria above before removing the transitional
-   Axum re-export. This includes production code and tests across all services.
-4. Revisit Step 07: optional database setup and migration helpers.
+3. Completed for the 16 in-scope services: public HTTP interfaces and tests use
+   owned contracts, the transitional re-export and escape hatches are removed,
+   and the final shared API audit passed. Quentin Torrentino remains excluded.
+4. **Next:** revisit Step 07, optional database setup and migration helpers.
 
 Database helpers are not a prerequisite for the HTTP abstraction. Services retain
 their existing database libraries, setup and migrations while that work proceeds.
@@ -77,10 +78,8 @@ Axum remains the internal HTTP implementation. The long-term product API hides
 Axum types, traits, extractors, and errors. When a service requires an additional
 capability, extend the public API and adapt it to Axum internally.
 
-Migration is incremental. First centralize the dependency and temporarily expose
-`simple_server::axum`, preserving the existing routing and execution flow.
-Extract shared capabilities one at a time across services, then retire exposed
-Axum APIs as the library's interfaces cover their needs.
+Migration began by centralizing the dependency and temporarily exposing Axum.
+Shared capabilities then replaced those APIs across the 16 in-scope services.
 
 Keep modules independently usable. A service should not need a database,
 authentication provider, or background worker to use server lifecycle helpers.
@@ -137,9 +136,6 @@ outcome counters, bounded storage and streaming-preserving HTTP admission.
 
 
 **Step 11 — Routing / HTTP core:** the [shared foundation](web-core.md) is implemented.
-Pezzottify has completed production routing adoption after the initial embedding
-canary: handlers, extraction, responses, router/middleware composition, streaming
-bodies and serving use shared contracts. Multipart/SSE/WebSocket protocols and
-observer/test boundaries remain explicit compatibility work. Other consumers
-remain Pending; the Axum re-export cannot be removed until their APIs and all
-remaining protocol/test interfaces are migrated.
+Pezzottify was the initial canary; all 16 in-scope services now use owned
+routing, protocol, middleware, serving and test interfaces. The transitional
+Axum re-export has been removed. Quentin Torrentino remains excluded.

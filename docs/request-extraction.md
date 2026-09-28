@@ -58,19 +58,18 @@ The auth module remains independent. A session extractor can use
 policy. Existing identity extensions are not automatically accepted as proof of
 authentication by the extraction module.
 
-## Incremental adoption and remaining work
+## Adoption
 
-Pezzottify is the first consumer. Its session implementations use this contract;
+Pezzottify was the first consumer. Its session implementations use this contract;
 handlers and permission/rate middleware use `Extract<Session>` or
 `Extract<Option<Session>>`. Direct extraction in report admission calls the same
 trait. Its session source file no longer imports Axum.
 
-The [shared HTTP core](web-core.md) now adds routing, built-in state/path/query/JSON
-extractors and ordinary successful responses. Pezzottify's embedding endpoints
-are its first canary; other routes still use transitional APIs. General middleware,
-multipart, SSE, WebSockets and streaming need further interfaces before the Axum
-re-export can be removed. Buffered extraction rejections do not establish the
-streaming-response contract.
+The [shared HTTP core](web-core.md) now provides routing, built-in
+state/path/query/JSON extractors, responses, middleware, multipart, SSE,
+WebSockets and streaming. Pezzottify's embedding endpoints were the first
+canary; the 16 in-scope services now use owned interfaces. Buffered extraction
+rejections remain separate from the streaming-response contract.
 
 Validation covers a standalone `extract` build, application state borrowed across
 an await, required/optional policy, repeated extraction, request-head mutations,

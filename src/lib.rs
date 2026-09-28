@@ -1,21 +1,13 @@
-//! A modular foundation for Axum-based Rust services.
+//! Modular server infrastructure with owned HTTP interfaces. Axum is an
+//! implementation detail of the optional HTTP capabilities.
 //!
-//! The first migration stage centralizes the Axum dependency. Consumers use
-//! `simple_server::axum` while retaining their current routers, state,
-//! middleware, startup, and shutdown behavior. The re-export is transitional;
-//! focused modules will eventually hide Axum behind this crate's own interfaces.
-//!
-//! The default `http` feature exposes Axum with its standard default features.
-//! `ws`, `multipart`, `macros`, and `http2` opt into additional Axum capabilities.
-//! Disable default features to use this crate without an HTTP dependency.
+//! The default `http` feature enables the HTTP backend; `web` provides the
+//! public routing, handler, extractor, response and serving contracts. Disable
+//! default features to use this crate without an HTTP dependency.
 //!
 //! The opt-in `lifecycle` feature adds shutdown notification, explicit signal
 //! registration, and coordination of application-owned service futures. Combined
-//! with `http`, it also provides TCP binding and graceful HTTP serving adapters.
-
-/// The centrally versioned HTTP framework, exposed during incremental migration.
-#[cfg(feature = "http")]
-pub use axum;
+//! with `http`, it also provides TCP binding. `web` owns HTTP serving.
 
 /// Framework-independent HTTP routing, handlers, extractors and responses.
 #[cfg(feature = "web")]

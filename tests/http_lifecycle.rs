@@ -1,11 +1,11 @@
-#![cfg(all(feature = "lifecycle", feature = "http"))]
+#![cfg(all(feature = "lifecycle", feature = "web"))]
 
 use std::{future::pending, io, net::SocketAddr, time::Duration};
 
-use axum::{Router, body::Body, extract::ConnectInfo, routing::get};
 use simple_server::{
     http,
     lifecycle::{Lifecycle, LifecycleError, Shutdown, ShutdownOptions, ShutdownReason, Unfinished},
+    web::{self, Router, body::Body, extract::ConnectInfo, routing::get},
 };
 #[cfg(feature = "ws")]
 use tokio::sync::oneshot;
@@ -64,17 +64,13 @@ async fn two_listeners_drain_active_request_and_preserve_peer_address() {
         lifecycle
             .service(
                 "api",
-                http::serve(
-                    api,
-                    app.into_make_service_with_connect_info::<SocketAddr>(),
-                    shutdown.clone(),
-                ),
+                web::serve_with_connect_info(api, app, shutdown.clone()),
             )
             .unwrap();
         lifecycle
             .service(
                 "metrics",
-                http::serve(metrics, Router::new(), shutdown.clone()),
+                web::serve(metrics, Router::new(), shutdown.clone()),
             )
             .unwrap();
         let server = tokio::spawn(
@@ -107,9 +103,7 @@ async fn bind_conflict_preserves_io_error_and_pre_requested_shutdown_drops_liste
     assert_eq!(error.kind(), io::ErrorKind::AddrInUse);
     let shutdown = Shutdown::new();
     shutdown.request();
-    http::serve(listener, Router::new(), shutdown)
-        .await
-        .unwrap();
+    web::serve(listener, Router::new(), shutdown).await.unwrap();
     assert!(TcpStream::connect(address).await.is_err());
 }
 
@@ -134,7 +128,7 @@ async fn unfinished_stream_hits_deadline_instead_of_reporting_success() {
         });
         let shutdown = lifecycle.shutdown();
         lifecycle
-            .service("stream", http::serve(listener, app, shutdown.clone()))
+            .service("stream", web::serve(listener, app, shutdown.clone()))
             .unwrap();
         let server = tokio::spawn(
             lifecycle.run(pending::<io::Result<ShutdownReason>>(), async {
@@ -164,7 +158,7 @@ use futures_util::StreamExt;
 #[cfg(feature = "ws")]
 #[tokio::test]
 async fn upgraded_connection_needs_explicit_cancellation_and_tracking() {
-    use axum::extract::WebSocketUpgrade;
+    use simple_server::web::ws::WebSocketUpgrade;
     tokio::time::timeout(Duration::from_secs(5), async {
         let mut lifecycle = Lifecycle::new(ShutdownOptions { grace_period: Duration::from_secs(3) });
         let shutdown = lifecycle.shutdown();
@@ -188,7 +182,7 @@ async fn upgraded_connection_needs_explicit_cancellation_and_tracking() {
         }));
         let listener = http::bind("127.0.0.1:0").await.unwrap();
         let address = listener.local_addr().unwrap();
-        lifecycle.service("http", http::serve(listener, app, shutdown.clone())).unwrap();
+        lifecycle.service("http", web::serve(listener, app, shutdown.clone())).unwrap();
         lifecycle.service("upgraded-connections", async {
             done_rx.await.map_err(io::Error::other)
         }).unwrap();

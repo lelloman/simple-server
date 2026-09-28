@@ -1,5 +1,6 @@
 #![cfg(feature = "correlation")]
 
+use axum::http::HeaderValue;
 use axum::{
     Router,
     body::{Body, Bytes, to_bytes},
@@ -14,10 +15,7 @@ use tower::ServiceExt;
 
 #[tokio::test]
 async fn selected_insert_if_missing_retains_repeated_headers() {
-    use simple_server::{
-        axum::http::HeaderValue,
-        correlation::{HeaderRequestId, Propagation, RequestHeader, ResponseHeader},
-    };
+    use simple_server::correlation::{HeaderRequestId, Propagation, RequestHeader, ResponseHeader};
     for present in [false, true] {
         let mut req = request(None);
         if present {
@@ -74,10 +72,7 @@ async fn selected_insert_if_missing_retains_repeated_headers() {
 
 #[tokio::test]
 async fn selected_ids_preserve_application_policy_and_opaque_bytes() {
-    use simple_server::{
-        axum::http::HeaderValue,
-        correlation::{HeaderRequestId, Propagation, current_header_id},
-    };
+    use simple_server::correlation::{HeaderRequestId, Propagation, current_header_id};
     for value in [
         HeaderValue::from_static(""),
         HeaderValue::from_static("legacy value"),
@@ -127,11 +122,8 @@ async fn selected_ids_preserve_application_policy_and_opaque_bytes() {
 
 #[tokio::test]
 async fn selected_propagation_preserves_response_overrides_and_restores_outer_scope() {
-    use simple_server::{
-        axum::http::HeaderValue,
-        correlation::{
-            HeaderRequestId, Propagation, RequestHeader, ResponseHeader, current_header_id,
-        },
+    use simple_server::correlation::{
+        HeaderRequestId, Propagation, RequestHeader, ResponseHeader, current_header_id,
     };
     let config = &Correlation::default();
     config

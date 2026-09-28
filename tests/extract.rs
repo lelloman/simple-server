@@ -92,10 +92,10 @@ async fn contract_works_without_http_feature_and_revalidates_each_time() {
     assert_eq!(parts.extensions.get::<&str>(), Some(&"visited"));
 }
 
-#[cfg(feature = "http")]
+#[cfg(feature = "web")]
 mod adapter {
     use super::*;
-    use axum::{self, Router, body::Body, routing::post};
+    use simple_server::web::{self, Router, body::Body, routing::post};
     use tower::ServiceExt;
 
     async fn required(Extract(user): Extract<User>, body: String) -> String {
@@ -148,9 +148,7 @@ mod adapter {
                 assert_eq!(response.headers().get_all("set-cookie").iter().count(), 2);
                 assert_eq!(response.extensions().get::<usize>(), Some(&73));
             }
-            let body = axum::body::to_bytes(response.into_body(), usize::MAX)
-                .await
-                .unwrap();
+            let body = response.into_body().collect(usize::MAX).await.unwrap();
             assert_eq!(body.as_ref(), expected_body.as_bytes());
         }
         assert_eq!(state.calls.load(Ordering::SeqCst), 8);
@@ -161,12 +159,10 @@ mod adapter {
         async fn twice(
             Extract(_): Extract<User>,
             Extract(_): Extract<User>,
-            request: axum::extract::Request,
+            request: web::Request,
         ) -> String {
             assert_eq!(request.extensions().get::<&str>(), Some(&"visited"));
-            let bytes = axum::body::to_bytes(request.into_body(), usize::MAX)
-                .await
-                .unwrap();
+            let bytes = request.into_body().collect(usize::MAX).await.unwrap();
             String::from_utf8(bytes.to_vec()).unwrap()
         }
         let state = State::default();
@@ -187,9 +183,7 @@ mod adapter {
         assert_eq!(response.status(), StatusCode::OK);
         assert_eq!(state.calls.load(Ordering::SeqCst), 2);
         assert_eq!(
-            axum::body::to_bytes(response.into_body(), usize::MAX)
-                .await
-                .unwrap(),
+            response.into_body().collect(usize::MAX).await.unwrap(),
             "untouched"
         );
     }

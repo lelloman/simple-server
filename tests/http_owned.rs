@@ -1,8 +1,8 @@
-#![cfg(feature = "http")]
+#![cfg(feature = "web")]
 
-use simple_server::axum::{
+use simple_server::web::{
     Router,
-    body::{Body, to_bytes},
+    body::Body,
     extract::{Path, State},
     http::{Request, StatusCode},
     routing::get,
@@ -33,10 +33,7 @@ async fn consumer_router_preserves_state_path_and_method_handling() {
         .await
         .unwrap();
     assert_eq!(response.status(), StatusCode::OK);
-    assert_eq!(
-        to_bytes(response.into_body(), 1024).await.unwrap(),
-        "item:42"
-    );
+    assert_eq!(response.into_body().collect(1024).await.unwrap(), "item:42");
 
     let response = app
         .oneshot(

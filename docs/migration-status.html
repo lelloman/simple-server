@@ -64,7 +64,8 @@
     <div class="eyebrow">simple-server / adoption tracker</div>
     <h1>One foundation. Service by service.</h1>
     <p>Every service on a row. Every migration step in a column. Adopt the building blocks each product needs, while keeping control of its application.</p>
-    <p><strong>End goal: completely abstract Axum away.</strong> Consumers will use only simple-server's public HTTP interfaces; Axum remains internal. Removing the transitional re-export and temporary escape hatches requires a final consumer/API audit beyond completion of the module columns. This milestone remains planned; see the <a href="design.md#end-goal-completely-abstract-axum-away">design completion criteria</a>.</p>
+    <p><strong>Axum is abstracted for the 16 in-scope services.</strong> Their production code and tests use simple-server's owned HTTP interfaces; Axum remains internal. The transitional re-export and temporary escape hatches are removed. Quentin Torrentino remains explicitly excluded and its old checkout is incompatible with the new shared revision. See the <a href="migration-status.md#in-scope-public-axum-removal--2026-09-28">final audit</a> and <a href="design.md#end-goal-completely-abstract-axum-away">completion criteria</a>.</p>
+    <p class="note"><strong>Shared public API closure — 28 September 2026.</strong> The re-export is removed and backend serving is crate-private beneath <code>web::serve</code>. A final scan finds no direct Axum code or dependency in the 16 migrated consumers; the complete shared check matrix and strict public rustdoc pass. Quentin remains excluded and needs migration before using this shared revision. See <a href="migration-status.md#in-scope-public-axum-removal--2026-09-28">scope and verification</a>.</p>
   </header>
   <main>
     <section class="summary" aria-label="Migration overview">
