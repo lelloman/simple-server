@@ -142,8 +142,8 @@ contracts; it does not imply these remaining protocol abstractions are complete.
 ## Remaining shared scope
 
 Owned multipart, WebSocket, HTTP tracing and SSE APIs are now available (see
-below). Alternate listeners/TLS still need shared
-APIs as consumers migrate. `compat::into_axum_router` remains
+below). TLS serving is available behind the optional `tls` feature.
+`compat::into_axum_router` remains
 available for other incremental migrations, but Pezzottify no longer uses it.
 
 Validation includes differential request/response checks against the prior router,
@@ -157,17 +157,21 @@ body cancellation/trailers/errors and real HTTP serving/shutdown.
 A configured `Router` accepts standard `http::Request<B>` bodies with byte data,
 not only the shared Body type. `Router::into_make_service()` returns an owned
 Tower service factory that clones the router for each connection target. This
-lets existing TLS servers consume shared routes directly without converting to
-a backend router. It ignores connection targets and installs no peer metadata;
-use `serve_with_connect_info` when that metadata is required. TLS configuration,
-accept policy and shutdown remain owned by the calling server.
+lets transports consume shared routes directly without converting to a backend
+router. It ignores connection targets and installs no peer metadata; use
+`serve_with_connect_info` when that metadata is required. For TLS,
+`web::tls::TlsConfig::from_pem` and `from_pem_file` load the certificate and key,
+and `web::tls::serve` serves an already-bound listener with the same `Shutdown`
+contract as `web::serve`. Certificate generation, trust policy, and upgraded
+socket shutdown remain application-owned. The lifecycle coordinator bounds
+graceful drain; the adapter itself sets no deadline.
 
 Response tuples also accept header arrays: `([(name, value); N], response)` and
 `(status, [(name, value); N], response)`. Names/values use standard HTTP conversion
 bounds. Entries replace matching headers in order; use HeaderMap append for
 multiple cookie fields. Invalid conversions preserve the existing error response
 contract. Androidoscopy exercises this with its controller login cookie and
-shared routes served through its existing TLS adapter.
+shared routes served through the shared TLS adapter.
 
 ## Nested services, method fallbacks and request metadata
 

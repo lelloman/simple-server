@@ -27,6 +27,8 @@ pub mod routing;
 mod service;
 #[cfg(feature = "sse")]
 pub mod sse;
+#[cfg(feature = "tls")]
+pub mod tls;
 #[cfg(feature = "http-tracing")]
 pub mod tracing;
 #[cfg(feature = "ws")]
