@@ -1,7 +1,7 @@
 # Step 07: database capability survey
 
 Status: design survey, 2026-09-28. The first optional connection-policy
-capability is specified in [Step 07a](step-07a-database-connections.md);
+capability is implemented and piloted in [Step 07a](step-07a-database-connections.md);
 migrations, backup and typed access remain future work. Step 07 is separate
 from the completed HTTP abstraction.
 
@@ -53,9 +53,10 @@ within the Crumbles repository.
 
 ## Proposed implementation sequence
 
-- **07a — contracts and connection adapters:** define opt-in readiness and
-  connection policy for SQLite drivers, with explicit values and observable
-  verification. Do not change a consumer's defaults implicitly.
+- **07a — explicit connection policy (implemented):** a driver-neutral SQLite
+  policy emits only selected settings and verifies effective live values. The
+  application executes the statements through its own driver on each connection;
+  no consumer default changes implicitly. Favzetto and Pezzottify are pilots.
 - **07b — migration planning and reporting:** compare ordered plans to recorded
   state, detect gaps, changed migrations and newer database versions, and report
   what would run. Implement execution only for a driver/ledger combination with

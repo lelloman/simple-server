@@ -65,12 +65,12 @@ references remain valid. The execution order after Step 06 is:
 3. Completed for the 16 in-scope services: public HTTP interfaces and tests use
    owned contracts, the transitional re-export and escape hatches are removed,
    and the final shared API audit passed. Quentin Torrentino remains excluded.
-4. **Next:** Step 07, optional database capabilities. The
+4. **Current:** Step 07, optional database capabilities. The
    [five-service survey](step-07-database-survey.md) compares connection setup,
-   migration ledgers, typed access, backup and synchronous execution before an
-   API is selected. [07a connection policy](step-07a-database-connections.md)
-   is the first optional shared capability; migrations and backup remain
-   application-owned.
+   migration ledgers, typed access, backup and synchronous execution.
+   [07a connection policy](step-07a-database-connections.md) is implemented and
+   adopted by Favzetto and Pezzottify. Next: assess other services for 07a and
+   design 07b migration planning. Migrations and backup remain application-owned.
 
 Database helpers are not a prerequisite for the HTTP abstraction. Services retain
 their existing database libraries, setup and migrations while that work proceeds.
