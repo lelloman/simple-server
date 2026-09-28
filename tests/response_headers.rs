@@ -128,9 +128,9 @@ fn invalid_vary_input_is_rejected_without_mutation_even_with_an_existing_wildcar
 #[cfg(all(feature = "http", feature = "http-tracing"))]
 #[tokio::test]
 async fn response_status_extensions_and_lazy_data_trailers_errors_survive() {
+    use axum::body::{Body, Bytes};
     use futures_util::StreamExt;
     use http_body_util::{BodyExt, StreamBody};
-    use simple_server::axum::body::{Body, Bytes};
     use std::sync::{
         Arc,
         atomic::{AtomicUsize, Ordering},

@@ -96,7 +96,7 @@ async fn selected_correlation_accepts_standard_http_bodies() {
 async fn websocket_negotiates_server_preference_on_real_http() {
     let app = Router::new().route(
         "/",
-        web::routing::get(|ws: web::compat::WebSocketUpgrade| async {
+        web::routing::get(|ws: web::ws::WebSocketUpgrade| async {
             ws.protocols(["preferred", "alternate"])
                 .on_upgrade(|_socket| async {})
         }),
@@ -137,7 +137,7 @@ async fn websocket_limits_reject_large_frames_and_fragmented_messages() {
     let count = failures.clone();
     let app = Router::new().route(
         "/",
-        web::routing::get(move |ws: web::compat::WebSocketUpgrade| {
+        web::routing::get(move |ws: web::ws::WebSocketUpgrade| {
             let count = count.clone();
             async move {
                 ws.max_frame_size(4)

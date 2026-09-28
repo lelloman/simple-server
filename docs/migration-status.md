@@ -5474,3 +5474,24 @@ worktree branch; the reviewed shared revision is `e34c6d6` in the active
 `simple-server.rev` and README. Neither repository was pushed or deployed.
 The current totals are **16 None, 0 active pending, 1 skipped (Quentin
 Torrentino)**. The dated audit above remains a historical snapshot.
+
+## Final public API audit and compatibility cleanup — 2026-09-28
+
+The active 16 consumers have no direct Axum source/manifest use, but the full
+abstraction criterion is not yet met. Quentin Torrentino remains explicitly
+skipped and still imports `simple_server::axum` in its production server and
+HTTP tests. Its main server also calls the backend-facing `http::serve`.
+Removing either API now would break that checkout. The re-export and legacy
+serving entry point therefore remain pending Quentin's migration or a separate
+compatibility decision; this is not marked complete.
+
+Independent shared API cleanup removes unused `web-compat` and its backend
+router, multipart, WebSocket and tracing escape hatches. No active or skipped
+consumer enables that feature. The old public tracing module is private behind
+`web::tracing`, correlation's public `run` now accepts standard HTTP bodies and
+its backend middleware adapter is removed, and `BodyLimit` exposes an owned
+Tower service type. Library tests use direct backend imports only as internal
+comparison oracles; the lifecycle example uses owned `web` routing and serving.
+All-feature tests and strict all-target Clippy pass on the isolated branch;
+full final API removal still awaits the Quentin decision and a final audit of
+the remaining legacy entry points. No consumer was changed in this cleanup.

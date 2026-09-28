@@ -40,12 +40,16 @@ starts a runtime nor spawns work. Existing default features are unchanged.
 
 ```rust
 use simple_server::{
-    axum::{Router, middleware::from_fn_with_state},
-    correlation::{Correlation, middleware},
+    correlation::Correlation,
+    web::{Router, Request, Response, extract::State, middleware::{self, Next}},
 };
 
+async fn correlate(State(config): State<Correlation>, request: Request, next: Next) -> Response {
+    config.run_http(request, |request| next.run(request)).await
+}
+
 let app: Router = Router::new()
-    .layer(from_fn_with_state(Correlation::default(), middleware));
+    .layer(middleware::from_fn_with_state(Correlation::default(), correlate));
 ```
 
 For existing application middleware, `Correlation::run(request, callback)`

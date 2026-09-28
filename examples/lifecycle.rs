@@ -1,9 +1,9 @@
 use std::{io, time::Duration};
 
 use simple_server::{
-    axum::{Router, routing::get},
     http,
     lifecycle::{Lifecycle, ShutdownOptions, Signals},
+    web::{self, Router, routing::get},
 };
 
 #[tokio::main(flavor = "current_thread")]
@@ -15,7 +15,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let listener = http::bind("127.0.0.1:3000").await?;
     println!("Listening on {}", listener.local_addr()?);
     let app = Router::new().route("/", get(|| async { "hello" }));
-    lifecycle.service("http", http::serve(listener, app, lifecycle.shutdown()))?;
+    lifecycle.service("http", web::serve(listener, app, lifecycle.shutdown()))?;
     let report = lifecycle
         .run(signals.wait(), async { Ok::<_, io::Error>(()) })
         .await?;

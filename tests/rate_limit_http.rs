@@ -239,7 +239,7 @@ async fn rejection_never_polls_request_body_or_invokes_handler_and_keeps_backend
 #[cfg(feature = "http")]
 #[tokio::test]
 async fn real_http_denial_retry_and_public_routes() {
-    use simple_server::axum::{self, Router, body::Body, routing::post};
+    use axum::{self, Router, body::Body, routing::post};
     let l = KeyedLimiter::new(
         Quota::replenishing(Duration::from_secs(60), NonZeroU32::new(1).unwrap()).unwrap(),
         StoreConfig::bounded(NonZeroUsize::new(4).unwrap(), Duration::ZERO),

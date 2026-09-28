@@ -38,7 +38,7 @@ pub mod correlation;
 
 /// Optional HTTP request spans and response-body lifecycle events.
 #[cfg(feature = "http-tracing")]
-pub mod http_tracing;
+mod http_tracing;
 
 #[cfg(all(feature = "lifecycle", feature = "http"))]
 pub mod http;

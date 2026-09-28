@@ -2,8 +2,8 @@
 
 use std::{future::pending, io, net::SocketAddr, time::Duration};
 
+use axum::{Router, body::Body, extract::ConnectInfo, routing::get};
 use simple_server::{
-    axum::{Router, body::Body, extract::ConnectInfo, routing::get},
     http,
     lifecycle::{Lifecycle, LifecycleError, Shutdown, ShutdownOptions, ShutdownReason, Unfinished},
 };
@@ -164,7 +164,7 @@ use futures_util::StreamExt;
 #[cfg(feature = "ws")]
 #[tokio::test]
 async fn upgraded_connection_needs_explicit_cancellation_and_tracking() {
-    use simple_server::axum::extract::WebSocketUpgrade;
+    use axum::extract::WebSocketUpgrade;
     tokio::time::timeout(Duration::from_secs(5), async {
         let mut lifecycle = Lifecycle::new(ShutdownOptions { grace_period: Duration::from_secs(3) });
         let shutdown = lifecycle.shutdown();

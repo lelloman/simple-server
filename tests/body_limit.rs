@@ -1,15 +1,13 @@
 #![cfg(feature = "body-limit")]
-use simple_server::{
-    axum::{
-        Json, Router,
-        body::{Body, Bytes, to_bytes},
-        extract::{DefaultBodyLimit, Request},
-        http::{StatusCode, header},
-        response::Response,
-        routing::post,
-    },
-    body_limit::BodyLimit,
+use axum::{
+    Json, Router,
+    body::{Body, Bytes, to_bytes},
+    extract::{DefaultBodyLimit, Request},
+    http::{StatusCode, header},
+    response::Response,
+    routing::post,
 };
+use simple_server::body_limit::BodyLimit;
 use std::convert::Infallible;
 use tower::ServiceExt;
 
@@ -31,7 +29,7 @@ async fn result(
     path: &str,
     bytes: Vec<u8>,
     declared: bool,
-) -> (StatusCode, simple_server::axum::http::HeaderMap, Bytes) {
+) -> (StatusCode, axum::http::HeaderMap, Bytes) {
     let mut req = Request::builder()
         .method("POST")
         .uri(path)
@@ -169,7 +167,7 @@ async fn response_stream_is_not_polled_or_limited_by_request_limit() {
 #[cfg(feature = "multipart")]
 #[tokio::test]
 async fn multipart_limits_preserve_rejections_without_content_length() {
-    use simple_server::axum::{extract::Multipart, response::IntoResponse};
+    use axum::{extract::Multipart, response::IntoResponse};
     async fn upload(mut multipart: Multipart) -> Response {
         match multipart.next_field().await {
             Ok(Some(field)) => match field.bytes().await {

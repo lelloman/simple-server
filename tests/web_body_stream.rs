@@ -60,7 +60,7 @@ async fn data_stream_matches_backend_frames_trailers_and_errors() {
         .map(|item| item.map_err(|error| error.to_string()))
         .collect()
         .await;
-    let expected: Vec<_> = simple_server::axum::body::Body::new(source())
+    let expected: Vec<_> = axum::body::Body::new(source())
         .into_data_stream()
         .map(|item| item.map_err(|error| error.to_string()))
         .collect()

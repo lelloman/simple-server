@@ -77,7 +77,3 @@ pub async fn serve_with_connect_info(
     )
     .await
 }
-
-/// Explicit migration boundaries for protocols not yet owned by the shared API.
-#[cfg(feature = "web-compat")]
-pub mod compat;

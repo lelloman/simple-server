@@ -1,10 +1,6 @@
-//! Optional HTTP request spans and response-body lifecycle events.
-//!
-//! With the `web` feature, prefer `web::tracing` for backend-independent
-//! request/response and observer contracts. This legacy API remains supported.
-//!
-//! [`trace`](crate::http_tracing::trace) wraps an Axum request callback. It records safe route templates,
-//! status, header latency and body lifetime without buffering or reading bodies.
+//! Private backend engine for the public `web::tracing` contract. It records
+//! safe route templates, status, header latency and body lifetime without
+//! buffering or reading bodies.
 //! It does not install a subscriber. See `docs/step-03c-http-tracing.md` for
 //! event semantics, placement and upgrade boundaries.
 
@@ -22,32 +18,12 @@ use std::{
 };
 use tracing::{Instrument, Span};
 
-/// Trace one request and its returned body, using the application's subscriber.
-///
-/// Install with `axum::middleware::from_fn(|request, next: axum::middleware::Next|
-/// trace(request, |request| next.run(request)))`, or call inside an existing
-/// middleware. Include response normalization inside the callback so the traced
-/// body is the body actually returned. Correlation, if used, must surround this
-/// call. The callback is constructed and polled inside the request span.
-///
-/// HTTP 101 and successful CONNECT responses finish at upgrade handoff; this
-/// does not trace the resulting session. Body completion means frames consumed
-/// by the server, not bytes acknowledged by the client. Dropping the future or
-/// body records cancellation, which is not necessarily a client disconnect.
-pub async fn trace<F, Fut>(request: Request<Body>, next: F) -> Response
-where
-    F: FnOnce(Request<Body>) -> Fut,
-    Fut: Future<Output = Response>,
-{
-    trace_with_observer(request, TracingObserver, next).await
-}
-
 /// Trace with application-owned response and completion events.
 ///
 /// Replaces automatic events, while retaining the same safe span, timing and
 /// body lifecycle. The observer can write to an existing sink without installing
 /// a tracing subscriber. Delegate to [`TracingObserver`] to retain selected
-/// default events. The callback placement rules of [`trace`] still apply.
+/// default events. The callback is constructed and polled inside the span.
 pub async fn trace_with_observer<F, Fut, O>(
     request: Request<Body>,
     observer: O,

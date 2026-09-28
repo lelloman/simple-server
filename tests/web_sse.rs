@@ -33,7 +33,7 @@ fn event_response(event: Event) -> Response {
 
 #[tokio::test]
 async fn event_wire_bytes_and_headers_match_existing_encoder() {
-    use simple_server::axum::response::sse::Event as Old;
+    use axum::response::sse::Event as Old;
     let cases = [
         (Event::default(), Old::default()),
         (Event::default().data(""), Old::default().data("")),
@@ -78,15 +78,16 @@ async fn event_wire_bytes_and_headers_match_existing_encoder() {
     ];
     for (owned, old) in cases {
         let response = event_response(owned);
-        let old_response = simple_server::axum::response::IntoResponse::into_response(
-            simple_server::axum::response::Sse::new(stream::iter([Ok::<_, Infallible>(old)])),
-        );
+        let old_response =
+            axum::response::IntoResponse::into_response(axum::response::Sse::new(stream::iter([
+                Ok::<_, Infallible>(old),
+            ])));
         assert_eq!(response.status(), StatusCode::OK);
         assert_eq!(response.status(), old_response.status());
         assert_eq!(response.headers(), old_response.headers());
         assert_eq!(response.headers()["content-type"], "text/event-stream");
         assert_eq!(response.headers()["cache-control"], "no-cache");
-        let old_bytes = simple_server::axum::body::to_bytes(old_response.into_body(), 1 << 20)
+        let old_bytes = axum::body::to_bytes(old_response.into_body(), 1 << 20)
             .await
             .unwrap();
         assert_eq!(bytes(response).await, old_bytes);

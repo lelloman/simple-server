@@ -58,9 +58,8 @@ versions. Exact Axum uniformity requires the same pin across the adopted
 
 The optional [`web` module](docs/web-core.md) provides shared routers, function
 handlers, state/path/query/JSON extraction and response/body types. Pezzottify's
-embedding endpoints are the first canary. The separately enabled `web-compat`
-feature supports temporary composition into existing routers; standalone shared
-routers do not need it.
+embedding endpoints were the first canary. The completed service migrations use
+owned routers directly; the temporary `web-compat` feature has been removed.
 
 The optional [`extract` module](docs/request-extraction.md) provides a shared
 request-extraction trait and `Extract<T>` handler arguments. Applications own
@@ -286,10 +285,10 @@ See the [Step 10 contract](docs/step-10-rate-limiting.md).
 With `web` + `ws`, [`web::ws`](docs/web-core.md#owned-websockets) supplies owned
 WebSocket upgrades, sockets, messages, close frames and errors, including split
 read/write streams, subprotocol negotiation and configurable transport limits.
-The compatibility upgrade API remains available during consumer migration.
+The temporary compatibility upgrade API has been removed.
 
-The optional `sse` feature enables `web::sse::{Sse, Event, KeepAlive}` and `web`
-without requiring `web-compat`. It supplies owned event/JSON builders and idle
+The optional `sse` feature enables `web::sse::{Sse, Event, KeepAlive}` and `web`.
+It supplies owned event/JSON builders and idle
 keepalives over lazy, fallible streams, preserving disconnect cancellation.
 See the [SSE contract](docs/step-11-sse.md) for framing, defaults and migration.
 

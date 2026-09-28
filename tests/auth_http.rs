@@ -1,9 +1,7 @@
 #![cfg(all(feature = "auth", feature = "http"))]
+use axum::{self, Router, body::Body, routing::post};
 use http::{Request, Response, StatusCode, request::Parts};
-use simple_server::{
-    auth::{AsyncAccess, AuthLayer, Identity},
-    axum::{self, Router, body::Body, routing::post},
-};
+use simple_server::auth::{AsyncAccess, AuthLayer, Identity};
 use std::sync::{
     Arc,
     atomic::{AtomicUsize, Ordering},

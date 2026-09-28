@@ -67,7 +67,7 @@ async fn snapshot(response: Response) -> (StatusCode, HeaderMap, Vec<u8>) {
 
 #[tokio::test]
 async fn routing_extraction_and_errors_match_existing_backend_contract() {
-    use simple_server::axum as old;
+    use axum as old;
     async fn read(
         old::extract::State(state): old::extract::State<AppState>,
         old::extract::Path(id): old::extract::Path<u64>,
@@ -328,26 +328,6 @@ async fn explicit_body_collection_limit_is_enforced() {
     assert!(Body::from("abcd").collect(3).await.is_err());
 }
 
-#[cfg(feature = "web-compat")]
-#[tokio::test]
-async fn compatibility_boundary_preserves_outer_extractor_body_limit() {
-    use simple_server::axum as old;
-    let app = web::compat::into_axum_router(Router::new().route("/", post(shared_write)))
-        .layer(old::extract::DefaultBodyLimit::max(16));
-    let response = app
-        .oneshot(
-            http::Request::builder()
-                .method("POST")
-                .uri("/")
-                .header("content-type", "application/json")
-                .body(old::body::Body::from(r#"{"value":"longer than limit"}"#))
-                .unwrap(),
-        )
-        .await
-        .unwrap();
-    assert_eq!(response.status(), StatusCode::PAYLOAD_TOO_LARGE);
-}
-
 #[cfg(feature = "body-limit")]
 #[tokio::test]
 async fn shared_body_limit_supports_standalone_router() {
@@ -438,7 +418,7 @@ async fn shared_router_serves_real_http_and_shuts_down() {
 #[cfg(feature = "body-limit")]
 #[tokio::test]
 async fn optional_json_matches_backend_presence_errors_and_limits() {
-    use simple_server::axum as old;
+    use axum as old;
     async fn shared(value: Option<Json<Payload>>) -> Json<Option<Payload>> {
         Json(value.map(|v| v.0))
     }
@@ -495,7 +475,7 @@ async fn optional_json_matches_backend_presence_errors_and_limits() {
 
 #[tokio::test]
 async fn method_route_layer_preserves_unmatched_method_responses() {
-    use simple_server::axum as old;
+    use axum as old;
     async fn gate(_: Request, _: web::middleware::Next) -> StatusCode {
         StatusCode::UNAUTHORIZED
     }
@@ -537,7 +517,7 @@ async fn method_route_layer_preserves_unmatched_method_responses() {
 
 #[tokio::test]
 async fn standalone_headers_preserve_empty_responses_and_repeated_values() {
-    use simple_server::axum as old;
+    use axum as old;
     let mut headers = HeaderMap::new();
     headers.append("set-cookie", "first=1".parse().unwrap());
     headers.append("set-cookie", "second=2".parse().unwrap());
@@ -565,17 +545,14 @@ async fn method_extraction_matches_backend_including_head_and_custom_methods() {
             method.to_string(),
         )
     }
-    async fn backend_response(method: Method) -> impl simple_server::axum::response::IntoResponse {
+    async fn backend_response(method: Method) -> impl axum::response::IntoResponse {
         (
             [("x-method", method.as_str().to_owned())],
             method.to_string(),
         )
     }
     let shared = Router::new().route("/method", web::routing::any(method_response));
-    let backend = simple_server::axum::Router::new().route(
-        "/method",
-        simple_server::axum::routing::any(backend_response),
-    );
+    let backend = axum::Router::new().route("/method", axum::routing::any(backend_response));
     for method in ["GET", "HEAD", "POST", "CUSTOM"] {
         let actual = shared
             .clone()
@@ -594,7 +571,7 @@ async fn method_extraction_matches_backend_including_head_and_custom_methods() {
                 Request::builder()
                     .method(method)
                     .uri("/method")
-                    .body(simple_server::axum::body::Body::empty())
+                    .body(axum::body::Body::empty())
                     .unwrap(),
             )
             .await
@@ -643,14 +620,10 @@ async fn method_group_state_is_independent_and_matches_backend() {
     async fn outer(State(state): State<AppState>) -> String {
         state.name
     }
-    async fn old_local(
-        simple_server::axum::extract::State(state): simple_server::axum::extract::State<String>,
-    ) -> String {
+    async fn old_local(axum::extract::State(state): axum::extract::State<String>) -> String {
         state
     }
-    async fn old_outer(
-        simple_server::axum::extract::State(state): simple_server::axum::extract::State<AppState>,
-    ) -> String {
+    async fn old_outer(axum::extract::State(state): axum::extract::State<AppState>) -> String {
         state.name
     }
     let shared = Router::new()
@@ -661,10 +634,10 @@ async fn method_group_state_is_independent_and_matches_backend() {
         .with_state(AppState {
             name: "router-state".into(),
         });
-    let backend = simple_server::axum::Router::new()
+    let backend = axum::Router::new()
         .route(
             "/mixed",
-            simple_server::axum::routing::get(old_local)
+            axum::routing::get(old_local)
                 .with_state("method-state".to_owned())
                 .post(old_outer),
         )
@@ -694,7 +667,7 @@ async fn method_group_state_is_independent_and_matches_backend() {
                 Request::builder()
                     .method(method)
                     .uri("/mixed")
-                    .body(simple_server::axum::body::Body::empty())
+                    .body(axum::body::Body::empty())
                     .unwrap(),
             )
             .await

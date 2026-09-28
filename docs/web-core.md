@@ -115,16 +115,6 @@ With `lifecycle`, `serve_with_connect_info` inserts the direct TCP peer address 
 forwarded headers. Both serving functions use the existing graceful shutdown
 contract; neither installs signal handlers.
 
-## Explicit protocol compatibility
-
-`web-compat` also supplies transitional `Multipart` and `WebSocketUpgrade`
-extractors (requiring the respective features), `response` for legacy streaming
-responses, and `trace_with_observer` for existing tracing observers. These keep
-ordinary handler signatures and router composition shared, but intentionally
-retain backend multipart field/error, WebSocket and observer contracts. They are
-migration boundaries, not completed protocol abstractions. SSE producers can use
-`compat::response` without buffering their event stream.
-
 ## Pezzottify adoption
 
 The five embedding endpoints were the first canary. Pezzottify now composes all
@@ -134,17 +124,15 @@ static-file fallback, main/metrics serving and its shared HTTP test fixture usin
 implementations are gone. Permissions, rate limits, CSRF, report admission,
 caching, task ownership and range policies remain application-owned and unchanged.
 
-The remaining explicit backend contracts are SSE event production, WebSocket
-messages/sockets, multipart fields/errors, the tracing observer and independent
-mock HTTP fixtures. Step 11 completion means shared routing and ordinary HTTP
-contracts; it does not imply these remaining protocol abstractions are complete.
+The later SSE, WebSocket, multipart, tracing and HTTP fixture migrations replaced
+those initial compatibility boundaries with owned contracts.
 
 ## Remaining shared scope
 
 Owned multipart, WebSocket, HTTP tracing and SSE APIs are now available (see
 below). TLS serving is available behind the optional `tls` feature.
-`compat::into_axum_router` remains
-available for other incremental migrations, but Pezzottify no longer uses it.
+The temporary router conversion and protocol compatibility module has been
+removed after active consumers migrated to the owned contracts.
 
 Validation includes differential request/response checks against the prior router,
 before/after consumer HTTP tests, extraction ordering, explicit rejection capture,
@@ -188,22 +176,19 @@ other extractor errors. Required `Extension<T>` retains its missing-value error.
 
 With `correlation`, `Correlation::run_http` establishes the existing ID/header and
 task-local context for arbitrary standard HTTP request/response bodies. It neither
-inspects nor converts those bodies. The existing backend `run` and `run_selected`
-APIs remain compatible. Crumbles uses the new method with shared requests and
-retains an explicit tracing compatibility boundary.
+inspects nor converts those bodies. `run_selected` supports caller-selected IDs.
 
 ### Fausto compatibility requirements
 
 `Correlation::run_selected` accepts standard HTTP request/response body types,
 including the shared web body, while preserving application-selected opaque IDs.
-`web::compat::WebSocketUpgrade::protocols` preserves server preference order when
+`web::ws::WebSocketUpgrade::protocols` preserves server preference order when
 negotiating a client-offered subprotocol.
 
-The optional `multipart-owned` feature adds `web::compat::OwnedMultipart` for
-consumers requiring owned multipart fields. It retains axum-extra parsing,
-extractor body limits, rejection text, and runtime field exclusivity. Its field
-and error types remain an explicit protocol compatibility boundary; this is not
-yet complete multipart abstraction. The existing borrowed `Multipart` is unchanged.
+The optional `multipart-owned` feature adds `web::multipart::OwnedMultipart` for
+consumers requiring owned multipart fields. It preserves parser behavior,
+extractor body limits, rejection text, and runtime field exclusivity while
+exposing owned field and error contracts.
 
 ### Browser and OAuth consumers
 
@@ -251,15 +236,11 @@ Missing/invalid boundary extraction returns the shared `RejectionResponse`.
 Field/parser failures expose `status`, `body_text`, `Display`, an error source,
 and shared response/rejection conversion without a backend error type.
 
-The existing `web::compat::{Multipart, OwnedMultipart}` remain available with
-their old field/error contracts for unmigrated consumers. They are distinct from
-the new owned interfaces; changing the shared library does not automatically
-remove remaining multipart exposure in other services. Lellostore uses the new
-borrowed shared API for streamed uploads and bounded metadata.
+LelloStore uses the borrowed shared API for streamed uploads and bounded metadata.
 
 `RawQuery` preserves the undecoded query and distinguishes absence from an empty
-query. The WebSocket compatibility adapter now forwards `max_frame_size` and
-`max_message_size`; the socket/message protocol types remain compatibility gaps.
+query. The owned WebSocket upgrade forwards `max_frame_size` and
+`max_message_size` to the transport.
 
 `Option<Json<T>>` preserves optional-body semantics: absent `Content-Type`
 produces `None`; declared JSON still validates syntax, shape and body limits.
@@ -285,7 +266,7 @@ fallbacks, GET/HEAD semantics and middleware placement are retained.
 
 ## Owned WebSockets
 
-Enable `web` and `ws` to use `web::ws` independently of `web-compat`.
+Enable `web` and `ws` to use `web::ws`.
 `web::extract::WebSocketUpgrade` re-exports the owned upgrade extractor.
 No public socket, message, close frame or error contract requires Axum.
 
@@ -333,30 +314,22 @@ heartbeat scheduling, protocol payloads, cancellation and task tracking remain
 application-owned. `on_failed_upgrade` observes background transport failures;
 request-head validation errors are ordinary extractor rejections.
 
-The old `compat::WebSocketUpgrade` remains unchanged for existing consumers.
-Providing this API does not imply those services have migrated their socket types.
+The temporary backend WebSocket adapter was removed after active consumers
+migrated their socket types.
 
 ## Owned HTTP tracing
 
 Enable `web` and `http-tracing` and use `web::tracing::{trace,
 trace_with_observer, Observer, ResponseInfo, TracingObserver, Outcome, Phase}`.
-No `web-compat` feature or backend response type is required.
+No backend response type is required.
 
 `Observer::on_response` receives a borrowed `&ResponseInfo<'_>` with status,
 HTTP version, headers and application extensions. It cannot consume or modify
 the body. `ResponseInfo::new` also accepts any standard HTTP response body.
 Observers retain application ownership of metrics, logging and redaction.
 
-Migration from the compatibility bridge:
-- Replace `web::compat::trace_with_observer` with
-  `web::tracing::trace_with_observer`.
-- Implement `web::tracing::Observer`; replace the callback's backend response
-  argument with `&web::tracing::ResponseInfo<'_>`.
-- Import `TracingObserver`, `Outcome` and `Phase` from `web::tracing`.
-- Remove `web-compat` only if no other compatibility APIs remain.
-
-The legacy `http_tracing` observer and `web::compat` bridge remain supported.
-Both APIs use the same lifecycle engine and default events. Completion is server
+The shared tracing API uses the same lifecycle engine and default events as the
+original implementation. Completion is server
 body consumption, not client acknowledgment. Upgrades finish at handoff; HEAD,
 bodyless responses, streaming errors, cancellation and trailers retain their
 existing semantics. Correlation middleware surrounds tracing, and response
@@ -378,7 +351,7 @@ async fn request_logger(request: Request, next: Next) -> Response {
 
 Enable the optional `sse` feature, which also enables `web`, and use
 `web::sse::{Sse, Event, KeepAlive, EventError, EventDataWriter}`. No backend types
-or `web-compat` feature are required. An `Sse` response implements the shared
+are required. An `Sse` response implements the shared
 `IntoResponse`, so handlers return it directly or call `.into_response()` when
 an existing response signature is needed. Header/status tuples remain available.
 

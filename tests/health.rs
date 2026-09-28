@@ -111,7 +111,7 @@ async fn concurrent_requests_do_not_serialize_or_cache_checks() {
 #[cfg(feature = "http")]
 #[tokio::test]
 async fn router_owns_get_head_and_method_rejection() {
-    use simple_server::axum::{
+    use axum::{
         Router,
         body::{Body, to_bytes},
         routing::get_service,

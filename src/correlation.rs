@@ -8,12 +8,7 @@
 
 use std::{fmt, future::Future};
 
-use axum::{
-    extract::{Request, State},
-    http::{HeaderName, HeaderValue},
-    middleware::Next,
-    response::Response,
-};
+use http::{HeaderName, HeaderValue};
 
 tokio::task_local! {
     static CURRENT: Context;
@@ -152,10 +147,10 @@ impl Correlation {
     /// Select one ID, set request extensions and scope the downstream future.
     /// Replace the response header and extension with the selected ID. Incoming
     /// request headers are unchanged. Bodies and status codes are untouched.
-    pub async fn run<F, Fut>(&self, request: Request, next: F) -> Response
+    pub async fn run<B, R, F, Fut>(&self, request: http::Request<B>, next: F) -> http::Response<R>
     where
-        F: FnOnce(Request) -> Fut,
-        Fut: Future<Output = Response>,
+        F: FnOnce(http::Request<B>) -> Fut,
+        Fut: Future<Output = http::Response<R>>,
     {
         self.run_http(request, next).await
     }
@@ -274,13 +269,4 @@ impl Correlation {
         response.extensions_mut().insert(final_id);
         response
     }
-}
-
-/// Adapter for `axum::middleware::from_fn_with_state(config, middleware)`.
-pub async fn middleware(
-    State(config): State<Correlation>,
-    request: Request,
-    next: Next,
-) -> Response {
-    config.run(request, |request| next.run(request)).await
 }

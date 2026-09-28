@@ -1,17 +1,15 @@
 #![cfg(feature = "correlation")]
 
-use simple_server::{
-    axum::{
-        Router,
-        body::{Body, Bytes, to_bytes},
-        extract::{Extension, Request},
-        http::{HeaderName, StatusCode},
-        middleware::from_fn_with_state,
-        response::{IntoResponse, Response},
-        routing::get,
-    },
-    correlation::{Correlation, IncomingIds, RequestId, current_id, middleware},
+use axum::{
+    Router,
+    body::{Body, Bytes, to_bytes},
+    extract::{Extension, Request},
+    http::{HeaderName, StatusCode},
+    middleware::from_fn_with_state,
+    response::{IntoResponse, Response},
+    routing::get,
 };
+use simple_server::correlation::{Correlation, IncomingIds, RequestId, current_id};
 use tower::ServiceExt;
 
 #[tokio::test]
@@ -196,7 +194,7 @@ async fn selected_propagation_preserves_response_overrides_and_restores_outer_sc
 fn runs_without_runtime_and_restores_context_after_panic() {
     use futures_util::FutureExt;
     let config = Correlation::default();
-    let future = config.run(request(None), |_| async {
+    let future = config.run::<Body, Body, _, _>(request(None), |_| async {
         assert!(current_id().is_some());
         panic!("handler panic");
     });
@@ -290,9 +288,16 @@ async fn router_covers_extractor_rejections_not_found_and_method_not_allowed() {
         )
         .route(
             "/json",
-            get(|_: simple_server::axum::Json<serde_json::Value>| async { "ok" }),
+            get(|_: axum::Json<serde_json::Value>| async { "ok" }),
         )
-        .layer(from_fn_with_state(config, middleware));
+        .layer(from_fn_with_state(
+            config,
+            |axum::extract::State(config): axum::extract::State<Correlation>,
+             request: Request,
+             next: axum::middleware::Next| async move {
+                config.run(request, |request| next.run(request)).await
+            },
+        ));
     for (uri, method, status) in [
         ("/", "GET", 200),
         ("/missing", "GET", 404),

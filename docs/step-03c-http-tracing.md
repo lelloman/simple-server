@@ -1,7 +1,8 @@
 # Step 03c: HTTP tracing
 
-The opt-in `http-tracing` feature exposes `http_tracing::trace(request, callback)`.
-It requires HTTP and `tracing`, but neither logging initialization, correlation,
+The opt-in `http-tracing` feature exposes `web::tracing::{trace,
+trace_with_observer, Observer, ResponseInfo, TracingObserver, Outcome, Phase}`.
+It enables `web` and `tracing`, but requires neither logging initialization, correlation,
 lifecycle, nor a Tokio runtime. The application owns subscriber configuration.
 No existing default feature or router behavior changes merely by updating the library.
 
@@ -10,7 +11,7 @@ No existing default feature or router behavior changes merely by updating the li
 `trace` creates an INFO `http.request` span with method, route and eventual status.
 It instruments callback construction, callback polling and response-body polling.
 Standard HTTP methods are recorded verbatim; extension methods become `OTHER`.
-Routes come exclusively from Axum's `MatchedPath`, capped at 256 bytes; missing
+Routes come exclusively from matched route metadata, capped at 256 bytes; missing
 matches use `<unmatched>` and oversized templates use `<route-too-long>`.
 Raw paths, URIs, query strings, headers, credentials, bodies and error text are
 never automatically recorded. Application-emitted events retain application policy.
@@ -51,7 +52,7 @@ WebSocket/CONNECT session lifetime requires separate application instrumentation
 
 ## Placement and adoption
 
-Use `axum::middleware::from_fn` for a normal router, or call `trace` inside an
+Use `web::middleware::from_fn` for a normal router, or call `trace` inside an
 existing middleware. Install at a point where matched route templates are visible.
 Keep correlation outside tracing if the ID should be recorded. Include any
 response normalization inside the callback so the observed body is the final
@@ -67,7 +68,7 @@ switches remain authoritative. Keep opt-in redacted header/body diagnostics,
 domain events, audits and metric boundaries application-owned; replacing
 request lifecycle logging must not silently disable those behaviors.
 
-This API is infallible like Axum middleware: service failures must become HTTP
+This API is infallible like shared middleware: service failures must become HTTP
 responses before returning. Body outcomes are independent of HTTP status: a 500
 response can have a completely transmitted body. It does not inspect domain errors,
 change response status/headers/extensions, register global state, trace spawned

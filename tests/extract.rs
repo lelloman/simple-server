@@ -95,7 +95,7 @@ async fn contract_works_without_http_feature_and_revalidates_each_time() {
 #[cfg(feature = "http")]
 mod adapter {
     use super::*;
-    use simple_server::axum::{self, Router, body::Body, routing::post};
+    use axum::{self, Router, body::Body, routing::post};
     use tower::ServiceExt;
 
     async fn required(Extract(user): Extract<User>, body: String) -> String {
