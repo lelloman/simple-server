@@ -55,7 +55,7 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local canary)** | **Done (local; scoped canary)** | N/A (assessed) | N/A (no served probe) | **Done (local; scoped canary)** | **Done (local; primitives)** | **Done (local; primitives)** | **Done (local; sessions + route permissions)** | **Done (HTTP, MCP, durable quotas + outbound pacing)** | **Done (all production route groups)** | None. |
 | favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local canary)** | **Done (local; request work)** | **Done (local; bounded batches)** | **Done (local; retry scope)** | **Done (local canary)** | **Done (local; global + endpoint budgets)** | **Done (local)** | None. |
-| androidoscopy | `server`; Android SDK pairing | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (no served probe) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; controller + LAN access)** | **Done (local; device JNI pairing gate)** | **Done (all production route groups)** | Production: axum-server TLS configuration, serving and graceful-shutdown handle. Tests: the same TLS adapter. |
+| androidoscopy | `server`; Android SDK pairing | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (no served probe) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; controller + LAN access)** | **Done (local; device JNI pairing gate)** | **Done (all production route groups)** | None. |
 | crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; durable primitives)** | **Done (local; retry primitives)** | **Done (local; main + integration)** | **Done (local; HTTP + MCP + durable dispatcher)** | **Done (both servers)** | None. |
 | fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; dynamic cron)** | N/A (assessed) | **Done (local; HTTP + WebSocket + admin/write)** | **Done (local; five API tiers)** | **Done (local)** | None. |
 | lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (Rust; Caddy owns CORS) | **Done (local; scoped)** | **Done (local; webhook scope)** | **Done (local; capacity)** | **Done (local; retry scope)** | **Done (local; sessions + resource/admin access)** | **Done (endpoint budgets + persisted device polling)** | **Done (local)** | None. |
@@ -5443,5 +5443,34 @@ pushed or deployed.
 
 The current HTML observations and Markdown summary cells are now **None** for
 Fausto and Crumbles. The dated 27 September audit table remains a snapshot.
-Current totals: **15 None, 1 active pending (Androidoscopy TLS), 1 skipped
-(Quentin Torrentino)**. Axum remains internal to simple-server.
+At this Fausto/Crumbles checkpoint the totals were **15 None, 1 active pending
+(Androidoscopy TLS), 1 skipped (Quentin Torrentino)**. Axum remains internal to
+simple-server.
+
+## Androidoscopy owned TLS cleanup — 2026-09-28
+
+Androidoscopy `server` previously used `axum-server` directly for the legacy
+app WSS listener, certificate loading and graceful-shutdown handle, including
+its verified TLS registration test. Shared commit `e34c6d6` adds optional
+`web::tls` with owned `TlsConfig` PEM loaders and an already-bound listener
+server. It observes the same `Shutdown` as plain HTTP and initiates an unbounded
+graceful drain; Androidoscopy's lifecycle retains its 30-second deadline and
+application-owned WebSocket/task drain. Certificate generation, TLS fallback to
+plain WS if certificate setup fails, the LAN pairing TLS protocol and trust
+policy remain unchanged.
+
+Baseline TLS registration passed (1 test). Shared checks passed: TLS feature
+compile, strict library Clippy, two TLS contract tests (invalid PEM and
+pre-requested shutdown). Androidoscopy's final locked offline server suite and
+verified TLS WebSocket registration passed; the TLS test also bounds server
+termination after requesting shutdown. Changed Rust files pass targeted
+formatting; `git diff --check` passes. Server source, tests and manifest contain
+no direct `axum`/`axum-server` references. The resolved dependency graph shows
+`axum-server` only through `simple-server`. Existing dead-code warnings remain;
+Android/SDK and separate E2E suites were not rerun.
+
+Consumer commit `6428fab` is integrated into clean `master` from its isolated
+worktree branch; the reviewed shared revision is `e34c6d6` in the active
+`simple-server.rev` and README. Neither repository was pushed or deployed.
+The current totals are **16 None, 0 active pending, 1 skipped (Quentin
+Torrentino)**. The dated audit above remains a historical snapshot.
