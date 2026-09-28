@@ -87,4 +87,9 @@ fn oversized_timeout_is_rejected_and_empty_policy_is_noop() {
     assert!(ConnectionPolicy::new().commands().unwrap().is_empty());
     let policy = ConnectionPolicy::new().busy_timeout(Duration::MAX);
     assert_eq!(policy.commands(), Err(PolicyError::BusyTimeoutTooLarge));
+    let policy = ConnectionPolicy::new().wal_autocheckpoint(u32::MAX);
+    assert_eq!(
+        policy.commands(),
+        Err(PolicyError::WalAutocheckpointTooLarge)
+    );
 }

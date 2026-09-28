@@ -110,7 +110,7 @@ impl ConnectionPolicy {
         }
         if let Some(timeout) = self.busy_timeout {
             let milliseconds = timeout.as_millis();
-            if milliseconds > i64::MAX as u128 {
+            if milliseconds > i32::MAX as u128 {
                 return Err(PolicyError::BusyTimeoutTooLarge);
             }
             commands.push(format!("PRAGMA busy_timeout = {milliseconds}"));
@@ -119,6 +119,9 @@ impl ConnectionPolicy {
             commands.push(format!("PRAGMA synchronous = {}", mode.value()));
         }
         if let Some(pages) = self.wal_autocheckpoint {
+            if pages > i32::MAX as u32 {
+                return Err(PolicyError::WalAutocheckpointTooLarge);
+            }
             commands.push(format!("PRAGMA wal_autocheckpoint = {pages}"));
         }
         Ok(commands)
@@ -187,6 +190,7 @@ pub struct ConnectionObservation {
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum PolicyError {
     BusyTimeoutTooLarge,
+    WalAutocheckpointTooLarge,
     Mismatch {
         setting: &'static str,
         expected: String,
@@ -197,7 +201,10 @@ pub enum PolicyError {
 impl fmt::Display for PolicyError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Self::BusyTimeoutTooLarge => write!(f, "SQLite busy timeout exceeds i64 milliseconds"),
+            Self::BusyTimeoutTooLarge => write!(f, "SQLite busy timeout exceeds i32 milliseconds"),
+            Self::WalAutocheckpointTooLarge => {
+                write!(f, "SQLite WAL auto-checkpoint interval exceeds i32 pages")
+            }
             Self::Mismatch {
                 setting,
                 expected,
