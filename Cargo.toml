@@ -8,6 +8,7 @@ readme = "README.md"
 publish = false
 
 [features]
+database-migrations = []
 database-sqlite = []
 test-harness = ["web", "lifecycle", "tokio/rt", "dep:reqwest", "dep:serde_json"]
 test-harness-ws = ["test-harness", "ws", "dep:tokio-tungstenite"]

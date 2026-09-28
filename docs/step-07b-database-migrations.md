@@ -1,7 +1,7 @@
 # Step 07b: migration planning and reporting
 
-Status: design, 2026-09-28. This step has no implementation or consumer adoption
-yet. It follows the optional [07a connection policy](step-07a-database-connections.md).
+Status: shared preflight implemented, no consumer adoption yet, 2026-09-28. It
+follows the optional [07a connection policy](step-07a-database-connections.md).
 
 ## Scope and boundary
 
@@ -15,7 +15,7 @@ adopt a legacy database, or infer that a schema is healthy from version numbers.
 The application's existing migration runner and schema validation remain the
 authority. No automatic repair or rollback is part of 07b.
 
-The first API should be independent of SQLite, SQLx and `rusqlite`. This keeps
+The API is independent of SQLite, SQLx and `rusqlite`. This keeps
 the PostgreSQL catalog in SCT and the differing SQLite driver versions usable
 without linking database drivers into `simple-server`.
 
@@ -24,11 +24,13 @@ without linking database drivers into `simple-server`.
 - A plan has one **namespace** per independent database/ledger and an ordered
   list of entries: stable version, stable name, and an optional **opaque** digest.
   The planner must never hash or normalize SQL itself. Existing byte/hash rules
-  differ, and changing them would falsely flag historical migrations.
+  differ, and changing them would falsely flag historical migrations. Numeric
+  versions use numeric order; text versions use lexicographic order, suitable
+  for sorted filename ledgers. A plan cannot mix the two kinds.
 - Recorded entries have the same identity fields plus an application-supplied
   completion state (`applied` or `dirty`). An adapter can supply a separate
   observed high-water mark, such as SQLite `user_version`, when its ledger uses
-  one. Missing digest is valid only when that ledger never stored digests; a
+  one. A missing digest is valid for an entry only when both sides lack it; a
   mismatch in availability is not silently accepted.
 - Input validation rejects duplicate or out-of-order versions, empty identity,
   inconsistent ledger records, and a dirty record. Comparison checks every
@@ -37,8 +39,9 @@ without linking database drivers into `simple-server`.
   or newer recorded versions, gaps, renamed entries, changed digests, and
   high-water/ledger disagreement. None is treated as an empty pending plan.
 - The result contains the matched prefix and ordered pending entries, with a
-  read-only report suitable for startup diagnostics or a dry run. It makes no
-  claim that applying the suffix is safe until the application validates its
+  read-only report and a count of historically verified digests, suitable for
+  startup diagnostics or a dry run. It makes no claim that applying the suffix
+  is safe until the application validates its
   schema, locks/transaction rules and external dependencies.
 
 The initial API should fail closed on unknown ledger state. Explicit
@@ -46,6 +49,16 @@ application-owned adapters can map special histories into the normalized
 records only after tests prove parity. A version-only ledger cannot gain
 checksum guarantees by passing a newly computed manifest digest as if it were
 historically recorded.
+
+Enable `database-migrations` independently of `database-sqlite`, then construct
+`database::migrations::MigrationPlan` and `MigrationObservation` from the
+application's own manifest and ledger. Call `plan.inspect(&observed)` before
+the application's existing migration runner. `None` for `high_water_mark`
+means the ledger has no separate high-water observation; map a genuinely empty
+SQLite ledger's `user_version = 0` sentinel to `None`. The returned
+`MigrationReport` owns its applied and pending entries. An error stops the
+preflight; it never modifies the ledger. A version-only ledger must use `None`
+digests on both sides, and its `verified_digests` count remains zero.
 
 ## Why these rules are needed
 
@@ -61,15 +74,15 @@ historically recorded.
 
 ## Implementation sequence and acceptance
 
-1. Add a small optional `database-migrations` feature with pure in-memory
+1. **Done:** add a small optional `database-migrations` feature with pure in-memory
    manifest/observation validation and a typed report/error API. No database
    driver dependency or default behavior. Keep 07a and 07b independently
    selectable.
-2. Test empty and fully applied histories, pending suffixes, duplicate/gapped
+2. **Done:** test empty and fully applied histories, pending suffixes, duplicate/gapped
    records, altered names/digests, dirty entries, newer versions, and high-water
    disagreement. Include a version-only ledger fixture so the API cannot claim
    historical checksum verification it did not perform.
-3. Pilot on a service whose current runner can consume the report without
+3. **Next:** pilot on a service whose current runner can consume the report without
    changing its ledger, SQL ordering, transaction boundaries, legacy handling,
    or error semantics. Compare preflight and real startup against fresh,
    existing, drifted and partially failed databases. If a runner cannot retain

@@ -78,9 +78,11 @@ tracked separately for each module.
 
 The optional `database-sqlite` feature provides an explicit, driver-independent
 SQLite connection policy and live-setting verification; see
-[Step 07a](docs/step-07a-database-connections.md). Migration and backup helpers
-remain future work shaped by real service integrations. Authentication and
-authorization share the optional `auth` module.
+[Step 07a](docs/step-07a-database-connections.md). The independent
+`database-migrations` feature provides a read-only preflight report over an
+application's existing migration ledger; see [Step 07b](docs/step-07b-database-migrations.md).
+Backup helpers remain future work shaped by real service integrations.
+Authentication and authorization share the optional `auth` module.
 
 Applications own their routes, state, configuration loading, database setup,
 authorization rules, background jobs, and domain logic. Capabilities should be

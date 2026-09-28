@@ -9,8 +9,8 @@
 //! registration, and coordination of application-owned service futures. Combined
 //! with `http`, it also provides TCP binding. `web` owns HTTP serving.
 
-/// Optional, driver-independent database connection contracts.
-#[cfg(feature = "database-sqlite")]
+/// Optional, driver-independent database contracts.
+#[cfg(any(feature = "database-sqlite", feature = "database-migrations"))]
 pub mod database;
 
 /// Framework-independent HTTP routing, handlers, extractors and responses.

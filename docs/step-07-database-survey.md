@@ -2,8 +2,9 @@
 
 Status: design survey, 2026-09-28. The first optional connection-policy
 capability is implemented and piloted in [Step 07a](step-07a-database-connections.md);
-[07b migration planning](step-07b-database-migrations.md) is designed but not
-implemented. Backup and typed access remain future work. Step 07 is separate
+[07b migration planning](step-07b-database-migrations.md) is implemented as a
+read-only preflight without consumer adoption. Backup and typed access remain
+future work. Step 07 is separate
 from the completed HTTP abstraction.
 
 ## Representative services
@@ -58,7 +59,7 @@ within the Crumbles repository.
   policy emits only selected settings and verifies effective live values. The
   application executes the statements through its own driver on each connection;
   no consumer default changes implicitly. Favzetto and Pezzottify are pilots.
-- **07b — migration planning and reporting ([design](step-07b-database-migrations.md)):**
+- **07b — migration planning and reporting ([contract](step-07b-database-migrations.md)):**
   compare ordered plans to existing ledger observations, detect gaps, changed
   migrations and newer database versions, and report what would run. Implement
   execution only for a driver/ledger combination with proven parity; never

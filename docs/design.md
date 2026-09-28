@@ -71,9 +71,9 @@ references remain valid. The execution order after Step 06 is:
    [07a connection policy](step-07a-database-connections.md) is implemented and
    adopted by Favzetto and Pezzottify. The remaining repositories have a
    [component-level applicability audit](migration-status.md#step-07a-applicability-audit-and-07b-design--2026-09-28).
-   The [07b migration preflight](step-07b-database-migrations.md) is designed;
-   its driver-neutral, read-only planner is the next shared-library increment.
-   Migration execution and backup remain application-owned.
+   The [07b migration preflight](step-07b-database-migrations.md) is implemented
+   as a driver-neutral, read-only planner; the next increment is a consumer
+   canary. Migration execution and backup remain application-owned.
 
 Database helpers are not a prerequisite for the HTTP abstraction. Services retain
 their existing database libraries, setup and migrations while that work proceeds.
