@@ -54,7 +54,7 @@ application-owned. See the [Step 07 survey](step-07-database-survey.md),
 adoption. SCT's PostgreSQL server is distinct from its SQLite archive catalog.
 
 **Step 07b status:** shared preflight available; 1 Done (Meteonesto pipeline),
-1 Partial (Simple Agents service ledger), 13 Pending (including excluded
+2 Partial (Simple Agents service ledger and Crumbles integration runner), 12 Pending (including excluded
 Quentin), 2 N/A in the consumer matrix. See the
 [contract](step-07b-database-migrations.md) and
 [verification](#step-07b-shared-migration-preflight--2026-09-28).
@@ -69,7 +69,7 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local canary)** | **Done (local; scoped canary)** | N/A (assessed) | N/A (no served probe) | **Done (local; scoped canary)** | **Done (local; primitives)** | **Done (local; primitives)** | **Done (local; sessions + route permissions)** | **Done (HTTP, MCP, durable quotas + outbound pacing)** | **Done (all production route groups)** | Done | Pending (no adoption) | None. |
 | favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local canary)** | **Done (local; request work)** | **Done (local; bounded batches)** | **Done (local; retry scope)** | **Done (local canary)** | **Done (local; global + endpoint budgets)** | **Done (local)** | Done | Pending (no adoption) | None. |
 | androidoscopy | `server`; Android SDK pairing | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (no served probe) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; controller + LAN access)** | **Done (local; device JNI pairing gate)** | **Done (all production route groups)** | N/A (no SQLite database) | N/A (no Rust migration runner) | None. |
-| crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; durable primitives)** | **Done (local; retry primitives)** | **Done (local; main + integration)** | **Done (local; HTTP + MCP + durable dispatcher)** | **Done (both servers)** | Pending (core + integration SQLite) | Pending (no adoption) | None. |
+| crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; durable primitives)** | **Done (local; retry primitives)** | **Done (local; main + integration)** | **Done (local; HTTP + MCP + durable dispatcher)** | **Done (both servers)** | Pending (core + integration SQLite) | Partial (integration runner; core pending) | None. |
 | fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; dynamic cron)** | N/A (assessed) | **Done (local; HTTP + WebSocket + admin/write)** | **Done (local; five API tiers)** | **Done (local)** | Pending (storage SQLite) | Pending (no adoption) | None. |
 | lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (Rust; Caddy owns CORS) | **Done (local; scoped)** | **Done (local; webhook scope)** | **Done (local; capacity)** | **Done (local; retry scope)** | **Done (local; sessions + resource/admin access)** | **Done (endpoint budgets + persisted device polling)** | **Done (local)** | Pending (SQLite backend) | Pending (no adoption) | None. |
 | lellostore | `backend` | **Done** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; OIDC + admin)** | N/A (no inbound admission policy) | **Done (local)** | N/A (no explicit policy) | Pending (no adoption) | None. |
@@ -5694,3 +5694,35 @@ not repeated for this database-local change.
 Meteonesto's original `master` was rebased onto the tested migration branch;
 ancestry and tree match, and the temporary worktree, branch and dependency
 link were removed. The original checkout is clean. No push or deployment.
+
+## Step 07b Crumbles integration runner — 2026-09-28
+
+Crumbles `master` commit `d7f19411d829d2d0d32d4a6d061fc6f3ef11a8e1`
+uses shared source `b522640c3dc967a5f6cd450d8fd39967388f094b` in
+the production `crumbles-integration` runner database. Its `db::open` and
+staged-upgrade validation both call the migrated path. The application reads
+its existing `runner_migration` ledger, supplies numeric versions, names,
+historical SHA-256 checksums and dirty state to `MigrationPlan::inspect`, and
+uses the report's applied count to select the pending suffix. The existing
+ledger format, unmanaged-schema guard, `InvalidLedger(version)` error,
+per-migration SQLx transactions, dirty-row updates and rollback behavior remain
+application-owned. The optional feature is enabled only for
+`crumbles-integration`. The main Crumbles database's separate SQLx migration
+policy is unchanged, so repository status is **Partial**.
+
+Baseline: eight focused integration database tests passed. After adoption, the
+full integration package passed 96 library tests, two binary tests, ten
+integration tests and doc tests. A new duplicate-manifest test then passed with
+the focused database suite (nine tests), confirming rejection before schema
+SQL. Existing tests cover fresh open/restart, staged upgrade and rollback,
+dirty, changed-name/checksum, missing and future ledger entries, unmanaged
+schema and failed migration rollback. `cargo fmt --check`, strict all-target
+package Clippy and `git diff --check` passed. The broader Crumbles workspace,
+frontend and deployment checks were not repeated for this scoped database
+change.
+
+The change was committed in an isolated worktree from `master` at `4580425`.
+The original `master` was rebased onto the tested branch and has the same tip
+and tree; the temporary branch, worktree and dependency link were removed.
+The original checkout's modified `ANDROID_CLIENT_PLAN.md` and five untracked
+Android files/directories were preserved. No push or deployment.
