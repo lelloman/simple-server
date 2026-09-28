@@ -3,7 +3,8 @@
 Status: design survey, 2026-09-28. The first optional connection-policy
 capability is implemented and piloted in [Step 07a](step-07a-database-connections.md);
 [07b migration planning](step-07b-database-migrations.md) is implemented as a
-read-only preflight without consumer adoption. Backup and typed access remain
+read-only preflight adopted by the Meteonesto pipeline and the Simple Agents
+service ledger. Backup and typed access remain
 future work. Step 07 is separate
 from the completed HTTP abstraction.
 

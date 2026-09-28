@@ -53,9 +53,10 @@ application-owned. See the [Step 07 survey](step-07-database-survey.md),
 6 N/A. This is a source-level applicability audit, not additional production
 adoption. SCT's PostgreSQL server is distinct from its SQLite archive catalog.
 
-**Step 07b status:** shared preflight available; 0 Done, 1 Partial (Simple
-Agents service ledger), 14 Pending (including excluded Quentin), 2 N/A in the
-consumer matrix. See the [contract](step-07b-database-migrations.md) and
+**Step 07b status:** shared preflight available; 1 Done (Meteonesto pipeline),
+1 Partial (Simple Agents service ledger), 13 Pending (including excluded
+Quentin), 2 N/A in the consumer matrix. See the
+[contract](step-07b-database-migrations.md) and
 [verification](#step-07b-shared-migration-preflight--2026-09-28).
 
 The final observations column records the [Axum exposure audit](#axum-exposure-audit--2026-09-24).
@@ -72,7 +73,7 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; dynamic cron)** | N/A (assessed) | **Done (local; HTTP + WebSocket + admin/write)** | **Done (local; five API tiers)** | **Done (local)** | Pending (storage SQLite) | Pending (no adoption) | None. |
 | lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (Rust; Caddy owns CORS) | **Done (local; scoped)** | **Done (local; webhook scope)** | **Done (local; capacity)** | **Done (local; retry scope)** | **Done (local; sessions + resource/admin access)** | **Done (endpoint budgets + persisted device polling)** | **Done (local)** | Pending (SQLite backend) | Pending (no adoption) | None. |
 | lellostore | `backend` | **Done** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; OIDC + admin)** | N/A (no inbound admission policy) | **Done (local)** | N/A (no explicit policy) | Pending (no adoption) | None. |
-| meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; pipeline/gateway)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; weighted claims)** | **Done (local; budgets/retry)** | **Done (local; all three services)** | **Done (local; gateway budgets)** | **Done (local)** | Pending (pipeline SQLite) | Pending (no adoption) | None. |
+| meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; pipeline/gateway)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; weighted claims)** | **Done (local; budgets/retry)** | **Done (local; all three services)** | **Done (local; gateway budgets)** | **Done (local)** | Pending (pipeline SQLite) | Done (weather-pipeline SQLite) | None. |
 | observo | `observo-server`; standalone extractor logging | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (no served probe) | **Done (local; scoped)** | **Done (local; primitives)** | N/A (assessed) | **Done (local; IP/key/JWT access)** | N/A (no request quota) | **Done (local)** | Pending (server SQLite) | Pending (no adoption) | None. |
 | paranza | `apps/paranza-server` | **Done** | **Done (local; scoped)** | N/A (no logger) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; runner + PCM access)** | N/A (no implemented request quota) | **Done (local)** | N/A (driver defaults only) | Pending (no adoption) | None. |
 | peerlo | `peerlo-api` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; retry primitives)** | **Done (local; bearer + Torznab keys)** | **Done (local; API + crawler + durable DHT)** | **Done (local)** | N/A (driver defaults only) | Pending (no adoption) | None. |
@@ -5660,3 +5661,36 @@ fabricated historical names. No other Simple Agents component is marked
 adopted. Its original `main` was rebased onto the tested worktree branch;
 the temporary branch, worktree and dependency link were removed. The original
 checkout remains clean. Nothing was pushed or deployed.
+
+## Step 07b Meteonesto pipeline — 2026-09-28
+
+Meteonesto `master` commit `bda1be88660d91195a5b0849ea4e0aa94ba740e8`
+opts its production `weather-pipeline` writer into `database-migrations` at
+reviewed shared source `0f92b9d15c11debe41c649a82a5e26c6b695c7bd`.
+The application reads its existing `schema_migrations` ledger and SQLite
+`user_version`, computes its historical SHA-256 checksums, and asks shared
+`MigrationPlan::inspect` for the pending suffix. Its existing validation runs
+first to preserve `NewerSchema`, `Integrity`, `UnknownMigration`,
+`MigrationName` and `MigrationChecksum` errors, including their order and
+details. The application still owns migration SQL, a single transaction for
+the pending set, foreign-key checks, backups and rollback policy. Weather API
+and gateway have no separate schema migration runner, so this is **Done in
+the applicable pipeline scope**.
+
+Baseline database integration tests passed 10/10. A new duplicate embedded
+version test failed on the old implementation and passed once shared preflight
+was wired in; it confirms rejection before schema SQL. Final database
+integration tests passed 11/11 and four focused library database tests passed.
+The tests cover fresh startup, older schema upgrade and retained rows,
+checksum/name drift, newer schema, `user_version` disagreement, failed migration
+rollback and reader isolation. The complete `weather-pipeline/scripts/check`
+passed with formatting, strict all-feature Clippy, dependency policy,
+all-target Rust tests, Python unit tests and a release build. Its first
+sandboxed run stopped when `cargo deny` could not lock its advisory database;
+the permitted rerun passed, with existing unmatched-source and duplicate-`syn`
+warnings. Provider, container, Android, API/gateway and deployment checks were
+not repeated for this database-local change.
+
+Meteonesto's original `master` was rebased onto the tested migration branch;
+ancestry and tree match, and the temporary worktree, branch and dependency
+link were removed. The original checkout is clean. No push or deployment.

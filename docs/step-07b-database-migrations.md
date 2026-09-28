@@ -1,7 +1,8 @@
 # Step 07b: migration planning and reporting
 
-Status: shared preflight implemented and piloted in the Simple Agents service
-database, 2026-09-28. It follows the optional
+Status: shared preflight implemented and adopted in Meteonesto's pipeline;
+Simple Agents' service database is a partial repository pilot, 2026-09-28.
+It follows the optional
 [07a connection policy](step-07a-database-connections.md).
 
 ## Scope and boundary
@@ -83,12 +84,14 @@ digests on both sides, and its `verified_digests` count remains zero.
    records, altered names/digests, dirty entries, newer versions, and high-water
    disagreement. Include a version-only ledger fixture so the API cannot claim
    historical checksum verification it did not perform.
-3. **Canary complete:** the Simple Agents service consumes the report without
+3. **Canaries complete:** the Simple Agents service consumes the report without
    changing its ledger, SQL ordering, transaction boundaries, legacy handling,
    or error semantics. Fresh, older, drifted and partially failed database
    cases pass; see the [verification record](migration-status.md#step-07b-simple-agents-canary--2026-09-28).
-   Other components remain Pending until their own ledger and failure behavior
-   are checked. The Runner's singleton version marker has no historical names,
+   Meteonesto's pipeline also consumes it while retaining dual-marker checks
+   and its historical error contract. Other components remain Pending until
+   their own ledger and failure behavior are checked. The Runner's singleton
+   version marker has no historical names,
    so it needs a version-only contract or an explicit compatibility proof.
 
 Execution adapters are a later, separately reviewed increment. Backup and
