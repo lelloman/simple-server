@@ -5492,6 +5492,10 @@ consumer enables that feature. The old public tracing module is private behind
 its backend middleware adapter is removed, and `BodyLimit` exposes an owned
 Tower service type. Library tests use direct backend imports only as internal
 comparison oracles; the lifecycle example uses owned `web` routing and serving.
-All-feature tests and strict all-target Clippy pass on the isolated branch;
+All-feature tests, strict all-target Clippy, formatting and minimal feature
+checks pass on the isolated branch. After integration, locked offline production
+checks pass for Fausto (`fausto-server`) and Crumbles (`crumbles`), exercising
+the tracing, correlation and body-limit consumers. The original development
+branches and working trees in those services were not changed. The
 full final API removal still awaits the Quentin decision and a final audit of
 the remaining legacy entry points. No consumer was changed in this cleanup.
