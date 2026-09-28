@@ -8,6 +8,7 @@ readme = "README.md"
 publish = false
 
 [features]
+database-sqlite = []
 test-harness = ["web", "lifecycle", "tokio/rt", "dep:reqwest", "dep:serde_json"]
 test-harness-ws = ["test-harness", "ws", "dep:tokio-tungstenite"]
 tower-cookies = ["web", "dep:tower-cookies"]
@@ -65,6 +66,7 @@ tracing = { version = "0.1", default-features = false, features = ["std"], optio
 tracing-subscriber = { version = "0.3", default-features = false, features = ["fmt", "env-filter", "ansi", "json"], optional = true }
 
 [dev-dependencies]
+rusqlite = { version = "0.33", features = ["bundled"] }
 rcgen = "0.13"
 hyper = { version = "1", features = ["http1"] }
 tokio-tungstenite = "=0.29.0"

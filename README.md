@@ -76,8 +76,11 @@ tracked separately for each module.
 - Health and readiness endpoint plumbing with application-provided checks.
 - Optional rate limiting with application-defined keys and route placement.
 
-Metrics and database helpers are follow-up modules, shaped by real service
-integrations. Authentication and authorization share the optional `auth` module.
+The optional `database-sqlite` feature provides an explicit, driver-independent
+SQLite connection policy and live-setting verification; see
+[Step 07a](docs/step-07a-database-connections.md). Migration and backup helpers
+remain future work shaped by real service integrations. Authentication and
+authorization share the optional `auth` module.
 
 Applications own their routes, state, configuration loading, database setup,
 authorization rules, background jobs, and domain logic. Capabilities should be

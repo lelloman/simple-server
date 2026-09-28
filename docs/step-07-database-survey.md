@@ -1,8 +1,9 @@
 # Step 07: database capability survey
 
-Status: design survey, 2026-09-28. No shared database API or consumer migration is
-implemented yet. Step 07 remains optional and separate from the completed HTTP
-abstraction.
+Status: design survey, 2026-09-28. The first optional connection-policy
+capability is specified in [Step 07a](step-07a-database-connections.md);
+migrations, backup and typed access remain future work. Step 07 is separate
+from the completed HTTP abstraction.
 
 ## Representative services
 

@@ -68,7 +68,9 @@ references remain valid. The execution order after Step 06 is:
 4. **Next:** Step 07, optional database capabilities. The
    [five-service survey](step-07-database-survey.md) compares connection setup,
    migration ledgers, typed access, backup and synchronous execution before an
-   API is selected. No Step 07 module is implemented yet.
+   API is selected. [07a connection policy](step-07a-database-connections.md)
+   is the first optional shared capability; migrations and backup remain
+   application-owned.
 
 Database helpers are not a prerequisite for the HTTP abstraction. Services retain
 their existing database libraries, setup and migrations while that work proceeds.
