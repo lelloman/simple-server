@@ -45,7 +45,9 @@ Torrentino remains explicitly excluded and cannot build against the revision
 without migrating its old backend imports. Step numbers are retained; Step 07
 was deferred until this milestone. Database setup and migrations remain local to
 services. Axum remains internal to simple-server.
-See the [roadmap and completion criteria](design.md).
+The [Step 07 five-service survey](step-07-database-survey.md) is design work only:
+no shared database module or consumer adoption is claimed. See the
+[roadmap and completion criteria](design.md).
 
 The final observations column records the [Axum exposure audit](#axum-exposure-audit--2026-09-24).
 It is independent of module adoption status.

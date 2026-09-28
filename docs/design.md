@@ -65,7 +65,10 @@ references remain valid. The execution order after Step 06 is:
 3. Completed for the 16 in-scope services: public HTTP interfaces and tests use
    owned contracts, the transitional re-export and escape hatches are removed,
    and the final shared API audit passed. Quentin Torrentino remains excluded.
-4. **Next:** revisit Step 07, optional database setup and migration helpers.
+4. **Next:** Step 07, optional database capabilities. The
+   [five-service survey](step-07-database-survey.md) compares connection setup,
+   migration ledgers, typed access, backup and synchronous execution before an
+   API is selected. No Step 07 module is implemented yet.
 
 Database helpers are not a prerequisite for the HTTP abstraction. Services retain
 their existing database libraries, setup and migrations while that work proceeds.
