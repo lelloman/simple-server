@@ -5241,3 +5241,40 @@ Implementation, contract and both trackers are committed together, then integrat
 by rebasing original `main` onto the tested worktree branch. Integration is verified
 by ancestry and identical tree; the temporary worktree/branch and owned validation
 logs are removed. No push or deployment is part of this change.
+
+## Fausto owned HTTP test harness canary — 2026-09-28
+
+**Adopted for HTTP test fixtures; other boundaries remain.** Fausto's active
+`master` was clean at `3a7ae23` before work. Its four axum-test integration
+suites (`api_tests`, `audit_tests`, `auth_access`, `query_endpoints_tests`) and
+plugin-file unit fixture actually exercised the production-owned routers via
+`web::compat::into_axum_router`. They now use `simple_server::testing::TestServer`
+directly, with explicit fallible request sends, response decoding and header
+checks. `axum-test` was removed from the dev dependency and lockfile. The
+shared dependency enables optional `test-harness` in dev builds; production
+router behavior and dependency features were otherwise unchanged. Active CI
+checkout pins and README source requirements reference reviewed library
+`d61c049aa49d89de6936de9e93a68bd18685f373`.
+
+Baseline on the unmodified branch: four suites **70 passed**; plugin-file
+fixture **1 passed**. After migration: the same **71 passed**. The full locked
+Fausto workspace suite passed **664 tests**, zero failures and ten existing
+ignored cases. `cargo fmt --all --check`, locked workspace check and warning-mode
+server all-target Clippy passed; Clippy reported existing warnings and is not
+claimed warning-free. The fixture checks retain auth error/status contracts,
+CORS request/response headers, request IDs, CRUD/query responses, static-file
+content/cache headers, HEAD behavior and 404s. Full browser/Docker E2E and
+live OIDC were not rerun for this test-only migration.
+
+Fausto commit **`83a5ce4`** was made on `migration/owned-test-harness` in
+`/home/lelloman/lelloprojects/fausto-harness-canary`; original `master` was
+rebased onto it. Ancestry and identical trees were verified. The temporary
+worktree and branch were removed; Fausto `master` is clean at `83a5ce4`. No
+push or deployment was performed. Remote CI cannot fetch the new shared source
+pin until that library revision is published.
+
+**Remaining Fausto exposure:** production `web::compat::OwnedMultipart` for
+node uploads still carries backend fields/errors, and the legacy Axum JSON
+parser comparison oracle remains test-only. The former axum-test transport and
+router-conversion item is removed from the current HTML observation cell.
+LelloStore and Pezzottify have not adopted the harness in this canary.
