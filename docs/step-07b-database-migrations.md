@@ -1,7 +1,8 @@
 # Step 07b: migration planning and reporting
 
-Status: shared preflight implemented, no consumer adoption yet, 2026-09-28. It
-follows the optional [07a connection policy](step-07a-database-connections.md).
+Status: shared preflight implemented and piloted in the Simple Agents service
+database, 2026-09-28. It follows the optional
+[07a connection policy](step-07a-database-connections.md).
 
 ## Scope and boundary
 
@@ -82,12 +83,13 @@ digests on both sides, and its `verified_digests` count remains zero.
    records, altered names/digests, dirty entries, newer versions, and high-water
    disagreement. Include a version-only ledger fixture so the API cannot claim
    historical checksum verification it did not perform.
-3. **Next:** pilot on a service whose current runner can consume the report without
+3. **Canary complete:** the Simple Agents service consumes the report without
    changing its ledger, SQL ordering, transaction boundaries, legacy handling,
-   or error semantics. Compare preflight and real startup against fresh,
-   existing, drifted and partially failed databases. If a runner cannot retain
-   those behaviors, leave that component Pending rather than adapting its
-   history to fit the helper.
+   or error semantics. Fresh, older, drifted and partially failed database
+   cases pass; see the [verification record](migration-status.md#step-07b-simple-agents-canary--2026-09-28).
+   Other components remain Pending until their own ledger and failure behavior
+   are checked. The Runner's singleton version marker has no historical names,
+   so it needs a version-only contract or an explicit compatibility proof.
 
 Execution adapters are a later, separately reviewed increment. Backup and
 checkpoint coordination remain [07c](step-07-database-survey.md), and typed

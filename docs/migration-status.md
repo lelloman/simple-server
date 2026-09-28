@@ -53,9 +53,9 @@ application-owned. See the [Step 07 survey](step-07-database-survey.md),
 6 N/A. This is a source-level applicability audit, not additional production
 adoption. SCT's PostgreSQL server is distinct from its SQLite archive catalog.
 
-**Step 07b status:** shared preflight available; 0 Done, 15 Pending (including
-excluded Quentin), 2 N/A in the consumer matrix. No consumer adoption is
-claimed. See the [contract](step-07b-database-migrations.md) and
+**Step 07b status:** shared preflight available; 0 Done, 1 Partial (Simple
+Agents service ledger), 14 Pending (including excluded Quentin), 2 N/A in the
+consumer matrix. See the [contract](step-07b-database-migrations.md) and
 [verification](#step-07b-shared-migration-preflight--2026-09-28).
 
 The final observations column records the [Axum exposure audit](#axum-exposure-audit--2026-09-24).
@@ -80,7 +80,7 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | pezzottify-downloader | Puppeteer API, downloader HTTP server and Python cron | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; Puppeteer)** | **Done (local; both HTTP routers)** | N/A (assessed) | N/A (assessed) | **Done (local; both routers)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; priority admission)** | N/A (assessed) | N/A (no application caller gate) | **Done (local; Python/SQLite quota bridge)** | **Done (local; parent + child HTTP core)** | N/A (Python SQLite only) | N/A (no Rust migration runner) | None. |
 | quentin-torrentino | `crates/server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; stage capacity)** | N/A (assessed) | **Done (local; API access)** | **Done (local; MusicBrainz pacing)** | Pending | Pending (excluded by request) | Pending (excluded by request) | Skipped: backend routing/handlers/extractors/responses, auth/metrics middleware and serving; torrent multipart, chat SSE, dashboard WebSockets, static-file routing and HTTP test fixtures. |
 | sct | `sct-server` | **Done** | **Done (scoped)** | N/A (no logger) | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; worker scope)** | **Done (local; durable worker cadence)** | **Done (local; retry scope)** | **Done (local; tokens/sessions + transactional access)** | N/A (durable state caps, no request quota) | **Done (local; HTTP core)** | Pending (archive SQLite) | Pending (no adoption) | None. |
-| simple-agents | `simple-agents-service`; runner-shell logging; associated coding test servers | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local pilot; service routes)** | **Done (local; scoped canary)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; transactional capacity)** | **Done (local; retry scope)** | **Done (local; caller + transactional access)** | N/A (task/storage admission, no request quota) | **Done (local; HTTP core)** | Pending (multiple SQLite components) | Pending (no adoption) | None. |
+| simple-agents | `simple-agents-service`; runner-shell logging; associated coding test servers | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local pilot; service routes)** | **Done (local; scoped canary)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; transactional capacity)** | **Done (local; retry scope)** | **Done (local; caller + transactional access)** | N/A (task/storage admission, no request quota) | **Done (local; HTTP core)** | Pending (multiple SQLite components) | Partial (service ledger; Runner pending) | None. |
 | simple-ai | `backend`, `inference-runner` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local; backend)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; batch readiness)** | N/A (assessed) | **Done (local; backend user/admin)** | **Done (local; backend budgets)** | **Done (local; HTTP core)** | N/A (driver defaults only) | Pending (no adoption) | None. |
 
 ## Axum exposure audit — 2026-09-24
@@ -5618,11 +5618,45 @@ feature-isolated tests and strict rustdoc. Its first sandboxed run stopped at
 loopback HTTP tests because socket binding was denied; the permitted rerun
 passed. The existing `web_sse` feature-only unused-import warning remains.
 
-The HTML and Markdown matrices are synchronized at **0 Done, 15 Pending,
-2 N/A** for 07b. Androidoscopy has no database; the downloader's SQLite cron
+At this shared implementation checkpoint the HTML and Markdown matrices were
+synchronized at **0 Done, 15 Pending, 2 N/A** for 07b. Androidoscopy has no database; the downloader's SQLite cron
 is Python-only, so neither has a Rust migration runner to adopt this helper.
 Quentin remains excluded at user request. All other rows remain Pending until
 their real migration paths and ledger compatibility are assessed; the new Cargo
 feature alone is not adoption. The next step is a consumer canary that preserves
 the current runner's ledger, execution and failure behavior. No consumer code,
 branch or pin changed, and nothing was pushed or deployed.
+
+## Step 07b Simple Agents canary — 2026-09-28
+
+Simple Agents `main` commit `25b2ea44cf077661bad70b6aa7dbfb73e14ce255`
+uses shared source `255881ae9926bbb9ce8f4c855d492ccfd1ffbd1d` in its
+production service database migration path. The reviewed revision is pinned in
+`simple-server.rev` and the workspace enables `database-migrations`. The
+service builds its manifest with the same historical SHA-256 checksum algorithm,
+reads its existing `service_migration` ledger, and uses the shared preflight
+report to choose the pending suffix. It retains its strict unmanaged-schema
+check, ledger table, `BEGIN IMMEDIATE` per-migration transaction, dirty marker,
+SQL execution and `InvalidLedger(version)` error contract.
+
+Baseline service migration tests passed 2/2. Final migration tests passed 4/4,
+including older-schema upgrade, idempotence, ciphertext/ownership retention,
+dirty/renamed/changed/gapped/future history rejection before later SQL, and
+rollback plus retry after a failed migration. The locked Rust workspace suite
+passed with serial test execution; workspace all-target check, strict Clippy,
+formatting and diff checks passed. An initial parallel workspace run had one
+timing-sensitive distributed test fail because slow maintenance starved permits;
+that test passed alone and in the serial full rerun. Browser, Android,
+worker-image and container qualifications were not repeated for this SQLite
+change.
+
+This is **Partial** repository adoption: the Runner transport database has a
+`schema_version` singleton, not a ledger of historical names and checksums.
+Its upgrades still use their existing transaction and version checks. Runtime
+and coding schema are installed within that Runner transaction. The current
+07b API requires names for recorded entries, so applying it to the Runner
+would need a version-only contract or another explicit parity proof, not
+fabricated historical names. No other Simple Agents component is marked
+adopted. Its original `main` was rebased onto the tested worktree branch;
+the temporary branch, worktree and dependency link were removed. The original
+checkout remains clean. Nothing was pushed or deployed.
