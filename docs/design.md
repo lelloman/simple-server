@@ -76,8 +76,9 @@ references remain valid. The execution order after Step 06 is:
    in-scope services. Six services have no matching migration ledger or Rust
    migration runner; Quentin Torrentino remains excluded. The
    [richer SQLite design](step-07-sqlite-design.md) defines optional schema
-   descriptions/validation (07e, next), backup coordination (07c) and bounded
-   synchronous execution (07d). It is a proposal, not implemented adoption.
+   descriptions/validation (07e), backup coordination (07c) and bounded
+   synchronous execution (07d). The [07e core](step-07e-sqlite-schema.md) is
+   implemented with consumer canaries pending; 07c/07d remain proposed.
    Application SQL, legacy layout decisions and domain repositories stay local.
 
 Database helpers are not a prerequisite for the HTTP abstraction. Services retain

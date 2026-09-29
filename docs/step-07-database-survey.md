@@ -4,8 +4,9 @@ Status: original survey 2026-09-28; rollout summary updated 2026-09-29.
 [07a connection policy](step-07a-database-connections.md) and
 [07b migration planning](step-07b-database-migrations.md) are adopted by all
 applicable in-scope services. The [richer SQLite design](step-07-sqlite-design.md)
-defines the proposed next increments: schema descriptions/validation (07e,
-next to implement), backup coordination (07c) and synchronous execution (07d).
+defines schema descriptions/validation ([07e core implemented](step-07e-sqlite-schema.md),
+canaries pending), plus proposed backup coordination (07c) and synchronous
+execution (07d).
 Domain typed access remains consumer-owned. Step 07 is separate from the
 completed HTTP abstraction.
 

@@ -1,7 +1,8 @@
 # Rich SQLite capabilities
 
-Status: proposed implementation contract, 2026-09-29. No new runtime API or
-consumer adoption is claimed by this document.
+Status: 07e schema core implemented, 2026-09-29; consumer canaries pending.
+See the [implemented API and coverage](step-07e-sqlite-schema.md). Backup and
+blocking execution below remain proposed; no consumer adoption is claimed.
 
 ## Objective and composition
 
@@ -14,7 +15,7 @@ enabling database features does not require HTTP, authentication or lifecycle.
 | --- | --- | --- |
 | 07a — connection policy | Selected PRAGMAs and effective-setting verification | Implemented; applicable rollout complete |
 | 07b — migration preflight | Existing ledger/marker inspection and pending suffix | Implemented; applicable rollout complete |
-| 07e — SQLite schema | Versioned descriptions, creation plans, observations and validation | Proposed; implement next |
+| 07e — SQLite schema | Versioned descriptions, creation plans, observations and validation | Shared core implemented; canary pending |
 | 07c — backup coordination | Checkpoint/copy strategies, verification and outcome reports | Proposed; after schema canaries |
 | 07d — synchronous execution | Bounded workers, priorities, lanes, deadlines and drain | Proposed; after backup canaries |
 
@@ -48,15 +49,16 @@ and SQL queries remain consumer code; this project does not introduce an ORM.
 
 ## 07e: descriptions and observations
 
-Proposed public concepts (names may be refined during implementation):
+Public concepts (see the [implemented contract](step-07e-sqlite-schema.md) for
+exact field names and coverage):
 
 - `SchemaSnapshot`: application namespace, logical version and table/index
   descriptions. Versions refer to complete expected layouts. Optional change
   provenance may identify the version that introduced a column, but does not
   establish a separate persisted column ledger.
 - `TableSpec` / `ColumnSpec`: safely quoted identifiers, declared type, explicit
-  nullability, ordered primary-key membership, uniqueness, default expression
-  and table options. Include composite keys, ordered index terms, partial
+  nullability, ordered primary-key membership, uniqueness and default expression.
+  Unsupported table options are reported explicitly. Include composite keys, ordered index terms, partial
   indexes and composite foreign keys with update/delete actions.
 - `SqlExpression`: explicitly trusted application SQL for defaults, predicates
   or expressions. It is never constructed from request input implicitly.

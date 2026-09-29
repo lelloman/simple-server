@@ -215,3 +215,7 @@ impl fmt::Display for PolicyError {
 }
 
 impl std::error::Error for PolicyError {}
+
+/// Optional driver-neutral schema descriptions, creation plans and validation.
+#[cfg(feature = "database-sqlite-schema")]
+pub mod schema;

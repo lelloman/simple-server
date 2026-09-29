@@ -11,6 +11,7 @@ include = ["/src/**", "/tests/**", "/examples/**", "/Cargo.toml", "/Cargo.lock",
 [features]
 database-migrations = []
 database-sqlite = []
+database-sqlite-schema = ["database-sqlite"]
 test-harness = ["web", "lifecycle", "tokio/rt", "dep:reqwest", "dep:serde_json"]
 test-harness-ws = ["test-harness", "ws", "dep:tokio-tungstenite"]
 tower-cookies = ["web", "dep:tower-cookies"]
@@ -115,3 +116,7 @@ required-features = ["task-scheduling"]
 [[example]]
 name = "policy_snapshot"
 required-features = ["task-policies"]
+
+[[example]]
+name = "sqlite_schema"
+required-features = ["database-sqlite-schema"]

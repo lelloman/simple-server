@@ -90,6 +90,8 @@ SQLite connection policy and live-setting verification; see
 [Step 07a](docs/step-07a-database-connections.md). The independent
 `database-migrations` feature provides a read-only preflight report over an
 application's existing migration ledger; see [Step 07b](docs/step-07b-database-migrations.md).
+The optional `database-sqlite-schema` feature adds schema descriptions, inspectable
+creation plans and explicit validation reports; see [Step 07e](docs/step-07e-sqlite-schema.md).
 Backup helpers remain future work shaped by real service integrations.
 Authentication and authorization share the optional `auth` module.
 
