@@ -49,7 +49,7 @@ framework-independent public types and explicit policy.
 application checks and a framework-independent endpoint adapter. Applications
 retain dependency policy and response contracts.
 
-## Next milestones (updated 2026-09-28)
+## Next milestones (updated 2026-09-29)
 
 Step 07 (optional database helpers) is deferred until after Step 10 and the
 consumer Axum-removal milestone. Keep the existing step numbers so historical
@@ -72,10 +72,12 @@ references remain valid. The execution order after Step 06 is:
    adopted by Favzetto and Pezzottify. The remaining repositories have a
    [component-level applicability audit](migration-status.md#step-07a-applicability-audit-and-07b-design--2026-09-28).
    The [07b migration preflight](step-07b-database-migrations.md) is implemented
-   as a driver-neutral, read-only planner. Meteonesto's pipeline uses it;
-   Simple Agents has a scoped service canary, while its Runner version-only
-   path remains outside the adopted scope.
-   Migration execution and backup remain application-owned.
+   as a driver-neutral, read-only planner and adopted by all ten applicable
+   in-scope services. Six services have no matching migration ledger or Rust
+   migration runner; Quentin Torrentino remains excluded. The next design task
+   is an optional, richer SQLite schema module informed by Pezzottify's
+   table/column descriptions and validation. Application SQL, legacy layout
+   decisions, migration execution and backup remain application-owned.
 
 Database helpers are not a prerequisite for the HTTP abstraction. Services retain
 their existing database libraries, setup and migrations while that work proceeds.

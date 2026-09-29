@@ -1,8 +1,7 @@
 # Step 07b: migration planning and reporting
 
-Status: shared preflight implemented and adopted in Meteonesto's pipeline;
-Simple Agents' service database is a partial repository pilot, 2026-09-28.
-It follows the optional
+Status: shared preflight implemented and adopted in all applicable in-scope
+services; Quentin Torrentino remains excluded, 2026-09-29. It follows the optional
 [07a connection policy](step-07a-database-connections.md).
 
 ## Scope and boundary
@@ -46,7 +45,7 @@ without linking database drivers into `simple-server`.
   is safe until the application validates its
   schema, locks/transaction rules and external dependencies.
 
-The initial API should fail closed on unknown ledger state. Explicit
+The API fails closed on unknown ledger state. Explicit
 application-owned adapters can map special histories into the normalized
 records only after tests prove parity. A version-only ledger cannot gain
 checksum guarantees by passing a newly computed manifest digest as if it were
@@ -68,9 +67,8 @@ the application's existing migration runner. `None` for `high_water_mark`
 means the ledger has no separate high-water observation; map a genuinely empty
 SQLite ledger's `user_version = 0` sentinel to `None`. The returned
 `MigrationReport` owns its applied and pending entries. An error stops the
-preflight; it never modifies the ledger. A version-only ledger passed to
-`inspect` must use `None` digests on both sides, and its `verified_digests`
-count remains zero.
+preflight; it never modifies the ledger. A store with only a latest-version
+marker uses `inspect_version_only`; its `verified_digests` count remains zero.
 
 ## Why these rules are needed
 
@@ -94,15 +92,16 @@ count remains zero.
    records, altered names/digests, dirty entries, newer versions, and high-water
    disagreement. Include a version-only ledger fixture so the API cannot claim
    historical checksum verification it did not perform.
-3. **Canaries complete:** the Simple Agents service consumes the report without
+3. **Canaries and rollout complete:** the Simple Agents service consumes the report without
    changing its ledger, SQL ordering, transaction boundaries, legacy handling,
    or error semantics. Fresh, older, drifted and partially failed database
    cases pass; see the [verification record](migration-status.md#step-07b-simple-agents-canary--2026-09-28).
    Meteonesto's pipeline also consumes it while retaining dual-marker checks
-   and its historical error contract. Other components remain Pending until
-   their own ledger and failure behavior are checked. The Runner's singleton
-   version marker has no historical names,
-   so it needs a version-only contract or an explicit compatibility proof.
+   and its historical error contract. The later `inspect_version_only` API
+   supports the Runner, Lello Auth and Pezzottify's single-marker stores
+   without inventing historical names or digests. The remaining SQLx and
+   custom-ledger consumers retain their own execution and recovery behavior.
+   See the [completion evidence](migration-status.md#step-07b-completion-pass--2026-09-29).
 
 Execution adapters are a later, separately reviewed increment. Backup and
 checkpoint coordination remain [07c](step-07-database-survey.md), and typed
