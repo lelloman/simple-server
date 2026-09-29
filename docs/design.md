@@ -78,7 +78,8 @@ references remain valid. The execution order after Step 06 is:
    [richer SQLite design](step-07-sqlite-design.md) defines optional schema
    descriptions/validation (07e), backup coordination (07c) and bounded
    synchronous execution (07d). The [07e core](step-07e-sqlite-schema.md) is
-   implemented with consumer canaries pending; 07c/07d remain proposed.
+   implemented with the Pezzottify versioned-helper canary complete; other consumers
+   await applicability review. 07c/07d remain proposed.
    Application SQL, legacy layout decisions and domain repositories stay local.
 
 Database helpers are not a prerequisite for the HTTP abstraction. Services retain

@@ -1,6 +1,6 @@
 # Rich SQLite capabilities
 
-Status: 07e schema core implemented, 2026-09-29; consumer canaries pending.
+Status: 07e schema core implemented, 2026-09-29; Pezzottify versioned-helper canary complete.
 See the [implemented API and coverage](step-07e-sqlite-schema.md). Backup and
 blocking execution below remain proposed; no consumer adoption is claimed.
 
@@ -15,7 +15,7 @@ enabling database features does not require HTTP, authentication or lifecycle.
 | --- | --- | --- |
 | 07a — connection policy | Selected PRAGMAs and effective-setting verification | Implemented; applicable rollout complete |
 | 07b — migration preflight | Existing ledger/marker inspection and pending suffix | Implemented; applicable rollout complete |
-| 07e — SQLite schema | Versioned descriptions, creation plans, observations and validation | Shared core implemented; canary pending |
+| 07e — SQLite schema | Versioned descriptions, creation plans, observations and validation | Shared core implemented; Pezzottify canary complete |
 | 07c — backup coordination | Checkpoint/copy strategies, verification and outcome reports | Proposed; after schema canaries |
 | 07d — synchronous execution | Bounded workers, priorities, lanes, deadlines and drain | Proposed; after backup canaries |
 

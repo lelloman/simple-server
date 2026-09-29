@@ -1,6 +1,6 @@
 # Step 07e: SQLite schema descriptions and validation
 
-Implemented in the shared library, 2026-09-29. Consumer canaries are pending.
+Implemented in the shared library, 2026-09-29. Pezzottify has completed the versioned-helper canary; other consumers await applicability review.
 Enable `database-sqlite-schema` and use `database::sqlite::schema`. This feature
 adds no runtime dependencies and does not enable HTTP or migration preflight.
 It includes the existing lightweight connection-policy feature. Backup and
@@ -147,3 +147,13 @@ hidden/generated columns or DDL clauses. Applications must document this scope.
 Pezzottify retains its existing one-layer default-parenthesis normalization in
 its adapter before shared comparison. The general library does not treat
 arbitrary SQL expressions as equivalent or enable that normalization implicitly.
+
+
+## Pezzottify canary
+
+The production versioned helper uses shared plans and a mixed-depth profile that
+preserves its previous validation policy. Native I/O, descriptor syntax, default
+normalization, SQL upgrades and transaction ownership remain local. All 38
+historical snapshots pass differential tests; file-backed startup, rollback,
+restart and retry pass. See the [canary evidence](migration-status.md#step-07e-pezzottify-schema-canary--2026-09-29).
+The shared suite now includes 22 schema tests and passes the full check script.

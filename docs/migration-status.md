@@ -43,7 +43,8 @@ WebSocket APIs. Quentin Torrentino remains pending at user request. See the
 [07b migration planning](step-07b-database-migrations.md) are implemented in
 the shared library and adopted by all applicable in-scope services. Quentin
 Torrentino remains excluded at user request. The optional [07e schema core](step-07e-sqlite-schema.md) is now implemented;
-its next gate is a Pezzottify canary. Database drivers,
+Pezzottify has completed the versioned-schema canary. Next is applicability review
+and a second consumer canary. Database drivers,
 schema execution, queries and backups remain application-owned. See the
 [Step 07 survey](step-07-database-survey.md),
 [07a contract](step-07a-database-connections.md), [completion evidence](#step-07a-completion-pass--2026-09-29)
@@ -72,7 +73,7 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 
 | Project | Server components | 1. Axum centralization | 2. Lifecycle / main() | 03a. Logging | 03b. Correlation | 03c. HTTP tracing | 04a. Body limits | 04b. Response headers | 04c. CORS | 05. Health/readiness | 06a. Task ownership | 06b. Scheduling | 06c. Execution policies | 08/09. Auth | 10. Rate limiting | 11. Routing / HTTP core | 07a. SQLite connection policy | 07b. Migration preflight | 07e. SQLite schema | Remaining Axum exposure |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local canary)** | **Done (local; scoped canary)** | N/A (assessed) | N/A (no served probe) | **Done (local; scoped canary)** | **Done (local; primitives)** | **Done (local; primitives)** | **Done (local; sessions + route permissions)** | **Done (HTTP, MCP, durable quotas + outbound pacing)** | **Done (all production route groups)** | Done | Done (five versioned SQLite stores) | Pending (canary) | None. |
+| pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local canary)** | **Done (local; scoped canary)** | N/A (assessed) | N/A (no served probe) | **Done (local; scoped canary)** | **Done (local; primitives)** | **Done (local; primitives)** | **Done (local; sessions + route permissions)** | **Done (HTTP, MCP, durable quotas + outbound pacing)** | **Done (all production route groups)** | Done | Done (five versioned SQLite stores) | Done (versioned helper; scoped canary) | None. |
 | favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local canary)** | **Done (local; request work)** | **Done (local; bounded batches)** | **Done (local; retry scope)** | **Done (local canary)** | **Done (local; global + endpoint budgets)** | **Done (local)** | Done | Done (backend SQLite) | Pending (applicability review) | None. |
 | androidoscopy | `server`; Android SDK pairing | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (no served probe) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; controller + LAN access)** | **Done (local; device JNI pairing gate)** | **Done (all production route groups)** | N/A (no SQLite database) | N/A (no Rust migration runner) | Pending (applicability review) | None. |
 | crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; durable primitives)** | **Done (local; retry primitives)** | **Done (local; main + integration)** | **Done (local; HTTP + MCP + durable dispatcher)** | **Done (both servers)** | Done (core + integration SQLite) | Done (core + integration ledgers) | Pending (applicability review) | None. |
@@ -5915,3 +5916,54 @@ remains excluded. Existing 07a/07b adoption is unchanged. Backup coordination
 (07c) and synchronous execution (07d) remain planned. The dedicated branch is
 integrated into `master` and its worktree/branch removed after verification;
 no push or deployment is part of this increment.
+
+
+## Step 07e Pezzottify schema canary — 2026-09-29
+
+**Done for the versioned schema helper.** Pezzottify `dev` advanced from
+`c53e06cb` to `acef712fdcca785042b7be1b8fb22eea465dca11`. The reviewed shared
+revision and active `simple-server.rev` pin is
+`7bc92f5f889dba2fb4c688e12920c3fe248af3a5`, integrated into simple-server `master`.
+
+The production descriptor helper now delegates table/index creation to shared
+plans and schema comparison to shared reports. Creation covers the user, server,
+catalog, enrichment and download-queue versioned stores. Existing user, server
+and download-queue validation paths use the shared validator; catalog and
+enrichment startup behavior is unchanged. Local descriptors/macros, rusqlite I/O,
+SQL migration execution, transactions, marker offset 99999, legacy catalog
+classification, raw ingestion/search/auxiliary schemas and backup/checkpoint
+behavior remain application-owned. This is not adoption of 07c/07d.
+
+The canary required explicit mixed-depth validation controls in simple-server:
+exact regular columns and case-sensitive names, first primary-key column,
+name-only indexes, unordered unique named-column sets, per-column foreign-key
+ON DELETE checks and an explicit table-property exclusion. Defaults retain the
+application's single-layer parenthesis normalization. The report records
+unverified definitions/predicates, expressions, ON UPDATE/grouping, hidden
+columns and other DDL properties instead of implying full-schema validation.
+Missing selected metadata fails closed; SQLite metadata errors propagate.
+
+Verification:
+
+- Baseline Pezzottify full library suite: **1,125 passed, two existing ignores**.
+  Final: **1,137 passed, two existing ignores**. Loopback tests pass with the
+  required sandbox permission.
+- **12 new canary tests**, including differential creation/validation against a
+  frozen pre-change oracle for **38 historical snapshots** (16 user, 8 server,
+  10 catalog, 1 enrichment, 3 download). Independent actual index metadata and
+  partial-predicate comparisons also pass.
+- File-backed production startup, upgrade/data retention, restart, mid-upgrade
+  rollback and successful retry; schema drift fails before backup registration.
+  Legacy acceptance/rejection and metadata authorization errors are covered.
+- Consumer formatting, database-boundary checks and strict production lib/bin
+  Clippy pass. Shared **22 schema tests** and full `bash scripts/check` pass
+  (all-feature lint/tests, feature matrix, no-default check and strict rustdoc).
+- No consumer all-target Clippy claim (existing test-only lint debt), Docker,
+  browser or Android qualification. Existing num-bigint-dig future-compatibility
+  warning remains. See Pezzottify `docs/step-07e-sqlite-schema.md` for commands.
+
+Both original development branches were rebased onto their dedicated branches;
+ancestry and identical tested trees were verified. Owned worktrees/branches and
+scratch logs were removed; pre-existing worktrees and recovery branches were
+preserved. Nothing pushed or deployed. Both trackers show **1 Done, 16 Pending**
+for 07e: fifteen need applicability review, and Quentin Torrentino stays excluded.
