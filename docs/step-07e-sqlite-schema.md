@@ -118,3 +118,32 @@ Pezzottify is the next canary; no consumer is marked adopted yet. Driver
 introspection follows SQLite's [PRAGMA documentation](https://www.sqlite.org/pragma.html),
 with generated statements checked against [CREATE TABLE](https://www.sqlite.org/lang_createtable.html)
 and [CREATE INDEX](https://www.sqlite.org/lang_createindex.html).
+
+## Explicit validation profiles
+
+The Pezzottify canary required mixed comparison depth: exact ordinary columns
+inside a subset of tables, with presence-based checks for selected constraints.
+`validate_with_profile` accepts a `ValidationProfile` for this use case.
+`validate` remains equivalent to `ValidationProfile::uniform(policy)` and keeps
+its original strict checks.
+
+A profile selects column scope and case matching independently of table scope;
+ordered or first-column primary-key comparison; full index definitions or
+case-sensitive names only; ordered UNIQUE constraints or unordered named-column
+sets; full foreign keys or case-sensitive per-column targets and deletion actions;
+and whether additional table properties must be verified. Every excluded property
+is listed in `SchemaReport::outside_scope`, and the report records the full profile.
+Unavailable metadata for any selected property still prevents a match.
+
+`TableObservation::index_names` and `unique_column_sets` are separate metadata
+projections. Adapters never need to invent index terms/predicates or claim a
+complete constraint definition to perform presence-based validation. Named-column
+sets alone do not prove unconditional uniqueness: expressions, partial predicates,
+collations and term order remain excluded. First-column primary-key comparison
+does not validate later key members. A profile that excludes additional table
+properties may inspect regular `table_info` columns without claiming coverage of
+hidden/generated columns or DDL clauses. Applications must document this scope.
+
+Pezzottify retains its existing one-layer default-parenthesis normalization in
+its adapter before shared comparison. The general library does not treat
+arbitrary SQL expressions as equivalent or enable that normalization implicitly.

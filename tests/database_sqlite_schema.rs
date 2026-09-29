@@ -123,6 +123,8 @@ fn observe(
             })?
             .collect::<rusqlite::Result<Vec<_>>>()?;
         let mut unique_constraints = vec![];
+        let mut unique_column_sets = vec![];
+        let mut index_names = vec![];
         let mut indexes = vec![];
         for (index_name, unique, origin, partial) in indices {
             let mut stmt = conn.prepare("SELECT name, coll, desc FROM pragma_index_xinfo(?1, ?2) WHERE key=1 ORDER BY seqno")?;
@@ -135,6 +137,10 @@ fn observe(
                     })
                 })?
                 .collect::<rusqlite::Result<Vec<_>>>()?;
+            if unique {
+                unique_column_sets.push(terms.iter().map(|t| t.column.clone()).collect());
+            }
+            index_names.push(id(&index_name));
             match origin.as_str() {
                 "pk" => {}
                 "u" => unique_constraints.push(terms.iter().map(|t| t.column.clone()).collect()),
@@ -208,6 +214,8 @@ fn observe(
             unique_constraints: Observed::Known(unique_constraints),
             foreign_keys: Observed::Known(fks.into_values().collect()),
             indexes: Observed::Known(indexes),
+            index_names: Observed::Known(index_names),
+            unique_column_sets: Observed::Known(unique_column_sets),
             ordinary_table,
         });
     }
@@ -753,4 +761,116 @@ fn file_database_upgrade_failure_and_restart_preserve_existing_records() {
         .unwrap(),
         ("keep".into(), 1)
     );
+}
+
+fn presence_profile() -> ValidationProfile {
+    ValidationProfile {
+        policy: policy(ValidationScope::RequiredSubset),
+        columns: ValidationScope::Exact,
+        column_names: NameComparison::Exact,
+        indexes: IndexComparison::NamesOnly,
+        unique_constraints: UniqueComparison::UnorderedColumnSets,
+        foreign_keys: ForeignKeyComparison::DeleteActionPerColumn,
+        primary_key: PrimaryKeyComparison::FirstColumn,
+        verify_table_properties: false,
+    }
+}
+
+#[test]
+fn explicit_profile_preserves_mixed_depth_without_claiming_full_validation() {
+    let conn = Connection::open_in_memory().unwrap();
+    let mut s = fixture();
+    apply(&conn, &s);
+    conn.execute_batch("DROP INDEX child_score; CREATE INDEX child_score ON child(parent_id); CREATE VIEW auxiliary AS SELECT * FROM child;").unwrap();
+    // Existing policies may intentionally ignore order, ON UPDATE, index contents
+    // and additional table properties. None of those are asserted as verified.
+    s.tables.to_mut()[1].unique_constraints.to_mut()[0].reverse();
+    s.tables.to_mut()[1].foreign_keys.to_mut()[0].on_update = ForeignKeyAction::Restrict;
+    let obs = observe(&conn, "main", &[]).unwrap();
+    let r = validate_with_profile(&s, &obs, presence_profile()).unwrap();
+    assert!(r.is_match(), "{r:?}");
+    assert_eq!(r.profile, presence_profile());
+    for property in [
+        "ordinary_table",
+        "terms_uniqueness_predicates",
+        "ordering_expressions_predicates_collations",
+        "update_action_grouping",
+        "additional_columns",
+    ] {
+        assert!(
+            r.outside_scope.iter().any(|p| p.ends_with(property)),
+            "{property}: {r:?}"
+        );
+    }
+    assert!(
+        !validate(&s, &obs, policy(ValidationScope::RequiredSubset))
+            .unwrap()
+            .is_match()
+    );
+}
+
+#[test]
+fn subset_tables_with_exact_columns_does_not_accept_column_drift() {
+    let conn = Connection::open_in_memory().unwrap();
+    conn.execute_batch("CREATE TABLE t(a TEXT, extra TEXT); CREATE TABLE auxiliary(x TEXT)")
+        .unwrap();
+    let s = snapshot(vec![table("t", vec![col("a", "TEXT")])]);
+    let obs = observe(&conn, "main", &[]).unwrap();
+    let r = validate_with_profile(&s, &obs, presence_profile()).unwrap();
+    assert!(!r.is_match());
+    assert!(r.differences.iter().any(|d| d.path.contains("extra")));
+    assert!(!r.outside_scope.iter().any(|p| p.contains("extra")));
+    let s = snapshot(vec![table(
+        "t",
+        vec![col("A", "TEXT"), col("extra", "TEXT")],
+    )]);
+    assert!(
+        !validate_with_profile(&s, &obs, presence_profile())
+            .unwrap()
+            .is_match()
+    );
+}
+
+#[test]
+fn unavailable_selected_projections_fail_even_with_full_metadata_available() {
+    let conn = Connection::open_in_memory().unwrap();
+    let s = fixture();
+    apply(&conn, &s);
+    let mut obs = observe(&conn, "main", &["parent", "child"]).unwrap();
+    let Observed::Known(tables) = &mut obs.tables else {
+        panic!()
+    };
+    tables[0].index_names = Observed::Unavailable("inventory unavailable".into());
+    tables[0].unique_column_sets = Observed::Unavailable("column sets unavailable".into());
+    let r = validate_with_profile(&s, &obs, presence_profile()).unwrap();
+    assert_eq!(
+        r.differences
+            .iter()
+            .filter(|d| d.kind == DifferenceKind::Unverified)
+            .count(),
+        2
+    );
+    assert!(
+        validate(&s, &obs, policy(ValidationScope::Exact))
+            .unwrap()
+            .is_match()
+    );
+}
+
+#[test]
+fn narrow_profile_still_rejects_missing_names_uniques_and_wrong_delete_actions() {
+    let conn = Connection::open_in_memory().unwrap();
+    let mut s = fixture();
+    apply(&conn, &s);
+    conn.execute_batch("DROP INDEX child_score").unwrap();
+    s.tables.to_mut()[1].foreign_keys.to_mut()[0].on_delete = ForeignKeyAction::Cascade;
+    s.tables.to_mut()[1].unique_constraints = vec![vec![id("score")]].into();
+    let obs = observe(&conn, "main", &[]).unwrap();
+    let r = validate_with_profile(&s, &obs, presence_profile()).unwrap();
+    for property in ["index_names", "foreign_keys", "unique_column_sets"] {
+        assert!(
+            r.differences.iter().any(|d| d.path.ends_with(property)),
+            "{property}: {r:?}"
+        );
+    }
 }

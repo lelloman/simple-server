@@ -171,6 +171,13 @@ pub struct TableObservation<'a> {
     pub unique_constraints: Observed<Vec<Vec<Identifier<'a>>>>,
     pub foreign_keys: Observed<Vec<ForeignKeySpec<'a>>>,
     pub indexes: Observed<Vec<IndexSpec<'a>>>,
+    /// Complete named-index inventory for a presence-only profile. This does not
+    /// imply knowledge of terms, predicates or uniqueness.
+    pub index_names: Observed<Vec<Identifier<'a>>>,
+    /// Named column sets exposed by UNIQUE indexes, including explicit/partial
+    /// indexes and primary-key indexes. A projection, not proof of unconditional
+    /// uniqueness: expressions, predicates, collations and ordering are excluded.
+    pub unique_column_sets: Observed<Vec<Vec<Identifier<'a>>>>,
     /// Known(()) asserts an ordinary rowid table with no additional properties
     /// outside the represented model. Metadata PRAGMAs alone may not establish
     /// this: the adapter must inspect DDL or explicitly report unavailable.
@@ -228,6 +235,62 @@ pub struct ValidationPolicy {
     pub expressions: ExpressionComparison,
 }
 
+/// How deeply an explicitly selected profile compares index metadata.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum IndexComparison {
+    Definition,
+    NamesOnly,
+}
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum UniqueComparison {
+    OrderedConstraints,
+    UnorderedColumnSets,
+}
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum ForeignKeyComparison {
+    Definition,
+    DeleteActionPerColumn,
+}
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum PrimaryKeyComparison {
+    Ordered,
+    FirstColumn,
+}
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum NameComparison {
+    Exact,
+    AsciiCaseInsensitive,
+}
+
+/// Explicit property-level scope. `uniform` preserves `validate` semantics.
+/// Narrower checks are named in the report; excluded properties never become
+/// asserted facts. These controls allow gradual adoption of existing validators.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct ValidationProfile {
+    pub policy: ValidationPolicy,
+    pub columns: ValidationScope,
+    pub column_names: NameComparison,
+    pub indexes: IndexComparison,
+    pub unique_constraints: UniqueComparison,
+    pub foreign_keys: ForeignKeyComparison,
+    pub primary_key: PrimaryKeyComparison,
+    pub verify_table_properties: bool,
+}
+impl ValidationProfile {
+    pub const fn uniform(policy: ValidationPolicy) -> Self {
+        Self {
+            policy,
+            columns: policy.scope,
+            column_names: NameComparison::AsciiCaseInsensitive,
+            indexes: IndexComparison::Definition,
+            unique_constraints: UniqueComparison::OrderedConstraints,
+            foreign_keys: ForeignKeyComparison::Definition,
+            primary_key: PrimaryKeyComparison::Ordered,
+            verify_table_properties: true,
+        }
+    }
+}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum DifferenceKind {
     Missing,
@@ -248,6 +311,7 @@ pub struct SchemaReport {
     pub database: String,
     pub snapshot_version: u64,
     pub policy: ValidationPolicy,
+    pub profile: ValidationProfile,
     /// Property paths that were compared, not a claim about row data or integrity.
     pub checked: Vec<String>,
     pub differences: Vec<SchemaDifference>,
@@ -509,7 +573,12 @@ fn compare_set<T: PartialEq + fmt::Debug>(
         {
             used[i] = true;
         } else {
-            report.difference(path, DifferenceKind::Missing, Some(format!("{e:?}")), None);
+            report.difference(
+                path,
+                DifferenceKind::Missing,
+                Some(format!("{e:?}")),
+                Some(format!("{actual:?}")),
+            );
         }
     }
     for (i, a) in actual.iter().enumerate() {
@@ -548,12 +617,28 @@ pub fn validate(
     observed: &SchemaObservation<'_>,
     policy: ValidationPolicy,
 ) -> Result<SchemaReport, DefinitionError> {
+    validate_with_profile(snapshot, observed, ValidationProfile::uniform(policy))
+}
+
+/// Compare only the properties selected by an explicit profile. Unsupported
+/// selected observations still fail closed. Exclusions are visible in the report.
+pub fn validate_with_profile(
+    snapshot: &SchemaSnapshot<'_>,
+    observed: &SchemaObservation<'_>,
+    profile: ValidationProfile,
+) -> Result<SchemaReport, DefinitionError> {
+    let policy = profile.policy;
+    let column_name = |name: &Identifier<'_>| match profile.column_names {
+        NameComparison::Exact => name.as_str().to_owned(),
+        NameComparison::AsciiCaseInsensitive => name.as_str().to_ascii_lowercase(),
+    };
     validate_definition(snapshot)?;
     let mut report = SchemaReport {
         namespace: snapshot.namespace.to_string(),
         database: snapshot.database.as_str().into(),
         snapshot_version: snapshot.version,
         policy,
+        profile,
         checked: vec![],
         differences: vec![],
         outside_scope: vec![],
@@ -604,23 +689,34 @@ pub fn validate(
             );
             continue;
         };
-        if report
-            .known(&format!("{path}.ordinary_table"), &actual.ordinary_table)
-            .is_some()
-        {
-            report.checked.push(format!("{path}.ordinary_table"));
+        if profile.verify_table_properties {
+            if report
+                .known(&format!("{path}.ordinary_table"), &actual.ordinary_table)
+                .is_some()
+            {
+                report.checked.push(format!("{path}.ordinary_table"));
+            }
+        } else {
+            report.outside_scope.push(format!("{path}.ordinary_table"));
         }
         if let Some(columns) = report.known(&format!("{path}.columns"), &actual.columns) {
             unique_names(&path, columns.iter().map(|c| c.name.as_str()))?;
             if policy.column_order == ColumnOrder::Ordered {
-                let expected_names: Vec<_> = expected.columns.iter().map(|c| &c.name).collect();
+                let expected_names: Vec<_> = expected
+                    .columns
+                    .iter()
+                    .map(|c| column_name(&c.name))
+                    .collect();
                 let actual_names: Vec<_> = columns
                     .iter()
                     .filter(|c| {
-                        policy.scope == ValidationScope::Exact
-                            || expected.columns.iter().any(|e| e.name == c.name)
+                        profile.columns == ValidationScope::Exact
+                            || expected
+                                .columns
+                                .iter()
+                                .any(|e| column_name(&e.name) == column_name(&c.name))
                     })
-                    .map(|c| &c.name)
+                    .map(|c| column_name(&c.name))
                     .collect();
                 report.compare(
                     &format!("{path}.column_order"),
@@ -630,7 +726,10 @@ pub fn validate(
             }
             for e in expected.columns.iter() {
                 let cp = format!("{path}.column[{:?}]", e.name.as_str());
-                if let Some(a) = columns.iter().find(|a| a.name == e.name) {
+                if let Some(a) = columns
+                    .iter()
+                    .find(|a| column_name(&a.name) == column_name(&e.name))
+                {
                     let normalize_type = |s: &str| match policy.declared_types {
                         TypeComparison::Exact => s.to_owned(),
                         TypeComparison::AsciiCaseInsensitive => s.to_ascii_uppercase(),
@@ -655,9 +754,13 @@ pub fn validate(
                     );
                 }
             }
-            if policy.scope == ValidationScope::Exact {
+            if profile.columns == ValidationScope::Exact {
                 for a in columns {
-                    if !expected.columns.iter().any(|e| e.name == a.name) {
+                    if !expected
+                        .columns
+                        .iter()
+                        .any(|e| column_name(&e.name) == column_name(&a.name))
+                    {
                         report.difference(
                             &format!("{path}.column[{:?}]", a.name.as_str()),
                             DifferenceKind::Unexpected,
@@ -669,36 +772,113 @@ pub fn validate(
             }
         }
         if let Some(pk) = report.known(&format!("{path}.primary_key"), &actual.primary_key) {
+            let key = |names: &[Identifier<'_>]| {
+                names
+                    .iter()
+                    .take(
+                        if profile.primary_key == PrimaryKeyComparison::FirstColumn {
+                            1
+                        } else {
+                            names.len()
+                        },
+                    )
+                    .map(&column_name)
+                    .collect::<Vec<_>>()
+            };
             report.compare(
                 &format!("{path}.primary_key"),
-                &expected.primary_key.as_ref(),
-                &pk.as_slice(),
+                &key(&expected.primary_key),
+                &key(pk),
             );
+            if profile.primary_key == PrimaryKeyComparison::FirstColumn {
+                report
+                    .outside_scope
+                    .push(format!("{path}.primary_key.additional_columns"));
+            }
         }
-        if let Some(uniques) = report.known(
-            &format!("{path}.unique_constraints"),
-            &actual.unique_constraints,
-        ) {
-            compare_set(
-                &mut report,
-                &format!("{path}.unique_constraints"),
-                &expected.unique_constraints,
-                uniques,
-            );
+        match profile.unique_constraints {
+            UniqueComparison::OrderedConstraints => {
+                if let Some(uniques) = report.known(
+                    &format!("{path}.unique_constraints"),
+                    &actual.unique_constraints,
+                ) {
+                    compare_set(
+                        &mut report,
+                        &format!("{path}.unique_constraints"),
+                        &expected.unique_constraints,
+                        uniques,
+                    );
+                }
+            }
+            UniqueComparison::UnorderedColumnSets => {
+                let path = format!("{path}.unique_column_sets");
+                report
+                    .outside_scope
+                    .push(format!("{path}.ordering_expressions_predicates_collations"));
+                if let Some(sets) = report.known(&path, &actual.unique_column_sets) {
+                    let normalize = |sets: &[Vec<Identifier<'_>>]| {
+                        sets.iter()
+                            .map(|s| {
+                                let mut s =
+                                    s.iter().map(|n| n.as_str().to_owned()).collect::<Vec<_>>();
+                                s.sort();
+                                s
+                            })
+                            .collect::<Vec<_>>()
+                    };
+                    compare_set(
+                        &mut report,
+                        &path,
+                        &normalize(&expected.unique_constraints),
+                        &normalize(sets),
+                    );
+                }
+            }
         }
         if let Some(fks) = report.known(&format!("{path}.foreign_keys"), &actual.foreign_keys) {
-            compare_set(
-                &mut report,
-                &format!("{path}.foreign_keys"),
-                &expected
-                    .foreign_keys
-                    .iter()
-                    .map(foreign_key_identity)
-                    .collect::<Vec<_>>(),
-                &fks.iter().map(foreign_key_identity).collect::<Vec<_>>(),
-            );
+            match profile.foreign_keys {
+                ForeignKeyComparison::Definition => compare_set(
+                    &mut report,
+                    &format!("{path}.foreign_keys"),
+                    &expected
+                        .foreign_keys
+                        .iter()
+                        .map(foreign_key_identity)
+                        .collect::<Vec<_>>(),
+                    &fks.iter().map(foreign_key_identity).collect::<Vec<_>>(),
+                ),
+                ForeignKeyComparison::DeleteActionPerColumn => {
+                    report
+                        .outside_scope
+                        .push(format!("{path}.foreign_keys.update_action_grouping"));
+                    compare_set(
+                        &mut report,
+                        &format!("{path}.foreign_keys"),
+                        &delete_action_rows(&expected.foreign_keys),
+                        &delete_action_rows(fks),
+                    );
+                }
+            }
         }
-        if let Some(indexes) = report.known(&format!("{path}.indexes"), &actual.indexes) {
+        if profile.indexes == IndexComparison::NamesOnly {
+            let ip = format!("{path}.index_names");
+            report
+                .outside_scope
+                .push(format!("{path}.indexes.terms_uniqueness_predicates"));
+            if let Some(names) = report.known(&ip, &actual.index_names) {
+                unique_names(&ip, names.iter().map(Identifier::as_str))?;
+                compare_set(
+                    &mut report,
+                    &ip,
+                    &expected
+                        .indexes
+                        .iter()
+                        .map(|i| i.name.as_str())
+                        .collect::<Vec<_>>(),
+                    &names.iter().map(Identifier::as_str).collect::<Vec<_>>(),
+                );
+            }
+        } else if let Some(indexes) = report.known(&format!("{path}.indexes"), &actual.indexes) {
             unique_names(&path, indexes.iter().map(|i| i.name.as_str()))?;
             for e in expected.indexes.iter() {
                 let ip = format!("{path}.index[{:?}]", e.name.as_str());
@@ -742,7 +922,10 @@ pub fn validate(
             let path = format!("table[{:?}]", actual.name.as_str());
             if let Some(expected) = snapshot.tables.iter().find(|t| t.name == actual.name) {
                 if let Observed::Known(columns) = &actual.columns {
-                    for c in columns {
+                    for c in columns
+                        .iter()
+                        .filter(|_| profile.columns == ValidationScope::RequiredSubset)
+                    {
                         if !expected.columns.iter().any(|e| e.name == c.name) {
                             report
                                 .outside_scope
@@ -816,4 +999,22 @@ fn foreign_key_identity(fk: &ForeignKeySpec<'_>) -> ForeignKeyIdentity {
         on_update: fk.on_update,
         on_delete: fk.on_delete,
     }
+}
+
+fn delete_action_rows(fks: &[ForeignKeySpec<'_>]) -> Vec<(String, String, String, &'static str)> {
+    fks.iter()
+        .flat_map(|fk| {
+            fk.columns
+                .iter()
+                .zip(fk.parent_columns.iter())
+                .map(|(from, to)| {
+                    (
+                        from.as_str().to_owned(),
+                        fk.parent_table.as_str().to_owned(),
+                        to.as_str().to_owned(),
+                        fk.on_delete.sql(),
+                    )
+                })
+        })
+        .collect()
 }
