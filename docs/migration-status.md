@@ -53,8 +53,8 @@ application-owned. See the [Step 07 survey](step-07-database-survey.md),
 6 N/A. This is a source-level applicability audit, not additional production
 adoption. SCT's PostgreSQL server is distinct from its SQLite archive catalog.
 
-**Step 07b status:** shared preflight available; 1 Done (Meteonesto pipeline),
-2 Partial (Simple Agents service ledger and Crumbles integration runner), 12 Pending (including excluded
+**Step 07b status:** shared preflight available; 2 Done (Meteonesto pipeline and Fausto SQLite),
+2 Partial (Simple Agents service ledger and Crumbles integration runner), 11 Pending (including excluded
 Quentin), 2 N/A in the consumer matrix. See the
 [contract](step-07b-database-migrations.md) and
 [verification](#step-07b-shared-migration-preflight--2026-09-28).
@@ -70,7 +70,7 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local canary)** | **Done (local; request work)** | **Done (local; bounded batches)** | **Done (local; retry scope)** | **Done (local canary)** | **Done (local; global + endpoint budgets)** | **Done (local)** | Done | Pending (no adoption) | None. |
 | androidoscopy | `server`; Android SDK pairing | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (no served probe) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; controller + LAN access)** | **Done (local; device JNI pairing gate)** | **Done (all production route groups)** | N/A (no SQLite database) | N/A (no Rust migration runner) | None. |
 | crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; durable primitives)** | **Done (local; retry primitives)** | **Done (local; main + integration)** | **Done (local; HTTP + MCP + durable dispatcher)** | **Done (both servers)** | Pending (core + integration SQLite) | Partial (integration runner; core pending) | None. |
-| fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; dynamic cron)** | N/A (assessed) | **Done (local; HTTP + WebSocket + admin/write)** | **Done (local; five API tiers)** | **Done (local)** | Pending (storage SQLite) | Pending (no adoption) | None. |
+| fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; dynamic cron)** | N/A (assessed) | **Done (local; HTTP + WebSocket + admin/write)** | **Done (local; five API tiers)** | **Done (local)** | Pending (storage SQLite) | Done (core SQLite store) | None. |
 | lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (Rust; Caddy owns CORS) | **Done (local; scoped)** | **Done (local; webhook scope)** | **Done (local; capacity)** | **Done (local; retry scope)** | **Done (local; sessions + resource/admin access)** | **Done (endpoint budgets + persisted device polling)** | **Done (local)** | Pending (SQLite backend) | Pending (no adoption) | None. |
 | lellostore | `backend` | **Done** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; OIDC + admin)** | N/A (no inbound admission policy) | **Done (local)** | N/A (no explicit policy) | Pending (no adoption) | None. |
 | meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; pipeline/gateway)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; weighted claims)** | **Done (local; budgets/retry)** | **Done (local; all three services)** | **Done (local; gateway budgets)** | **Done (local)** | Pending (pipeline SQLite) | Done (weather-pipeline SQLite) | None. |
@@ -5726,3 +5726,33 @@ The original `master` was rebased onto the tested branch and has the same tip
 and tree; the temporary branch, worktree and dependency link were removed.
 The original checkout's modified `ANDROID_CLIENT_PLAN.md` and five untracked
 Android files/directories were preserved. No push or deployment.
+
+## Step 07b Fausto SQLite storage — 2026-09-29
+
+Fausto `master` commit `34326d2ea356f07f72ae8b3de59658b338709a82`
+uses shared source `e815c1b8ccf6e4d64fb3f950ba0ca1b88e4edf5b` in its
+production `fausto-core` SQLite store, reached by normal server startup. The
+store first applies its existing legacy unversioned-database adoption rule,
+then reads the `schema_version` version/name ledger and compares it with its
+embedded manifest through `MigrationPlan::inspect`. It uses the report to
+select the pending suffix. This ledger has no stored digests, so both inputs
+use `None` and the integration does not claim checksum verification. Fausto
+still owns foreign-key enforcement, the ledger table, migration SQL, and the
+transactional or nontransactional boundary selected by each migration.
+No other Fausto database migration runner was found, so 07b is **Done** for
+its applicable SQLite store; 07a connection policy remains Pending.
+
+Baseline: 431 core library tests passed. After adoption, 432 core tests passed,
+including a new test that rejects renamed, missing and future ledger entries.
+The 202 SQLite storage tests passed; existing tests also exercise fresh schema,
+legacy unversioned adoption and idempotent restart. `cargo fmt --check`, locked
+workspace all-target check and diff checks passed. Workspace check emitted two
+existing server test-import warnings. Strict all-target core Clippy failed on
+352 warnings across the crate; a library-only run with pedantic lints disabled
+still found 12 warnings outside the changed migration code. The server, plugin,
+frontend and deployment suites were not rerun for this storage-only change.
+
+The change was committed in an isolated worktree from `master` at `1947a29`.
+The original `master` was rebased onto that tested branch; ancestry and trees
+match, the original checkout is clean, and the temporary worktree, branch and
+dependency link were removed. No push or deployment.
