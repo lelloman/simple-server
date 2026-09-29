@@ -63,3 +63,21 @@ trusted build environments. See the homelab `fucina/PACKAGES.md` runbook for
 credential provisioning, backup, and rotation.
 
 Publishing alone does not change existing service manifests or Docker builds.
+
+## Verified release: 0.1.0 (29 September 2026)
+
+- Published from clean Git revision `24f2db50f292ece609dd37ffc46fbc305e9c49d5`.
+- Crate SHA-256: `76dd285fbdddd588b5caab30f6ac15559794a38a8717c8e81c5f56f93565268c`.
+- `bash scripts/check` passed: formatting, all-target/all-feature Clippy,
+  default/all-feature tests, the feature-isolation matrix, no-default-feature
+  compilation, and documentation with warnings denied (522 test executions).
+- Cargo publish dry run verified the extracted package. The real upload succeeded
+  and Cargo confirmed registry availability. Archive: 119 files, about 193 KiB.
+- An independent consumer with an initially empty Cargo cache downloaded and ran
+  against Fucina with `web`, `ws`, `multipart`, `lifecycle`, `database-sqlite`, and
+  `database-migrations`. Its lockfile points to the Fucina sparse index, and the
+  downloaded crate matches both the lockfile checksum and the publication archive.
+- Dedicated credentials: `simple-server-cargo-publish` and
+  `simple-server-cargo-consume`, provisioned on homelab under the existing
+  `fucina/secrets` directory, with owner-only workstation copies under
+  `~/.config/fucina/` using the `.token` suffix. Tokens are not in source control.
