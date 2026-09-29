@@ -147,6 +147,45 @@ impl fmt::Display for MigrationError {
 impl Error for MigrationError {}
 
 impl MigrationPlan {
+    /// Inspect a store that records only its latest applied version, without a
+    /// per-migration ledger. The caller must map an empty-store sentinel to
+    /// `None` and retain its own schema-shape and legacy-layout checks.
+    ///
+    /// Entries through the marker are reported as applied, but their names and
+    /// digests cannot be historically verified. `verified_digests` is always
+    /// zero, even when the manifest contains digests.
+    pub fn inspect_version_only(
+        &self,
+        applied_version: Option<&MigrationVersion>,
+    ) -> Result<MigrationReport, MigrationError> {
+        if self.namespace.trim().is_empty() {
+            return Err(MigrationError::EmptyNamespace);
+        }
+        validate_manifest(&self.entries)?;
+
+        let applied_count = match applied_version {
+            None => 0,
+            Some(version) => {
+                if let Some(first) = self.entries.first()
+                    && !same_kind(version, &first.version)
+                {
+                    return Err(MigrationError::MixedVersionKinds);
+                }
+                self.entries
+                    .iter()
+                    .position(|entry| &entry.version == version)
+                    .map(|index| index + 1)
+                    .ok_or_else(|| classify_unexpected(version, self.entries.last()))?
+            }
+        };
+        Ok(MigrationReport {
+            namespace: self.namespace.clone(),
+            applied: self.entries[..applied_count].to_vec(),
+            pending: self.entries[applied_count..].to_vec(),
+            verified_digests: 0,
+        })
+    }
+
     /// Compare this manifest with existing ledger observations without mutation.
     pub fn inspect(
         &self,

@@ -52,6 +52,15 @@ records only after tests prove parity. A version-only ledger cannot gain
 checksum guarantees by passing a newly computed manifest digest as if it were
 historically recorded.
 
+For a store that persists only one latest-version marker rather than a ledger,
+`MigrationPlan::inspect_version_only` accepts that marker (or `None` for a fresh
+store) and reports the pending suffix. It rejects a marker absent from the
+manifest, including a newer database version. Its `verified_digests` remains
+zero: the marker cannot verify past names or checksums. Applications must still
+inspect schema shape, classify legacy layouts, and run migrations under their
+existing transaction rules. Do not synthesize historical ledger rows from the
+current manifest just to call `inspect`.
+
 Enable `database-migrations` independently of `database-sqlite`, then construct
 `database::migrations::MigrationPlan` and `MigrationObservation` from the
 application's own manifest and ledger. Call `plan.inspect(&observed)` before
@@ -59,8 +68,9 @@ the application's existing migration runner. `None` for `high_water_mark`
 means the ledger has no separate high-water observation; map a genuinely empty
 SQLite ledger's `user_version = 0` sentinel to `None`. The returned
 `MigrationReport` owns its applied and pending entries. An error stops the
-preflight; it never modifies the ledger. A version-only ledger must use `None`
-digests on both sides, and its `verified_digests` count remains zero.
+preflight; it never modifies the ledger. A version-only ledger passed to
+`inspect` must use `None` digests on both sides, and its `verified_digests`
+count remains zero.
 
 ## Why these rules are needed
 

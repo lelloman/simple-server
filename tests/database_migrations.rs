@@ -81,6 +81,36 @@ fn version_only_ledger_does_not_claim_checksum_verification() {
 }
 
 #[test]
+fn single_version_marker_reports_suffix_without_inventing_history() {
+    let plan = sample_manifest();
+    let fresh = plan.inspect_version_only(None).unwrap();
+    assert!(fresh.applied.is_empty());
+    assert_eq!(fresh.pending, plan.entries);
+
+    let partial = plan.inspect_version_only(Some(&2.into())).unwrap();
+    assert_eq!(partial.applied, plan.entries[..2]);
+    assert_eq!(partial.pending, plan.entries[2..]);
+    assert_eq!(partial.verified_digests, 0);
+
+    let complete = plan.inspect_version_only(Some(&3.into())).unwrap();
+    assert!(complete.pending.is_empty());
+    assert_eq!(complete.verified_digests, 0);
+
+    assert_eq!(
+        plan.inspect_version_only(Some(&4.into())),
+        Err(MigrationError::NewerDatabaseVersion { version: 4.into() })
+    );
+    assert_eq!(
+        plan.inspect_version_only(Some(&0.into())),
+        Err(MigrationError::UnknownRecordedVersion { version: 0.into() })
+    );
+    assert_eq!(
+        plan.inspect_version_only(Some(&"2".into())),
+        Err(MigrationError::MixedVersionKinds)
+    );
+}
+
+#[test]
 fn text_versions_use_the_applications_sorted_filename_order() {
     let plan = MigrationPlan {
         namespace: "favzetto".into(),
