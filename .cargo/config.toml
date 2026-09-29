@@ -1,0 +1,3 @@
+[registries.fucina]
+index = "sparse+https://fucina.homelab/api/packages/lelloman/cargo/"
+credential-provider = "cargo:token"

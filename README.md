@@ -19,9 +19,18 @@ including applicability checks and updates to both adoption trackers.
 
 ## Owned HTTP API
 
-`simple-server` pins its internal Axum implementation to **0.8.9**. Consumers
-depend on this repository at a reviewed Git revision and enable `web` for the
-owned HTTP API. Builds outside the private forge can use the public HTTPS mirror:
+`simple-server` pins its internal Axum implementation to **0.8.9**. Private builds
+can use the versioned Fucina Cargo package; see [publishing and consuming](docs/publishing.md)
+for registry configuration, credentials and CA trust:
+
+```toml
+[dependencies]
+simple-server = { version = "=0.1.0", registry = "fucina", features = ["web", "ws", "multipart"] }
+```
+
+Consumers can also depend on this repository at a reviewed Git revision and
+enable `web` for the owned HTTP API. Builds outside the private forge can use
+the public HTTPS mirror:
 
 ```toml
 [dependencies]

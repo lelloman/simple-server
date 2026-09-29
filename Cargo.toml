@@ -5,7 +5,8 @@ edition = "2024"
 description = "A modular foundation for Axum-based Rust services"
 repository = "https://github.com/lelloman/simple-server"
 readme = "README.md"
-publish = false
+publish = ["fucina"]
+include = ["/src/**", "/tests/**", "/examples/**", "/Cargo.toml", "/Cargo.lock", "/README.md", "/docs/publishing.md"]
 
 [features]
 database-migrations = []
