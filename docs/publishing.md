@@ -34,6 +34,23 @@ overwritten. Record the source commit and archive checksum, then independently
 verify a consumer download and compile before migrating consumer lockfiles.
 A Git push and deployment are separate operations.
 
+## Verified crates.io release: 0.1.0 (29 September 2026)
+
+- Public package: https://crates.io/crates/lelloman-simple-server/0.1.0
+- Source commit: `c95506164669c37a12bc06339a3b977a4b8d6a1b`.
+- License: `MIT OR Apache-2.0`; both license texts are in the archive.
+- Crate SHA-256: `1f3187c81c94701cd041df7ab17ce968b73c967db77c551170e3c24960b6c77a`.
+- Full `scripts/check` passed: formatting, strict all-target/all-feature Clippy,
+  default/all-feature tests and feature matrix (569 test executions),
+  no-default-feature compilation, and rustdoc with warnings denied.
+- Clean-checkout publish dry run passed; publication uploaded 124 files,
+  approximately 212 KiB compressed, and Cargo confirmed registry availability.
+- An independent consumer with a fresh Cargo home and no registry credentials
+  downloaded, compiled and ran with `database-sqlite-schema`. Its lockfile points
+  to crates.io; the downloaded archive SHA-256 matches its lockfile checksum.
+- Consumer migrations and their verification are tracked separately in
+  `migration-status.md`; publication alone does not update application manifests.
+
 ## Historical private Fucina release
 
 The original `simple-server` 0.1.0 package remains on the private Fucina registry.

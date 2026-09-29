@@ -86,7 +86,7 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | peerlo | `peerlo-api` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; retry primitives)** | **Done (local; bearer + Torznab keys)** | **Done (local; API + crawler + durable DHT)** | **Done (local)** | N/A (driver defaults only) | N/A (create-if-missing stores, no migration ledger) | Pending (applicability review) | None. |
 | pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local; main HTTP)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; socket scope)** | **Done (local; durable queue cadence)** | N/A (assessed) | **Done (local; sessions + permissions + WebSocket)** | **Done (login, durable daily quota + TMDB pacing)** | **Done (local; HTTP core)** | Done (server + CLI SQLite) | Done (server SQLx) | Pending (applicability review) | None. |
 | pezzottify-downloader | Puppeteer API, downloader HTTP server and Python cron | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; Puppeteer)** | **Done (local; both HTTP routers)** | N/A (assessed) | N/A (assessed) | **Done (local; both routers)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; priority admission)** | N/A (assessed) | N/A (no application caller gate) | **Done (local; Python/SQLite quota bridge)** | **Done (local; parent + child HTTP core)** | N/A (Python SQLite only) | N/A (no Rust migration runner) | Pending (applicability review) | None. |
-| quentin-torrentino | `crates/server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; stage capacity)** | N/A (assessed) | **Done (local; API access)** | **Done (local; MusicBrainz pacing)** | Pending | Pending (excluded by request) | Pending (excluded by request) | Pending (excluded by request) | Skipped: backend routing/handlers/extractors/responses, auth/metrics middleware and serving; torrent multipart, chat SSE, dashboard WebSockets, static-file routing and HTTP test fixtures. |
+| quentin-torrentino | `crates/server` | Pending (legacy direct Axum) | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; stage capacity)** | N/A (assessed) | **Done (local; API access)** | **Done (local; MusicBrainz pacing)** | Pending | Pending (excluded by request) | Pending (excluded by request) | Pending (excluded by request) | Legacy direct Axum: backend routing/handlers/extractors/responses, auth/metrics middleware and serving; torrent multipart, chat SSE, dashboard WebSockets, static-file routing and HTTP test fixtures. Owned HTTP migration remains pending. |
 | sct | `sct-server` | **Done** | **Done (scoped)** | N/A (no logger) | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; worker scope)** | **Done (local; durable worker cadence)** | **Done (local; retry scope)** | **Done (local; tokens/sessions + transactional access)** | N/A (durable state caps, no request quota) | **Done (local; HTTP core)** | Done (archive SQLite) | Done (PostgreSQL catalog; archive format N/A) | Pending (applicability review) | None. |
 | simple-agents | `simple-agents-service`; runner-shell logging; associated coding test servers | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local pilot; service routes)** | **Done (local; scoped canary)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; transactional capacity)** | **Done (local; retry scope)** | **Done (local; caller + transactional access)** | N/A (task/storage admission, no request quota) | **Done (local; HTTP core)** | Done (service + Runner SQLite) | Done (service ledger + Runner version marker) | Pending (applicability review) | None. |
 | simple-ai | `backend`, `inference-runner` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local; backend)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; batch readiness)** | N/A (assessed) | **Done (local; backend user/admin)** | **Done (local; backend budgets)** | **Done (local; HTTP core)** | N/A (driver defaults only) | N/A (column-driven upgrades, no migration ledger) | Pending (applicability review) | None. |
@@ -5969,33 +5969,97 @@ preserved. Nothing pushed or deployed. Both trackers show **1 Done, 16 Pending**
 for 07e: fifteen need applicability review, and Quentin Torrentino stays excluded.
 ## Public crates.io package migration — 2026-09-29
 
-**Pending publication and consumer integration.** The intended public package is
-`lelloman-simple-server` 0.1.0, with the `simple-server` dependency alias retaining
-existing Rust imports. The crates.io name was available when checked. No release
-has been uploaded; the owner selected `MIT OR Apache-2.0` and release preparation is underway. Existing
-Fucina publication evidence is retained in [publishing.md](publishing.md).
+**Done for public package delivery in all 18 active consumer development branches
+and Homelab build orchestration.** Published `lelloman-simple-server` 0.1.0 from
+`c95506164669c37a12bc06339a3b977a4b8d6a1b` under `MIT OR Apache-2.0`. The
+`simple-server` dependency alias retains existing Rust imports. All 25 consumer
+lockfiles identify crates.io and checksum
+`1f3187c81c94701cd041df7ab17ce968b73c967db77c551170e3c24960b6c77a`.
+See [publication evidence](publishing.md#verified-cratesio-release-010-29-september-2026).
 
-Prepared isolated worktrees cover Androidoscopy, Crumbles, Fausto, Favzetto,
-Lello Auth, LelloStore, Meteonesto, Observo, Paranza, Peerlo, Pezzottflix,
-Pezzottify, Pezzottify Downloader, Quentin Torrentino, SCT, Simple Agents,
-SimpleAI, Torrentino, and Homelab build orchestration. Pezzottify is based on
-`dev`; the others are based on `master`. Pezzottify's separate Paravoid worktree
-is not a separate development-branch consumer and remains untouched.
+The publication includes concurrent SQLite schema changes through `7345a52`.
+The full release check script passes formatting, strict all-target/all-feature
+Clippy, default/all-feature tests and feature matrix (**569 test executions**),
+no-default-feature compilation and strict rustdoc. Clean-checkout publish dry
+run and real publication passed. An independent fresh Cargo home, without
+registry credentials, downloaded, compiled and ran the released package; its
+archive checksum matches the consumer lockfiles.
 
-The initial reviewed library base was `a92ba06`; release preparation also
-incorporates the subsequent SQLite canary changes through `7345a52`. Baseline `scripts/check` passed after granting isolated loopback
-access to the HTTP tests. The renamed package also passes the complete check
-script (561 test executions), and crates.io publish dry run successfully
-packages and compiles the extracted archive without uploading. The package now includes both selected license texts. All 38 direct dependency declarations retain their
-feature sets and default-feature settings; 34 changed YAML files parse and all
-consumer diffs pass whitespace checks. Changed shell and Python files pass
-syntax checks. Homelab's release workflow suite passes four tests, including
-immutable application lockfile export, removal of sibling source requirements,
-build failure before push, and temporary context cleanup. Its older
-`test_deploy.py` suite has baseline failures from obsolete release fixtures;
-these are not represented as migration regressions or successful validation.
+All production users were identified from manifests and shared API imports.
+Existing feature selections/default-feature behavior are retained, including
+Pezzottify's concurrent SQLite schema feature. Native, CI, Docker, Compose and
+Android build paths no longer require a sibling library checkout or private
+registry access. The old checkout scripts/revision files were removed. The
+shared implementation is the reviewed release; this delivery migration makes no
+new capability-adoption claims. The private Fucina release remains available.
 
-Consumer lockfile regeneration, public download verification, compile checks,
-commits, development-branch integration and temporary worktree cleanup remain
-pending. Original worktree changes are preserved, including ongoing work in
-LelloStore, SimpleAI and Homelab. No Git push or deployment has been performed.
+| Repository | Development branch / integrated commit | Verification |
+| --- | --- | --- |
+| androidoscopy | `master` / `8cc9f4e7b9dc` | Server and pairing JNI crate: all-target checks. |
+| crumbles | `master` / `01a1ae04c0bb` | Workspace and native-dispatch qualification: all-target checks. |
+| fausto | `master` / `624a90223a25` | Workspace all-target check. |
+| favzetto | `master` / `07553fcddff9` | Backend all-target check. |
+| lello-auth | `master` / `dc2da7259087` | Workspace/examples all-target check. |
+| lellostore | `master` / `0d361fa9a969` | Backend all-target check, repeated after concurrent Paravoid changes. |
+| meteonesto | `master` / `5837d312eb03` | API, gateway and pipeline all-target checks with required Rust 1.97.1. |
+| observo | `master` / `53a78a443838` | Server and content-extractor all-target checks. |
+| paranza | `master` / `309ed300abc1` | Workspace all-target check. |
+| peerlo | `master` / `7c482a44a9f6` | Workspace all-target check. |
+| pezzottflix | `master` / `f4d81b1a524d` | Workspace and standalone RaiPlay CLI all-target checks. |
+| pezzottify | `dev` / `b47ec31b03b2` | All-target check repeated after current dev changes; concurrent package migration retained. |
+| pezzottify-downloader | `master` / `9bd75f9a24bc` | All-target check; concurrent equivalent package migration retained. |
+| quentin-torrentino | `master` / `1f76d881b199` | All-target check; before/after test failures match; both signal/drain cases pass (details below). |
+| sct | `master` / `77732bae83d9` | Workspace all-target check; qualification source export updated. |
+| simple-agents | `master` / `ecae1fa36083` | Workspace and managed-handoff qualification all-target checks; unrelated working edits preserved. |
+| simple-ai | `master` / `c199e6fee940` | Production workspace libraries/binaries pass after concurrent semantic-service changes; test fixture limitation below. |
+| torrentino | `master` / `81fdaa78d71d` | Replacement service all-target check and 43 tests pass before/after, including real-binary shutdown. |
+| homelab | `master` / `83b007f3696a` | Four hermetic release-workflow tests, including immutable lockfile export/build-failure cleanup; shell syntax passes. |
+
+All 17 changed Dockerfiles pass `docker build --check`. YAML parses, shell/Python
+syntax and diff whitespace checks pass. Existing embedded frontend assets were
+reused for Rust checks; no new frontend build or full Android qualification is
+claimed. Full container builds and complete application suites were not rerun
+for every service. The separately recorded concurrent Pezzottify/downloader
+migration includes its own Docker and broader test evidence.
+
+Two legacy HTTP implementations needed explicit compatibility changes because
+the old `simple_server::axum` re-export and public backend serve helper no longer
+exist. Quentin Torrentino and the separate Torrentino replacement service now
+import **the same Axum 0.8.9** directly for their existing HTTP code, while using
+the public shared package for lifecycle, logging and other existing helpers.
+Their HTTP serving retains graceful lifecycle cancellation and the
+pre-requested-shutdown guard. This is not owned HTTP migration: Quentin's Axum
+centralization/routing remains Pending, and Torrentino's raw HTTP usage is
+recorded here outside the original 17-service capability matrix.
+
+- Torrentino: **43 tests pass before and after**, including real HTTP/WebSocket
+  contracts and binary signal shutdown; all targets compile.
+- Quentin: all targets compile. The baseline and final workspace test command
+  both reach **521 passed, one failed** (`test_post_process_dispatches_to_video`).
+  The separately run server tests match **174 passed, one failed**
+  (`test_musicbrainz_search`), including 144/145 real HTTP E2E cases. These
+  baseline failures remain; tests after an early suite failure are not claimed.
+  Existing real-process SIGINT/SIGTERM checks pass with open WebSockets, listener
+  closure and durable `ServiceStopped` audit events.
+- SimpleAI: production libraries/binaries pass; all-target test compilation is
+  blocked by the existing untracked `scripts/configs/rtx.toml`
+  include. No private runtime configuration was copied to satisfy that test.
+- Meteonesto: the initial default Rust 1.96 check was rejected by its declared
+  1.97.1 minimum; all three checks pass with installed Rust 1.97.1.
+- Homelab: the old `test_deploy.py` fixtures fail on the unchanged baseline.
+  The current four-case release-workflow suite passes, including the new
+  application-lockfile export, no sibling source, build-failure-before-push and
+  temporary-context cleanup checks. No deployment command was run.
+
+Implementation and verification used isolated branches/worktrees. Concurrent
+package migrations in Pezzottify, its downloader and SimpleAI were retained,
+including their stricter locked Docker builds and unrelated application changes.
+LelloStore's new Paravoid commit and Homelab's concurrent build adjustment were
+preserved. Every consumer development branch was rebased onto its migration
+branch, ancestry and tested-tree integration were checked, and all 19 temporary
+consumer worktrees/branches were removed. Uncommitted/untracked original files
+were verified preserved; Simple Agents' overlapping Cargo.lock and README edits
+were merged without stashing its active work. Original dirty application changes
+are outside the clean committed-branch verification scope. Pezzottify's separate
+Paravoid worktree and SCT's validation scratch checkout were left untouched.
+No Git push, deployment or branch-protection change was performed.
