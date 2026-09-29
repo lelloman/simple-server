@@ -1,5 +1,40 @@
 # Service migration status
 
+## Pezzottify crates.io dependency — 2026-09-29
+
+Pezzottify and Pezzottify-downloader now consume the public
+`lelloman-simple-server =0.1.0` package using the existing `simple-server` Cargo
+alias. Production features and `simple_server` imports are preserved; Pezzottify's
+test-harness dependency uses the same package. Both lockfiles identify crates.io
+and checksum `1f3187c81c94701cd041df7ab17ce968b73c967db77c551170e3c24960b6c77a`.
+The downloaded archive records source revision
+`c95506164669c37a12bc06339a3b977a4b8d6a1b`; its `src/` tree matched the local
+shared library byte-for-byte at migration start. This changes dependency delivery,
+not capability adoption or runtime behavior.
+
+- Pezzottify `dev`: `acef712f` → `8edff13c`. Removed sibling checkout script/pin,
+  CI checkout steps, Docker COPY instructions and Compose source contexts. Docker
+  builds enforce Cargo.lock. All-target check, 1,469 Rust tests (36 existing
+  ignores), 45 Docker E2E tests (2 Android deselected), formatting, DB boundaries
+  and strict production Clippy passed. Docker E2E builds from the consumer root
+  without a library source context.
+- Downloader `master`: `32d7ab9` → `9bd75f9`. Removed sibling checkout script/pin
+  and Docker COPY instructions; build documentation no longer needs a library
+  checkout. All-target check, 171 tests (1 existing ignore), and a complete
+  standalone Docker release build passed. Existing formatting and strict Clippy
+  failures reproduce on the unchanged development branch; no Rust source was
+  edited and the Clippy diagnostic sets match.
+- Homelab `master`: `bad5318` removes Pezzottify's obsolete build-context
+  argument; the downloader invocation also has no library source context.
+  Shell syntax and diff checks pass. Other services retain their existing build
+  contexts, and unrelated homelab changes were preserved.
+- Implemented in isolated worktrees; development branches were rebased onto
+  their migration branches. Integrated trees match the tested trees, both
+  consumer working trees are clean, and their temporary worktrees/branches were
+  removed. No push or deployment was performed. Existing Fucina releases remain
+  available; these consumers need neither private-registry credentials nor a
+  `simple-server` checkout.
+
 Open the [HTML migration matrix](migration-status.html) for the visual table,
 with all services as rows and implemented and planned steps as columns.
 
