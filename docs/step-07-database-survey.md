@@ -1,12 +1,13 @@
 # Step 07: database capability survey
 
-Status: design survey, 2026-09-28. The first optional connection-policy
-capability is implemented and piloted in [Step 07a](step-07a-database-connections.md);
-[07b migration planning](step-07b-database-migrations.md) is implemented as a
-read-only preflight adopted by the Meteonesto pipeline and the Simple Agents
-service ledger. Backup and typed access remain
-future work. Step 07 is separate
-from the completed HTTP abstraction.
+Status: original survey 2026-09-28; rollout summary updated 2026-09-29.
+[07a connection policy](step-07a-database-connections.md) and
+[07b migration planning](step-07b-database-migrations.md) are adopted by all
+applicable in-scope services. The [richer SQLite design](step-07-sqlite-design.md)
+defines the proposed next increments: schema descriptions/validation (07e,
+next to implement), backup coordination (07c) and synchronous execution (07d).
+Domain typed access remains consumer-owned. Step 07 is separate from the
+completed HTTP abstraction.
 
 ## Representative services
 
@@ -55,6 +56,10 @@ within the Crumbles repository.
    cancellation and shutdown behavior before offering it as a shared feature.
 
 ## Proposed implementation sequence
+
+The [richer SQLite design](step-07-sqlite-design.md) inserts 07e schema support
+after the completed 07a/07b rollout and before 07c/07d. The original identifiers
+below remain stable.
 
 - **07a — explicit connection policy (implemented):** a driver-neutral SQLite
   policy emits only selected settings and verifies effective live values. The

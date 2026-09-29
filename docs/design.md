@@ -74,10 +74,11 @@ references remain valid. The execution order after Step 06 is:
    The [07b migration preflight](step-07b-database-migrations.md) is implemented
    as a driver-neutral, read-only planner and adopted by all ten applicable
    in-scope services. Six services have no matching migration ledger or Rust
-   migration runner; Quentin Torrentino remains excluded. The next design task
-   is an optional, richer SQLite schema module informed by Pezzottify's
-   table/column descriptions and validation. Application SQL, legacy layout
-   decisions, migration execution and backup remain application-owned.
+   migration runner; Quentin Torrentino remains excluded. The
+   [richer SQLite design](step-07-sqlite-design.md) defines optional schema
+   descriptions/validation (07e, next), backup coordination (07c) and bounded
+   synchronous execution (07d). It is a proposal, not implemented adoption.
+   Application SQL, legacy layout decisions and domain repositories stay local.
 
 Database helpers are not a prerequisite for the HTTP abstraction. Services retain
 their existing database libraries, setup and migrations while that work proceeds.

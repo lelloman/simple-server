@@ -49,6 +49,12 @@ schema execution, queries and backups remain application-owned. See the
 [07a contract](step-07a-database-connections.md), [completion evidence](#step-07a-completion-pass--2026-09-29)
 and [roadmap](design.md).
 
+**Richer SQLite design (2026-09-29):** the
+[proposed contract](step-07-sqlite-design.md) covers schema descriptions and
+validation (07e, next), backup coordination (07c) and bounded synchronous
+execution (07d). These capabilities are not implemented or adopted yet;
+existing 07a/07b statuses do not imply their completion.
+
 **Step 07a status:** 10 Done, 0 Partial, 1 Pending excluded, 6 N/A.
 SCT's PostgreSQL server is distinct from its SQLite archive catalog.
 
