@@ -53,8 +53,8 @@ application-owned. See the [Step 07 survey](step-07-database-survey.md),
 6 N/A. This is a source-level applicability audit, not additional production
 adoption. SCT's PostgreSQL server is distinct from its SQLite archive catalog.
 
-**Step 07b status:** shared preflight available; 2 Done (Meteonesto pipeline and Fausto SQLite),
-2 Partial (Simple Agents service ledger and Crumbles integration runner), 11 Pending (including excluded
+**Step 07b status:** shared preflight available; 3 Done (Meteonesto pipeline, Fausto SQLite and Favzetto backend),
+2 Partial (Simple Agents service ledger and Crumbles integration runner), 10 Pending (including excluded
 Quentin), 2 N/A in the consumer matrix. See the
 [contract](step-07b-database-migrations.md) and
 [verification](#step-07b-shared-migration-preflight--2026-09-28).
@@ -67,7 +67,7 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | Project | Server components | 1. Axum centralization | 2. Lifecycle / main() | 03a. Logging | 03b. Correlation | 03c. HTTP tracing | 04a. Body limits | 04b. Response headers | 04c. CORS | 05. Health/readiness | 06a. Task ownership | 06b. Scheduling | 06c. Execution policies | 08/09. Auth | 10. Rate limiting | 11. Routing / HTTP core | 07a. SQLite connection policy | 07b. Migration preflight | Remaining Axum exposure |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local canary)** | **Done (local; scoped canary)** | N/A (assessed) | N/A (no served probe) | **Done (local; scoped canary)** | **Done (local; primitives)** | **Done (local; primitives)** | **Done (local; sessions + route permissions)** | **Done (HTTP, MCP, durable quotas + outbound pacing)** | **Done (all production route groups)** | Done | Pending (no adoption) | None. |
-| favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local canary)** | **Done (local; request work)** | **Done (local; bounded batches)** | **Done (local; retry scope)** | **Done (local canary)** | **Done (local; global + endpoint budgets)** | **Done (local)** | Done | Pending (no adoption) | None. |
+| favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local canary)** | **Done (local; request work)** | **Done (local; bounded batches)** | **Done (local; retry scope)** | **Done (local canary)** | **Done (local; global + endpoint budgets)** | **Done (local)** | Done | Done (backend SQLite) | None. |
 | androidoscopy | `server`; Android SDK pairing | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (no served probe) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; controller + LAN access)** | **Done (local; device JNI pairing gate)** | **Done (all production route groups)** | N/A (no SQLite database) | N/A (no Rust migration runner) | None. |
 | crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; durable primitives)** | **Done (local; retry primitives)** | **Done (local; main + integration)** | **Done (local; HTTP + MCP + durable dispatcher)** | **Done (both servers)** | Pending (core + integration SQLite) | Partial (integration runner; core pending) | None. |
 | fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; dynamic cron)** | N/A (assessed) | **Done (local; HTTP + WebSocket + admin/write)** | **Done (local; five API tiers)** | **Done (local)** | Pending (storage SQLite) | Done (core SQLite store) | None. |
@@ -5756,3 +5756,37 @@ The change was committed in an isolated worktree from `master` at `1947a29`.
 The original `master` was rebased onto that tested branch; ancestry and trees
 match, the original checkout is clean, and the temporary worktree, branch and
 dependency link were removed. No push or deployment.
+
+## Step 07b Favzetto backend — 2026-09-29
+
+Favzetto `master` commit `22cc24e659f2b0fcb870c1770b92256710fecb19`
+uses reviewed simple-server source `da1229723b2378269ca6cf02d0cd568cc608ba07`
+in production `Database::migrate`. Both configured startup migration and the
+`migrate` command call this path. The backend discovers its sorted SQL files,
+reads its existing `schema_migrations` ledger, and gives the complete filename
+as both version and name to `MigrationPlan::inspect`. The ledger stores no
+historical digests, so both inputs use no digest and this adoption claims no
+checksum verification. The planner selects the pending suffix; Favzetto
+retains its per-file SQLx transactions, per-file applied checks, ledger inserts
+and post-migration legacy schema repairs. Missing history and unknown future
+versions now fail closed before pending SQL. This is **Done** for Favzetto's
+applicable backend database; its independent 07a policy remains Done.
+
+Baseline: four focused database tests passed after copying the original
+checkout's ignored `web/dist` into the isolated worktree for compile-time
+embedding. Final focused database tests passed 6/6, including valid older
+schema upgrade with retained rows and idempotence, and rejection of gapped or
+future ledger entries before pending SQL. The final full backend run passed
+137 library tests, 102 API tests, two lifecycle tests and two logging tests
+with two unrelated API tests skipped. Those catalog-research runtime-bridge
+tests failed identically on the untouched `master` checkout and migration
+branch: they attempted transitions from a completed flow and received HTTP
+400 rather than the expected 200. Warning-mode all-target Clippy, targeted
+database-file formatting and diff checks passed. Repository-wide formatting
+fails on unrelated files in both branches. Frontend and deployment checks
+were not repeated.
+
+The change was committed in an isolated worktree from `master` at `e5fdafd`.
+The original `master` was rebased onto the tested branch; ancestry and trees
+match, the original checkout is clean, and the temporary worktree, branch,
+generated-asset copy and dependency link were removed. No push or deployment.
