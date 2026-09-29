@@ -1,12 +1,16 @@
 [package]
-name = "simple-server"
+name = "lelloman-simple-server"
 version = "0.1.0"
 edition = "2024"
+license = "MIT OR Apache-2.0"
 description = "A modular foundation for Axum-based Rust services"
 repository = "https://github.com/lelloman/simple-server"
 readme = "README.md"
-publish = ["fucina"]
-include = ["/src/**", "/tests/**", "/examples/**", "/Cargo.toml", "/Cargo.lock", "/README.md", "/docs/publishing.md"]
+publish = ["crates-io"]
+include = ["/src/**", "/tests/**", "/examples/**", "/Cargo.toml", "/Cargo.lock", "/README.md", "/LICENSE-MIT", "/LICENSE-APACHE", "/docs/publishing.md"]
+
+[lib]
+name = "simple_server"
 
 [features]
 database-migrations = []

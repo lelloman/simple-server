@@ -963,6 +963,44 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bbd2bcb4c963f2ddae06a2efc7e9f3591312473c50c6685e1f298068316e66fe"
 
 [[package]]
+name = "lelloman-simple-server"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "axum-extra",
+ "axum-server",
+ "bytes",
+ "chrono",
+ "cookie",
+ "cron",
+ "futures-util",
+ "governor 0.10.4",
+ "governor 0.6.3",
+ "governor 0.8.1",
+ "http",
+ "http-body",
+ "http-body-util",
+ "hyper",
+ "log",
+ "pin-project-lite",
+ "rand 0.8.8",
+ "rcgen",
+ "reqwest",
+ "rusqlite",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tokio-tungstenite",
+ "tower",
+ "tower-cookies",
+ "tower-http",
+ "tower-layer",
+ "tower-service",
+ "tracing",
+ "tracing-subscriber",
+]
+
+[[package]]
 name = "libc"
 version = "0.2.189"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1562,44 +1600,6 @@ name = "simdutf8"
 version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e3a9fe34e3e7a50316060351f37187a3f546bce95496156754b601a5fa71b76e"
-
-[[package]]
-name = "simple-server"
-version = "0.1.0"
-dependencies = [
- "axum",
- "axum-extra",
- "axum-server",
- "bytes",
- "chrono",
- "cookie",
- "cron",
- "futures-util",
- "governor 0.10.4",
- "governor 0.6.3",
- "governor 0.8.1",
- "http",
- "http-body",
- "http-body-util",
- "hyper",
- "log",
- "pin-project-lite",
- "rand 0.8.8",
- "rcgen",
- "reqwest",
- "rusqlite",
- "serde",
- "serde_json",
- "tokio",
- "tokio-tungstenite",
- "tower",
- "tower-cookies",
- "tower-http",
- "tower-layer",
- "tower-service",
- "tracing",
- "tracing-subscriber",
-]
 
 [[package]]
 name = "slab"

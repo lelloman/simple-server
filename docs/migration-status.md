@@ -5967,3 +5967,35 @@ ancestry and identical tested trees were verified. Owned worktrees/branches and
 scratch logs were removed; pre-existing worktrees and recovery branches were
 preserved. Nothing pushed or deployed. Both trackers show **1 Done, 16 Pending**
 for 07e: fifteen need applicability review, and Quentin Torrentino stays excluded.
+## Public crates.io package migration — 2026-09-29
+
+**Pending publication and consumer integration.** The intended public package is
+`lelloman-simple-server` 0.1.0, with the `simple-server` dependency alias retaining
+existing Rust imports. The crates.io name was available when checked. No release
+has been uploaded; the owner selected `MIT OR Apache-2.0` and release preparation is underway. Existing
+Fucina publication evidence is retained in [publishing.md](publishing.md).
+
+Prepared isolated worktrees cover Androidoscopy, Crumbles, Fausto, Favzetto,
+Lello Auth, LelloStore, Meteonesto, Observo, Paranza, Peerlo, Pezzottflix,
+Pezzottify, Pezzottify Downloader, Quentin Torrentino, SCT, Simple Agents,
+SimpleAI, Torrentino, and Homelab build orchestration. Pezzottify is based on
+`dev`; the others are based on `master`. Pezzottify's separate Paravoid worktree
+is not a separate development-branch consumer and remains untouched.
+
+The initial reviewed library base was `a92ba06`; release preparation also
+incorporates the subsequent SQLite canary changes through `7345a52`. Baseline `scripts/check` passed after granting isolated loopback
+access to the HTTP tests. The renamed package also passes the complete check
+script (561 test executions), and crates.io publish dry run successfully
+packages and compiles the extracted archive without uploading. The package now includes both selected license texts. All 38 direct dependency declarations retain their
+feature sets and default-feature settings; 34 changed YAML files parse and all
+consumer diffs pass whitespace checks. Changed shell and Python files pass
+syntax checks. Homelab's release workflow suite passes four tests, including
+immutable application lockfile export, removal of sibling source requirements,
+build failure before push, and temporary context cleanup. Its older
+`test_deploy.py` suite has baseline failures from obsolete release fixtures;
+these are not represented as migration regressions or successful validation.
+
+Consumer lockfile regeneration, public download verification, compile checks,
+commits, development-branch integration and temporary worktree cleanup remain
+pending. Original worktree changes are preserved, including ongoing work in
+LelloStore, SimpleAI and Homelab. No Git push or deployment has been performed.

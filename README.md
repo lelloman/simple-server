@@ -19,23 +19,19 @@ including applicability checks and updates to both adoption trackers.
 
 ## Owned HTTP API
 
-`simple-server` pins its internal Axum implementation to **0.8.9**. Private builds
-can use the versioned Fucina Cargo package; see [publishing and consuming](docs/publishing.md)
-for registry configuration, credentials and CA trust:
+`simple-server` pins its internal Axum implementation to **0.8.9**. The public
+crates.io package is named `lelloman-simple-server`; keep the `simple-server`
+dependency alias to preserve existing `simple_server` imports:
 
 ```toml
 [dependencies]
-simple-server = { version = "=0.1.0", registry = "fucina", features = ["web", "ws", "multipart"] }
+simple-server = { package = "lelloman-simple-server", version = "=0.1.0", features = ["web", "ws", "multipart"] }
 ```
 
-Consumers can also depend on this repository at a reviewed Git revision and
-enable `web` for the owned HTTP API. Builds outside the private forge can use
-the public HTTPS mirror:
+Cargo downloads source and compiles it using your selected features. No sibling
+checkout, Fucina credentials, or private network access is required. See
+[publishing and consuming](docs/publishing.md) for release instructions.
 
-```toml
-[dependencies]
-simple-server = { git = "https://github.com/lelloman/simple-server", rev = "<reviewed-commit>", features = ["web", "ws", "multipart"] }
-```
 
 ```rust
 use simple_server::web::{Router, routing::get};
@@ -306,3 +302,7 @@ in-process tests and real loopback fixtures, bounded HTTP requests/responses,
 assertions and multipart uploads. `test-harness-ws` adds a client using owned
 WebSocket messages. Enable these in dev-dependencies; see the
 [test harness contract](docs/test-harness.md).
+
+## License
+
+Licensed under either [MIT](LICENSE-MIT) or [Apache-2.0](LICENSE-APACHE), at your option.

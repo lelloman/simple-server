@@ -1,68 +1,45 @@
-# Private Cargo releases on Fucina
+# Public Cargo releases
 
-`simple-server` is published under the `lelloman` owner on Fucina. This is a
-versioned Rust source package, not a precompiled library. Cargo downloads it;
-consumers no longer need a sibling checkout. Compilation reuse requires build
-caching separately.
-
-## Publish
-
-Use a clean committed checkout. Run `bash scripts/check` and inspect
-`cargo package --list --registry fucina` before releasing. The archive includes
-the library, tests, examples, manifest, lockfile, README and this guide; it excludes internal
-planning documents, agent settings, build outputs and credentials.
-
-The registry is restricted through `publish = ["fucina"]` and configured in
-`.cargo/config.toml`. Supply a dedicated `write:package` token in the owner-only
-file `~/.config/fucina/simple-server-cargo-publish.token`, or use
-`FUCINA_CARGO_TOKEN_FILE` / `FUCINA_CARGO_TOKEN`. The helper adds the `Bearer `
-prefix expected by Forgejo, passes the token in the Cargo environment, and does
-not change global Cargo settings or place credentials in command arguments.
-
-```sh
-python3 scripts/publish-fucina.py --dry-run
-python3 scripts/publish-fucina.py
-```
-
-Never delete or overwrite a release to replace its contents. Bump the version,
-update Cargo.lock, validate and commit before publishing the next version. Keep
-the publishing Git revision and package checksum as release evidence. A source
-Git push and consumer migrations are separate operations.
+The canonical consumer package is `lelloman-simple-server` on crates.io. The
+library target remains `simple_server`; the repository remains `simple-server`.
 
 ## Consume
 
-Add to the consumer's `.cargo/config.toml`:
-
-```toml
-[registries.fucina]
-index = "sparse+https://fucina.homelab/api/packages/lelloman/cargo/"
-credential-provider = "cargo:token"
-```
-
-Then replace the path dependency, preserving the features that consumer needs:
-
 ```toml
 [dependencies]
-simple-server = { version = "=0.1.0", registry = "fucina", features = ["web"] }
+simple-server = { package = "lelloman-simple-server", version = "=0.1.0", features = ["web"] }
 ```
 
-Provide `CARGO_REGISTRIES_FUCINA_TOKEN` as `Bearer ` followed by a dedicated
-consumer token. Developers and builders need LAN/VPN access, private DNS, and
-trust in Fucina's Caddy root CA. Workstation system trust is not automatically
-available inside Docker. Do not disable TLS verification. For Docker builds,
-provide credentials using BuildKit secrets, never build arguments or image ENV.
-Use an appropriate trusted CA bundle in the build stage.
+Retain each consumer's existing features and `default-features` setting. Commit
+Cargo.lock; it records the crates.io source and archive checksum. Native builds,
+CI and Docker builds download the same public package without credentials or a
+sibling library checkout. Cargo still compiles the source; build caching is a
+separate concern. No Fucina registry configuration is required.
 
-Verify a first release using an independent consumer and an empty Cargo cache;
-check Cargo.lock identifies Fucina and compare the downloaded crate checksum
-with the release archive. Compile with the consumer's actual feature set.
+## Publish
 
-Forgejo 15 package scopes follow owner permissions, and its read/write package
-token scopes are not a proven write-isolation boundary. Keep consumer tokens in
-trusted build environments. See the homelab `fucina/PACKAGES.md` runbook for
-credential provisioning, backup, and rotation.
+Use a clean committed checkout, run `bash scripts/check`, and inspect
+`cargo package --list --registry crates-io` before publication. The explicit
+package include list excludes internal planning, credentials and build outputs.
+Authenticate with a crates.io publishing token using `cargo login` or the
+`CARGO_REGISTRY_TOKEN` environment variable; never commit or print the token.
 
-Publishing alone does not change existing service manifests or Docker builds.
+```sh
+cargo publish --dry-run --locked --registry crates-io
+cargo publish --locked --registry crates-io
+```
+
+Always bump the version for a subsequent release. Published versions cannot be
+overwritten. Record the source commit and archive checksum, then independently
+verify a consumer download and compile before migrating consumer lockfiles.
+A Git push and deployment are separate operations.
+
+## Historical private Fucina release
+
+The original `simple-server` 0.1.0 package remains on the private Fucina registry.
+It required private network access, registry credentials and CA trust. New public
+consumers use the crates.io package above. The old publication evidence below is
+retained for reproducibility; it describes a different package and archive.
 
 ## Verified release: 0.1.0 (29 September 2026)
 
