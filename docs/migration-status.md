@@ -5873,3 +5873,45 @@ verified, and temporary worktrees and branches were removed. Existing unrelated
 consumer edits and pre-existing worktrees were preserved. Active
 `simple-server.rev` pins and build references were updated where present. No
 push or deployment was performed.
+
+## Step 07e shared SQLite schema core — 2026-09-29
+
+Implemented in `40c5214` from clean `master` base `085b569`, on isolated
+`codex/07e-schema` worktree branch. The optional `database-sqlite-schema` feature
+provides `database::sqlite::schema`: borrowed/owned snapshots, safely quoted
+identifiers, trusted application expressions, deterministic creation plans,
+driver-neutral observations, explicit comparison policies and structured
+reports. No runtime dependency is added. The normal dependency graph for this
+feature contains only `simple-server`.
+
+The implemented scope is ordinary tables, columns, ordered/composite primary
+and unique keys, composite foreign keys and named/partial indexes. Unsupported
+or unavailable metadata cannot silently produce a match. Required-subset reports
+separately identify permitted extras; exact reports reject them. Applications
+retain SQL execution, transactions, ledger/version markers, domain queries and
+legacy classification. See the [API and adapter contract](step-07e-sqlite-schema.md)
+for coverage limits, including the ordinary-table capability assertion.
+
+Verification: the existing 12 connection-policy/migration tests passed before
+changes. All 18 new schema tests pass against bundled SQLite through the existing
+rusqlite 0.33 development dependency, including metadata differences, composite
+constraints, partial-index contents, attached database isolation, quoted names,
+unsupported properties, metadata read failure propagation, and file-backed
+rollback/retry/reopen with data and version preservation. Borrowed definitions
+and runtime observations are tested together. No SQLx consumer or production
+canary is claimed by these fixtures.
+
+Repository formatting, strict all-target/all-feature Clippy, default and
+all-feature tests, the existing feature-matrix checks, no-default-features check,
+and strict all-feature rustdoc passed. The sandbox initially prevented existing
+HTTP tests from binding local sockets; the permitted rerun completed the tests.
+The final rustdoc check found a new unresolved link, which was corrected and
+rechecked successfully. The standalone schema example runs; documentation links,
+Markdown column counts and rendered HTML table dimensions/statuses were checked.
+
+The new 07e column has **17 Pending**: Pezzottify awaits its canary, fifteen
+services await capability-specific applicability review, and Quentin Torrentino
+remains excluded. Existing 07a/07b adoption is unchanged. Backup coordination
+(07c) and synchronous execution (07d) remain planned. The dedicated branch is
+integrated into `master` and its worktree/branch removed after verification;
+no push or deployment is part of this increment.
