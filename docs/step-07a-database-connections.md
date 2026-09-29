@@ -1,5 +1,9 @@
 # Step 07a: SQLite connection policy
 
+As of 2026-09-29, all ten applicable in-scope services use this contract in
+production. See the [completion record](migration-status.md#step-07a-completion-pass--2026-09-29)
+for the per-service scope and verification.
+
 `database-sqlite` is an optional, driver-independent feature. It does not
 enable an HTTP feature or add a SQLite driver. The shared
 `database::sqlite::ConnectionPolicy` records only settings the application
@@ -23,6 +27,7 @@ linking both drivers into one build. Native driver types, pool construction,
 schema/migration ledgers, query mapping, transactions, and backup remain in
 the consumer.
 
-This is 07a only. Migration planning/reporting, backup coordination and a
-bounded synchronous execution adapter are proposed separately in the
+This is 07a only. Migration planning/reporting is implemented separately as
+[07b](step-07b-database-migrations.md); backup coordination and a bounded
+synchronous execution adapter are separate topics in the
 [Step 07 survey](step-07-database-survey.md).

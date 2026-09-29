@@ -69,8 +69,8 @@ references remain valid. The execution order after Step 06 is:
    [five-service survey](step-07-database-survey.md) compares connection setup,
    migration ledgers, typed access, backup and synchronous execution.
    [07a connection policy](step-07a-database-connections.md) is implemented and
-   adopted by Favzetto and Pezzottify. The remaining repositories have a
-   [component-level applicability audit](migration-status.md#step-07a-applicability-audit-and-07b-design--2026-09-28).
+   adopted by all ten applicable in-scope services, with
+   [completion evidence](migration-status.md#step-07a-completion-pass--2026-09-29).
    The [07b migration preflight](step-07b-database-migrations.md) is implemented
    as a driver-neutral, read-only planner and adopted by all ten applicable
    in-scope services. Six services have no matching migration ledger or Rust
