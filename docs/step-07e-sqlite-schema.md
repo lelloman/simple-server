@@ -114,7 +114,9 @@ specifications and borrowed descriptions. Creation does not alter an existing
 `user_version`; an application-owned failed transaction preserves records and
 its old marker across restart.
 
-Pezzottify is the next canary; no consumer is marked adopted yet. Driver
+Pezzottify has completed its canary. SimpleAI and Paranza use shared creation
+plans; Peerlo has Partial tracker adoption. Remaining rollout was stopped at user
+request; see the [checkpoint](migration-status.md#step-07e-consumer-rollout-checkpoint--2026-09-30). Driver
 introspection follows SQLite's [PRAGMA documentation](https://www.sqlite.org/pragma.html),
 with generated statements checked against [CREATE TABLE](https://www.sqlite.org/lang_createtable.html)
 and [CREATE INDEX](https://www.sqlite.org/lang_createindex.html).
@@ -157,3 +159,12 @@ normalization, SQL upgrades and transaction ownership remain local. All 38
 historical snapshots pass differential tests; file-backed startup, rollback,
 restart and retry pass. See the [canary evidence](migration-status.md#step-07e-pezzottify-schema-canary--2026-09-29).
 The shared suite now includes 22 schema tests and passes the full check script.
+
+
+## Driver-owned idempotent creation
+
+Adapters adding IF NOT EXISTS to generated indexes must test malformed existing
+schemas: SQLite DQS_DDL may interpret a missing double-quoted column as a string
+literal. SimpleAI and Peerlo temporarily disable that fallback during generated
+index execution, restore the setting on success/error, and test existing-index
+acceptance and partial-bootstrap failure order. Execution remains driver-owned.
