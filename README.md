@@ -25,7 +25,7 @@ dependency alias to preserve existing `simple_server` imports:
 
 ```toml
 [dependencies]
-simple-server = { package = "lelloman-simple-server", version = "=0.1.0", features = ["web", "ws", "multipart"] }
+simple-server = { package = "lelloman-simple-server", version = "=0.1.1", features = ["web", "ws", "multipart"] }
 ```
 
 Cargo downloads source and compiles it using your selected features. No sibling

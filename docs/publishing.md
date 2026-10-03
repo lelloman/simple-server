@@ -34,13 +34,19 @@ overwritten. Record the source commit and archive checksum, then independently
 verify a consumer download and compile before migrating consumer lockfiles.
 A Git push and deployment are separate operations.
 
-## Prepared release: 0.1.1
+## Verified crates.io release: 0.1.1 (3 October 2026)
 
 Adds additive SQLite extended creation descriptions for AUTOINCREMENT, FTS5 and
 triggers. Existing creation/comparison APIs and runtime dependencies are unchanged.
 Peerlo's metadata canary is tested against this source before registry publication.
-This version is **not published yet**. Publication requires separate approval;
-consumer registry integration remains pending until the download is verified.
+Published with explicit user approval from clean source
+`bda33540e410bc759a80e8627e132923b8996859`. Archive SHA256:
+`f7fd8567b285a8e1cb8315626df78c8d56b444907e8a9a5ac9e83f5db6e47f25`.
+Full shared checks, package verification and publication dry-run passed.
+Independent crates.io archive download matches checksum and embedded source commit.
+Peerlo downloaded the published package without an override: 236 targeted tests
+pass (one existing ignored doctest), and workspace check passes with existing CLI
+warnings. Its master is integrated at `1ce8481`; temporary worktrees are removed.
 
 ## Verified crates.io release: 0.1.0 (29 September 2026)
 
