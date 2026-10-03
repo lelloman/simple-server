@@ -79,7 +79,9 @@ WebSocket APIs. Quentin Torrentino remains pending at user request. See the
 the shared library and adopted by all applicable in-scope services. Quentin
 Torrentino remains excluded at user request. The optional [07e schema core](step-07e-sqlite-schema.md) is now implemented;
 Pezzottify, SimpleAI and Paranza have scoped adoption; Peerlo is Partial.
-The remaining rollout is stopped at user request (2026-09-30). Database drivers,
+The extended creation core and Peerlo metadata canary are prepared (2026-10-03);
+publication approval and registry verification are pending. Other consumer rollout
+has not resumed. Database drivers,
 schema execution, queries and backups remain application-owned. See the
 [Step 07 survey](step-07-database-survey.md),
 [07a contract](step-07a-database-connections.md), [completion evidence](#step-07a-completion-pass--2026-09-29)
@@ -118,7 +120,7 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; pipeline/gateway)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; weighted claims)** | **Done (local; budgets/retry)** | **Done (local; all three services)** | **Done (local; gateway budgets)** | **Done (local)** | Done (pipeline SQLite) | Done (weather-pipeline SQLite) | Pending (applicability review) | None. |
 | observo | `observo-server`; standalone extractor logging | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (no served probe) | **Done (local; scoped)** | **Done (local; primitives)** | N/A (assessed) | **Done (local; IP/key/JWT access)** | N/A (no request quota) | **Done (local)** | Done (server SQLite) | N/A (idempotent schema, no migration ledger) | Pending (applicability review) | None. |
 | paranza | `apps/paranza-server` | **Done** | **Done (local; scoped)** | N/A (no logger) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; runner + PCM access)** | N/A (no implemented request quota) | **Done (local)** | N/A (driver defaults only) | N/A (idempotent DDL/column repairs, no migration ledger) | Done (store creation; scoped) | None. |
-| peerlo | `peerlo-api` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; retry primitives)** | **Done (local; bearer + Torznab keys)** | **Done (local; API + crawler + durable DHT)** | **Done (local)** | N/A (driver defaults only) | N/A (create-if-missing stores, no migration ledger) | Partial (tracker creation; metadata pending) | None. |
+| peerlo | `peerlo-api` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; retry primitives)** | **Done (local; bearer + Torznab keys)** | **Done (local; API + crawler + durable DHT)** | **Done (local)** | N/A (driver defaults only) | N/A (create-if-missing stores, no migration ledger) | Partial (tracker integrated; metadata canary awaits 0.1.1 release) | None. |
 | pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local; main HTTP)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; socket scope)** | **Done (local; durable queue cadence)** | N/A (assessed) | **Done (local; sessions + permissions + WebSocket)** | **Done (login, durable daily quota + TMDB pacing)** | **Done (local; HTTP core)** | Done (server + CLI SQLite) | Done (server SQLx) | Pending (applicability review) | None. |
 | pezzottify-downloader | Puppeteer API, downloader HTTP server and Python cron | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; Puppeteer)** | **Done (local; both HTTP routers)** | N/A (assessed) | N/A (assessed) | **Done (local; both routers)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; priority admission)** | N/A (assessed) | N/A (no application caller gate) | **Done (local; Python/SQLite quota bridge)** | **Done (local; parent + child HTTP core)** | N/A (Python SQLite only) | N/A (no Rust migration runner) | Pending (applicability review) | None. |
 | quentin-torrentino | `crates/server` | Pending (legacy direct Axum) | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; stage capacity)** | N/A (assessed) | **Done (local; API access)** | **Done (local; MusicBrainz pacing)** | Pending | Pending (excluded by request) | Pending (excluded by request) | Pending (excluded by request) | Legacy direct Axum: backend routing/handlers/extractors/responses, auth/metrics middleware and serving; torrent multipart, chat SSE, dashboard WebSockets, static-file routing and HTTP test fixtures. Owned HTTP migration remains pending. |
@@ -6141,3 +6143,35 @@ incompatibility N/A. Peerlo stays Partial until its metadata scope is resolved.
 The scope question about existing helpers versus rewriting all application
 migration SQL was unanswered when the user stopped work; resolve it on resume.
 All unactioned rows retain Pending.
+
+## Step 07e extended creation and Peerlo release gate — 2026-10-03
+
+Shared source `bda33540e410bc759a80e8627e132923b8996859` implements additive
+AUTOINCREMENT, FTS5 and trigger descriptions with explicit creation mode.
+Existing creation APIs remain compatible. Execution, synchronization SQL bodies,
+backfill, rebuild, transactions, PRAGMAs and markers stay consumer-owned. Ordinary
+schema observations do not establish validation of these extended objects.
+
+Library master includes the implementation. Full `scripts/check` passes, including
+9 extended SQLite tests and 22 existing schema tests, strict Clippy and rustdoc.
+The 0.1.1 package builds and verifies; publication dry-run passes without upload.
+Archive SHA256: `f7fd8567b285a8e1cb8315626df78c8d56b444907e8a9a5ac9e83f5db6e47f25`.
+The archive records the shared source commit above. Version 0.1.1 is not published.
+
+Peerlo canary `6268085` is committed on isolated `codex/07e-metadata`. Its metadata
+bootstrap uses both shared creation phases, preserving legacy failure order,
+search triggers, AUTOINCREMENT, existing objects and driver defaults. All five
+shared dependency aliases target exact 0.1.1; the proposed registry checksum
+matches the prepared archive. No path override is committed. Tests used a temporary
+local patch to the exact shared source: **236 passed**, one existing ignored
+doctest. Six new legacy comparisons cover schema, CRUD/search, reopen, rollback,
+sequence progression, missing backfill, startup failures and retry. Workspace
+check and formatting pass. Strict metadata all-target Clippy retains existing
+redundant_closure and unnecessary_map_or findings; normal Clippy completes.
+
+Peerlo master remains clean at `7af21ac67d078a812e4c2472ae44e3902cd737d2`.
+No registry-based verification or consumer integration is claimed yet. Publication
+requires user approval; afterwards download verification, locked tests against
+crates.io, master rebase and worktree cleanup remain. Release and canary worktrees
+are deliberately retained for this gate. Matrix remains **3 Done, 1 Partial,
+13 Pending**. No push, deployment or production database operation occurred.
