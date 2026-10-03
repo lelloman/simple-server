@@ -34,6 +34,14 @@ overwritten. Record the source commit and archive checksum, then independently
 verify a consumer download and compile before migrating consumer lockfiles.
 A Git push and deployment are separate operations.
 
+## Prepared release: 0.1.1
+
+Adds additive SQLite extended creation descriptions for AUTOINCREMENT, FTS5 and
+triggers. Existing creation/comparison APIs and runtime dependencies are unchanged.
+Peerlo's metadata canary is tested against this source before registry publication.
+This version is **not published yet**. Publication requires separate approval;
+consumer registry integration remains pending until the download is verified.
+
 ## Verified crates.io release: 0.1.0 (29 September 2026)
 
 - Public package: https://crates.io/crates/lelloman-simple-server/0.1.0

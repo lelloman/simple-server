@@ -7,6 +7,9 @@
 
 use std::{borrow::Cow, collections::BTreeSet, fmt};
 
+mod creation;
+pub use creation::*;
+
 /// An SQLite identifier, quoted independently of trusted SQL expressions.
 #[derive(Clone, Debug)]
 pub struct Identifier<'a>(Cow<'a, str>);
@@ -461,8 +464,9 @@ fn validate_definition(snapshot: &SchemaSnapshot<'_>) -> Result<(), DefinitionEr
     Ok(())
 }
 
-/// Deterministic statements in input table/index order. No transaction, PRAGMA,
-/// marker write, IF NOT EXISTS, repair or destructive migration is included.
+/// Inspectable DDL in the selected planner's deterministic object order.
+/// No transaction, PRAGMA, marker write, repair or destructive migration is
+/// included. Extended creation may explicitly select IF NOT EXISTS.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct CreationPlan {
     pub statements: Vec<String>,
@@ -476,6 +480,15 @@ fn identifiers(names: &[Identifier<'_>]) -> String {
 }
 
 pub fn create_plan(snapshot: &SchemaSnapshot<'_>) -> Result<CreationPlan, DefinitionError> {
+    create_ordinary_plan(snapshot, &[], CreationMode::Create, false)
+}
+
+fn create_ordinary_plan(
+    snapshot: &SchemaSnapshot<'_>,
+    auto_increment: &[AutoIncrementSpec<'_>],
+    mode: CreationMode,
+    strict_index_identifiers: bool,
+) -> Result<CreationPlan, DefinitionError> {
     validate_definition(snapshot)?;
     for t in snapshot.tables.iter() {
         if !t.unsupported.is_empty() {
@@ -487,6 +500,7 @@ pub fn create_plan(snapshot: &SchemaSnapshot<'_>) -> Result<CreationPlan, Defini
     }
     let mut statements = Vec::new();
     for t in snapshot.tables.iter() {
+        let auto = auto_increment.iter().find(|option| option.table == t.name);
         let mut parts = Vec::new();
         for c in t.columns.iter() {
             let mut part = c.name.quoted();
@@ -499,9 +513,12 @@ pub fn create_plan(snapshot: &SchemaSnapshot<'_>) -> Result<CreationPlan, Defini
             if let Some(default) = &c.default {
                 part.push_str(&format!(" DEFAULT ({})", default.as_str()));
             }
+            if auto.is_some_and(|option| option.column == c.name) {
+                part.push_str(" PRIMARY KEY AUTOINCREMENT");
+            }
             parts.push(part);
         }
-        if !t.primary_key.is_empty() {
+        if auto.is_none() && !t.primary_key.is_empty() {
             parts.push(format!("PRIMARY KEY ({})", identifiers(&t.primary_key)));
         }
         for columns in t.unique_constraints.iter() {
@@ -518,7 +535,8 @@ pub fn create_plan(snapshot: &SchemaSnapshot<'_>) -> Result<CreationPlan, Defini
             ));
         }
         statements.push(format!(
-            "CREATE TABLE {}.{} ({});",
+            "CREATE TABLE {}{}.{} ({});",
+            mode.clause(),
             snapshot.database.quoted(),
             t.name.quoted(),
             parts.join(", ")
@@ -532,7 +550,11 @@ pub fn create_plan(snapshot: &SchemaSnapshot<'_>) -> Result<CreationPlan, Defini
                 .map(|term| {
                     format!(
                         "{} COLLATE {} {}",
-                        term.column.quoted(),
+                        if strict_index_identifiers {
+                            format!("`{}`", term.column.as_str().replace('`', "``"))
+                        } else {
+                            term.column.quoted()
+                        },
                         term.collation.quoted(),
                         if term.descending { "DESC" } else { "ASC" }
                     )
@@ -540,8 +562,9 @@ pub fn create_plan(snapshot: &SchemaSnapshot<'_>) -> Result<CreationPlan, Defini
                 .collect::<Vec<_>>()
                 .join(", ");
             statements.push(format!(
-                "CREATE {}INDEX {}.{} ON {} ({}){};",
+                "CREATE {}INDEX {}{}.{} ON {} ({}){};",
                 if idx.unique { "UNIQUE " } else { "" },
+                mode.clause(),
                 snapshot.database.quoted(),
                 idx.name.quoted(),
                 t.name.quoted(),

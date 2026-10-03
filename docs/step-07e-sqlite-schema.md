@@ -168,3 +168,56 @@ schemas: SQLite DQS_DDL may interpret a missing double-quoted column as a string
 literal. SimpleAI and Peerlo temporarily disable that fallback during generated
 index execution, restore the setting on success/error, and test existing-index
 acceptance and partial-bootstrap failure order. Execution remains driver-owned.
+
+
+## Extended creation (prepared for 0.1.1)
+
+`ExtendedSchemaSnapshot::new(schema)` adds optional AUTOINCREMENT, FTS5 and
+trigger descriptions without changing `TableSpec`, `SchemaSnapshot`, `create_plan`
+or the existing validation APIs. `create_extended_plan(snapshot, CreationMode)`
+returns all statements or a definition error; it executes nothing. Use `Create`
+for ordinary creation or explicitly choose `IfNotExists`. The latter is SQLite's
+existing-object no-op, never shape validation or repair. Statement order is
+ordinary tables, indexes, virtual tables, then triggers; split plans if existing
+startup phases require different locks or ordering. Transactions and markers
+remain owned by the caller.
+
+`AutoIncrementSpec` selects a declared table's sole INTEGER primary-key column.
+It emits inline PRIMARY KEY AUTOINCREMENT, retaining the declared NOT NULL flag.
+Other types, composite keys, missing columns/tables and repeated options fail
+before a plan is returned. SQLite owns sqlite_sequence, allocation and rollback.
+
+`Fts5TableSpec` names indexed/unindexed columns, internal/external/contentless
+content ownership, external content table/rowid, optional tokenizer configuration
+and positive prefix lengths. Names are identifiers; tokenizer/content options
+are encoded as SQL literals, never inserted as SQL fragments. SQLite checks FTS5
+module syntax/availability. The planner rejects empty/reserved/duplicate columns,
+invalid prefixes/tokenizers and explicit collisions with allocated shadow names.
+It does not rebuild/backfill an existing content table, select a tokenizer
+implicitly, or create synchronization triggers automatically.
+
+`TriggerSpec` names the target, timing (BEFORE/AFTER/INSTEAD OF), event
+(INSERT/DELETE/UPDATE, optionally UPDATE OF), optional WHEN expression and a
+trusted application-authored body. The body includes its statement terminators;
+newlines preserve SQL comments. Body syntax, policy, references and semantics
+remain application-owned. Targets may exist outside the snapshot; known UPDATE
+OF columns are checked when their table is declared. Trigger names use SQLite's
+separate namespace. Application-authored bodies are not parsed or sanitized:
+never derive them from untrusted requests.
+
+Extended indexes use escaped backtick identifiers for column terms, which reject
+missing columns even when SQLite DQS is enabled. Existing `create_plan` SQL stays
+compatible; its idempotent adapters retain their documented DQS handling.
+
+This increment extends **creation only**. Existing read-only comparison does not
+prove AUTOINCREMENT, FTS5 configuration/shadows or trigger bodies. Do not mark these
+as structurally verified using ordinary-table observations; report unsupported or
+unavailable coverage as appropriate. CHECK, STRICT, WITHOUT ROWID, generated
+columns, views and other excluded constructs still require separate work.
+
+Verification includes actual SQLite auto-ID non-reuse, external-content
+insert/update/delete/integrity checks, transaction rollback, all FTS content
+modes, tokenizer/prefix/unindexed options, missing-column rejection, collision
+checks, quoted literals, trigger comments/WHEN/UPDATE OF/views, attached-schema
+creation and file-backed restart. Publication and consumer integration status are
+recorded separately in the migration tracker.
