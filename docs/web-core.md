@@ -389,5 +389,4 @@ service behavior. Standard cookie values/builders and attribute types are expose
 from the cookie data library. Auth/CSRF/session policy remains application-owned.
 The legacy `tower-cookies` adapter above remains supported independently. See the
 [mutable-cookie contract](cookies.md) for parsing, deletion, layer placement,
-manual composition and consumer migration limits. This feature is not yet
-published in a new crate release.
+manual composition and consumer migration limits. This feature is available starting with release 0.1.4.

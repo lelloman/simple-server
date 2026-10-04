@@ -317,4 +317,4 @@ Optional mutable HTTP cookies: enable `cookies` and use
 `web::cookies::{Cookies, CookieManagerLayer, Cookie, SameSite}`. The shared jar
 tracks request mutations and appends response deltas; cookie attributes and
 session/CSRF policy remain application-owned. See [the cookie contract](docs/cookies.md).
-This capability is local and not yet in a published crate release.
+Available starting with release 0.1.4.

@@ -98,5 +98,5 @@ replace imports with `simple_server::web::cookies`, enable `cookies` instead of
 server and embedded/external-OIDC examples. Current consumers still use published
 older versions; implementation availability is not consumer adoption.
 
-The feature is implemented locally and is not yet published in a new crate
-release. Existing published 0.1.3 does not contain it.
+The feature is available starting with release 0.1.4. Published 0.1.3 does not
+contain it.
