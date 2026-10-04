@@ -49,9 +49,8 @@ Optional modules do not have to be adopted by every product.
 
 **Combined auth (08/09):** active services complete locally, including Torrentino; its async bearer/session adoption is recorded below. Quentin Torrentino remains excluded.
 
-**Rate limiting (10):** previously migrated consumers are complete locally.
-Torrentino application-budget applicability remains Pending; Quentin Torrentino
-remains excluded. The five final consumers now use shared
+**Rate limiting (10):** all applicable active consumers are complete locally,
+including Torrentino’s durable application budgets. Quentin Torrentino remains excluded. The five final consumers now use shared
 policies for their remaining quotas and pacing; application storage and transaction
 ownership are preserved. Test limitations are recorded in the completion evidence.
 
@@ -86,9 +85,9 @@ have evidenced N/A assessments for the optional schema module; Meteonesto and
 Downloader now have evidenced N/A assessments as well. Pezzottflix CLI creation
 is adopted.
 The extended creation core is published as 0.1.1 and Peerlo metadata is integrated
-with registry verification (2026-10-03). Simple Agents and SCT are integrated (2026-10-04). The only remaining in-scope
-service, LelloStore, is deferred by the user while its backend is actively changing;
-Torrentino remains excluded. Database drivers,
+with registry verification (2026-10-03). Simple Agents and SCT are integrated (2026-10-04). LelloStore has an evidenced N/A schema assessment; Torrentino’s replacement
+service now adopts connection policy, version-only preflight and schema creation.
+All applicable active SQLite consumers are complete; Quentin Torrentino remains excluded. Database drivers,
 schema execution, queries and backups remain application-owned. See the
 [Step 07 survey](step-07-database-survey.md),
 [07a contract](step-07a-database-connections.md), [completion evidence](#step-07a-completion-pass--2026-09-29)
@@ -130,7 +129,7 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | peerlo | `peerlo-api` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; retry primitives)** | **Done (local; bearer + Torznab keys)** | **Done (local; API + crawler + durable DHT)** | **Done (local)** | N/A (driver defaults only) | N/A (create-if-missing stores, no migration ledger) | **Done (tracker + metadata creation)** | None. |
 | pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local; main HTTP)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; socket scope)** | **Done (local; durable queue cadence)** | N/A (assessed) | **Done (local; sessions + permissions + WebSocket)** | Done (login/daily/TMDB + configured HTTP limiter) | **Done (local; HTTP core)** | Done (server + CLI SQLite) | Done (server SQLx) | Done (CLI creation; server owns versioned SQL) | None. |
 | pezzottify-downloader | Puppeteer API, downloader HTTP server and Python cron | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; Puppeteer)** | **Done (local; both HTTP routers)** | N/A (assessed) | N/A (assessed) | **Done (local; both routers)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; priority admission)** | N/A (assessed) | N/A (no application caller gate) | **Done (local; Python/SQLite quota bridge)** | **Done (local; parent + child HTTP core)** | N/A (Python SQLite only) | N/A (no Rust migration runner) | N/A (Python owns SQLite; Rust quota bridge has no schema API) | None. |
-| torrentino | `crates/service` (included) | **Done** | **Done (shared lifecycle)** | **Done (shared logging)** | N/A (no request-ID protocol) | N/A (no HTTP tracing layer) | **Done (64 KiB API; 4 KiB sessions)** | **Done (authenticated cache policy)** | N/A (same-origin; no CORS grant) | N/A (no served probe) | Pending (worker ownership review) | Pending (fixed worker polling) | Pending (worker policy review) | **Done (async bearer/session verification)** | Pending (application budget applicability review) | **Done (owned HTTP + WebSockets)** | Pending (SQLx WAL/FK/busy timeout) | Pending (custom user_version guard) | Pending (schema.sql bootstrap) | None. |
+| torrentino | `crates/service` (included) | **Done** | **Done (shared lifecycle)** | **Done (shared logging)** | **Done (error-envelope UUIDs only)** | N/A (no HTTP tracing layer) | **Done (64 KiB API; 4 KiB sessions)** | **Done (authenticated cache policy)** | N/A (same-origin; no CORS grant) | N/A (no served probe) | **Done (tracked worker cycles)** | **Done (fixed-rate intake; completion-relative polling)** | **Done (runtime deadlines and retry decisions)** | **Done (async bearer/session verification)** | **Done (durable application counters and snapshot quota)** | **Done (owned HTTP + WebSockets)** | **Done (verified per-connection WAL/FK/busy policy)** | **Done (version-only user_version guard)** | **Done (11 tables; 3 explicit indexes)** | None. |
 | quentin-torrentino | `crates/server` (**excluded by request**) | Pending (legacy direct Axum) | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; stage capacity)** | N/A (assessed) | **Done (local; API access)** | **Done (local; MusicBrainz pacing)** | Pending | Pending (excluded by request) | Pending (excluded by request) | Pending (excluded by request) | Legacy direct Axum: backend routing/handlers/extractors/responses, auth/metrics middleware and serving; torrent multipart, chat SSE, dashboard WebSockets, static-file routing and HTTP test fixtures. Owned HTTP migration remains pending. |
 | sct | `sct-server` | **Done** | **Done (scoped)** | N/A (no logger) | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; worker scope)** | **Done (local; durable worker cadence)** | **Done (local; retry scope)** | **Done (local; tokens/sessions + transactional access)** | N/A (durable state caps, no request quota) | **Done (local; HTTP core)** | Done (archive SQLite) | Done (PostgreSQL catalog; archive format N/A) | Done (offline archive creation; PostgreSQL outside scope) | None. |
 | simple-agents | `simple-agents-service`; runner-shell logging; associated coding test servers | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local pilot; service routes)** | **Done (local; scoped canary)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; transactional capacity)** | **Done (local; retry scope)** | **Done (local; caller + transactional access)** | N/A (task/storage admission, no request quota) | **Done (local; HTTP core)** | Done (service + Runner SQLite) | Done (service ledger + Runner version marker) | Done (service ledger + Runner transport creation) | None. |
@@ -7367,3 +7366,50 @@ shared release worktree/branch are removed. Both trackers now show only actual
 remaining work in their last cells. Task-owned `/tmp` build directories, logs,
 public verification archive, isolated fixtures/sockets and the central tracker
 worktree are removed after integration. No unrelated artifacts are deleted.
+
+## Torrentino remaining modules complete — 2026-10-04
+
+Active `master` moved from `9850c1659ab060caf575f70d02580236b9ff0815` to
+`11593ea11a25939ea28805f72fe4d3d0454a377a`. The isolated migration uses public
+`lelloman-simple-server =0.1.6`, source `58e9b7504176c82b538dca0cd3041468fb4a1ccd`,
+checksum `4f37d395af4d6ca8495ad190b8cecc5ab078ddfc92b8e9b3a41bc9eee80d3fce`.
+No new library publication was required.
+
+- 06a tracks accepted intake, identification and acquisition cycles. Lifecycle
+  still owns worker futures; cancellation and panic release work guards.
+- 06b uses shared schedule descriptions for immediate 250 ms intake, retaining
+  Tokio Skip overdue-tick behavior, and shared polling for immediate serial
+  identification/acquisition with a one-second delay after each completion.
+- 06c uses ExecutionBudget for existing identification/acquisition deadlines and
+  shared retry classification/caps. Durable attempt charging, retry checkpoints,
+  transactions and cancellation authority remain application-owned.
+- Step 10 evaluates existing durable intake, identification, acquisition and
+  reply counters plus the 32-snapshot owner quota through shared limit checks.
+  It adds no HTTP throttling or counter reset behavior.
+- 07a configures and verifies WAL, foreign keys and the five-second busy timeout
+  on every SQLx connection. 07b preserves the numeric user_version guard,
+  accepting historical nonpositive markers and refusing future versions.
+  Version-only preflight verifies no historical digests or schema health.
+- 07e replaces production schema.sql bootstrap with structured creation of eleven
+  tables and three explicit indexes. The old SQL remains a test oracle; PRAGMA
+  metadata and actual defaults, constraints and cascades match. Existing tables
+  are not rebuilt. Bootstrap and marker updates retain their transaction.
+- 03b shares UUID generation for existing error-envelope IDs only. No new request
+  header or task-local propagation is installed. HTTP tracing, CORS and health
+  remain N/A after assessment. No direct Axum/backend dependency remains in the
+  replacement Rust service. Legacy root CLI/external SQLx client code remains
+  outside this service scope; quentin-torrentino is excluded and untouched.
+
+Baseline: 44 Rust tests passed. Final: **56 passed, zero failed or ignored**;
+locked build, formatting, diff checks and strict all-target Clippy passed.
+Real Chromium E2E passed integrations, sessions, previews, clarification,
+confirmation, format consent, delivery, movie identification and logout,
+including service restart/replay. Added tests cover schema equivalence,
+connection replacement, historical/future markers, rollback, quota boundaries,
+paused-clock worker cadence/deadlines and cancellation/panic guard cleanup.
+
+Master was rebased onto the committed migration; ancestry and identical tested
+and integrated trees were verified. Owned worktrees, branches and temporary
+build artifacts were removed. Both trackers record all applicable active steps
+complete; schema totals including the excluded row are **12 Done, 5 N/A,
+1 Pending (Quentin)**. Nothing was pushed or deployed.
