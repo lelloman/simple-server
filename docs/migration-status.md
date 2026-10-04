@@ -6261,3 +6261,44 @@ Matrix now **6 Done, 2 Partial, 2 N/A, 7 Pending**, including excluded Torrentin
 Pending services: LelloStore, Meteonesto, Pezzottflix, Pezzottify Downloader,
 SCT and Simple Agents; Torrentino remains skipped. Concrete shared gaps remain
 Fausto's dynamic vec0 and Crumbles integration STRICT/CHECK ledger creation.
+
+## Step 07e STRICT/CHECK and generic virtual-table core — 2026-10-04
+
+Shared implementation `358a226a29d66e6f8a73df4573799c8b0970c8cd` is committed
+and integrated into `master` from an isolated worktree branch.
+`create_extended_plan_with_options` adds `CreationOptions` without changing existing
+public snapshot literals or the existing creation APIs' SQL. Table options describe
+STRICT and optional named column/table CHECK constraints. Generic virtual tables
+have escaped identifiers and explicit trusted module arguments, supporting
+module-defined grammars such as vec0 dimensions. The shared library loads no
+extensions, executes no SQL, owns no transaction and adds no runtime dependency.
+Existing structural observations do not validate these new properties.
+
+Full `bash scripts/check` passed: format, strict all-target/all-feature Clippy,
+default/all-feature tests, feature matrix, no-default build and strict rustdoc.
+The schema matrix now includes **17 extended creation tests** (eight added) plus
+**22 existing schema tests**. Real SQLite covers strict type rejection/coercion,
+ANY, key metadata, named/column/table CHECKs including NULL semantics, rollback,
+Crumbles-style legacy ledger comparisons and file restart, attached-schema FTS5
+and RTree creation/query/idempotence, unknown modules and known name collisions.
+
+Standalone repository consumer fixture `tests/fixtures/sqlite_vec_creation`
+loads sqlite-vec **0.1.6** outside the library and passes dynamic 2/3-dimensional
+vec0 creation, nearest-neighbor query, existing-table no-op and wrong-dimension
+rejection. It has its own lockfile and runs in `scripts/check`; independent format
+and strict Clippy pass. Unsafe extension FFI stays in this external fixture; the
+library retains its unsafe-code prohibition. Cargo excludes this nested consumer
+crate from the public archive; shared regression tests are packaged.
+
+Prepared release **0.1.2**: package verification and crates.io publication dry-run
+passed with no upload. Archive has 126 files and no build/environment artifacts;
+embedded source commit matches the implementation above. SHA256:
+`d31aa705a4b51e0dfea8fdc334de20f8cf6048b049dedb970ef63227a7661d46`.
+Publication requires user approval. The release worktree/branch are intentionally
+retained at the reviewed source commit while this gate is pending.
+
+Crumbles and Fausto remain **Partial** until their actual production callers use
+a published new API and pass consumer verification. No consumer repository,
+historical SQL migration, production database, push or deployment was changed
+in this core increment. Matrix remains **6 Done, 2 Partial, 2 N/A, 7 Pending**.
+See [the API contract](step-07e-sqlite-schema.md#strict-check-and-generic-virtual-tables-prepared-for-012).
