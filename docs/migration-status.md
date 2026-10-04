@@ -127,7 +127,7 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | observo | `observo-server`; standalone extractor logging | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (no served probe) | **Done (local; scoped)** | **Done (local; primitives)** | N/A (assessed) | **Done (local; IP/key/JWT access)** | N/A (no request quota) | **Done (local)** | Done (server SQLite) | N/A (idempotent schema, no migration ledger) | Done (bootstrap creation; scoped) | None. |
 | paranza | `apps/paranza-server` | **Done** | **Done (local; scoped)** | N/A (no logger) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; runner + PCM access)** | N/A (no implemented request quota) | **Done (local)** | N/A (driver defaults only) | N/A (idempotent DDL/column repairs, no migration ledger) | Done (store creation; scoped) | None. |
 | peerlo | `peerlo-api` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; retry primitives)** | **Done (local; bearer + Torznab keys)** | **Done (local; API + crawler + durable DHT)** | **Done (local)** | N/A (driver defaults only) | N/A (create-if-missing stores, no migration ledger) | **Done (tracker + metadata creation)** | None. |
-| pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local; main HTTP)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; socket scope)** | **Done (local; durable queue cadence)** | N/A (assessed) | **Done (local; sessions + permissions + WebSocket)** | **Done (login, durable daily quota + TMDB pacing)** | **Done (local; HTTP core)** | Done (server + CLI SQLite) | Done (server SQLx) | Done (CLI creation; server owns versioned SQL) | None. |
+| pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local; main HTTP)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; socket scope)** | **Done (local; durable queue cadence)** | N/A (assessed) | **Done (local; sessions + permissions + WebSocket)** | Partial (login/daily/TMDB shared; configured HTTP Governor pending) | **Done (local; HTTP core)** | Done (server + CLI SQLite) | Done (server SQLx) | Done (CLI creation; server owns versioned SQL) | None. |
 | pezzottify-downloader | Puppeteer API, downloader HTTP server and Python cron | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; Puppeteer)** | **Done (local; both HTTP routers)** | N/A (assessed) | N/A (assessed) | **Done (local; both routers)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; priority admission)** | N/A (assessed) | N/A (no application caller gate) | **Done (local; Python/SQLite quota bridge)** | **Done (local; parent + child HTTP core)** | N/A (Python SQLite only) | N/A (no Rust migration runner) | N/A (Python owns SQLite; Rust quota bridge has no schema API) | None. |
 | quentin-torrentino | `crates/server` | Pending (legacy direct Axum) | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; stage capacity)** | N/A (assessed) | **Done (local; API access)** | **Done (local; MusicBrainz pacing)** | Pending | Pending (excluded by request) | Pending (excluded by request) | Pending (excluded by request) | Legacy direct Axum: backend routing/handlers/extractors/responses, auth/metrics middleware and serving; torrent multipart, chat SSE, dashboard WebSockets, static-file routing and HTTP test fixtures. Owned HTTP migration remains pending. |
 | sct | `sct-server` | **Done** | **Done (scoped)** | N/A (no logger) | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; worker scope)** | **Done (local; durable worker cadence)** | **Done (local; retry scope)** | **Done (local; tokens/sessions + transactional access)** | N/A (durable state caps, no request quota) | **Done (local; HTTP core)** | Done (archive SQLite) | Done (PostgreSQL catalog; archive format N/A) | Done (offline archive creation; PostgreSQL outside scope) | None. |
@@ -6394,3 +6394,175 @@ Matrix now **11 Done, 0 Partial, 4 N/A, 2 Pending**. LelloStore remains Pending
 services have verified scoped adoption or an evidenced N/A assessment. This
 rollout does not claim full domain schema validation, move cross-language
 storage into Rust, or replace authored SQL migration history.
+
+## All-project backend dependency audit — 2026-10-04
+
+Read-only consumer audit of `/home/lelloman/lelloprojects`: **64 top-level Git
+repositories**, **5,632 tracked or nonignored source/manifest files** in the
+focused Rust/Python/JS/TS/Go inventory. A broad hidden/unignored filesystem pass
+also inspected 464 manifest paths (including generated copies), Kotlin/Java
+server imports/build files, C/C++ server-library markers, and standalone project
+directories. Generated targets/node_modules, downloaded toolchains, source caches
+and SCT's preserved `.validation-work/simple-server` copy were excluded from
+active findings. Branches/revisions below identify observed local working trees,
+including current uncommitted/new nonignored source; no deployment state is claimed.
+Some permission-denied capture/runtime-storage directories under km-g6-control
+and watch-rns-rs were inaccessible. No permissions were changed; no locked build,
+dependency-removal experiment or runtime tests were run. Detection uses known
+framework names/source patterns and is not proof of absence of every possible
+backend implementation. LelloStore was inspected read-only, never changed.
+
+### Direct Axum
+
+Active direct Axum dependencies/imports were found in three consumer repositories:
+
+| Repository | Evidence | Scope |
+| --- | --- | --- |
+| Talia | `talia/engine/Cargo.toml:13`, `engine/src/main.rs:6`, plus `spikes/transport/server/src/main.rs:2`. | Engine routing/handlers/serving and test fixtures, plus an experimental transport server. Talia was never included in the 17-service tracker. |
+| torrentino | `torrentino/crates/service/Cargo.toml:12`, `src/main.rs:80`, `src/api.rs:7`. | Separate repository from quentin-torrentino; production Axum router/handlers/rejections/WebSockets/serve and fixtures. Some simple-server helpers are used, but HTTP abstraction is incomplete. |
+| quentin-torrentino | `quentin-torrentino/crates/server/Cargo.toml:34`, `src/main.rs:454`, `src/api/catalog.rs:5`. | Previously excluded service retains direct Axum routing/extractors/serving, multipart/SSE/WebSocket and test usage. Audit does not resume its migration. |
+
+No direct Axum dependency or active source import/re-export was found in the
+**16 non-excluded services** in the existing matrix, including read-only
+LelloStore. Old comments/log target names do not constitute adoption gaps.
+Axum inside simple-server is the intended implementation. SCT's untracked
+validation copy of the library is an artifact, not a new consumer dependency.
+
+### Backend libraries still used by migrated Rust services
+
+| Theme | Current evidence | Interpretation / possible follow-up |
+| --- | --- | --- |
+| Disk static files / SPA fallback | Pezzottify `pezzottify-server/src/server/server.rs:36` and `route_builder.rs:451`; Pezzottflix `pezzottflix-server/src/server.rs:10`/`:440`; SCT `crates/sct-server/src/lib.rs:14`/`:34` directly use tower-http ServeDir/ServeFile. | Shared static-file/fallback abstraction is a useful multi-service increment. Fausto also has its own rust-embed-based Tower Service (`server/src/static_files.rs:18`); an embedded-assets adapter could serve that distinct policy. |
+| Response compression | Pezzottflix `pezzottflix-server/src/server.rs:491` installs tower-http CompressionLayer. | Separate optional shared compression API; do not silently alter negotiation/content-type/streaming policy. |
+| Mutable cookies / cookie middleware | lello-auth `crates/lello-auth-axum/src/middleware/session.rs:14`/`:44`, UI/authenticator handlers, server and examples use tower-cookies Cookie/Cookies/CookieManagerLayer. | Existing shared credential extraction does not replace its full mutable cookie-jar/output-cookie middleware contract. Extend shared cookies before removing this dependency. |
+| Request-ID compatibility types | Fausto `server/src/api/correlation.rs:6`, `error.rs:9`, `federation/handler.rs:12`; Downloader `src/puppeteer/correlation.rs:6`. | Shared correlation is adopted, but application typed extensions still use tower-http RequestId; Downloader also uses its UUID generator. This is a compatibility boundary, not absence of shared correlation. |
+| Unix HTTP serving / proxy | Downloader `src/downloader/http_server.rs:105` uses Hyper HTTP/1 serve_connection/TokioIo in actual serve_unix; `src/downloader/mod.rs:33` calls it. `src/puppeteer/proxy.rs:7`/`:27` uses Hyper/hyperlocal streaming Unix client. Hyper mock-server code further down proxy.rs is test-only. | Shared Unix-listener/connection serving could hide server-side Hyper. Streaming Unix HTTP/WebSocket client proxying is a distinct optional client capability, not normal TCP server adoption. |
+| Configured generic HTTP rate limit | Pezzottflix `pezzottflix-server/src/server.rs:471` installs `middleware::rate_limit::RateLimiter` when rate_limit.enabled; `src/middleware/rate_limit.rs:3` directly uses Governor quota/clock/limiter. | **Actual active shared-policy gap.** Historical Step 10 doc says this middleware has no production reader, which is no longer true. Login failure windows, daily quota and TMDB pacing remain shared. Step 10 matrix corrected to Partial pending migration of this now-active path; current counters are 11 Done, 1 Partial, 5 N/A. |
+| Tower Service/Layer and test utilities | Fausto custom static-file/rate-limit services, Downloader serving adapter, and many router oneshot tests use Tower traits/extensions directly. | Normal service composition/test infrastructure, not direct Axum. Hiding these would require a separately defined trait/test-adapter contract; not all such imports are production leftovers. |
+
+Candidate **stale direct declarations**, not confirmed removal-safe: Androidoscopy
+server tower-http (fs), LelloStore backend tower-http (fs), lello-auth-axum
+tower-http (cors/trace), Pezzottify-server Hyper. Active reviewed production source
+contains no corresponding direct use; logging target strings and negative tracing
+assertions do not count. Validate each package/feature graph before removing.
+LelloStore cleanup stays deferred. Legacy tower-http/governor references in
+comparative tests may intentionally remain dev dependencies.
+
+### Other projects and languages
+
+- **Homelab:** production Python aiohttp idle-manager API/wake relay, Flask
+  telegram-webhook, Go net/http access-gateway, and stdlib HTTP sync/observer
+  services. These are outside the Rust migration matrix.
+- **Casuccia:** Python stdlib ThreadingHTTPServer capture receiver/queue
+  (`server/app.py:10`).
+- **Observo worker:** Node built-in http management API
+  (`observo-worker/src/management-api.js:9`, called by `src/index.js:132`).
+  Its Rust server migration does not cover this Node process.
+- **Simple AI:** Python stdlib HTTP semantic/extraction/classification/audio/XTTS/
+  Chatterbox provider processes remain under scripts; separate aiohttp fake runner
+  and HTTP/OIDC test fixtures are intentional test infrastructure.
+- **Pezzottflix Android:** Ktor/Netty WebSocket remote-control server
+  (`android/remotecontrol/.../server/RemoteWebSocketServer.kt:10`–`:18`).
+  This on-device Kotlin server cannot adopt a Rust feature alone.
+- **My Home Assistant:** aiohttp-based platform extension endpoints; those use
+  Home Assistant's hosting contract rather than a standalone Rust HTTP server.
+- **Librespot:** Hyper-based Spotify HTTP clients and discovery HTTP server
+  (`discovery/src/server.rs:318`), an upstream library/protocol implementation.
+- **Utility/reference servers:** rns-rs VPS history dashboard, Rustentia embedding
+  demo, Talia Python dashboard, Paravoid compatibility/provisioning/reference
+  servers, and standalone simple-hearth-monitor tools. Test-only Flask/aiohttp/
+  stdlib HTTP servers also remain in service E2E fixtures. These should not be
+  mechanically folded into the Rust server module.
+
+No active Actix-web, Warp, Rocket, Poem, Salvo, Tonic, Express, Fastify, Koa,
+Hono, FastAPI, Django or Spring server declaration/use was found in the reviewed
+application inventories. Flask/aiohttp/Ktor and language-standard HTTP servers
+above are positive findings. Broad generated vendor matches were not classified
+as project adoption. Client libraries (reqwest, tokio-tungstenite), database
+drivers/pools (SQLx, rusqlite, r2d2, sqlite-vec), and tracing/filter configuration
+remain intentional ownership or separate roadmap work; presence alone is not
+a migration regression.
+
+The earlier "all services" statement applies to **in-scope Rust services and
+applicable implemented modules**, not every project under lelloprojects, every
+auxiliary Python/Node/Kotlin process, or eliminating all backend dependencies.
+The broad audit also detects the newly active Pezzottflix Governor scope above.
+
+### Repository inventory
+
+“None detected” means no direct Axum or named server-framework match in the
+reviewed source inventory; it does not certify absence of all backend libraries.
+
+| Project | Observed branch / revision | Finding |
+| --- | --- | --- |
+| accordomi | `master` / `80bbc4d5` | None detected in reviewed inventory. |
+| amperino | `master` / `999d540f` | None detected in reviewed inventory. |
+| android-identicons | `master` / `66402864` | None detected in reviewed inventory. |
+| android-keys | `main` / `df0d438f` | None detected in reviewed inventory. |
+| android-simple-ephem | `master` / `f0d6d2b8` | None detected in reviewed inventory. |
+| android-simplebpmdetector | `master` / `6b6cfd81` | None detected in reviewed inventory. |
+| androidoscopy | `master` / `fdb16f71` | No Axum; tower-http declaration candidate; WebSocket clients/test infrastructure. |
+| casuccia | `main` / `075a4ca6` | Python stdlib HTTP capture receiver. |
+| chrome-utils | `master` / `fdc54495` | None detected in reviewed inventory. |
+| creticulum | `master` / `6ccca85b` | None detected in reviewed inventory. |
+| crumbles | `master` / `de7556ae` | No Axum; Tower tests/SQLx/client libraries; cached Android sources excluded. |
+| dotfiles | `master` / `b03200e3` | None detected in reviewed inventory. |
+| fausto | `master` / `b2ccfd60` | Tower RequestId compatibility/custom services; database/vec extension local. |
+| favzetto | `master` / `6bcbc8fc` | No Axum; Tower tests/SQLx/client libraries. |
+| halloo | `master` / `(unborn)` | No committed HEAD / no reviewed source. |
+| homelab | `master` / `77123cc3` | Python aiohttp/Flask/stdlib servers and Go net/http gateway. |
+| km-g6-control | `main` / `d6637e00` | None detected in reviewed inventory. |
+| lello-auth | `master` / `228edd17` | tower-cookies production API; tower-http declaration candidate; Python fixture. |
+| lellodesign | `master` / `3fc683b6` | None detected in reviewed inventory. |
+| lelloman-com | `master` / `e4a20981` | None detected in reviewed inventory. |
+| lellostore | `master` / `34fe9e2a` | No Axum; tower-http declaration candidate; read-only/deferred. |
+| librespot | `dev` / `939dc5ee` | Hyper Spotify clients/discovery server; upstream library. |
+| lxmf-rs | `dev` / `f8f55201` | None detected in reviewed inventory. |
+| lxst-rs | `master` / `8ee20127` | None detected in reviewed inventory. |
+| maruzzella | `master` / `dd4572f9` | None detected in reviewed inventory. |
+| mat | `master` / `e3c2f965` | None detected in reviewed inventory. |
+| meteonesto | `master` / `471e9d06` | No Axum; Python fixture and SQLite driver intentional. |
+| mimmo | `master` / `af69f53a` | None detected in reviewed inventory. |
+| my-home-assistant | `master` / `b8ed4e7d` | aiohttp Home Assistant extension endpoints. |
+| napulicchio | `main` / `e3338f61` | None detected in reviewed inventory. |
+| nomadnet-rs | `master` / `af680bfa` | None detected in reviewed inventory. |
+| nvidia-gpu-data | `master` / `872292b8` | None detected in reviewed inventory. |
+| observo | `master` / `9cf709bd` | Node HTTP worker API; Rust has no Axum. |
+| paranza | `master` / `50e621c4` | No Axum; Tower tests/SQLite/client libraries. |
+| paravoid-android | `master` / `55f64af7` | Python stdlib provisioning/compatibility/reference servers. |
+| peerlo | `master` / `1ce84815` | No Axum; Governor legacy tests/client/database libraries. |
+| pezzottflix | `master` / `71a13092` | Tower static/compression, active Governor gap, Android Ktor; CLI schema shared. |
+| pezzottify | `dev` / `e3e6fba0` | Tower HTTP static files; Python mocks; client/database libraries. |
+| pezzottify-downloader | `master` / `22ffc5c3` | Hyper Unix serving/client proxy; Tower RequestId; Python SQLite local. |
+| pezzottv | `master` / `21a89218` | None detected in reviewed inventory. |
+| projectino | `master` / `ecd796fd` | None detected in reviewed inventory. |
+| pv-estimator | `dev` / `1d0d9ea7` | None detected in reviewed inventory. |
+| quentin-torrentino | `master` / `1f76d881` | Direct Axum; excluded migration. |
+| reticulum-pin | `(detached)` / `3f95b472` | None detected in reviewed inventory. |
+| rns-rs | `dev` / `afe71800` | Python stdlib VPS dashboard; SQLite driver local. |
+| rns-topo | `master` / `1f3e9fcc` | None detected in reviewed inventory. |
+| ronomepo | `main` / `aab408cb` | None detected in reviewed inventory. |
+| rustentia | `master` / `1f854ba9` | Python stdlib embedding demo; SQLite driver local. |
+| rusty-sweeper | `master` / `ac4ea52a` | None detected in reviewed inventory. |
+| scannerino | `main` / `cb418763` | None detected in reviewed inventory. |
+| sct | `master` / `d6b81bb6` | Tower static files; PostgreSQL/SQLite drivers intentional; validation artifact excluded. |
+| sim-rns | `master` / `1e73fd6a` | None detected in reviewed inventory. |
+| simple-agents | `master` / `adee7a79` | No Axum; Tower tests/WebSocket clients/SQLx intentional. |
+| simple-ai | `master` / `851ce0cd` | Python stdlib provider servers/aiohttp test runner; Rust has no Axum. |
+| simple-android-assistant | `master` / `87a49956` | None detected in reviewed inventory. |
+| simple-server | `master` / `c0d408bb` | Axum/Tower/Hyper internal implementation; expected. |
+| sniffy | `master` / `d502d867` | None detected in reviewed inventory. |
+| talia | `master` / `e37ac714` | Direct Axum engine and transport spike; Python dashboard. |
+| torrentino | `master` / `81fdaa78` | Direct Axum service; separate from quentin-torrentino. |
+| tufino | `master` / `fe53c5a9` | None detected in reviewed inventory. |
+| vggt-capturer | `main` / `a1c17908` | None detected in reviewed inventory. |
+| watch-rns-rs | `master` / `8bcf5003` | No direct application framework; cached upstream sources excluded. |
+| wgtransport | `master` / `cdf73f99` | None detected in reviewed inventory. |
+| wpe-the-wood-price-extractor | `main` / `b32003b2` | None detected in reviewed inventory. |
+
+Standalone non-repository source directories were covered by the broad scan;
+notably simple-hearth-monitor has a stdlib HTTP tool. Hidden control directories,
+build/source caches, credentials and permission-denied runtime data were not
+audited as application projects. This audit changed only shared documentation
+and truthful tracker scope, with no consumer implementation/branch/dependency
+changes or tests, no push and no deployment.
