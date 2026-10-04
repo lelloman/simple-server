@@ -127,7 +127,7 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | observo | `observo-server`; standalone extractor logging | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (no served probe) | **Done (local; scoped)** | **Done (local; primitives)** | N/A (assessed) | **Done (local; IP/key/JWT access)** | N/A (no request quota) | **Done (local)** | Done (server SQLite) | N/A (idempotent schema, no migration ledger) | Done (bootstrap creation; scoped) | None. |
 | paranza | `apps/paranza-server` | **Done** | **Done (local; scoped)** | N/A (no logger) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; runner + PCM access)** | N/A (no implemented request quota) | **Done (local)** | N/A (driver defaults only) | N/A (idempotent DDL/column repairs, no migration ledger) | Done (store creation; scoped) | None. |
 | peerlo | `peerlo-api` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; retry primitives)** | **Done (local; bearer + Torznab keys)** | **Done (local; API + crawler + durable DHT)** | **Done (local)** | N/A (driver defaults only) | N/A (create-if-missing stores, no migration ledger) | **Done (tracker + metadata creation)** | None. |
-| pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local; main HTTP)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; socket scope)** | **Done (local; durable queue cadence)** | N/A (assessed) | **Done (local; sessions + permissions + WebSocket)** | Done (login/daily/TMDB + configured HTTP limiter) | **Done (local; HTTP core)** | Done (server + CLI SQLite) | Done (server SQLx) | Done (CLI creation; server owns versioned SQL) | Owned gzip compression canary prepared; awaiting public 0.1.5 release and final registry verification/integration. |
+| pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local; main HTTP)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; socket scope)** | **Done (local; durable queue cadence)** | N/A (assessed) | **Done (local; sessions + permissions + WebSocket)** | Done (login/daily/TMDB + configured HTTP limiter) | **Done (local; HTTP core)** | Done (server + CLI SQLite) | Done (server SQLx) | Done (CLI creation; server owns versioned SQL) | None. |
 | pezzottify-downloader | Puppeteer API, downloader HTTP server and Python cron | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; Puppeteer)** | **Done (local; both HTTP routers)** | N/A (assessed) | N/A (assessed) | **Done (local; both routers)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; priority admission)** | N/A (assessed) | N/A (no application caller gate) | **Done (local; Python/SQLite quota bridge)** | **Done (local; parent + child HTTP core)** | N/A (Python SQLite only) | N/A (no Rust migration runner) | N/A (Python owns SQLite; Rust quota bridge has no schema API) | Hyper HTTP/1 Unix serving; Hyper/hyperlocal streaming Unix proxy client; Tower HTTP RequestId and UUID-generator compatibility. Unix proxy client is a separate capability. |
 | torrentino | `crates/service` (included) | Pending (direct Axum) | **Done (shared lifecycle)** | **Done (shared logging)** | Pending (applicability review) | Pending (applicability review) | Pending (applicability review) | Pending (applicability review) | Pending (applicability review) | Pending (applicability review) | Pending (applicability review) | Pending (applicability review) | Pending (applicability review) | Pending (custom bearer/session auth) | Pending (applicability review) | Pending (direct Axum routing/serve) | Pending (SQLx WAL/FK/busy timeout) | Pending (custom user_version guard) | Pending (schema.sql bootstrap) | Direct Axum routing, handlers/extractors/rejections/responses, bearer/session middleware, body limits, WebSocket socket/message types, serving and HTTP test fixtures. |
 | quentin-torrentino | `crates/server` (**excluded by request**) | Pending (legacy direct Axum) | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; stage capacity)** | N/A (assessed) | **Done (local; API access)** | **Done (local; MusicBrainz pacing)** | Pending | Pending (excluded by request) | Pending (excluded by request) | Pending (excluded by request) | Legacy direct Axum: backend routing/handlers/extractors/responses, auth/metrics middleware and serving; torrent multipart, chat SSE, dashboard WebSockets, static-file routing and HTTP test fixtures. Owned HTTP migration remains pending. |
@@ -7119,3 +7119,51 @@ commit and rebase master onto the final migration, then remove retained owned
 worktrees/branches/builds. The remaining cell records this pending integration;
 it does not claim a completed consumer adoption. Evidence lives in the
 candidate's `docs/response-compression.md`. No Git pushes or deployments.
+
+## Published gzip compression and Pezzottflix completion — 2026-10-04
+
+The user explicitly authorized publication. Public `lelloman-simple-server`
+**0.1.5** is published from clean tested commit
+`4a0f06ea61719ca5e9219f006988824c09d75bf6`; registry availability confirmed.
+Independent static.crates.io archive download verifies SHA256
+`3df80ad94d2f2accc506f153787c81b6c11c13a0da670212c1e233d54ddcbab7` and
+the embedded Git source. Inspected package has 132 files; package verification
+and publication dry run passed. Shared full validation passed **687 test
+executions**, zero failures/ignores, strict Clippy, feature isolation, fixture,
+formatting and warnings-as-errors rustdoc. See [release evidence](publishing.md)
+and [the compression contract](compression.md).
+
+Pezzottflix active clean master `ccbdc87` was rebased onto the tested migration
+branch, including local canary `e891348` and final public-registry commit
+`5c83181b35de8de8fe22b5238bc17d5c95e2eae7`. Production gzip now uses owned
+CompressionLayer in the original position around API/health/frontend routes.
+Direct Tower HTTP and Governor are dev-only differential oracles; no direct
+Axum, Tower HTTP or Governor normal dependency remains. Other driver/client
+packages and Android Ktor/Netty serving remain intentional runtime boundaries.
+The remaining Rust backend exposure cell is **None** in both trackers.
+
+Temporary consumer path removed. Exact registry 0.1.5 and its source/checksum
+verified in Cargo.lock; README build pin updated. The standalone RaiPlay CLI
+and its lockfile remain unchanged at 0.1.2. **Final full workspace against the
+public crate: 608 passed, zero failed, three existing ignores**, matching the
+local canary. Baseline: 605 passed/three ignores. Three added tests include
+420 legacy-policy comparisons, real production-router TCP gzip/identity/refusal/
+HEAD/health and TCP SPA/missing-asset/range checks. Shared tests separately
+cover 1,280 legacy cases, streaming/readiness/body/service errors/cancellation.
+Vary token semantics are preserved; duplicate Accept-Encoding tokens may be
+deduplicated by the newer backend. Explicit gRPC prefix exclusions retain the
+old predicate. Application policy/placement remains unchanged.
+
+Published-dependency locked workspace check and warning-capped all-target
+Clippy pass. Strict lint findings from baseline/local candidate persist (34
+library and 39 library-test errors); strict Clippy was not repeated after
+switching to identical public source. Unrelated formatting differences remain;
+new canary module and diff checks pass. No frontend/browser/Android/container
+or standalone CLI rerun. Consumer evidence is in
+`pezzottflix/docs/response-compression.md` and updated `docs/backend-cleanup.md`.
+
+Base branch ancestry and identical tested/integrated trees verified. Both owned
+migration worktrees/branches and release/test temporary builds, logs and archive
+were removed; original checkouts are clean and pre-existing recovery branch
+preserved. Only the authorized crate publication changed remote state; no Git
+push or deployment. Earlier prepared/pending records remain dated checkpoints.

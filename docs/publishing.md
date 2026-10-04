@@ -34,6 +34,24 @@ overwritten. Record the source commit and archive checksum, then independently
 verify a consumer download and compile before migrating consumer lockfiles.
 A Git push and deployment are separate operations.
 
+## Verified crates.io release: 0.1.5 (4 October 2026)
+
+Adds optional owned streaming gzip response compression under
+`web::compression`, with owned layer/service/future/body boundaries, explicit
+installation, quality/toggle/u64 size/custom metadata policy controls, default
+MIME exclusions and encoded/range guards. See [the contract](compression.md).
+
+Published with explicit user authorization from clean tested source
+`4a0f06ea61719ca5e9219f006988824c09d75bf6`. Archive SHA256:
+`3df80ad94d2f2accc506f153787c81b6c11c13a0da670212c1e233d54ddcbab7`.
+Full validation passes 687 test executions, strict Clippy, isolated features,
+fixture, formatting and rustdoc. Inspected 132 package files; verification and
+publication dry run pass. Cargo confirmed publication and registry availability.
+An independent public archive download matches both the checksum and embedded
+Git commit. Root and standalone SQLite fixture lockfiles both record 0.1.5.
+Pezzottflix registry adoption and remaining-scope evidence are in the central
+trackers. No Git push or deployment was performed.
+
 ## Verified crates.io release: 0.1.4 (4 October 2026)
 
 Adds optional owned mutable request jars and cookie middleware under
