@@ -1,6 +1,6 @@
 [package]
 name = "lelloman-simple-server"
-version = "0.1.4"
+version = "0.1.5"
 edition = "2024"
 license = "MIT OR Apache-2.0"
 description = "A modular foundation for Axum-based Rust services"
@@ -13,6 +13,7 @@ include = ["/src/**", "/tests/**", "!/tests/**/target/**", "/examples/**", "/Car
 name = "simple_server"
 
 [features]
+compression = ["web", "dep:tower-http", "tower-http/compression-gzip", "dep:pin-project-lite"]
 cookies = ["web", "dep:cookie", "dep:pin-project-lite"]
 static-files = ["web", "dep:tower-http", "tower-http/fs"]
 database-migrations = []
@@ -75,6 +76,8 @@ tracing = { version = "0.1", default-features = false, features = ["std"], optio
 tracing-subscriber = { version = "0.3", default-features = false, features = ["fmt", "env-filter", "ansi", "json"], optional = true }
 
 [dev-dependencies]
+flate2 = "1"
+tower-http-05 = { package = "tower-http", version = "0.5", default-features = false, features = ["compression-gzip"] }
 rusqlite = { version = "0.33", features = ["bundled"] }
 rcgen = "0.13"
 hyper = { version = "1", features = ["http1"] }

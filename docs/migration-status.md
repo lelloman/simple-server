@@ -7074,3 +7074,20 @@ This cleanup does not claim that all backend dependencies have been removed.
 Master rebased onto the isolated migration branch; ancestry and identical tested
 trees verified. Owned worktree/branch removed, unrelated recovery branch
 preserved. No pushes/deployments. Both central trackers updated consistently.
+
+## Owned gzip response compression prepared — 2026-10-04
+
+Optional `compression` provides owned web compression layer, service and future
+returning the shared Body. Gzip negotiation/quality/toggle, u64 size thresholds,
+custom response-metadata predicates, default MIME exclusions, encoded/range
+guards and streaming/readiness/error/cancellation behavior are supported.
+No middleware is installed implicitly. See [the contract](compression.md).
+
+Full `scripts/check` passes **687 test executions**, zero failures/ignores, strict
+all-target/all-feature Clippy, isolated features, fixture, formatting, rustdoc.
+Ten new tests include 1,280 Tower HTTP 0.5 differential cases, gzip bytes and
+header contracts, policies, service/body errors, cancellation and TCP/HEAD.
+The newer backend deduplicates Vary Accept-Encoding tokens; token semantics
+match the legacy implementation. gRPC-prefix exclusion is explicitly retained.
+Version 0.1.5 is prepared for publication; it is not yet a published/adopted
+release. Pezzottflix migration is being verified separately before integration.

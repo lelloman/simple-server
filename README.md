@@ -318,3 +318,9 @@ Optional mutable HTTP cookies: enable `cookies` and use
 tracks request mutations and appends response deltas; cookie attributes and
 session/CSRF policy remain application-owned. See [the cookie contract](docs/cookies.md).
 Available starting with release 0.1.4.
+
+Optional streaming gzip responses: enable `compression` and explicitly install
+`web::compression::CompressionLayer`. Owned service/body boundaries support
+gzip toggling, quality, minimum known size and custom metadata predicates;
+encoding negotiation and stream cancellation remain lazy. See the
+[compression contract](docs/compression.md).

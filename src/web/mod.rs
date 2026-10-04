@@ -17,6 +17,8 @@
 //! ```
 
 pub mod body;
+#[cfg(feature = "compression")]
+pub mod compression;
 #[cfg(feature = "cookies")]
 pub mod cookies;
 pub mod extract;

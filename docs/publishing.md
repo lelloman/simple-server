@@ -7,7 +7,7 @@ library target remains `simple_server`; the repository remains `simple-server`.
 
 ```toml
 [dependencies]
-simple-server = { package = "lelloman-simple-server", version = "=0.1.4", features = ["web"] }
+simple-server = { package = "lelloman-simple-server", version = "=0.1.5", features = ["web"] }
 ```
 
 Retain each consumer's existing features and `default-features` setting. Commit
