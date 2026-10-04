@@ -26,5 +26,7 @@ cargo test --locked --no-default-features --features cookies --test web_cookies
 cargo test --locked --no-default-features --features cookies,tower-cookies,test-harness --test web_cookies
 cargo test --locked --no-default-features --features compression --test web_compression
 cargo test --locked --no-default-features --features compression,test-harness --test web_compression
+cargo test --locked --no-default-features --features unix-http,correlation --test web_unix
+cargo test --locked --no-default-features --features unix-http,ws --test web_unix
 cargo check --locked --no-default-features
 RUSTDOCFLAGS="-D warnings" cargo doc --locked --no-deps --all-features

@@ -37,6 +37,8 @@ pub mod static_files;
 pub mod tls;
 #[cfg(feature = "http-tracing")]
 pub mod tracing;
+#[cfg(all(unix, feature = "unix-http"))]
+pub mod unix;
 #[cfg(feature = "ws")]
 pub mod ws;
 

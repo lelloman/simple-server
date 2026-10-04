@@ -324,3 +324,7 @@ Optional streaming gzip responses: enable `compression` and explicitly install
 gzip toggling, quality, minimum known size and custom metadata predicates;
 encoding negotiation and stream cancellation remain lazy. See the
 [compression contract](docs/compression.md).
+
+Unix domain socket serving and streaming HTTP clients are available through the
+opt-in `unix-http` feature on Unix platforms. See [Unix HTTP transport](docs/unix-http.md)
+for lifecycle, path, header and streaming contracts.

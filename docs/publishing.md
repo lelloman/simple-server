@@ -7,7 +7,7 @@ library target remains `simple_server`; the repository remains `simple-server`.
 
 ```toml
 [dependencies]
-simple-server = { package = "lelloman-simple-server", version = "=0.1.5", features = ["web"] }
+simple-server = { package = "lelloman-simple-server", version = "=0.1.6", features = ["web"] }
 ```
 
 Retain each consumer's existing features and `default-features` setting. Commit
@@ -33,6 +33,15 @@ Always bump the version for a subsequent release. Published versions cannot be
 overwritten. Record the source commit and archive checksum, then independently
 verify a consumer download and compile before migrating consumer lockfiles.
 A Git push and deployment are separate operations.
+
+## Prepared release: 0.1.6 (4 October 2026)
+
+Adds optional owned Unix HTTP serving/streaming clients and a UUID v4 header
+request-ID generator. See [the Unix transport contract](unix-http.md).
+The complete library check passes, including strict Clippy, isolated Unix
+features, graceful-drain/streaming/error/WebSocket tests, formatting and rustdoc.
+The downloader canary passes all 164 tests using the candidate. Publication is
+separate from local integration and requires explicit authorization.
 
 ## Verified crates.io release: 0.1.5 (4 October 2026)
 

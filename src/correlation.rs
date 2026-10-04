@@ -31,6 +31,22 @@ impl HeaderRequestId {
         Self(value)
     }
 
+    /// Generate a lowercase RFC 4122 UUID v4 header without selecting trust policy.
+    pub fn uuid_v4() -> Self {
+        use std::fmt::Write;
+        let mut bytes: [u8; 16] = rand::random();
+        bytes[6] = (bytes[6] & 0x0f) | 0x40;
+        bytes[8] = (bytes[8] & 0x3f) | 0x80;
+        let mut value = String::with_capacity(36);
+        for (index, byte) in bytes.into_iter().enumerate() {
+            if matches!(index, 4 | 6 | 8 | 10) {
+                value.push('-');
+            }
+            write!(value, "{byte:02x}").expect("formatting into a string");
+        }
+        Self(HeaderValue::from_str(&value).expect("UUID is a valid header value"))
+    }
+
     pub fn as_header_value(&self) -> &HeaderValue {
         &self.0
     }

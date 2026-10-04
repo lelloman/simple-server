@@ -1,18 +1,19 @@
 [package]
 name = "lelloman-simple-server"
-version = "0.1.5"
+version = "0.1.6"
 edition = "2024"
 license = "MIT OR Apache-2.0"
 description = "A modular foundation for Axum-based Rust services"
 repository = "https://github.com/lelloman/simple-server"
 readme = "README.md"
 publish = ["crates-io"]
-include = ["/src/**", "/tests/**", "!/tests/**/target/**", "/examples/**", "/Cargo.toml", "/Cargo.lock", "/README.md", "/LICENSE-MIT", "/LICENSE-APACHE", "/docs/publishing.md"]
+include = ["/src/**", "/tests/**", "!/tests/**/target/**", "/examples/**", "/Cargo.toml", "/Cargo.lock", "/README.md", "/LICENSE-MIT", "/LICENSE-APACHE", "/docs/publishing.md", "/docs/unix-http.md"]
 
 [lib]
 name = "simple_server"
 
 [features]
+unix-http = ["web", "lifecycle", "dep:hyper", "dep:hyper-util", "dep:hyperlocal"]
 compression = ["web", "dep:tower-http", "tower-http/compression-gzip", "dep:pin-project-lite"]
 cookies = ["web", "dep:cookie", "dep:pin-project-lite"]
 static-files = ["web", "dep:tower-http", "tower-http/fs"]
@@ -75,7 +76,13 @@ tower-service = { version = "0.3", optional = true }
 tracing = { version = "0.1", default-features = false, features = ["std"], optional = true }
 tracing-subscriber = { version = "0.3", default-features = false, features = ["fmt", "env-filter", "ansi", "json"], optional = true }
 
+[target.'cfg(unix)'.dependencies]
+hyper = { version = "1", features = ["client", "http1"], optional = true }
+hyper-util = { version = "0.1", features = ["client", "client-legacy", "tokio"], optional = true }
+hyperlocal = { version = "0.9", default-features = false, features = ["client"], optional = true }
+
 [dev-dependencies]
+tempfile = "3"
 flate2 = "1"
 tower-http-05 = { package = "tower-http", version = "0.5", default-features = false, features = ["compression-gzip"] }
 rusqlite = { version = "0.33", features = ["bundled"] }
