@@ -121,7 +121,7 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | androidoscopy | `server`; Android SDK pairing | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (no served probe) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; controller + LAN access)** | **Done (local; device JNI pairing gate)** | **Done (all production route groups)** | N/A (no SQLite database) | N/A (no Rust migration runner) | N/A (Rust has no SQLite; viewer uses Android platform API) | None. |
 | crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; durable primitives)** | **Done (local; retry primitives)** | **Done (local; main + integration)** | **Done (local; HTTP + MCP + durable dispatcher)** | **Done (both servers)** | Done (core + integration SQLite) | Done (core + integration ledgers) | Done (core + integration ledger creation) | None. |
 | fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; dynamic cron)** | N/A (assessed) | **Done (local; HTTP + WebSocket + admin/write)** | **Done (local; five API tiers)** | **Done (local)** | Done (storage SQLite) | Done (core SQLite store) | Done (ledger + runtime vec0 creation) | None. |
-| lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (Rust; Caddy owns CORS) | **Done (local; scoped)** | **Done (local; webhook scope)** | **Done (local; capacity)** | **Done (local; retry scope)** | **Done (local; sessions + resource/admin access)** | **Done (endpoint budgets + persisted device polling)** | **Done (local)** | Done (SQLite backend) | Done (SQLite + PostgreSQL version markers) | N/A (versioned SQL owns creation; no independent SQLite bootstrap) | Tower Cookies mutable cookie jar and CookieManagerLayer in server/examples. Tower HTTP cors/trace declaration needs removal-safety verification. |
+| lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (Rust; Caddy owns CORS) | **Done (local; scoped)** | **Done (local; webhook scope)** | **Done (local; capacity)** | **Done (local; retry scope)** | **Done (local; sessions + resource/admin access)** | **Done (endpoint budgets + persisted device polling)** | **Done (local)** | Done (SQLite backend) | Done (SQLite + PostgreSQL version markers) | N/A (versioned SQL owns creation; no independent SQLite bootstrap) | Tower Cookies mutable cookie jar and CookieManagerLayer in server/examples. Shared owned mutable-cookie API is still needed. |
 | lellostore | `backend` | **Done** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; OIDC + admin)** | N/A (no inbound admission policy) | **Done (local)** | N/A (no explicit policy) | Done (backend SQLx) | Pending (deferred by user: active backend work) | Tower HTTP fs declaration needs removal-safety verification; cleanup deferred during active backend work. |
 | meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; pipeline/gateway)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; weighted claims)** | **Done (local; budgets/retry)** | **Done (local; all three services)** | **Done (local; gateway budgets)** | **Done (local)** | Done (pipeline SQLite) | Done (weather-pipeline SQLite) | N/A (versioned SQL owns creation; no independent bootstrap) | None. |
 | observo | `observo-server`; standalone extractor logging | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (no served probe) | **Done (local; scoped)** | **Done (local; primitives)** | N/A (assessed) | **Done (local; IP/key/JWT access)** | N/A (no request quota) | **Done (local)** | Done (server SQLite) | N/A (idempotent schema, no migration ledger) | Done (bootstrap creation; scoped) | Node worker HTTP management server remains outside Rust migration scope. |
@@ -6799,3 +6799,55 @@ Verification:
 
 Fausto's active README pin was corrected from stale `=0.1.0` to actual `=0.1.2`.
 Consumer details: `fausto/docs/simple-server-migration.md#backend-cleanup-2026-10-04`.
+
+## Lello-auth backend dependency cleanup — 2026-10-04
+
+Active `master` started at `228edd17bfb8`. A dedicated
+`migration/backend-cleanup` worktree held the declaration-only cleanup, tested
+and committed at `2e42c18`. Original master was rebased onto that branch;
+ancestry and identical tested trees were verified. The three original untracked
+identity-provider research files were preserved and their hashes verified.
+Owned worktree/branch, build caches, logs and scripts were removed after
+integration. No push, deployment or shared-library release was performed.
+
+The `lello-auth-axum` production manifest's unused Tower HTTP cors/trace
+declaration is removed. The complete Rust source audit finds no Tower HTTP
+imports or middleware installation. CORS remains Caddy-owned; Rust tracing/CORS
+applicability does not change. Direct Tower usage is exclusively test ServiceExt,
+so its declaration moves to dev-dependencies. The lockfile removes two dependency
+edges, with no package version changes. The direct normal dependency tree
+confirms neither Tower nor Tower HTTP is declared by the HTTP integration crate.
+Transitive Tower/HTTP/Axum dependencies still exist, as expected.
+
+**Cookie migration remains pending.** The shared integration crate, production
+server, embedded example and external-OIDC example still use Tower Cookies
+Cookie/Cookies, CookieManagerLayer and SameSite. Shared public
+`lelloman-simple-server =0.1.0` supplies an extraction compatibility adapter, not
+an owned mutable jar/middleware contract. Its auth cookie extractor reads
+credentials and cannot replace output deltas or unauthenticated browser CSRF
+and device-link flows. No cookie import is renamed to falsely imply adoption.
+
+The needed shared contract covers incoming parsing, clone/shared mutation,
+add/remove deltas appended as distinct Set-Cookie headers, cookie attributes and
+missing-layer rejection. Lello-auth must keep its session/CSRF/OIDC/device-link
+policy, including __Host- host-only cookies, Secure/HttpOnly, Path=/, SameSite
+Lax/Strict, lifetimes and deletion rules. Details are recorded in
+`lello-auth/docs/BACKEND_DEPENDENCY_CLEANUP.md`. The table's last cell now lists
+only this pending cookie boundary, removing the completed Tower HTTP item.
+
+Verification:
+
+- Baseline and final `cargo test --locked --workspace --all-targets` each:
+  **969 passed, 14 ignored** external database cases. This includes real-loopback
+  admin/login/logout, device-link, OAuth, OIDC lifecycle, CSRF/password, profile,
+  reauthentication and TOTP suites, plus core database and token contracts.
+- CI's Rust **1.88.0** strict all-target workspace Clippy passes before and after,
+  with its existing `large_enum_variant`/`too_many_arguments` allowances.
+- The newer local compiler's strict Clippy fails before and after with the same
+  two pre-existing `cmp_owned` findings at server main.rs:887 and :903; these are
+  not migration failures. Formatting, diff checks and the Python CI contract
+  pass before and after.
+- No application source or cookie behavior changes. No new tests are added for
+  this unused-declaration cleanup. External PostgreSQL ignores, excluded
+  standalone examples/auth-helper, browser release gates and Docker E2E were
+  not rerun. The existing public =0.1.0 dependency remains unchanged.
