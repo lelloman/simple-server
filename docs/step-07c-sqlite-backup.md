@@ -1,6 +1,6 @@
 # Step 07c: SQLite backup coordination
 
-Implemented locally, 2026-10-04. Feature `database-sqlite-backup` exposes
+Implemented in 0.1.7, 2026-10-04. Feature `database-sqlite-backup` exposes
 `database::sqlite::backup`; no HTTP, runtime or native SQLite driver dependency.
 Consumer adoption is Pending assessment/canary, independently of 07a/07b/07e.
 

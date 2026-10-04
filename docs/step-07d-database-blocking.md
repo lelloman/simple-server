@@ -1,6 +1,6 @@
 # Step 07d: bounded synchronous database execution
 
-Implemented locally, 2026-10-04. Feature `database-blocking` exposes
+Implemented in 0.1.7, 2026-10-04. Feature `database-blocking` exposes
 `database::blocking`. It requires Tokio's notification/time primitives but no
 HTTP, SQLite driver, task module or Tokio runtime for synchronous callers.
 Consumer adoption is Pending assessment/canary.

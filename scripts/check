@@ -8,6 +8,9 @@ cargo test --locked
 cargo test --locked --all-features
 cargo test --locked --no-default-features --features database-migrations --test database_migrations
 cargo test --locked --no-default-features --features database-sqlite-schema --test database_sqlite_schema --test database_sqlite_extended_creation --test database_sqlite
+cargo test --locked --no-default-features --features database-sqlite-backup --test database_backup
+cargo test --locked --no-default-features --features database-blocking --test database_blocking
+cargo run --locked --no-default-features --features database-blocking --example database_blocking
 cargo run --locked --manifest-path tests/fixtures/sqlite_vec_creation/Cargo.toml
 cargo test --locked --no-default-features --features lifecycle
 cargo test --locked --no-default-features --features body-limit

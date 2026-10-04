@@ -7,7 +7,7 @@ description = "A modular foundation for Axum-based Rust services"
 repository = "https://github.com/lelloman/simple-server"
 readme = "README.md"
 publish = ["crates-io"]
-include = ["/src/**", "/tests/**", "!/tests/**/target/**", "/examples/**", "/Cargo.toml", "/Cargo.lock", "/README.md", "/LICENSE-MIT", "/LICENSE-APACHE", "/docs/publishing.md", "/docs/unix-http.md"]
+include = ["/src/**", "/tests/**", "!/tests/**/target/**", "/examples/**", "/Cargo.toml", "/Cargo.lock", "/README.md", "/LICENSE-MIT", "/LICENSE-APACHE", "/docs/publishing.md", "/docs/unix-http.md", "/docs/step-07c-sqlite-backup.md", "/docs/step-07d-database-blocking.md"]
 
 [lib]
 name = "simple_server"

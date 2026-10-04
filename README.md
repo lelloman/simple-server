@@ -9,7 +9,7 @@ explicitly excluded and must migrate before building against this revision. See 
 
 **Status:** Axum dependency centralization and opt-in lifecycle, logging,
 correlation, HTTP tracing, body limits, response-header helpers, CORS, health checks, task ownership, scheduling, execution policies, combined auth and rate limiting are implemented. All 17 inventoried products have adopted lifecycle helpers locally
-with documented application scopes. Crumbles and SCT include those migrations on local `master`. Public crates.io releases are available; new 07c/07d features are implemented locally for the next release.
+with documented application scopes. Crumbles and SCT include those migrations on local `master`. Public crates.io releases are available; backup coordination and bounded database workers are new in 0.1.7.
 
 Open the [HTML migration matrix](docs/migration-status.html) in a browser for adoption status
 across 17 active services plus excluded Quentin Torrentino and the completed steps for each one.
@@ -342,4 +342,4 @@ Sync and async callers share one scheduler. Runtime timeout does not interrupt
 native operations or release their capacity early; close/drain observes actual
 completion. See the [07d contract](docs/step-07d-database-blocking.md).
 
-Both APIs are local 0.1.7 additions, not yet published or adopted in consumers.
+Both APIs are new in 0.1.7. Consumer adoption is tracked independently.
