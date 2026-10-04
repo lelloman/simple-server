@@ -127,7 +127,7 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | observo | `observo-server`; standalone extractor logging | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (no served probe) | **Done (local; scoped)** | **Done (local; primitives)** | N/A (assessed) | **Done (local; IP/key/JWT access)** | N/A (no request quota) | **Done (local)** | Done (server SQLite) | N/A (idempotent schema, no migration ledger) | Done (bootstrap creation; scoped) | None. |
 | paranza | `apps/paranza-server` | **Done** | **Done (local; scoped)** | N/A (no logger) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; runner + PCM access)** | N/A (no implemented request quota) | **Done (local)** | N/A (driver defaults only) | N/A (idempotent DDL/column repairs, no migration ledger) | Done (store creation; scoped) | None. |
 | peerlo | `peerlo-api` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; retry primitives)** | **Done (local; bearer + Torznab keys)** | **Done (local; API + crawler + durable DHT)** | **Done (local)** | N/A (driver defaults only) | N/A (create-if-missing stores, no migration ledger) | **Done (tracker + metadata creation)** | None. |
-| pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local; main HTTP)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; socket scope)** | **Done (local; durable queue cadence)** | N/A (assessed) | **Done (local; sessions + permissions + WebSocket)** | Partial (login/daily/TMDB shared; configured HTTP Governor pending) | **Done (local; HTTP core)** | Done (server + CLI SQLite) | Done (server SQLx) | Done (CLI creation; server owns versioned SQL) | Tower HTTP ServeDir/ServeFile static files and SPA fallback; CompressionLayer; active configured Governor HTTP limiter (Step 10 Partial). Android Ktor/Netty WebSocket server is outside Rust migration scope. |
+| pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local; main HTTP)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; socket scope)** | **Done (local; durable queue cadence)** | N/A (assessed) | **Done (local; sessions + permissions + WebSocket)** | Done (login/daily/TMDB + configured HTTP limiter) | **Done (local; HTTP core)** | Done (server + CLI SQLite) | Done (server SQLx) | Done (CLI creation; server owns versioned SQL) | Tower HTTP gzip CompressionLayer; shared response compression API is not yet available. |
 | pezzottify-downloader | Puppeteer API, downloader HTTP server and Python cron | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; Puppeteer)** | **Done (local; both HTTP routers)** | N/A (assessed) | N/A (assessed) | **Done (local; both routers)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; priority admission)** | N/A (assessed) | N/A (no application caller gate) | **Done (local; Python/SQLite quota bridge)** | **Done (local; parent + child HTTP core)** | N/A (Python SQLite only) | N/A (no Rust migration runner) | N/A (Python owns SQLite; Rust quota bridge has no schema API) | Hyper HTTP/1 Unix serving; Hyper/hyperlocal streaming Unix proxy client; Tower HTTP RequestId and UUID-generator compatibility. Unix proxy client is a separate capability. |
 | torrentino | `crates/service` (included) | Pending (direct Axum) | **Done (shared lifecycle)** | **Done (shared logging)** | Pending (applicability review) | Pending (applicability review) | Pending (applicability review) | Pending (applicability review) | Pending (applicability review) | Pending (applicability review) | Pending (applicability review) | Pending (applicability review) | Pending (applicability review) | Pending (custom bearer/session auth) | Pending (applicability review) | Pending (direct Axum routing/serve) | Pending (SQLx WAL/FK/busy timeout) | Pending (custom user_version guard) | Pending (schema.sql bootstrap) | Direct Axum routing, handlers/extractors/rejections/responses, bearer/session middleware, body limits, WebSocket socket/message types, serving and HTTP test fixtures. |
 | quentin-torrentino | `crates/server` (**excluded by request**) | Pending (legacy direct Axum) | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; stage capacity)** | N/A (assessed) | **Done (local; API access)** | **Done (local; MusicBrainz pacing)** | Pending | Pending (excluded by request) | Pending (excluded by request) | Pending (excluded by request) | Legacy direct Axum: backend routing/handlers/extractors/responses, auth/metrics middleware and serving; torrent multipart, chat SSE, dashboard WebSockets, static-file routing and HTTP test fixtures. Owned HTTP migration remains pending. |
@@ -7029,3 +7029,48 @@ audit. Existing 07e results remain historical. Shared library inspected at
 
 Master was rebased onto the isolated audit branch, identical trees and ancestry
 verified, and the owned worktree/branch removed. No pushes or deployments.
+
+## Pezzottflix static serving and configured HTTP limiter — 2026-10-04
+
+Active clean `master` started at `71a1309`; consumer migration
+`ccbdc876ffd8640feaf7d635461eb3aaba835c6d` is integrated into master. Shared
+public 0.1.4 source `40c41291d9b0f90705c93f8528eead16a9eb2477`, checksum
+`5526aea10c87982acc311e23401e6134f624f03d10470c982059163c325b595a` is now
+pinned in the server workspace and documented in README. The standalone
+RaiPlay CLI stays unchanged at 0.1.2.
+
+Production frontend/SPA fallback uses owned StaticDir with directory indexes
+and explicit index.html fallback. Missing assets, relative root resolution,
+GET/HEAD, methods, ranges and conditional requests retain their existing policy.
+The factory called by production is compared against Tower HTTP 0.5: **120
+requests match full headers, status and response bytes**, including traversal
+and redirects. Missing fallback index returns 404.
+
+Configured /v1 HTTP admission uses shared Budget and ExtraIdleCredit, preserving
+Governor 0.6 refill/idle behavior, per-IP/global/disabled modes, peer fallback,
+map/locking, cleanup after attempted requests, zero-setting assertions, plain
+429 body and Retry-After floor rounding. Accepted extreme rates above one
+billion preserve their old zero-debt behavior. **15,000 deterministic decisions
+match Governor, including exact retry durations**. Existing production-router
+and cleanup/refill tests remain green. Governor and Tower are now test-only;
+unused direct nonzero_ext is removed. Step 10 becomes **Done**.
+
+Baseline full workspace: **603 passed, zero failed, three existing ignores**.
+Final full workspace: **605 passed, zero failed, three existing ignores**.
+Locked workspace check and warning-capped all-target Clippy pass. Baseline and
+final strict Clippy have identical diagnostic counts/messages (34 library, 39
+library-test errors); repository formatting differences also persist. Changed
+rate-limiter formatting and diff checks pass; unrelated formatting is preserved.
+No frontend/Android/browser/container E2E or standalone CLI rerun. Evidence
+is in `pezzottflix/docs/backend-cleanup.md` and the updated Step 10 document.
+
+The remaining cell now lists only **gzip CompressionLayer**. It stays unchanged
+in its original position around the combined router; simple-server has no
+response compression API yet. Runtime Tower HTTP enables only compression-gzip;
+fs is enabled for the old static-service test oracle. Android Ktor/Netty serving
+is a separate runtime boundary, recorded here rather than as pending Rust work.
+This cleanup does not claim that all backend dependencies have been removed.
+
+Master rebased onto the isolated migration branch; ancestry and identical tested
+trees verified. Owned worktree/branch removed, unrelated recovery branch
+preserved. No pushes/deployments. Both central trackers updated consistently.
