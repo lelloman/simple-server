@@ -6632,10 +6632,48 @@ previous Pezzottify configuration and a real TCP/shutdown test. Registry package
 contents were inspected and `cargo publish --dry-run --locked --registry crates-io`
 passes from clean committed source. Publication is pending explicit approval.
 
-Pezzottify is being tested in an isolated worktree from clean committed dev
+Pezzottify was tested in an isolated worktree from clean committed dev
 `21641eec`; unrelated work appeared in its original checkout and is preserved.
 Baseline auth and permissions: 44 passed. The new production-frontend HTTP
 contract test passes against the old backend. The canary replaces ServeDir/
 ServeFile, removes direct Hyper/Tower HTTP declarations and moves Tower into
 dev dependencies. Public-release consumption and integration are still pending,
 so the last-cell leftovers have not yet been removed.
+
+### Pezzottify static-file canary ready; publication pending
+
+Prepared consumer commits `e83df8e9` (implementation) and `d9a13b20` (verification)
+are on `migration/shared-static-files`, refreshed onto concurrent dev commits
+`bf9912ae` and `dc803924`. Production Rust checks were rerun on the combined CI-fix
+source; the latter commit changes only an unrelated Python E2E test. Original dev
+remains at `dc803924`: do not interpret preparation as completed adoption.
+
+Verified with an uncommitted command-line Cargo source patch:
+
+- Full fast unit run: 1,170 passed, two ignored, one failure in the existing
+  scheduler test's 200 ms execution assumption. The isolated retry passes.
+- All 34 integration suites: 342 passed, 32 existing ignores. External deletion
+  of build artifacts interrupted execution after 11 suites/145 passes; the
+  remaining 23 suites were rebuilt outside the projects directory and passed
+  197 tests on the combined CI-fix source. No missing-binary result is counted
+  as a passing test.
+- Frontend/auth/permission checks on the combined source: 45 passed.
+- Formatting, strict production Clippy and locked all-target/all-feature checking
+  pass. Existing fixture warnings and num-bigint-dig future-compatibility warnings
+  remain; strict all-target Clippy is not claimed.
+- Metadata verifies no direct Axum, Hyper or Tower HTTP declaration; Tower is
+  dev-only. Static frontend configuration and API middleware ordering remain
+  unchanged. No user databases, deployment or remote branches were changed.
+
+The public 0.1.3 candidate is source `dbc7f682f9656c1b29c6a52dfc011a94de27087a`,
+archive SHA256 `0c3c1347b1c85484b5d4ba18cd6d886688b8a1dc2d94d84bc596a6abec128ddb`.
+A fresh packaging run reproduces the dry-run archive hash. Publication approval
+was requested because the new API is absent from existing registry releases.
+The consumer's candidate lockfile still reflects the local test override; registry
+resolution/checks, rebasing dev onto the migration branch, and consumer worktree/
+branch removal remain pending. The remaining-backend cell deliberately retains
+current dev's static-file/Hyper cleanup items until integration.
+
+Shared-library implementation and tracker updates are integrated into master.
+The library worktree/branch and owned temporary build artifacts are cleaned up;
+the committed consumer worktree/branch is retained for the pending release.
