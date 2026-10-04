@@ -129,12 +129,12 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | paranza | `apps/paranza-server` | **Done** | **Done (local; scoped)** | N/A (no logger) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; runner + PCM access)** | N/A (no implemented request quota) | **Done (local)** | N/A (driver defaults only) | N/A (idempotent DDL/column repairs, no migration ledger) | Done (store creation; scoped) | None. |
 | peerlo | `peerlo-api` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; retry primitives)** | **Done (local; bearer + Torznab keys)** | **Done (local; API + crawler + durable DHT)** | **Done (local)** | N/A (driver defaults only) | N/A (create-if-missing stores, no migration ledger) | **Done (tracker + metadata creation)** | None. |
 | pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local; main HTTP)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; socket scope)** | **Done (local; durable queue cadence)** | N/A (assessed) | **Done (local; sessions + permissions + WebSocket)** | Done (login/daily/TMDB + configured HTTP limiter) | **Done (local; HTTP core)** | Done (server + CLI SQLite) | Done (server SQLx) | Done (CLI creation; server owns versioned SQL) | None. |
-| pezzottify-downloader | Puppeteer API, downloader HTTP server and Python cron | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; Puppeteer)** | **Done (local; both HTTP routers)** | N/A (assessed) | N/A (assessed) | **Done (local; both routers)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; priority admission)** | N/A (assessed) | N/A (no application caller gate) | **Done (local; Python/SQLite quota bridge)** | **Done (local; parent + child HTTP core)** | N/A (Python SQLite only) | N/A (no Rust migration runner) | N/A (Python owns SQLite; Rust quota bridge has no schema API) | Hyper Unix serving/client and Tower RequestId remain on master. Replacement canary passes 164 tests; public dependency switch and integration await simple-server 0.1.6 publication. |
+| pezzottify-downloader | Puppeteer API, downloader HTTP server and Python cron | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; Puppeteer)** | **Done (local; both HTTP routers)** | N/A (assessed) | N/A (assessed) | **Done (local; both routers)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; priority admission)** | N/A (assessed) | N/A (no application caller gate) | **Done (local; Python/SQLite quota bridge)** | **Done (local; parent + child HTTP core)** | N/A (Python SQLite only) | N/A (no Rust migration runner) | N/A (Python owns SQLite; Rust quota bridge has no schema API) | None. |
 | torrentino | `crates/service` (included) | **Done** | **Done (shared lifecycle)** | **Done (shared logging)** | N/A (no request-ID protocol) | N/A (no HTTP tracing layer) | **Done (64 KiB API; 4 KiB sessions)** | **Done (authenticated cache policy)** | N/A (same-origin; no CORS grant) | N/A (no served probe) | Pending (worker ownership review) | Pending (fixed worker polling) | Pending (worker policy review) | **Done (async bearer/session verification)** | Pending (application budget applicability review) | **Done (owned HTTP + WebSockets)** | Pending (SQLx WAL/FK/busy timeout) | Pending (custom user_version guard) | Pending (schema.sql bootstrap) | None. |
 | quentin-torrentino | `crates/server` (**excluded by request**) | Pending (legacy direct Axum) | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; stage capacity)** | N/A (assessed) | **Done (local; API access)** | **Done (local; MusicBrainz pacing)** | Pending | Pending (excluded by request) | Pending (excluded by request) | Pending (excluded by request) | Legacy direct Axum: backend routing/handlers/extractors/responses, auth/metrics middleware and serving; torrent multipart, chat SSE, dashboard WebSockets, static-file routing and HTTP test fixtures. Owned HTTP migration remains pending. |
-| sct | `sct-server` | **Done** | **Done (scoped)** | N/A (no logger) | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; worker scope)** | **Done (local; durable worker cadence)** | **Done (local; retry scope)** | **Done (local; tokens/sessions + transactional access)** | N/A (durable state caps, no request quota) | **Done (local; HTTP core)** | Done (archive SQLite) | Done (PostgreSQL catalog; archive format N/A) | Done (offline archive creation; PostgreSQL outside scope) | Tower HTTP ServeDir static-file fallback. |
+| sct | `sct-server` | **Done** | **Done (scoped)** | N/A (no logger) | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; worker scope)** | **Done (local; durable worker cadence)** | **Done (local; retry scope)** | **Done (local; tokens/sessions + transactional access)** | N/A (durable state caps, no request quota) | **Done (local; HTTP core)** | Done (archive SQLite) | Done (PostgreSQL catalog; archive format N/A) | Done (offline archive creation; PostgreSQL outside scope) | None. |
 | simple-agents | `simple-agents-service`; runner-shell logging; associated coding test servers | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local pilot; service routes)** | **Done (local; scoped canary)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; transactional capacity)** | **Done (local; retry scope)** | **Done (local; caller + transactional access)** | N/A (task/storage admission, no request quota) | **Done (local; HTTP core)** | Done (service + Runner SQLite) | Done (service ledger + Runner version marker) | Done (service ledger + Runner transport creation) | None. |
-| simple-ai | `backend`, `inference-runner` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local; backend)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; batch readiness)** | N/A (assessed) | **Done (local; backend user/admin)** | **Done (local; backend budgets)** | **Done (local; HTTP core)** | N/A (driver defaults only) | N/A (column-driven upgrades, no migration ledger) | Done (audit creation; scoped) | Python HTTP provider processes remain outside Rust migration scope. |
+| simple-ai | `backend`, `inference-runner` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local; backend)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; batch readiness)** | N/A (assessed) | **Done (local; backend user/admin)** | **Done (local; backend budgets)** | **Done (local; HTTP core)** | N/A (driver defaults only) | N/A (column-driven upgrades, no migration ledger) | Done (audit creation; scoped) | None. |
 
 ## Axum exposure audit — 2026-09-24
 
@@ -7171,6 +7171,9 @@ push or deployment. Earlier prepared/pending records remain dated checkpoints.
 
 ## Downloader and Torrentino cleanup — 2026-10-04
 
+This is the earlier preparation checkpoint. The later downloader publication and
+completion below supersede its pending-release/integration status.
+
 Scope: remaining direct HTTP backend dependencies, preserving application
 protocols. Torrentino is the current replacement repository, not excluded
 quentin-torrentino. Original branches were clean active `master`: Torrentino
@@ -7256,3 +7259,111 @@ failure, real-process lifecycle and TCP-to-Unix WebSocket forwarding. No service
 deployment, remote push or user data changes occurred. Shared release/downloader
 worktrees are intentionally retained for publication and final registry testing;
 the downloader remaining cell lists what still exists on its integrated master.
+
+## Downloader SCT and SimpleAI completion — 2026-10-04
+
+Completed the downloader, SCT and SimpleAI cleanup before the requested broader
+Torrentino pass. Torrentino was not changed during this batch. All three active
+branches were clean `master`, selected from local status/history/tracking, not
+remote HEAD. Baselines, isolated sibling worktrees, tested commits, rebasing the
+original master onto each migration branch, identical-tree/ancestry verification
+and removal of owned worktrees/branches followed the agreed workflow. No Git
+push, service deployment or branch-protection changes were performed.
+
+### Published shared support
+
+`lelloman-simple-server =0.1.6` is published from clean tested commit
+`58e9b7504176c82b538dca0cd3041468fb4a1ccd`, following the user's go-ahead to finish
+the prepared downloader. Public archive SHA256 is
+`4f37d395af4d6ca8495ad190b8cecc5ab078ddfc92b8e9b3a41bc9eee80d3fce`.
+Cargo confirms publication/availability. An independent public download matches
+checksum, embedded source commit and every library source file. The complete
+shared check passes **706 test executions**, strict Clippy, isolated features,
+SQLite fixture, formatting and warnings-as-errors rustdoc; package dry run and
+publication verification pass for 135 files. See [Unix HTTP](unix-http.md) and
+[publication evidence](publishing.md#verified-cratesio-release-016-4-october-2026).
+
+### Pezzottify-downloader
+
+- Original master `22ffc5c3` → integrated master
+  `06943ad42a2acea03660fa69d45e076c5577dcc7`; the earlier canary commit is retained
+  in history, followed by the final public dependency switch. Manifest/lockfile
+  use public 0.1.6 with the verified checksum, without a path override.
+- Production child serving calls shared `web::unix::serve`; Puppeteer HTTP
+  proxy/health calls shared streaming `UnixClient`. Socket ownership/0700,
+  stale-file cleanup, signals, 30-second grace/final removal, three-second health
+  deadline, Host filtering, path/query/header forwarding, 502 failures and lazy
+  streaming/error behavior are preserved. WebSocket upstream connection remains
+  an outbound protocol client.
+- UUID selection calls shared `HeaderRequestId::uuid_v4()`; the application ID
+  extension wrapper preserves raw/repeated caller headers and extension overrides
+  independently of shared selected-ID scope/response propagation. Librespot's
+  HTTP primitives use the owned facade with its upstream Spotify client.
+- **164 tests** and locked all-target check pass against the published package,
+  including real process lifecycle, TCP-to-Unix WebSockets, streaming-before-EOF,
+  upstream body failure and legacy request-ID oracle comparisons. Capped Clippy
+  passes. Strict Clippy reproduces the same 12 findings on unchanged original
+  master; diagnostic sets match. Original broad formatting debt remains.
+- No direct normal Tower HTTP/Tower/Hyper/Hyper-util/Hyperlocal/HTTP-body-util
+  dependencies remain. Development-only legacy oracles/mock servers are retained.
+  Python SQLite remains outside Rust database applicability. Live Spotify login
+  or a fresh Docker release build was not exercised. Remaining Rust server
+  backend exposure: **None**.
+
+### SCT
+
+- Original master `d6b81bb` → integrated master
+  `9e118e6c73db6f80b15f85fc525a1d254096a05b`. Workspace/core consume public 0.1.6;
+  only the server adds the static-files feature. Direct Tower HTTP dependency
+  entries are removed.
+- Production fallback calls shared `StaticDir`. Directory indexes, GET/HEAD,
+  MIME/body, ranges, modification conditionals, redirects/query, absent-file
+  404 and method 405 remain unchanged. No implicit SPA fallback, compression or
+  caching policy was added. Reserved API paths still return structured unsupported
+  errors, not static content; auth/correlation/health/storage policy is preserved.
+- Baseline workspace: **58 tests, 92 infrastructure ignores**. New real-TCP
+  production-router contract passes with old ServeDir and new StaticDir. Final:
+  **59 tests, the same 92 ignores**; strict all-target/all-feature Clippy,
+  workspace build, formatting and diff checks pass.
+- Initial baseline linking with debug information disabled hit an undefined
+  SQLite/Tokio monomorphization symbol. Successful baseline/final host checks use
+  isolated targets, two jobs, `CARGO_PROFILE_DEV_DEBUG=0`, `CARGO_INCREMENTAL=0`
+  and `--config 'profile.dev.package.sqlx-sqlite.codegen-units=1'`. No repository
+  build policy or database behavior was changed. PostgreSQL/S3/destructive
+  qualification and frontend suites were not rerun for this fallback migration.
+  Remaining Rust server backend exposure: **None**.
+
+### SimpleAI
+
+- Original master `851ce0c` → integrated master
+  `9d29333df8ad498aec1ab83d101bf47184fa6aca`. Already adopted owned production
+  routing/extractors/responses/serving, WebSocket/socket/message types, SSE and
+  existing shared middleware. No direct production Axum/Tower HTTP/Hyper server
+  dependencies or compatibility imports were found. Rust runtime source is
+  unchanged; the public package is upgraded from 0.1.0 to verified 0.1.6 and
+  current documentation is corrected. No unused new features are installed.
+- Baseline/final workspace suites both pass **482 tests with one existing ignored
+  Wake-on-LAN doctest**. Locked build, capped all-target Clippy and diff checks
+  pass. Strict Clippy reproduces the same four findings in unchanged common
+  source on original master; existing broad formatting debt remains. Real
+  HTTP/WebSocket/SSE and fake-engine process tests are in the suite. The unchanged
+  ignored RTX config fixture required by compile-time tests was copied only into
+  the owned worktree and removed with it; nothing was written to original config.
+- Audio, classification, extraction, Chatterbox and XTTS providers use Python
+  standard-library `ThreadingHTTPServer`. These are separate model processes
+  spawned/managed by runner engines, not direct Rust Axum exposure. Replacing
+  their transport would require a distinct cross-language bridge/provider redesign.
+  Their model/protocol code is unchanged. Outbound Reqwest/tokio-tungstenite
+  clients are likewise outside owned server API migration. Live GPU/provider
+  deployment qualification was not run. Remaining Rust server backend exposure:
+  **None**; the separate Python scope boundary is recorded here, not as unfinished
+  migration in the remaining cell.
+
+### Integration and cleanup
+
+All three masters contain their reviewed commits and match the tested trees;
+original checkouts are clean. Owned consumer worktrees/migration branches and
+shared release worktree/branch are removed. Both trackers now show only actual
+remaining work in their last cells. Task-owned `/tmp` build directories, logs,
+public verification archive, isolated fixtures/sockets and the central tracker
+worktree are removed after integration. No unrelated artifacts are deleted.

@@ -34,14 +34,23 @@ overwritten. Record the source commit and archive checksum, then independently
 verify a consumer download and compile before migrating consumer lockfiles.
 A Git push and deployment are separate operations.
 
-## Prepared release: 0.1.6 (4 October 2026)
+## Verified crates.io release: 0.1.6 (4 October 2026)
 
 Adds optional owned Unix HTTP serving/streaming clients and a UUID v4 header
 request-ID generator. See [the Unix transport contract](unix-http.md).
-The complete library check passes, including strict Clippy, isolated Unix
-features, graceful-drain/streaming/error/WebSocket tests, formatting and rustdoc.
-The downloader canary passes all 164 tests using the candidate. Publication is
-separate from local integration and requires explicit authorization.
+Published following the user's go-ahead to finish the downloader from clean
+committed source `58e9b7504176c82b538dca0cd3041468fb4a1ccd`. Archive SHA256:
+`4f37d395af4d6ca8495ad190b8cecc5ab078ddfc92b8e9b3a41bc9eee80d3fce`.
+
+The complete library check passes **706 test executions**, strict Clippy,
+isolated Unix features, graceful-drain/streaming/error/WebSocket tests, SQLite
+fixture, formatting and warnings-as-errors rustdoc. The clean committed dry run
+and real publication verify 135 package files. Cargo confirms registry
+availability. An independent public archive download matches the checksum,
+embedded Git source revision and every library source file. Downloader, SCT and
+SimpleAI lockfiles consume public 0.1.6 with this checksum, without overrides.
+Their migration/verification evidence is recorded in both central trackers.
+No Git push or service deployment was performed.
 
 ## Verified crates.io release: 0.1.5 (4 October 2026)
 
