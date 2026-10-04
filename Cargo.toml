@@ -13,6 +13,7 @@ include = ["/src/**", "/tests/**", "!/tests/**/target/**", "/examples/**", "/Car
 name = "simple_server"
 
 [features]
+cookies = ["web", "dep:cookie", "dep:pin-project-lite"]
 static-files = ["web", "dep:tower-http", "tower-http/fs"]
 database-migrations = []
 database-sqlite = []

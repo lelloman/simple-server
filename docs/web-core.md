@@ -379,3 +379,15 @@ fixtures, finite response assertions and multipart requests. `test-harness-ws`
 adds real WebSocket testing with owned messages. No compatibility router adapter
 is required. See [the harness contract](test-harness.md); consumer test adapters
 and legacy comparison oracles remain pending until separately migrated.
+
+### Owned mutable cookies
+
+The optional `cookies` feature provides `web::cookies::{Cookies, CookieManagerLayer}`
+without Tower Cookies API exposure. The owned request jar is shared across clones
+and extractors; the owned layer appends response deltas while preserving body and
+service behavior. Standard cookie values/builders and attribute types are exposed
+from the cookie data library. Auth/CSRF/session policy remains application-owned.
+The legacy `tower-cookies` adapter above remains supported independently. See the
+[mutable-cookie contract](cookies.md) for parsing, deletion, layer placement,
+manual composition and consumer migration limits. This feature is not yet
+published in a new crate release.

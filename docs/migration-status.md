@@ -121,7 +121,7 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | androidoscopy | `server`; Android SDK pairing | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (no served probe) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; controller + LAN access)** | **Done (local; device JNI pairing gate)** | **Done (all production route groups)** | N/A (no SQLite database) | N/A (no Rust migration runner) | N/A (Rust has no SQLite; viewer uses Android platform API) | None. |
 | crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; durable primitives)** | **Done (local; retry primitives)** | **Done (local; main + integration)** | **Done (local; HTTP + MCP + durable dispatcher)** | **Done (both servers)** | Done (core + integration SQLite) | Done (core + integration ledgers) | Done (core + integration ledger creation) | None. |
 | fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; dynamic cron)** | N/A (assessed) | **Done (local; HTTP + WebSocket + admin/write)** | **Done (local; five API tiers)** | **Done (local)** | Done (storage SQLite) | Done (core SQLite store) | Done (ledger + runtime vec0 creation) | None. |
-| lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (Rust; Caddy owns CORS) | **Done (local; scoped)** | **Done (local; webhook scope)** | **Done (local; capacity)** | **Done (local; retry scope)** | **Done (local; sessions + resource/admin access)** | **Done (endpoint budgets + persisted device polling)** | **Done (local)** | Done (SQLite backend) | Done (SQLite + PostgreSQL version markers) | N/A (versioned SQL owns creation; no independent SQLite bootstrap) | Tower Cookies mutable cookie jar and CookieManagerLayer in server/examples. Shared owned mutable-cookie API is still needed. |
+| lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (Rust; Caddy owns CORS) | **Done (local; scoped)** | **Done (local; webhook scope)** | **Done (local; capacity)** | **Done (local; retry scope)** | **Done (local; sessions + resource/admin access)** | **Done (endpoint budgets + persisted device polling)** | **Done (local)** | Done (SQLite backend) | Done (SQLite + PostgreSQL version markers) | N/A (versioned SQL owns creation; no independent SQLite bootstrap) | Tower Cookies mutable jar/layer remains in server/examples; pending adoption of shared web::cookies after a new crate release. |
 | lellostore | `backend` | **Done** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; OIDC + admin)** | N/A (no inbound admission policy) | **Done (local)** | N/A (no explicit policy) | Done (backend SQLx) | Pending (deferred by user: active backend work) | Tower HTTP fs declaration needs removal-safety verification; cleanup deferred during active backend work. |
 | meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; pipeline/gateway)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; weighted claims)** | **Done (local; budgets/retry)** | **Done (local; all three services)** | **Done (local; gateway budgets)** | **Done (local)** | Done (pipeline SQLite) | Done (weather-pipeline SQLite) | N/A (versioned SQL owns creation; no independent bootstrap) | None. |
 | observo | `observo-server`; standalone extractor logging | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (no served probe) | **Done (local; scoped)** | **Done (local; primitives)** | N/A (assessed) | **Done (local; IP/key/JWT access)** | N/A (no request quota) | **Done (local)** | Done (server SQLite) | N/A (idempotent schema, no migration ledger) | Done (bootstrap creation; scoped) | Node worker HTTP management server remains outside Rust migration scope. |
@@ -6851,3 +6851,59 @@ Verification:
   this unused-declaration cleanup. External PostgreSQL ignores, excluded
   standalone examples/auth-helper, browser release gates and Docker E2E were
   not rerun. The existing public =0.1.0 dependency remains unchanged.
+
+## Owned mutable HTTP cookies — 2026-10-04
+
+Simple-server now implements optional `cookies`, exposing owned
+`web::cookies::{Cookies, CookieManagerLayer, CookieManager}` and its response
+future. The feature enables web and the standard cookie data library, not the
+external Tower Cookies dependency. The owned jar/middleware implementation does
+not wrap or re-export Tower Cookies types. Standard cookie values/builders,
+SameSite/Expiration and time types are exposed from the cookie data library.
+Application session, CSRF, cookie attributes and authentication policy remain
+application-owned. See [the contract](cookies.md).
+
+The layer installs a fresh lazy request jar, shares mutations across clones and
+head-only handler/middleware extraction, and appends deltas to existing
+Set-Cookie headers after a successful downstream response. It preserves repeated
+header parsing/percent decoding, duplicate-name precedence, mutation/removal
+semantics, invalid-header filtering and missing-layer 500 text. Read-only requests
+emit no cookies. Request/response bodies, streaming, metadata, readiness, inner
+service errors and cancellation are preserved. Detached jars, delta snapshots
+and manual append support custom composition. The old tower-cookies extraction
+adapter remains available unchanged for unmigrated consumers.
+
+Verification:
+
+- Unmodified baseline: **366 all-feature tests/doctests passed**, strict
+  all-target/all-feature Clippy and formatting passed.
+- New suite: **11 tests pass**, including **48 differential cases** against
+  Tower Cookies: six incoming-header cases times eight mutation policies.
+  Coverage includes absent/duplicate/repeated/encoded/non-text/malformed input,
+  replacement/removal/cancellation, explicit expiry and attributes, invalid
+  output filtering, existing Set-Cookie preservation and response metadata.
+- Real loopback login/read/logout checks verify separate cookie fields,
+  __Host- attributes, percent decoding, read-only output and explicit deletion.
+  Additional tests cover shared middleware/multiple extractor mutations,
+  per-request isolation, concurrent jar clones, downstream extractor rejection,
+  detached composition, service readiness/errors, untouched response streams
+  and pending-future cancellation.
+- Complete `scripts/check`: **657 passed test executions**, no ignores/failures;
+  strict all-target/all-feature Clippy, formatting, no-default-feature builds,
+  existing feature matrix and warnings-as-errors rustdoc pass. Added minimal
+  cookies-only and cookies/compatibility/HTTP-harness test configurations.
+- Minimal cookies-only normal dependency tree contains **no tower-cookies**.
+  No dependency versions or lockfile changed.
+
+The implementation was developed in a dedicated `feature/owned-cookies`
+worktree from clean master `2401f2c`, committed and integrated by rebasing original
+master onto that feature branch. Ancestry and the tested tree were verified;
+owned worktree/branch, build caches and logs were removed after integration.
+No push, deployment or package publication was performed.
+
+**Consumer adoption remains pending.** Lello-auth master still uses its Tower
+Cookies API. Its last table cell now names adoption of the available shared API
+rather than a missing library capability. This source capability is unreleased:
+published 0.1.3 does not contain it. A new crate version/publication and subsequent
+canary are required before registry consumers can adopt it. No service status is
+marked Done merely because the library feature exists.

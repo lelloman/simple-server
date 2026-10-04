@@ -17,6 +17,8 @@
 //! ```
 
 pub mod body;
+#[cfg(feature = "cookies")]
+pub mod cookies;
 pub mod extract;
 mod handler;
 pub mod middleware;

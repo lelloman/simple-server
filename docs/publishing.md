@@ -34,6 +34,15 @@ overwritten. Record the source commit and archive checksum, then independently
 verify a consumer download and compile before migrating consumer lockfiles.
 A Git push and deployment are separate operations.
 
+## Unreleased after 0.1.3
+
+The local `cookies` feature adds owned mutable request jars and cookie middleware
+under `web::cookies`; see [the contract](cookies.md). Published 0.1.3 does not
+contain this API. Bump the version and complete the publication workflow above
+before upgrading registry consumers. Library implementation/testing does not
+imply authorization to publish a new version. Validation and adoption scope are
+recorded in the migration trackers.
+
 ## Verified crates.io release: 0.1.3 (4 October 2026)
 
 Adds optional owned directory/single-file serving via `static-files`, including

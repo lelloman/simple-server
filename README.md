@@ -312,3 +312,9 @@ Optional disk static files: enable `static-files` and use
 `web::static_files::{StaticDir, StaticFile}` for directory/single-file serving,
 explicit SPA/error-page fallback and opt-in precompressed assets. See
 [the static-file contract](docs/static-files.md).
+
+Optional mutable HTTP cookies: enable `cookies` and use
+`web::cookies::{Cookies, CookieManagerLayer, Cookie, SameSite}`. The shared jar
+tracks request mutations and appends response deltas; cookie attributes and
+session/CSRF policy remain application-owned. See [the cookie contract](docs/cookies.md).
+This capability is local and not yet in a published crate release.
