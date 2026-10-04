@@ -129,7 +129,8 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | peerlo | `peerlo-api` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; retry primitives)** | **Done (local; bearer + Torznab keys)** | **Done (local; API + crawler + durable DHT)** | **Done (local)** | N/A (driver defaults only) | N/A (create-if-missing stores, no migration ledger) | **Done (tracker + metadata creation)** | None. |
 | pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local; main HTTP)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; socket scope)** | **Done (local; durable queue cadence)** | N/A (assessed) | **Done (local; sessions + permissions + WebSocket)** | Partial (login/daily/TMDB shared; configured HTTP Governor pending) | **Done (local; HTTP core)** | Done (server + CLI SQLite) | Done (server SQLx) | Done (CLI creation; server owns versioned SQL) | None. |
 | pezzottify-downloader | Puppeteer API, downloader HTTP server and Python cron | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; Puppeteer)** | **Done (local; both HTTP routers)** | N/A (assessed) | N/A (assessed) | **Done (local; both routers)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; priority admission)** | N/A (assessed) | N/A (no application caller gate) | **Done (local; Python/SQLite quota bridge)** | **Done (local; parent + child HTTP core)** | N/A (Python SQLite only) | N/A (no Rust migration runner) | N/A (Python owns SQLite; Rust quota bridge has no schema API) | None. |
-| quentin-torrentino | `crates/server` | Pending (legacy direct Axum) | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; stage capacity)** | N/A (assessed) | **Done (local; API access)** | **Done (local; MusicBrainz pacing)** | Pending | Pending (excluded by request) | Pending (excluded by request) | Pending (excluded by request) | Legacy direct Axum: backend routing/handlers/extractors/responses, auth/metrics middleware and serving; torrent multipart, chat SSE, dashboard WebSockets, static-file routing and HTTP test fixtures. Owned HTTP migration remains pending. |
+| torrentino | `crates/service` (included) | Pending (direct Axum) | **Done (shared lifecycle)** | **Done (shared logging)** | Pending (applicability review) | Pending (applicability review) | Pending (applicability review) | Pending (applicability review) | Pending (applicability review) | Pending (applicability review) | Pending (applicability review) | Pending (applicability review) | Pending (applicability review) | Pending (custom bearer/session auth) | Pending (applicability review) | Pending (direct Axum routing/serve) | Pending (SQLx WAL/FK/busy timeout) | Pending (custom user_version guard) | Pending (schema.sql bootstrap) | Direct Axum routing, handlers/extractors/rejections/responses, bearer/session middleware, body limits, WebSocket socket/message types, serving and HTTP test fixtures. |
+| quentin-torrentino | `crates/server` (**excluded by request**) | Pending (legacy direct Axum) | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; stage capacity)** | N/A (assessed) | **Done (local; API access)** | **Done (local; MusicBrainz pacing)** | Pending | Pending (excluded by request) | Pending (excluded by request) | Pending (excluded by request) | Legacy direct Axum: backend routing/handlers/extractors/responses, auth/metrics middleware and serving; torrent multipart, chat SSE, dashboard WebSockets, static-file routing and HTTP test fixtures. Owned HTTP migration remains pending. |
 | sct | `sct-server` | **Done** | **Done (scoped)** | N/A (no logger) | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; worker scope)** | **Done (local; durable worker cadence)** | **Done (local; retry scope)** | **Done (local; tokens/sessions + transactional access)** | N/A (durable state caps, no request quota) | **Done (local; HTTP core)** | Done (archive SQLite) | Done (PostgreSQL catalog; archive format N/A) | Done (offline archive creation; PostgreSQL outside scope) | None. |
 | simple-agents | `simple-agents-service`; runner-shell logging; associated coding test servers | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local pilot; service routes)** | **Done (local; scoped canary)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; transactional capacity)** | **Done (local; retry scope)** | **Done (local; caller + transactional access)** | N/A (task/storage admission, no request quota) | **Done (local; HTTP core)** | Done (service + Runner SQLite) | Done (service ledger + Runner version marker) | Done (service ledger + Runner transport creation) | None. |
 | simple-ai | `backend`, `inference-runner` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local; backend)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; batch readiness)** | N/A (assessed) | **Done (local; backend user/admin)** | **Done (local; backend budgets)** | **Done (local; HTTP core)** | N/A (driver defaults only) | N/A (column-driven upgrades, no migration ledger) | Done (audit creation; scoped) | None. |
@@ -6566,3 +6567,33 @@ build/source caches, credentials and permission-denied runtime data were not
 audited as application projects. This audit changed only shared documentation
 and truthful tracker scope, with no consumer implementation/branch/dependency
 changes or tests, no push and no deployment.
+
+
+## Torrentino tracker inclusion — 2026-10-04
+
+The matrix now includes **torrentino**, the replacement service, and has 18 rows.
+**quentin-torrentino remains excluded by user request**; its historic adoption
+entries do not authorize further migration. Talia remains outside the matrix.
+
+Read-only inspection of Torrentino's clean active `master` at `81fdaa78d71d`
+verified actual production calls to shared `logging::try_init`, `Signals`,
+`Lifecycle::service` and `Lifecycle::run` in `crates/service/src/main.rs`.
+Those two modules are Done; previous public-package migration evidence records
+43 passing tests and a real-binary shutdown check. No tests were rerun for this
+documentation update. The dependency remains public simple-server 0.1.0.
+
+HTTP centralization and routing remain Pending: `main.rs` directly calls
+`axum::serve`; `api.rs` uses Axum routing, middleware, extractors, body limits
+(65,536 bytes for API routes; 4,096 for sessions) and WebSockets. Custom bearer
+and session authentication needs migration. `store.rs` configures SQLx WAL,
+foreign keys and a five-second busy timeout, rejects `user_version > 4`, and
+executes `schema.sql`; SQLite policy, preflight and creation remain Pending.
+Other modules are Pending until applicability is assessed; this does not mean
+unused features should be introduced. No consumer code changed.
+
+The all-project audit above remains a dated snapshot of the earlier 17-row
+matrix. Its statement that 16 non-excluded services have no direct Axum applies
+to those previously migrated services, not to newly included Torrentino.
+Current Step 10 totals: 11 Done, 1 Partial, 5 N/A, 1 Pending. Current Step 07e
+totals: 11 Done, 4 N/A, 3 Pending (Torrentino, deferred LelloStore and excluded
+Quentin Torrentino).
