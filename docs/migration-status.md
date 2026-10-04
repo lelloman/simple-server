@@ -127,7 +127,7 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | observo | `observo-server`; standalone extractor logging | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (no served probe) | **Done (local; scoped)** | **Done (local; primitives)** | N/A (assessed) | **Done (local; IP/key/JWT access)** | N/A (no request quota) | **Done (local)** | Done (server SQLite) | N/A (idempotent schema, no migration ledger) | Done (bootstrap creation; scoped) | None. |
 | paranza | `apps/paranza-server` | **Done** | **Done (local; scoped)** | N/A (no logger) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; runner + PCM access)** | N/A (no implemented request quota) | **Done (local)** | N/A (driver defaults only) | N/A (idempotent DDL/column repairs, no migration ledger) | Done (store creation; scoped) | None. |
 | peerlo | `peerlo-api` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; retry primitives)** | **Done (local; bearer + Torznab keys)** | **Done (local; API + crawler + durable DHT)** | **Done (local)** | N/A (driver defaults only) | N/A (create-if-missing stores, no migration ledger) | **Done (tracker + metadata creation)** | None. |
-| pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local; main HTTP)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; socket scope)** | **Done (local; durable queue cadence)** | N/A (assessed) | **Done (local; sessions + permissions + WebSocket)** | Done (login/daily/TMDB + configured HTTP limiter) | **Done (local; HTTP core)** | Done (server + CLI SQLite) | Done (server SQLx) | Done (CLI creation; server owns versioned SQL) | Tower HTTP gzip CompressionLayer; shared response compression API is not yet available. |
+| pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local; main HTTP)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; socket scope)** | **Done (local; durable queue cadence)** | N/A (assessed) | **Done (local; sessions + permissions + WebSocket)** | Done (login/daily/TMDB + configured HTTP limiter) | **Done (local; HTTP core)** | Done (server + CLI SQLite) | Done (server SQLx) | Done (CLI creation; server owns versioned SQL) | Owned gzip compression canary prepared; awaiting public 0.1.5 release and final registry verification/integration. |
 | pezzottify-downloader | Puppeteer API, downloader HTTP server and Python cron | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; Puppeteer)** | **Done (local; both HTTP routers)** | N/A (assessed) | N/A (assessed) | **Done (local; both routers)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; priority admission)** | N/A (assessed) | N/A (no application caller gate) | **Done (local; Python/SQLite quota bridge)** | **Done (local; parent + child HTTP core)** | N/A (Python SQLite only) | N/A (no Rust migration runner) | N/A (Python owns SQLite; Rust quota bridge has no schema API) | Hyper HTTP/1 Unix serving; Hyper/hyperlocal streaming Unix proxy client; Tower HTTP RequestId and UUID-generator compatibility. Unix proxy client is a separate capability. |
 | torrentino | `crates/service` (included) | Pending (direct Axum) | **Done (shared lifecycle)** | **Done (shared logging)** | Pending (applicability review) | Pending (applicability review) | Pending (applicability review) | Pending (applicability review) | Pending (applicability review) | Pending (applicability review) | Pending (applicability review) | Pending (applicability review) | Pending (applicability review) | Pending (custom bearer/session auth) | Pending (applicability review) | Pending (direct Axum routing/serve) | Pending (SQLx WAL/FK/busy timeout) | Pending (custom user_version guard) | Pending (schema.sql bootstrap) | Direct Axum routing, handlers/extractors/rejections/responses, bearer/session middleware, body limits, WebSocket socket/message types, serving and HTTP test fixtures. |
 | quentin-torrentino | `crates/server` (**excluded by request**) | Pending (legacy direct Axum) | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; stage capacity)** | N/A (assessed) | **Done (local; API access)** | **Done (local; MusicBrainz pacing)** | Pending | Pending (excluded by request) | Pending (excluded by request) | Pending (excluded by request) | Legacy direct Axum: backend routing/handlers/extractors/responses, auth/metrics middleware and serving; torrent multipart, chat SSE, dashboard WebSockets, static-file routing and HTTP test fixtures. Owned HTTP migration remains pending. |
@@ -7091,3 +7091,31 @@ The newer backend deduplicates Vary Accept-Encoding tokens; token semantics
 match the legacy implementation. gRPC-prefix exclusion is explicitly retained.
 Version 0.1.5 is prepared for publication; it is not yet a published/adopted
 release. Pezzottflix migration is being verified separately before integration.
+
+## Pezzottflix owned compression canary prepared — 2026-10-04
+
+Shared library source `4a0f06ea61719ca5e9219f006988824c09d75bf6` is committed and
+integrated into simple-server master. Version 0.1.5 publication dry run/package
+verification pass; inspected archive contains 132 files, SHA256
+`3df80ad94d2f2accc506f153787c81b6c11c13a0da670212c1e233d54ddcbab7`, and
+embeds that Git source. The release has **not been published**; user approval
+has been requested for the permanent public publication.
+
+Pezzottflix candidate `e891348` on isolated `codex/pezzottflix-compression`
+replaces the gzip production layer with the shared owned layer at its existing
+position. Direct Tower HTTP is now dev-only. Three canaries include 420 old/new
+policy cases, real TCP requests through the actual production router, and
+compressed frontend/SPA/range fixtures. Full candidate suite: **608 passed,
+zero failed, three existing ignores**; baseline 605 passed/three ignores.
+Warning-capped all-target Clippy passes; strict lint baseline findings remain
+(34 library/39 library-test errors). No browser/Android/container/CLI rerun.
+
+Candidate verification currently uses the exact local release-source worktree;
+that path is intentionally **not integrated** into Pezzottflix master, which
+remains `ccbdc87`. After approval, publish the clean committed 0.1.5 package,
+independently verify its public archive/source/checksum, replace the temporary
+consumer path with a registry pin, regenerate/verify Cargo.lock, rerun checks,
+commit and rebase master onto the final migration, then remove retained owned
+worktrees/branches/builds. The remaining cell records this pending integration;
+it does not claim a completed consumer adoption. Evidence lives in the
+candidate's `docs/response-compression.md`. No Git pushes or deployments.
