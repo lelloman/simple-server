@@ -49,45 +49,34 @@ framework-independent public types and explicit policy.
 application checks and a framework-independent endpoint adapter. Applications
 retain dependency policy and response contracts.
 
-## Next milestones (updated 2026-09-29)
+## Next milestones (updated 2026-10-04)
 
-Step 07 (optional database helpers) is deferred until after Step 10 and the
-consumer Axum-removal milestone. Keep the existing step numbers so historical
-references remain valid. The execution order after Step 06 is:
+All 17 active services have completed their applicable implemented migration
+steps through HTTP abstraction and SQLite 07a/07b/07e. Quentin Torrentino remains
+excluded. Optional modules are adopted only where existing behavior requires
+and matches them; drivers, SQL, domain repositories and transaction ownership
+remain application-owned. See the [current matrix](migration-status.html) and
+[Torrentino completion](migration-status.md#torrentino-remaining-modules-complete--2026-10-04).
 
-1. Steps 08/09: one optional `auth` module for authentication and authorization,
-   designed and migrated together. Step 09 is absorbed; there is no second rollout.
-   Completed locally: 16 adopted and one N/A; see the
-   [auth rollout evidence](migration-status.md#steps-0809-final-auth-rollout--2026-09-23).
-2. Step 10: rate limiting. Shared budgets, admission policies and HTTP adapter
-   are implemented. Completed locally: 12 adopted, five N/A, no Partial or Pending;
-   see the [completion evidence](migration-status.md#step-10-final-five-partial-consumers--2026-09-24).
-3. Completed for the 16 in-scope services: public HTTP interfaces and tests use
-   owned contracts, the transitional re-export and escape hatches are removed,
-   and the final shared API audit passed. Quentin Torrentino remains excluded.
-4. **Current:** Step 07, optional database capabilities. The
-   [five-service survey](step-07-database-survey.md) compares connection setup,
-   migration ledgers, typed access, backup and synchronous execution.
-   [07a connection policy](step-07a-database-connections.md) is implemented and
-   adopted by all ten applicable in-scope services, with
-   [completion evidence](migration-status.md#step-07a-completion-pass--2026-09-29).
-   The [07b migration preflight](step-07b-database-migrations.md) is implemented
-   as a driver-neutral, read-only planner and adopted by all ten applicable
-   in-scope services. Six services have no matching migration ledger or Rust
-   migration runner; Quentin Torrentino remains excluded. The
-   [richer SQLite design](step-07-sqlite-design.md) defines optional schema
-   descriptions/validation (07e), backup coordination (07c) and bounded
-   synchronous execution (07d). The [07e core](step-07e-sqlite-schema.md) is
-   implemented with the Pezzottify versioned-helper canary complete. Published
-   0.1.2 adds STRICT/CHECK and generic virtual-table creation; scoped consumer
-   adoption and N/A assessments are tracked in the migration matrix. Remaining
-   consumers await applicability review. 07c/07d remain proposed.
-   Application SQL, legacy layout decisions and domain repositories stay local.
+The next increments are now implemented locally for 0.1.7:
 
-Database helpers are not a prerequisite for the HTTP abstraction. Services retain
-their existing database libraries, setup and migrations while that work proceeds.
-Axum may remain internal to simple-server; the milestone removes its exposure to
-consumers. Completing Steps 08–10 alone does not establish that milestone.
+1. **07c: backup coordination.** Independent checkpoint-preparation reports and
+   guarded staged copying, verification, atomic no-replace publication and
+   explicit cleanup through sync/async adapters. The [contract](step-07c-sqlite-backup.md)
+   preserves the distinct Pezzottify checkpoint and Crumbles consistent-copy
+   strategies. No cross-file atomic snapshot or automatic restore is implied.
+2. **07d: bounded synchronous execution.** Dedicated workers with configurable
+   weighted priorities, queues, lane limits, deadlines, cancellation and drain.
+   The [contract](step-07d-database-blocking.md) retains running capacity after a
+   caller timeout and shares scheduling between async and sync callers.
+
+Next: review these APIs against production adapters, publish when separately
+requested, canary backup coordination against Pezzottify and Crumbles, then
+canary blocking execution against Pezzottify's existing executor. Consumer
+adoption of 07c/07d remains Pending assessment/canary; no service behavior changed
+in this library implementation. Future rollout follows the
+[consumer workflow](consumer-migration-workflow.md). Original step identifiers
+remain stable; 07e was delivered before 07c/07d.
 
 ## Composition
 

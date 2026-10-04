@@ -10,7 +10,11 @@
 //! with `http`, it also provides TCP binding. `web` owns HTTP serving.
 
 /// Optional, driver-independent database contracts.
-#[cfg(any(feature = "database-sqlite", feature = "database-migrations"))]
+#[cfg(any(
+    feature = "database-sqlite",
+    feature = "database-migrations",
+    feature = "database-blocking"
+))]
 pub mod database;
 
 /// Framework-independent HTTP routing, handlers, extractors and responses.

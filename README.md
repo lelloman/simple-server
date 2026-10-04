@@ -3,16 +3,16 @@
 A small, modular Rust library with owned server interfaces. Axum remains an
 internal HTTP implementation; consumers use the library's routing, handler,
 extractor, response, middleware and serving contracts. The transitional Axum
-re-export has been removed for the 16 migrated services. Quentin Torrentino was
+re-export has been removed for all 17 active migrated services. Quentin Torrentino was
 explicitly excluded and must migrate before building against this revision. See the
 [design and completion criteria](docs/design.md#end-goal-completely-abstract-axum-away).
 
 **Status:** Axum dependency centralization and opt-in lifecycle, logging,
 correlation, HTTP tracing, body limits, response-header helpers, CORS, health checks, task ownership, scheduling, execution policies, combined auth and rate limiting are implemented. All 17 inventoried products have adopted lifecycle helpers locally
-with documented application scopes. Crumbles and SCT include those migrations on local `master`. Publication to crates.io remains disabled.
+with documented application scopes. Crumbles and SCT include those migrations on local `master`. Public crates.io releases are available; new 07c/07d features are implemented locally for the next release.
 
 Open the [HTML migration matrix](docs/migration-status.html) in a browser for adoption status
-across all 17 planned consumer projects and the completed steps for each one.
+across 17 active services plus excluded Quentin Torrentino and the completed steps for each one.
 
 All consumer migrations follow the [reusable worktree and verification workflow](docs/consumer-migration-workflow.md),
 including applicability checks and updates to both adoption trackers.
@@ -328,3 +328,18 @@ encoding negotiation and stream cancellation remain lazy. See the
 Unix domain socket serving and streaming HTTP clients are available through the
 opt-in `unix-http` feature on Unix platforms. See [Unix HTTP transport](docs/unix-http.md)
 for lifecycle, path, header and streaming contracts.
+
+## SQLite backup and synchronous execution
+
+The optional `database-sqlite-backup` feature coordinates explicit checkpoint
+preparation or consistent staged copies, verification, no-replace publication
+and failure cleanup through application-owned sync/async adapters. See the
+[07c contract](docs/step-07c-sqlite-backup.md).
+
+The independent `database-blocking` feature provides dedicated bounded worker
+threads with configurable weighted priorities, queue budgets and lane limits.
+Sync and async callers share one scheduler. Runtime timeout does not interrupt
+native operations or release their capacity early; close/drain observes actual
+completion. See the [07d contract](docs/step-07d-database-blocking.md).
+
+Both APIs are local 0.1.7 additions, not yet published or adopted in consumers.

@@ -93,17 +93,18 @@ schema execution, queries and backups remain application-owned. See the
 [07a contract](step-07a-database-connections.md), [completion evidence](#step-07a-completion-pass--2026-09-29)
 and [roadmap](design.md).
 
-**Richer SQLite design (2026-09-29):** the
-[proposed contract](step-07-sqlite-design.md) covers schema descriptions and
-validation (07e shared core implemented, consumer canaries pending), backup
-coordination (07c) and bounded synchronous execution (07d, both planned).
-Existing 07a/07b statuses do not imply their completion. The 07e column is
-Pending for canary/applicability review, not a claim that every service needs it.
+**SQLite backup and blocking execution (2026-10-04):** 07c and 07d are
+implemented locally for unpublished 0.1.7. See the [backup contract](step-07c-sqlite-backup.md)
+and [executor contract](step-07d-database-blocking.md). These new columns remain
+Pending consumer assessment/canary; no feature flag alone counts as adoption.
+07a/07b/07e adoption is independent. The next canaries should compare Pezzottify
+checkpoint preparation and Crumbles staged copies, followed by Pezzottify's
+blocking executor. Quentin Torrentino remains excluded.
 
-**Step 07a status:** 10 Done, 0 Partial, 1 Pending excluded, 6 N/A.
+**Step 07a status:** 11 Done, 0 Partial, 1 Pending excluded, 6 N/A.
 SCT's PostgreSQL server is distinct from its SQLite archive catalog.
 
-**Step 07b status:** shared preflight available; 10 Done, 0 Partial,
+**Step 07b status:** shared preflight available; 11 Done, 0 Partial,
 1 Pending (excluded Quentin Torrentino), 6 N/A in the consumer matrix.
 Version-only stores report no verified historical digests. See the
 [contract](step-07b-database-migrations.md) and
@@ -114,26 +115,26 @@ It is independent of module adoption status.
 
 Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its original dates.
 
-| Project | Server components | 1. Axum centralization | 2. Lifecycle / main() | 03a. Logging | 03b. Correlation | 03c. HTTP tracing | 04a. Body limits | 04b. Response headers | 04c. CORS | 05. Health/readiness | 06a. Task ownership | 06b. Scheduling | 06c. Execution policies | 08/09. Auth | 10. Rate limiting | 11. Routing / HTTP core | 07a. SQLite connection policy | 07b. Migration preflight | 07e. SQLite schema | Remaining backend exposure |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local canary)** | **Done (local; scoped canary)** | N/A (assessed) | N/A (no served probe) | **Done (local; scoped canary)** | **Done (local; primitives)** | **Done (local; primitives)** | **Done (local; sessions + route permissions)** | **Done (HTTP, MCP, durable quotas + outbound pacing)** | **Done (all production route groups)** | Done | Done (five versioned SQLite stores) | Done (versioned helper; scoped canary) | None. |
-| favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local canary)** | **Done (local; request work)** | **Done (local; bounded batches)** | **Done (local; retry scope)** | **Done (local canary)** | **Done (local; global + endpoint budgets)** | **Done (local)** | Done | Done (backend SQLite) | Done (migration-ledger creation; scoped) | None. |
-| androidoscopy | `server`; Android SDK pairing | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (no served probe) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; controller + LAN access)** | **Done (local; device JNI pairing gate)** | **Done (all production route groups)** | N/A (no SQLite database) | N/A (no Rust migration runner) | N/A (Rust has no SQLite; viewer uses Android platform API) | None. |
-| crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; durable primitives)** | **Done (local; retry primitives)** | **Done (local; main + integration)** | **Done (local; HTTP + MCP + durable dispatcher)** | **Done (both servers)** | Done (core + integration SQLite) | Done (core + integration ledgers) | Done (core + integration ledger creation) | None. |
-| fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; dynamic cron)** | N/A (assessed) | **Done (local; HTTP + WebSocket + admin/write)** | **Done (local; five API tiers)** | **Done (local)** | Done (storage SQLite) | Done (core SQLite store) | Done (ledger + runtime vec0 creation) | None. |
-| lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (Rust; Caddy owns CORS) | **Done (local; scoped)** | **Done (local; webhook scope)** | **Done (local; capacity)** | **Done (local; retry scope)** | **Done (local; sessions + resource/admin access)** | **Done (endpoint budgets + persisted device polling)** | **Done (local)** | Done (SQLite backend) | Done (SQLite + PostgreSQL version markers) | N/A (versioned SQL owns creation; no independent SQLite bootstrap) | None. |
-| lellostore | `backend` | **Done** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; OIDC + admin)** | N/A (no inbound admission policy) | **Done (local)** | N/A (no explicit policy) | Done (backend SQLx) | N/A (versioned SQLx owns creation; no independent bootstrap) | None. |
-| meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; pipeline/gateway)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; weighted claims)** | **Done (local; budgets/retry)** | **Done (local; all three services)** | **Done (local; gateway budgets)** | **Done (local)** | Done (pipeline SQLite) | Done (weather-pipeline SQLite) | N/A (versioned SQL owns creation; no independent bootstrap) | None. |
-| observo | `observo-server`; standalone extractor logging | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (no served probe) | **Done (local; scoped)** | **Done (local; primitives)** | N/A (assessed) | **Done (local; IP/key/JWT access)** | N/A (no request quota) | **Done (local)** | Done (server SQLite) | N/A (idempotent schema, no migration ledger) | Done (bootstrap creation; scoped) | None. |
-| paranza | `apps/paranza-server` | **Done** | **Done (local; scoped)** | N/A (no logger) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; runner + PCM access)** | N/A (no implemented request quota) | **Done (local)** | N/A (driver defaults only) | N/A (idempotent DDL/column repairs, no migration ledger) | Done (store creation; scoped) | None. |
-| peerlo | `peerlo-api` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; retry primitives)** | **Done (local; bearer + Torznab keys)** | **Done (local; API + crawler + durable DHT)** | **Done (local)** | N/A (driver defaults only) | N/A (create-if-missing stores, no migration ledger) | **Done (tracker + metadata creation)** | None. |
-| pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local; main HTTP)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; socket scope)** | **Done (local; durable queue cadence)** | N/A (assessed) | **Done (local; sessions + permissions + WebSocket)** | Done (login/daily/TMDB + configured HTTP limiter) | **Done (local; HTTP core)** | Done (server + CLI SQLite) | Done (server SQLx) | Done (CLI creation; server owns versioned SQL) | None. |
-| pezzottify-downloader | Puppeteer API, downloader HTTP server and Python cron | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; Puppeteer)** | **Done (local; both HTTP routers)** | N/A (assessed) | N/A (assessed) | **Done (local; both routers)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; priority admission)** | N/A (assessed) | N/A (no application caller gate) | **Done (local; Python/SQLite quota bridge)** | **Done (local; parent + child HTTP core)** | N/A (Python SQLite only) | N/A (no Rust migration runner) | N/A (Python owns SQLite; Rust quota bridge has no schema API) | None. |
-| torrentino | `crates/service` (included) | **Done** | **Done (shared lifecycle)** | **Done (shared logging)** | **Done (error-envelope UUIDs only)** | N/A (no HTTP tracing layer) | **Done (64 KiB API; 4 KiB sessions)** | **Done (authenticated cache policy)** | N/A (same-origin; no CORS grant) | N/A (no served probe) | **Done (tracked worker cycles)** | **Done (fixed-rate intake; completion-relative polling)** | **Done (runtime deadlines and retry decisions)** | **Done (async bearer/session verification)** | **Done (durable application counters and snapshot quota)** | **Done (owned HTTP + WebSockets)** | **Done (verified per-connection WAL/FK/busy policy)** | **Done (version-only user_version guard)** | **Done (11 tables; 3 explicit indexes)** | None. |
-| quentin-torrentino | `crates/server` (**excluded by request**) | Pending (legacy direct Axum) | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; stage capacity)** | N/A (assessed) | **Done (local; API access)** | **Done (local; MusicBrainz pacing)** | Pending | Pending (excluded by request) | Pending (excluded by request) | Pending (excluded by request) | Legacy direct Axum: backend routing/handlers/extractors/responses, auth/metrics middleware and serving; torrent multipart, chat SSE, dashboard WebSockets, static-file routing and HTTP test fixtures. Owned HTTP migration remains pending. |
-| sct | `sct-server` | **Done** | **Done (scoped)** | N/A (no logger) | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; worker scope)** | **Done (local; durable worker cadence)** | **Done (local; retry scope)** | **Done (local; tokens/sessions + transactional access)** | N/A (durable state caps, no request quota) | **Done (local; HTTP core)** | Done (archive SQLite) | Done (PostgreSQL catalog; archive format N/A) | Done (offline archive creation; PostgreSQL outside scope) | None. |
-| simple-agents | `simple-agents-service`; runner-shell logging; associated coding test servers | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local pilot; service routes)** | **Done (local; scoped canary)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; transactional capacity)** | **Done (local; retry scope)** | **Done (local; caller + transactional access)** | N/A (task/storage admission, no request quota) | **Done (local; HTTP core)** | Done (service + Runner SQLite) | Done (service ledger + Runner version marker) | Done (service ledger + Runner transport creation) | None. |
-| simple-ai | `backend`, `inference-runner` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local; backend)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; batch readiness)** | N/A (assessed) | **Done (local; backend user/admin)** | **Done (local; backend budgets)** | **Done (local; HTTP core)** | N/A (driver defaults only) | N/A (column-driven upgrades, no migration ledger) | Done (audit creation; scoped) | None. |
+| Project | Server components | 1. Axum centralization | 2. Lifecycle / main() | 03a. Logging | 03b. Correlation | 03c. HTTP tracing | 04a. Body limits | 04b. Response headers | 04c. CORS | 05. Health/readiness | 06a. Task ownership | 06b. Scheduling | 06c. Execution policies | 08/09. Auth | 10. Rate limiting | 11. Routing / HTTP core | 07a. SQLite connection policy | 07b. Migration preflight | 07e. SQLite schema | 07c. SQLite backup | 07d. Blocking execution | Remaining backend exposure |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local canary)** | **Done (local; scoped canary)** | N/A (assessed) | N/A (no served probe) | **Done (local; scoped canary)** | **Done (local; primitives)** | **Done (local; primitives)** | **Done (local; sessions + route permissions)** | **Done (HTTP, MCP, durable quotas + outbound pacing)** | **Done (all production route groups)** | Done | Done (five versioned SQLite stores) | Done (versioned helper; scoped canary) | Pending (assessment/canary) | Pending (assessment/canary) | None. |
+| favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local canary)** | **Done (local; request work)** | **Done (local; bounded batches)** | **Done (local; retry scope)** | **Done (local canary)** | **Done (local; global + endpoint budgets)** | **Done (local)** | Done | Done (backend SQLite) | Done (migration-ledger creation; scoped) | Pending (assessment/canary) | Pending (assessment/canary) | None. |
+| androidoscopy | `server`; Android SDK pairing | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (no served probe) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; controller + LAN access)** | **Done (local; device JNI pairing gate)** | **Done (all production route groups)** | N/A (no SQLite database) | N/A (no Rust migration runner) | N/A (Rust has no SQLite; viewer uses Android platform API) | Pending (assessment/canary) | Pending (assessment/canary) | None. |
+| crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; durable primitives)** | **Done (local; retry primitives)** | **Done (local; main + integration)** | **Done (local; HTTP + MCP + durable dispatcher)** | **Done (both servers)** | Done (core + integration SQLite) | Done (core + integration ledgers) | Done (core + integration ledger creation) | Pending (assessment/canary) | Pending (assessment/canary) | None. |
+| fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; dynamic cron)** | N/A (assessed) | **Done (local; HTTP + WebSocket + admin/write)** | **Done (local; five API tiers)** | **Done (local)** | Done (storage SQLite) | Done (core SQLite store) | Done (ledger + runtime vec0 creation) | Pending (assessment/canary) | Pending (assessment/canary) | None. |
+| lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (Rust; Caddy owns CORS) | **Done (local; scoped)** | **Done (local; webhook scope)** | **Done (local; capacity)** | **Done (local; retry scope)** | **Done (local; sessions + resource/admin access)** | **Done (endpoint budgets + persisted device polling)** | **Done (local)** | Done (SQLite backend) | Done (SQLite + PostgreSQL version markers) | N/A (versioned SQL owns creation; no independent SQLite bootstrap) | Pending (assessment/canary) | Pending (assessment/canary) | None. |
+| lellostore | `backend` | **Done** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; OIDC + admin)** | N/A (no inbound admission policy) | **Done (local)** | N/A (no explicit policy) | Done (backend SQLx) | N/A (versioned SQLx owns creation; no independent bootstrap) | Pending (assessment/canary) | Pending (assessment/canary) | None. |
+| meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; pipeline/gateway)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; weighted claims)** | **Done (local; budgets/retry)** | **Done (local; all three services)** | **Done (local; gateway budgets)** | **Done (local)** | Done (pipeline SQLite) | Done (weather-pipeline SQLite) | N/A (versioned SQL owns creation; no independent bootstrap) | Pending (assessment/canary) | Pending (assessment/canary) | None. |
+| observo | `observo-server`; standalone extractor logging | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (no served probe) | **Done (local; scoped)** | **Done (local; primitives)** | N/A (assessed) | **Done (local; IP/key/JWT access)** | N/A (no request quota) | **Done (local)** | Done (server SQLite) | N/A (idempotent schema, no migration ledger) | Done (bootstrap creation; scoped) | Pending (assessment/canary) | Pending (assessment/canary) | None. |
+| paranza | `apps/paranza-server` | **Done** | **Done (local; scoped)** | N/A (no logger) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; runner + PCM access)** | N/A (no implemented request quota) | **Done (local)** | N/A (driver defaults only) | N/A (idempotent DDL/column repairs, no migration ledger) | Done (store creation; scoped) | Pending (assessment/canary) | Pending (assessment/canary) | None. |
+| peerlo | `peerlo-api` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; retry primitives)** | **Done (local; bearer + Torznab keys)** | **Done (local; API + crawler + durable DHT)** | **Done (local)** | N/A (driver defaults only) | N/A (create-if-missing stores, no migration ledger) | **Done (tracker + metadata creation)** | Pending (assessment/canary) | Pending (assessment/canary) | None. |
+| pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local; main HTTP)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; socket scope)** | **Done (local; durable queue cadence)** | N/A (assessed) | **Done (local; sessions + permissions + WebSocket)** | Done (login/daily/TMDB + configured HTTP limiter) | **Done (local; HTTP core)** | Done (server + CLI SQLite) | Done (server SQLx) | Done (CLI creation; server owns versioned SQL) | Pending (assessment/canary) | Pending (assessment/canary) | None. |
+| pezzottify-downloader | Puppeteer API, downloader HTTP server and Python cron | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; Puppeteer)** | **Done (local; both HTTP routers)** | N/A (assessed) | N/A (assessed) | **Done (local; both routers)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; priority admission)** | N/A (assessed) | N/A (no application caller gate) | **Done (local; Python/SQLite quota bridge)** | **Done (local; parent + child HTTP core)** | N/A (Python SQLite only) | N/A (no Rust migration runner) | N/A (Python owns SQLite; Rust quota bridge has no schema API) | Pending (assessment/canary) | Pending (assessment/canary) | None. |
+| torrentino | `crates/service` (included) | **Done** | **Done (shared lifecycle)** | **Done (shared logging)** | **Done (error-envelope UUIDs only)** | N/A (no HTTP tracing layer) | **Done (64 KiB API; 4 KiB sessions)** | **Done (authenticated cache policy)** | N/A (same-origin; no CORS grant) | N/A (no served probe) | **Done (tracked worker cycles)** | **Done (fixed-rate intake; completion-relative polling)** | **Done (runtime deadlines and retry decisions)** | **Done (async bearer/session verification)** | **Done (durable application counters and snapshot quota)** | **Done (owned HTTP + WebSockets)** | **Done (verified per-connection WAL/FK/busy policy)** | **Done (version-only user_version guard)** | **Done (11 tables; 3 explicit indexes)** | Pending (assessment/canary) | Pending (assessment/canary) | None. |
+| quentin-torrentino | `crates/server` (**excluded by request**) | Pending (legacy direct Axum) | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; stage capacity)** | N/A (assessed) | **Done (local; API access)** | **Done (local; MusicBrainz pacing)** | Pending | Pending (excluded by request) | Pending (excluded by request) | Pending (excluded by request) | Pending (excluded by request) | Pending (excluded by request) | Legacy direct Axum: backend routing/handlers/extractors/responses, auth/metrics middleware and serving; torrent multipart, chat SSE, dashboard WebSockets, static-file routing and HTTP test fixtures. Owned HTTP migration remains pending. |
+| sct | `sct-server` | **Done** | **Done (scoped)** | N/A (no logger) | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; worker scope)** | **Done (local; durable worker cadence)** | **Done (local; retry scope)** | **Done (local; tokens/sessions + transactional access)** | N/A (durable state caps, no request quota) | **Done (local; HTTP core)** | Done (archive SQLite) | Done (PostgreSQL catalog; archive format N/A) | Done (offline archive creation; PostgreSQL outside scope) | Pending (assessment/canary) | Pending (assessment/canary) | None. |
+| simple-agents | `simple-agents-service`; runner-shell logging; associated coding test servers | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local pilot; service routes)** | **Done (local; scoped canary)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; transactional capacity)** | **Done (local; retry scope)** | **Done (local; caller + transactional access)** | N/A (task/storage admission, no request quota) | **Done (local; HTTP core)** | Done (service + Runner SQLite) | Done (service ledger + Runner version marker) | Done (service ledger + Runner transport creation) | Pending (assessment/canary) | Pending (assessment/canary) | None. |
+| simple-ai | `backend`, `inference-runner` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local; backend)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; batch readiness)** | N/A (assessed) | **Done (local; backend user/admin)** | **Done (local; backend budgets)** | **Done (local; HTTP core)** | N/A (driver defaults only) | N/A (column-driven upgrades, no migration ledger) | Done (audit creation; scoped) | Pending (assessment/canary) | Pending (assessment/canary) | None. |
 
 ## Axum exposure audit — 2026-09-24
 
@@ -808,35 +809,18 @@ verification scope and existing limitations are recorded above; 03c is locally a
 
 ## Roadmap
 
-[Step 03: observability](step-03-observability.md) contains three independently
-adoptable modules: **03a logging setup**, **03b request correlation**, and
-**03c HTTP tracing**. 03a is implemented; local adoption is recorded per service
-above. 03b rollout is complete with six adopted products and eleven N/A;
-03c is locally adopted by nine products, with eight N/A after assessment.
-The [03a contract](step-03a-logging.md) records the API and pilot compatibility. Completion of one module does not imply completion of Step 03.
+The current [design roadmap](design.md#next-milestones-updated-2026-10-04)
+records completion of all applicable active HTTP, lifecycle, observability,
+auth, task, rate-limit and 07a/07b/07e database migrations. The detailed sections
+below are dated implementation evidence, not an outstanding-work checklist.
 
-The accepted [Step 04 source assessment](step-04-http-policy-assessment.md) splits
-HTTP policies into optional 04a body limits, 04b response headers and 04c CORS.
-04a is implemented; the pilot/canary verification is recorded below.
-[04b response headers](step-04b-response-headers.md) is rolled out locally: ten adopted, seven N/A; see the verification record below.
-[04c CORS](step-04c-cors.md) and [05 health](step-05-health.md) are implemented;
-their completed local rollout evidence is recorded below.
-[06 background tasks](step-06-background-tasks.md) now has three implemented
-library modules; consumer rollout remains pending.
-
-Remaining shared capabilities are database helpers, authentication, authorization,
-and rate limiting. The HTML matrix shows those columns as planned.
-The end goal is to **completely abstract Axum away** from consumer code and the
-public API, then remove the transitional Axum re-export and temporary escape
-hatches. Completing the module columns alone does not establish that outcome;
-a final consumer/API audit must verify the
-[design completion criteria](design.md#end-goal-completely-abstract-axum-away).
-This final abstraction milestone remains planned.
-
-The initial scope is the 17 Axum-based products inventoried in this workspace.
-Custom servers in `rns-rs` and `lxmf-rs`, and embedded servers in `librespot` and
-`wgtransport`, are not currently scheduled for this migration. They can be added
-if adoption of an independent `simple-server` module becomes useful.
+07c backup coordination and 07d bounded synchronous execution are implemented
+locally for 0.1.7, not yet published or adopted in consumers. Their new matrix
+columns remain Pending assessment/canary. Backup canaries must preserve both
+checkpoint and staged-copy strategies; executor canaries must preserve actual
+priorities, lanes, cancellation and drain behavior. Quentin Torrentino remains
+excluded. Custom/embedded protocol servers outside the matrix are not scheduled
+for migration merely because they contain another backend library.
 
 ## Step 03c: HTTP tracing
 
@@ -7413,3 +7397,52 @@ and integrated trees were verified. Owned worktrees, branches and temporary
 build artifacts were removed. Both trackers record all applicable active steps
 complete; schema totals including the excluded row are **12 Done, 5 N/A,
 1 Pending (Quentin)**. Nothing was pushed or deployed.
+
+## Step 07c/07d shared implementation — 2026-10-04
+
+Implemented in an isolated branch/worktree from clean active master `e69edc1`.
+Local package version is **0.1.7, unpublished**. Neither new feature adds a
+native SQLite binding to normal dependencies or requires HTTP. No consumer was
+changed; all 18 entries in each new column remain Pending (17 assessment/canary,
+one excluded Quentin Torrentino). Existing Done/N/A statuses are preserved.
+
+07c `database-sqlite-backup` exposes preparation-only checkpoint registry reports
+and guarded per-file backup coordination through synchronous and Send async
+adapter traits. Checkpoint/raw-copy and engine-consistent-copy strategies remain
+distinct. Reports retain phase completion, busy/page counts, native errors,
+verification results, publication state and failed cleanup/retained staging.
+No-replace publication is an explicit adapter contract, and publication success
+is not undone or hidden by cleanup failure. Canonical identity, fencing, filesystem
+permissions, native copy/verification and retention remain application-owned.
+Abruptly abandoning an async coordinator may leave staging; own and await it
+through shutdown rather than assuming cancellation rolled back native work.
+No restore or cross-file atomic snapshot is claimed. See the
+[backup contract](step-07c-sqlite-backup.md).
+
+07d `database-blocking` supplies a fixed dedicated-thread executor with explicit
+weighted priorities, per-priority queue bounds, application-defined lane limits,
+queue/runtime deadlines and shared sync/async result observation. Queue timeout
+and pre-dispatch cancellation prevent execution; caller runtime timeout retains
+real worker/lane occupancy until native work finishes. Panic isolation includes
+abandoned result/cancelled capture destructors. Close/drain has separate modes
+for draining accepted jobs or cancelling queued jobs. No operation is retried or
+interrupted implicitly. See the [executor contract](step-07d-database-blocking.md).
+
+Verification: pre-edit database/schema baseline **51 passed**. Final all-feature
+suite **422 tests/doctests passed, zero failed or ignored**, including **11 new
+backup tests and 15 new executor tests**. Strict all-target/all-feature Clippy,
+formatting, diff checks, rustdoc, standalone feature builds and the synchronous
+executor example pass. Real SQLite fixtures verify WAL reader/checkpoint busy
+results, consistent copying with committed WAL data, phase failures including
+partial-copy cleanup, integrity/schema rejection, destination collision/source
+protection and retained staging after failed cleanup. Controlled execution tests
+verify fairness, saturated-lane bypass, admission bounds, cancellation, panic
+recovery, runtime deadlines, shutdown and reentrant destructors. A real timed-out
+SQLite transaction remains active then commits once; no rollback/retry is inferred.
+
+The roadmap and both matrices now distinguish implemented shared APIs from
+pending consumer adoption. Next are backup canaries against Pezzottify's registry
+and Crumbles' staged-copy path, then a Pezzottify executor canary after exact
+production-policy review. Master was rebased onto the committed implementation,
+ancestry and tested/integrated trees verified, and the owned worktree/branch and
+temporary logs removed. Nothing was published, pushed or deployed.

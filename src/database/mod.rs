@@ -6,3 +6,6 @@ pub mod migrations;
 
 #[cfg(feature = "database-sqlite")]
 pub mod sqlite;
+
+#[cfg(feature = "database-blocking")]
+pub mod blocking;

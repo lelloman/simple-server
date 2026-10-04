@@ -1,12 +1,12 @@
 # Step 07: database capability survey
 
-Status: original survey 2026-09-28; rollout summary updated 2026-09-29.
+Status: original survey 2026-09-28; rollout summary updated 2026-10-04.
 [07a connection policy](step-07a-database-connections.md) and
 [07b migration planning](step-07b-database-migrations.md) are adopted by all
 applicable in-scope services. The [richer SQLite design](step-07-sqlite-design.md)
 defines schema descriptions/validation ([07e core implemented](step-07e-sqlite-schema.md),
-canaries pending), plus proposed backup coordination (07c) and synchronous
-execution (07d).
+applicable adoption complete), plus locally implemented backup coordination (07c) and synchronous
+execution (07d), whose consumer canaries are pending.
 Domain typed access remains consumer-owned. Step 07 is separate from the
 completed HTTP abstraction.
 
@@ -56,7 +56,7 @@ within the Crumbles repository.
    useful, but should be designed against Pezzottify's existing lane, priority,
    cancellation and shutdown behavior before offering it as a shared feature.
 
-## Proposed implementation sequence
+## Implementation sequence
 
 The [richer SQLite design](step-07-sqlite-design.md) inserts 07e schema support
 after the completed 07a/07b rollout and before 07c/07d. The original identifiers
@@ -71,12 +71,12 @@ below remain stable.
   migrations and newer database versions, and report what would run. Implement
   execution only for a driver/ledger combination with proven parity; never
   replace an existing ledger as part of a first adoption.
-- **07c — backup coordination:** model preparation and verification outcomes;
+- **07c — backup coordination (implemented locally; [contract](step-07c-sqlite-backup.md)):** model preparation and verification outcomes;
   prototype a SQLite-specific adapter against both Pezzottify's checkpoint
   contract and Crumbles' staged-copy contract. Treat them as distinct strategies.
-- **07d — optional synchronous execution:** assess whether the existing task
-  primitives can host bounded database work without weakening Pezzottify's
-  priority, lane, cancellation or shutdown guarantees.
+- **07d — optional synchronous execution (implemented locally; [contract](step-07d-database-blocking.md)):** dedicated bounded workers preserve explicit
+  priorities, lanes, deadlines, cancellation and drain. Pezzottify's production
+  executor is the proposed consumer canary; adoption remains pending.
 
 Before selecting a canary, compare the exact behavior and fixtures of the
 candidate adapter with an existing service. The initial implementation should

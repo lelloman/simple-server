@@ -1,6 +1,6 @@
 [package]
 name = "lelloman-simple-server"
-version = "0.1.6"
+version = "0.1.7"
 edition = "2024"
 license = "MIT OR Apache-2.0"
 description = "A modular foundation for Axum-based Rust services"
@@ -17,6 +17,8 @@ unix-http = ["web", "lifecycle", "dep:hyper", "dep:hyper-util", "dep:hyperlocal"
 compression = ["web", "dep:tower-http", "tower-http/compression-gzip", "dep:pin-project-lite"]
 cookies = ["web", "dep:cookie", "dep:pin-project-lite"]
 static-files = ["web", "dep:tower-http", "tower-http/fs"]
+database-blocking = ["dep:tokio"]
+database-sqlite-backup = ["database-sqlite"]
 database-migrations = []
 database-sqlite = []
 database-sqlite-schema = ["database-sqlite"]
@@ -136,3 +138,7 @@ required-features = ["task-policies"]
 [[example]]
 name = "sqlite_schema"
 required-features = ["database-sqlite-schema"]
+
+[[example]]
+name = "database_blocking"
+required-features = ["database-blocking"]
