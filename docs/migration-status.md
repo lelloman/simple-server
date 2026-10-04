@@ -124,7 +124,7 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (Rust; Caddy owns CORS) | **Done (local; scoped)** | **Done (local; webhook scope)** | **Done (local; capacity)** | **Done (local; retry scope)** | **Done (local; sessions + resource/admin access)** | **Done (endpoint budgets + persisted device polling)** | **Done (local)** | Done (SQLite backend) | Done (SQLite + PostgreSQL version markers) | N/A (versioned SQL owns creation; no independent SQLite bootstrap) | None. |
 | lellostore | `backend` | **Done** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; OIDC + admin)** | N/A (no inbound admission policy) | **Done (local)** | N/A (no explicit policy) | Done (backend SQLx) | N/A (versioned SQLx owns creation; no independent bootstrap) | None. |
 | meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; pipeline/gateway)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; weighted claims)** | **Done (local; budgets/retry)** | **Done (local; all three services)** | **Done (local; gateway budgets)** | **Done (local)** | Done (pipeline SQLite) | Done (weather-pipeline SQLite) | N/A (versioned SQL owns creation; no independent bootstrap) | None. |
-| observo | `observo-server`; standalone extractor logging | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (no served probe) | **Done (local; scoped)** | **Done (local; primitives)** | N/A (assessed) | **Done (local; IP/key/JWT access)** | N/A (no request quota) | **Done (local)** | Done (server SQLite) | N/A (idempotent schema, no migration ledger) | Done (bootstrap creation; scoped) | Node worker HTTP management server remains outside Rust migration scope. |
+| observo | `observo-server`; standalone extractor logging | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (no served probe) | **Done (local; scoped)** | **Done (local; primitives)** | N/A (assessed) | **Done (local; IP/key/JWT access)** | N/A (no request quota) | **Done (local)** | Done (server SQLite) | N/A (idempotent schema, no migration ledger) | Done (bootstrap creation; scoped) | None. |
 | paranza | `apps/paranza-server` | **Done** | **Done (local; scoped)** | N/A (no logger) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; runner + PCM access)** | N/A (no implemented request quota) | **Done (local)** | N/A (driver defaults only) | N/A (idempotent DDL/column repairs, no migration ledger) | Done (store creation; scoped) | None. |
 | peerlo | `peerlo-api` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; retry primitives)** | **Done (local; bearer + Torznab keys)** | **Done (local; API + crawler + durable DHT)** | **Done (local)** | N/A (driver defaults only) | N/A (create-if-missing stores, no migration ledger) | **Done (tracker + metadata creation)** | None. |
 | pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local; main HTTP)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; socket scope)** | **Done (local; durable queue cadence)** | N/A (assessed) | **Done (local; sessions + permissions + WebSocket)** | Partial (login/daily/TMDB shared; configured HTTP Governor pending) | **Done (local; HTTP core)** | Done (server + CLI SQLite) | Done (server SQLx) | Done (CLI creation; server owns versioned SQL) | Tower HTTP ServeDir/ServeFile static files and SPA fallback; CompressionLayer; active configured Governor HTTP limiter (Step 10 Partial). Android Ktor/Netty WebSocket server is outside Rust migration scope. |
@@ -7004,3 +7004,28 @@ ancestry verified, temporary worktree and branch removed. Original checkout is
 clean; its pre-existing detached release worktree is preserved. No pushes or
 deployments. Current 07e matrix totals: **11 Done, 5 N/A, 2 Pending** (Torrentino
 and excluded Quentin Torrentino); earlier totals remain dated checkpoints.
+
+## Observo remaining-backend scope audit — 2026-10-04
+
+Clean active `master` `9cf709b` was inspected across the server, content extractor,
+link scorer and Node worker. Rust source/manifests have no direct Axum, Hyper,
+Tower HTTP or Tower Cookies usage; Tower remains test-only. SQLite bootstrap
+creation is already adopted. No application implementation change was needed.
+
+The former remaining cell described the separate Node worker management API.
+It is an intentional runtime boundary, not pending Rust adoption. The Node HTTP
+listener exposes profile status/export/import and operates on live Puppeteer
+state, task draining, busy admission and browser restart. Migrating it would
+require a separately scoped worker architecture change; no claim is made that
+this Node API now uses simple-server. Its code and behavior remain unchanged.
+The pending Rust exposure cell is now **None** in both trackers.
+
+Consumer evidence: `observo/docs/backend-migration-scope.md`, committed as
+`0ba9b3f5bc4115d7ffdcb685e9abd14bcba4cbc7`. All **31 existing Node worker tests
+passed**, zero skips/failures; these do not cover browser-backed management
+HTTP operations. No Rust suite/browser E2E rerun for this documentation-only
+audit. Existing 07e results remain historical. Shared library inspected at
+`3c8c10f`; consumer dependencies remain unchanged at public 0.1.1.
+
+Master was rebased onto the isolated audit branch, identical trees and ancestry
+verified, and the owned worktree/branch removed. No pushes or deployments.
