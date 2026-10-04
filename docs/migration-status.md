@@ -6614,3 +6614,28 @@ ordinary driver/client dependencies and intentional test utilities are not
 automatically classified as migration work. Completed module statuses remain
 unchanged. These cells use the 4 October source audit evidence above; no consumer
 code changed and no runtime tests were rerun for this documentation correction.
+
+## Static files library checkpoint — 2026-10-04
+
+Implemented at `dbc7f68` on simple-server master, prepared version 0.1.3.
+The optional `static-files` feature exposes owned `web::static_files::StaticDir`
+and `StaticFile`; no backend file-serving types appear in the public API.
+See [the contract](static-files.md) for streaming, MIME, GET/HEAD, ranges,
+modification-time conditionals, directory indexes/redirects, explicit SPA/404
+fallback, precompressed siblings, symlink ownership and error handling.
+No cache-header or dynamic compression middleware is added implicitly.
+
+`bash scripts/check` passes: 625 test executions, strict all-feature/all-target
+Clippy, feature isolation, no-default-feature compilation and rustdoc with
+warnings denied. Static-file tests include 42 differential requests against the
+previous Pezzottify configuration and a real TCP/shutdown test. Registry package
+contents were inspected and `cargo publish --dry-run --locked --registry crates-io`
+passes from clean committed source. Publication is pending explicit approval.
+
+Pezzottify is being tested in an isolated worktree from clean committed dev
+`21641eec`; unrelated work appeared in its original checkout and is preserved.
+Baseline auth and permissions: 44 passed. The new production-frontend HTTP
+contract test passes against the old backend. The canary replaces ServeDir/
+ServeFile, removes direct Hyper/Tower HTTP declarations and moves Tower into
+dev dependencies. Public-release consumption and integration are still pending,
+so the last-cell leftovers have not yet been removed.
