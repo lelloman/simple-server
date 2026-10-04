@@ -6702,7 +6702,9 @@ Unrelated active Push work was preserved. Its overlapping route_builder.rs local
 edits were retained while applying only the two static-file API substitutions;
 all other recorded local file hashes were unchanged. No user work was included
 in the migration commits. The clean migration checkout was tested; ongoing
-uncommitted Push work has a separate verification scope.
+uncommitted Push work has a separate verification scope: a final `cargo check
+--locked` also passes on the restored original checkout, including those local
+edits. The 45 registry tests cover the committed migration checkout.
 
 Current production routes now use owned StaticDir with the same directory-index
 and SPA fallback semantics. Direct Hyper and Tower HTTP dependencies are removed;
