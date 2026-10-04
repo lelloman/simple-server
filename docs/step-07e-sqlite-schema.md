@@ -1,6 +1,6 @@
 # Step 07e: SQLite schema descriptions and validation
 
-Implemented in the shared library, 2026-09-29. Pezzottify has completed the versioned-helper canary; other consumers await applicability review.
+Implemented in the shared library, 2026-09-29; extended creation published in 0.1.1 on 2026-10-03. Pezzottify has completed the versioned-helper canary. SimpleAI, Paranza and Peerlo have scoped creation adoption; remaining consumers await applicability review.
 Enable `database-sqlite-schema` and use `database::sqlite::schema`. This feature
 adds no runtime dependencies and does not enable HTTP or migration preflight.
 It includes the existing lightweight connection-policy feature. Backup and
@@ -115,8 +115,8 @@ specifications and borrowed descriptions. Creation does not alter an existing
 its old marker across restart.
 
 Pezzottify has completed its canary. SimpleAI and Paranza use shared creation
-plans; Peerlo has Partial tracker adoption. Remaining rollout was stopped at user
-request; see the [checkpoint](migration-status.md#step-07e-consumer-rollout-checkpoint--2026-09-30). Driver
+plans; Peerlo uses shared tracker and metadata creation, including AUTOINCREMENT,
+FTS5 and triggers. See the [published canary](migration-status.md#step-07e-peerlo-published-canary-completion--2026-10-03). Driver
 introspection follows SQLite's [PRAGMA documentation](https://www.sqlite.org/pragma.html),
 with generated statements checked against [CREATE TABLE](https://www.sqlite.org/lang_createtable.html)
 and [CREATE INDEX](https://www.sqlite.org/lang_createindex.html).
@@ -170,7 +170,7 @@ index execution, restore the setting on success/error, and test existing-index
 acceptance and partial-bootstrap failure order. Execution remains driver-owned.
 
 
-## Extended creation (prepared for 0.1.1)
+## Extended creation (published in 0.1.1)
 
 `ExtendedSchemaSnapshot::new(schema)` adds optional AUTOINCREMENT, FTS5 and
 trigger descriptions without changing `TableSpec`, `SchemaSnapshot`, `create_plan`
