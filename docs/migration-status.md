@@ -47,14 +47,15 @@ each product independently as it adopts that capability.
 Partial = only some listed components migrated; N/A = deliberately not needed.
 Optional modules do not have to be adopted by every product.
 
-**Combined auth (08/09):** complete locally — 16 Done, 1 N/A, 0 Pending.
+**Combined auth (08/09):** active services complete locally, including Torrentino; its async bearer/session adoption is recorded below. Quentin Torrentino remains excluded.
 
-**Rate limiting (10):** complete locally — 12 Done, 0 Partial, 5 N/A, 0 Pending.
-All 17 services have been assessed. The five final consumers now use shared
+**Rate limiting (10):** previously migrated consumers are complete locally.
+Torrentino application-budget applicability remains Pending; Quentin Torrentino
+remains excluded. The five final consumers now use shared
 policies for their remaining quotas and pacing; application storage and transaction
 ownership are preserved. Test limitations are recorded in the completion evidence.
 
-**Routing / HTTP core (11):** **16 Done, 0 Partial, 1 Pending**. Pezzottify, Androidoscopy, Crumbles, Fausto, lello-auth, lellostore, Favzetto, Observo, Paranza, Peerlo, Meteonesto, Pezzottflix, Pezzottify-downloader, SCT, SimpleAI and simple-agents now
+**Routing / HTTP core (11):** all **17 active services Done**; excluded Quentin Torrentino remains Pending in the historical row. Pezzottify, Androidoscopy, Crumbles, Fausto, lello-auth, lellostore, Favzetto, Observo, Paranza, Peerlo, Meteonesto, Pezzottflix, Pezzottify-downloader, SCT, SimpleAI, simple-agents and Torrentino now
 use shared APIs for all production route groups, ordinary handlers, built-in
 extractors, response adapters and router assembly. Done excludes explicitly
 tracked protocol compatibility boundaries. Pending records unverified adoption,
@@ -128,8 +129,8 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | paranza | `apps/paranza-server` | **Done** | **Done (local; scoped)** | N/A (no logger) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; runner + PCM access)** | N/A (no implemented request quota) | **Done (local)** | N/A (driver defaults only) | N/A (idempotent DDL/column repairs, no migration ledger) | Done (store creation; scoped) | None. |
 | peerlo | `peerlo-api` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; retry primitives)** | **Done (local; bearer + Torznab keys)** | **Done (local; API + crawler + durable DHT)** | **Done (local)** | N/A (driver defaults only) | N/A (create-if-missing stores, no migration ledger) | **Done (tracker + metadata creation)** | None. |
 | pezzottflix | `pezzottflix-server` | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local; main HTTP)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; socket scope)** | **Done (local; durable queue cadence)** | N/A (assessed) | **Done (local; sessions + permissions + WebSocket)** | Done (login/daily/TMDB + configured HTTP limiter) | **Done (local; HTTP core)** | Done (server + CLI SQLite) | Done (server SQLx) | Done (CLI creation; server owns versioned SQL) | None. |
-| pezzottify-downloader | Puppeteer API, downloader HTTP server and Python cron | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; Puppeteer)** | **Done (local; both HTTP routers)** | N/A (assessed) | N/A (assessed) | **Done (local; both routers)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; priority admission)** | N/A (assessed) | N/A (no application caller gate) | **Done (local; Python/SQLite quota bridge)** | **Done (local; parent + child HTTP core)** | N/A (Python SQLite only) | N/A (no Rust migration runner) | N/A (Python owns SQLite; Rust quota bridge has no schema API) | Hyper HTTP/1 Unix serving; Hyper/hyperlocal streaming Unix proxy client; Tower HTTP RequestId and UUID-generator compatibility. Unix proxy client is a separate capability. |
-| torrentino | `crates/service` (included) | Pending (direct Axum) | **Done (shared lifecycle)** | **Done (shared logging)** | Pending (applicability review) | Pending (applicability review) | Pending (applicability review) | Pending (applicability review) | Pending (applicability review) | Pending (applicability review) | Pending (applicability review) | Pending (applicability review) | Pending (applicability review) | Pending (custom bearer/session auth) | Pending (applicability review) | Pending (direct Axum routing/serve) | Pending (SQLx WAL/FK/busy timeout) | Pending (custom user_version guard) | Pending (schema.sql bootstrap) | Direct Axum routing, handlers/extractors/rejections/responses, bearer/session middleware, body limits, WebSocket socket/message types, serving and HTTP test fixtures. |
+| pezzottify-downloader | Puppeteer API, downloader HTTP server and Python cron | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; Puppeteer)** | **Done (local; both HTTP routers)** | N/A (assessed) | N/A (assessed) | **Done (local; both routers)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; priority admission)** | N/A (assessed) | N/A (no application caller gate) | **Done (local; Python/SQLite quota bridge)** | **Done (local; parent + child HTTP core)** | N/A (Python SQLite only) | N/A (no Rust migration runner) | N/A (Python owns SQLite; Rust quota bridge has no schema API) | Hyper Unix serving/client and Tower RequestId remain on master. Replacement canary passes 164 tests; public dependency switch and integration await simple-server 0.1.6 publication. |
+| torrentino | `crates/service` (included) | **Done** | **Done (shared lifecycle)** | **Done (shared logging)** | N/A (no request-ID protocol) | N/A (no HTTP tracing layer) | **Done (64 KiB API; 4 KiB sessions)** | **Done (authenticated cache policy)** | N/A (same-origin; no CORS grant) | N/A (no served probe) | Pending (worker ownership review) | Pending (fixed worker polling) | Pending (worker policy review) | **Done (async bearer/session verification)** | Pending (application budget applicability review) | **Done (owned HTTP + WebSockets)** | Pending (SQLx WAL/FK/busy timeout) | Pending (custom user_version guard) | Pending (schema.sql bootstrap) | None. |
 | quentin-torrentino | `crates/server` (**excluded by request**) | Pending (legacy direct Axum) | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; stage capacity)** | N/A (assessed) | **Done (local; API access)** | **Done (local; MusicBrainz pacing)** | Pending | Pending (excluded by request) | Pending (excluded by request) | Pending (excluded by request) | Legacy direct Axum: backend routing/handlers/extractors/responses, auth/metrics middleware and serving; torrent multipart, chat SSE, dashboard WebSockets, static-file routing and HTTP test fixtures. Owned HTTP migration remains pending. |
 | sct | `sct-server` | **Done** | **Done (scoped)** | N/A (no logger) | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; storage-backed HTTP)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; worker scope)** | **Done (local; durable worker cadence)** | **Done (local; retry scope)** | **Done (local; tokens/sessions + transactional access)** | N/A (durable state caps, no request quota) | **Done (local; HTTP core)** | Done (archive SQLite) | Done (PostgreSQL catalog; archive format N/A) | Done (offline archive creation; PostgreSQL outside scope) | Tower HTTP ServeDir static-file fallback. |
 | simple-agents | `simple-agents-service`; runner-shell logging; associated coding test servers | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local pilot; service routes)** | **Done (local; scoped canary)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; transactional capacity)** | **Done (local; retry scope)** | **Done (local; caller + transactional access)** | N/A (task/storage admission, no request quota) | **Done (local; HTTP core)** | Done (service + Runner SQLite) | Done (service ledger + Runner version marker) | Done (service ledger + Runner transport creation) | None. |
@@ -7167,3 +7168,91 @@ migration worktrees/branches and release/test temporary builds, logs and archive
 were removed; original checkouts are clean and pre-existing recovery branch
 preserved. Only the authorized crate publication changed remote state; no Git
 push or deployment. Earlier prepared/pending records remain dated checkpoints.
+
+## Downloader and Torrentino cleanup — 2026-10-04
+
+Scope: remaining direct HTTP backend dependencies, preserving application
+protocols. Torrentino is the current replacement repository, not excluded
+quentin-torrentino. Original branches were clean active `master`: Torrentino
+`81fdaa78`, downloader `22ffc5c3`, shared library `ab61041`. Separate sibling
+worktrees and migration branches were used throughout.
+
+### Torrentino integrated
+
+Master is `9850c1659ab060caf575f70d02580236b9ff0815`. The independent
+`crates/service` package now consumes public `lelloman-simple-server =0.1.5`
+(source `4a0f06ea61719ca5e9219f006988824c09d75bf6`, archive checksum
+`3df80ad94d2f2accc506f153787c81b6c11c13a0da670212c1e233d54ddcbab7`).
+Direct Axum and HTTP-body-util dependencies/imports were removed. Production
+routes, handlers/extractors/rejections, responses, serving, body limits and
+WebSocket upgrades/messages use owned APIs; mock HTTP fixtures do too.
+
+Shared `auth::AsyncAccess` evaluates existing credential policy while keeping
+plain application `Principal` extensions. Bearer header precedence and
+case-insensitive scheme parsing, strict duplicate-cookie rejection, hashed
+SQLite sessions, binding/expiry, CSRF, admin/resource/owner authorization remain
+unchanged. The shared header helper preserves authenticated no-store responses.
+Limits remain 64 KiB protected API and 4 KiB public session creation. Embedded
+assets/security headers and database/worker behavior remain application-owned.
+
+Baseline: 43 tests passed. Final: **44 tests**, formatting, diff checks and
+**strict all-target Clippy** pass. New HTTP contracts check credential precedence,
+authenticated fallback, cache headers and oversized body rejections. Existing
+contracts cover owners, sessions, CSRF, WebSocket replay/expiry and binary shutdown.
+**Real Chromium E2E passes** integrations, sessions, previews, clarification,
+confirmation, format consent, delivery, movie identification and logout.
+Master was rebased onto the migration branch; ancestry and identical tested tree
+were verified. Temporary Torrentino worktree/branch were removed. Legacy root
+workspace clients/tools are unchanged.
+
+Request correlation, HTTP tracing, CORS and health are N/A after source review:
+there is no request-ID protocol, HTTP trace middleware, cross-origin access grant
+or served probe. SQLite policy/preflight/schema, fixed worker scheduling and
+worker/budget applicability remain explicitly Pending; HTTP cleanup does not
+claim their migration. Remaining HTTP backend exposure is **None**.
+
+### Shared Unix HTTP release prepared
+
+Shared `master` includes tested commit
+`58e9b75` (version 0.1.6). Opt-in Unix serving accepts an application-bound
+listener and drains active HTTP requests using explicit shared shutdown.
+The application retains socket permissions/removal, signals/deadline and upgraded
+WebSocket session policy. The owned pooled Unix HTTP/1 client streams bodies,
+returns owned responses/errors and leaves forwarding/deadline/retry policy to
+the caller. Non-UTF-8 paths and unsupported request targets fail explicitly.
+`HeaderRequestId::uuid_v4()` provides UUID format without a consumer backend
+request-ID dependency. See [Unix HTTP contract](unix-http.md).
+
+Complete `scripts/check`: **706 test executions**, zero failures/ignores,
+strict all-target/all-feature Clippy, isolated features, SQLite fixture,
+formatting and warnings-as-errors rustdoc pass. Seven new transport/UUID contracts
+cover repeated headers, request/response streaming, upstream body errors,
+graceful draining, pre-requested shutdown, error classification, socket ownership
+and Unix WebSocket text/binary/close. The clean committed publication dry run
+verifies **135 package files**, including the Unix contract. **0.1.6 has not been
+published; authorization was requested for the permanent public crate version.**
+
+### Downloader canary pending public dependency switch
+
+Candidate commit `d0321c8604e5a788d74314468481e0006da06000` in owned branch
+`codex/downloader-backend-cleanup` uses the reviewed shared worktree candidate.
+Original downloader master remains `22ffc5c3` until registry adoption/integration.
+Child Unix serving now uses shared `web::unix::serve`; application socket 0700
+permissions, stale-file removal, lifecycle 30-second grace and final cleanup are
+preserved. HTTP proxy and three-second health check use shared `UnixClient`;
+Host filtering, method/path/query/header forwarding, 502 errors and streaming
+backpressure/failure behavior are retained. UUID request IDs use the shared
+helper with a distinct application extension wrapper, preserving raw/repeated
+headers, extension overrides, selected-ID context and response propagation.
+Librespot HTTP primitives use the owned facade and its upstream Spotify client.
+Tower HTTP/Hyper/Hyperlocal helpers move to development-only legacy oracles/mock
+servers. The outbound Unix WebSocket protocol client remains tokio-tungstenite.
+Python SQLite ownership remains N/A for Rust database modules.
+
+An initial unchanged baseline run hit the credentials-file timing assertion;
+the isolated case and full baseline rerun pass. Final candidate: **164 tests pass**,
+including raw-header/extension legacy comparisons, streaming-before-EOF/body
+failure, real-process lifecycle and TCP-to-Unix WebSocket forwarding. No service
+deployment, remote push or user data changes occurred. Shared release/downloader
+worktrees are intentionally retained for publication and final registry testing;
+the downloader remaining cell lists what still exists on its integrated master.
