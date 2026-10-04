@@ -7,7 +7,7 @@ library target remains `simple_server`; the repository remains `simple-server`.
 
 ```toml
 [dependencies]
-simple-server = { package = "lelloman-simple-server", version = "=0.1.2", features = ["web"] }
+simple-server = { package = "lelloman-simple-server", version = "=0.1.3", features = ["web"] }
 ```
 
 Retain each consumer's existing features and `default-features` setting. Commit
@@ -33,6 +33,23 @@ Always bump the version for a subsequent release. Published versions cannot be
 overwritten. Record the source commit and archive checksum, then independently
 verify a consumer download and compile before migrating consumer lockfiles.
 A Git push and deployment are separate operations.
+
+## Verified crates.io release: 0.1.3 (4 October 2026)
+
+Adds optional owned directory/single-file serving via `static-files`, including
+streaming GET/HEAD, ranges, modification-time conditionals, directory indexes,
+explicit SPA/error-page fallback and precompressed asset negotiation. Existing
+capabilities remain compatible; the filesystem backend is internal to the shared
+API. See [the static-file contract](static-files.md).
+
+Published with explicit user authorization from clean tested source
+`dbc7f682f9656c1b29c6a52dfc011a94de27087a`. Archive SHA256:
+`0c3c1347b1c85484b5d4ba18cd6d886688b8a1dc2d94d84bc596a6abec128ddb`.
+Full library checks pass 625 test executions, strict Clippy, feature isolation
+and rustdoc. Package contents and publication dry run were verified before
+publication; Cargo confirmed registry availability. An independent public archive
+download matches both checksum and embedded source commit. Consumer verification
+and integration evidence are recorded in the migration trackers.
 
 ## Verified crates.io release: 0.1.2 (4 October 2026)
 

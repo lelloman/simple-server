@@ -116,7 +116,7 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 
 | Project | Server components | 1. Axum centralization | 2. Lifecycle / main() | 03a. Logging | 03b. Correlation | 03c. HTTP tracing | 04a. Body limits | 04b. Response headers | 04c. CORS | 05. Health/readiness | 06a. Task ownership | 06b. Scheduling | 06c. Execution policies | 08/09. Auth | 10. Rate limiting | 11. Routing / HTTP core | 07a. SQLite connection policy | 07b. Migration preflight | 07e. SQLite schema | Remaining backend exposure |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local canary)** | **Done (local; scoped canary)** | N/A (assessed) | N/A (no served probe) | **Done (local; scoped canary)** | **Done (local; primitives)** | **Done (local; primitives)** | **Done (local; sessions + route permissions)** | **Done (HTTP, MCP, durable quotas + outbound pacing)** | **Done (all production route groups)** | Done | Done (five versioned SQLite stores) | Done (versioned helper; scoped canary) | Tower HTTP ServeDir/ServeFile static files and SPA fallback. Hyper declaration needs removal-safety verification (no direct production use found). |
+| pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local canary)** | **Done (local; scoped canary)** | N/A (assessed) | N/A (no served probe) | **Done (local; scoped canary)** | **Done (local; primitives)** | **Done (local; primitives)** | **Done (local; sessions + route permissions)** | **Done (HTTP, MCP, durable quotas + outbound pacing)** | **Done (all production route groups)** | Done | Done (five versioned SQLite stores) | Done (versioned helper; scoped canary) | None. |
 | favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local canary)** | **Done (local; request work)** | **Done (local; bounded batches)** | **Done (local; retry scope)** | **Done (local canary)** | **Done (local; global + endpoint budgets)** | **Done (local)** | Done | Done (backend SQLite) | Done (migration-ledger creation; scoped) | None. |
 | androidoscopy | `server`; Android SDK pairing | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (no served probe) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; controller + LAN access)** | **Done (local; device JNI pairing gate)** | **Done (all production route groups)** | N/A (no SQLite database) | N/A (no Rust migration runner) | N/A (Rust has no SQLite; viewer uses Android platform API) | Tower HTTP fs declaration needs removal-safety verification (no direct production use found). |
 | crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; durable primitives)** | **Done (local; retry primitives)** | **Done (local; main + integration)** | **Done (local; HTTP + MCP + durable dispatcher)** | **Done (both servers)** | Done (core + integration SQLite) | Done (core + integration ledgers) | Done (core + integration ledger creation) | None. |
@@ -6677,3 +6677,37 @@ current dev's static-file/Hyper cleanup items until integration.
 Shared-library implementation and tracker updates are integrated into master.
 The library worktree/branch and owned temporary build artifacts are cleaned up;
 the committed consumer worktree/branch is retained for the pending release.
+
+## Static files publication and Pezzottify integration — 2026-10-04
+
+Published public `lelloman-simple-server` 0.1.3 with explicit user authorization
+from clean tested source `dbc7f682f9656c1b29c6a52dfc011a94de27087a`. Cargo confirmed
+registry availability. Independent download verifies SHA256
+`0c3c1347b1c85484b5d4ba18cd6d886688b8a1dc2d94d84bc596a6abec128ddb`, the embedded source
+commit and static-file source. Full library checks already passed 625 test
+executions, strict Clippy, feature isolation and rustdoc.
+
+Pezzottify's migration branch was refreshed onto current dev `9f644b79`, retaining
+its rewritten history, async-trait lockfile update and Android CI changes. Final
+consumer commit `aee770c9` locks the actual crates.io package/checksum, with no
+source override. Registry verification: 45 frontend/auth/permission tests pass;
+formatting, strict production Clippy and locked all-target/all-feature checking
+pass. The earlier source canary passed all 34 integration suites (342 passed,
+32 existing ignores); its broad unit run passed 1,170 with one scheduler timing
+failure that passed on isolated retry, plus two ignores. Those earlier results
+are not represented as a fresh complete registry suite.
+
+Dev was rebased onto the migration branch and ancestry/tree equality verified.
+Unrelated active Push work was preserved. Its overlapping route_builder.rs local
+edits were retained while applying only the two static-file API substitutions;
+all other recorded local file hashes were unchanged. No user work was included
+in the migration commits. The clean migration checkout was tested; ongoing
+uncommitted Push work has a separate verification scope.
+
+Current production routes now use owned StaticDir with the same directory-index
+and SPA fallback semantics. Direct Hyper and Tower HTTP dependencies are removed;
+Tower is dev-only. The remaining-backend cell is now None for this Rust scope.
+Library release and consumer migration worktrees/branches were removed after
+verification, and owned temporary builds/logs were cleaned up. No Git push or
+service deployment was performed. This section supersedes the earlier publication
+and consumer-integration pending notes.
