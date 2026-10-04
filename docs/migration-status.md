@@ -120,7 +120,7 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local canary)** | **Done (local; request work)** | **Done (local; bounded batches)** | **Done (local; retry scope)** | **Done (local canary)** | **Done (local; global + endpoint budgets)** | **Done (local)** | Done | Done (backend SQLite) | Done (migration-ledger creation; scoped) | None. |
 | androidoscopy | `server`; Android SDK pairing | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (no served probe) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; controller + LAN access)** | **Done (local; device JNI pairing gate)** | **Done (all production route groups)** | N/A (no SQLite database) | N/A (no Rust migration runner) | N/A (Rust has no SQLite; viewer uses Android platform API) | None. |
 | crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; durable primitives)** | **Done (local; retry primitives)** | **Done (local; main + integration)** | **Done (local; HTTP + MCP + durable dispatcher)** | **Done (both servers)** | Done (core + integration SQLite) | Done (core + integration ledgers) | Done (core + integration ledger creation) | None. |
-| fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; dynamic cron)** | N/A (assessed) | **Done (local; HTTP + WebSocket + admin/write)** | **Done (local; five API tiers)** | **Done (local)** | Done (storage SQLite) | Done (core SQLite store) | Done (ledger + runtime vec0 creation) | Custom Tower/rust-embed static-file service; Tower HTTP RequestId compatibility types. Shared adapters need defined contracts before removal. |
+| fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; dynamic cron)** | N/A (assessed) | **Done (local; HTTP + WebSocket + admin/write)** | **Done (local; five API tiers)** | **Done (local)** | Done (storage SQLite) | Done (core SQLite store) | Done (ledger + runtime vec0 creation) | None. |
 | lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (Rust; Caddy owns CORS) | **Done (local; scoped)** | **Done (local; webhook scope)** | **Done (local; capacity)** | **Done (local; retry scope)** | **Done (local; sessions + resource/admin access)** | **Done (endpoint budgets + persisted device polling)** | **Done (local)** | Done (SQLite backend) | Done (SQLite + PostgreSQL version markers) | N/A (versioned SQL owns creation; no independent SQLite bootstrap) | Tower Cookies mutable cookie jar and CookieManagerLayer in server/examples. Tower HTTP cors/trace declaration needs removal-safety verification. |
 | lellostore | `backend` | **Done** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; OIDC + admin)** | N/A (no inbound admission policy) | **Done (local)** | N/A (no explicit policy) | Done (backend SQLx) | Pending (deferred by user: active backend work) | Tower HTTP fs declaration needs removal-safety verification; cleanup deferred during active backend work. |
 | meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; pipeline/gateway)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; weighted claims)** | **Done (local; budgets/retry)** | **Done (local; all three services)** | **Done (local; gateway budgets)** | **Done (local)** | Done (pipeline SQLite) | Done (weather-pipeline SQLite) | N/A (versioned SQL owns creation; no independent bootstrap) | None. |
@@ -6744,3 +6744,58 @@ Both tracker remaining-backend cells now read None for Androidoscopy's Rust
 scope. Earlier audit's stale declaration candidate is resolved. Existing module
 statuses are unchanged. Central trackers are committed separately on
 simple-server master; owned temporary builds/logs are cleaned up.
+
+## Fausto backend dependency cleanup — 2026-10-04
+
+Active clean `master` started at `b2ccfd601d0d`; implementation was tested and
+committed in the dedicated `migration/backend-cleanup` worktree, then original
+`master` was rebased onto it at `006004d`. Ancestry and identical trees were
+verified. Owned worktree/branch, frontend dependencies/fixtures, build cache and
+logs were removed after integration; no push or deployment was performed.
+
+Production correlation and federation/API errors now use shared opaque
+`correlation::HeaderRequestId`. UUID generation, repeated/empty/long/non-text
+headers, response overrides and conflicting typed-extension precedence retain
+Fausto's policy. Forty before/after differential cases compare the original
+Tower HTTP layers with the shared implementation. Tower HTTP is dev-only for
+that oracle, with only its request-id feature enabled; its production declaration
+and unused filesystem/propagate-header features are removed. The direct normal
+dependency tree confirms this, and the source audit finds no production Axum,
+Hyper or Tower HTTP imports.
+
+The handwritten Tower embedded-file service was replaced by production
+`Router::fallback(serve_embedded)`, using shared owned HTTP types. Application
+rust-embed packaging, MIME detection, root/index, SPA/missing-file fallbacks,
+POST behavior and feature-disabled 404 body remain. The handler strips HEAD
+bodies in-process; network HEAD was already bodyless, and final loopback checks
+confirm status, MIME, exact content length and empty body. Disk static-files is
+N/A for these embedded assets; the unchanged public `=0.1.2` already provides
+all required APIs. There is no new shared-library release.
+
+Generic Tower Layer/Service composition of Fausto's per-IP adapter around the
+shared token bucket remains an intentional boundary. Outbound reqwest and
+embedded asset packaging remain application-owned. Transitive Axum/framework
+dependencies are expected; the final table cell tracks outstanding migration
+work, not all transitive dependencies. There is no remaining identified backend
+migration gap for Fausto in this scope.
+
+Verification:
+
+- Unmodified server baseline: **218 passed**, one existing ignored doctest;
+  all-target Clippy completes with warnings, formatting passes.
+- Before/after embedded fallback contracts cover GET/HEAD/POST, root, SPA/query
+  paths, missing assets, disabled UI and exact CSS/binary bytes. Production-router
+  loopback checks include request-ID propagation and graceful shutdown.
+- Final default server suite: **220 passed**, one ignored doctest. With web-ui
+  and Swagger: **221 passed**, one ignored doctest, including six live process
+  lifecycle cases and the WebSocket transport suite.
+- All-target Clippy with web-ui/Swagger completes with warnings (not a strict
+  warnings-as-errors pass); no-default-feature compilation, formatting and diff
+  checks pass. Integrated master matches the tested migration tree.
+- The unchanged frontend still fails TypeScript checks and standalone Vite build
+  (`import.meta` in LoginView), as documented in the original migration. Optional
+  Rust/HTTP checks use explicit temporary HTML/CSS/binary fixtures, not a working
+  production UI build. Docker E2E was not rerun.
+
+Fausto's active README pin was corrected from stale `=0.1.0` to actual `=0.1.2`.
+Consumer details: `fausto/docs/simple-server-migration.md#backend-cleanup-2026-10-04`.
