@@ -1,13 +1,13 @@
 [package]
 name = "lelloman-simple-server"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2024"
 license = "MIT OR Apache-2.0"
 description = "A modular foundation for Axum-based Rust services"
 repository = "https://github.com/lelloman/simple-server"
 readme = "README.md"
 publish = ["crates-io"]
-include = ["/src/**", "/tests/**", "/examples/**", "/Cargo.toml", "/Cargo.lock", "/README.md", "/LICENSE-MIT", "/LICENSE-APACHE", "/docs/publishing.md"]
+include = ["/src/**", "/tests/**", "!/tests/**/target/**", "/examples/**", "/Cargo.toml", "/Cargo.lock", "/README.md", "/LICENSE-MIT", "/LICENSE-APACHE", "/docs/publishing.md"]
 
 [lib]
 name = "simple_server"

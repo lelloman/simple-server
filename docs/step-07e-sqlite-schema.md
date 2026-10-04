@@ -221,3 +221,63 @@ modes, tokenizer/prefix/unindexed options, missing-column rejection, collision
 checks, quoted literals, trigger comments/WHEN/UPDATE OF/views, attached-schema
 creation and file-backed restart. Publication and consumer integration status are
 recorded separately in the migration tracker.
+
+## STRICT, CHECK and generic virtual tables (prepared for 0.1.2)
+
+`create_extended_plan_with_options(snapshot, mode, &CreationOptions)` accepts
+creation-only additions without adding fields to existing public descriptors.
+Existing `create_plan` and `create_extended_plan` retain their generated SQL.
+`CreationOptions::default()` is equivalent to the existing extended planner.
+
+`TableCreationOptions` selects a declared table, optional STRICT typing and
+ordered `CheckConstraint` entries. Each CHECK may have an escaped constraint name
+and optional declared column for column-level placement; otherwise it is a table
+constraint. Expressions use explicit trusted application SQL; they are not parsed,
+normalized or populated from request data. Newlines preserve trailing SQL comments.
+SQLite checks syntax/references and evaluates CHECK expressions, including its
+normal acceptance of NULL results. There is no new NOT NULL or repair policy.
+
+STRICT requires SQLite 3.37+; the planner rejects missing or unsupported types
+before returning a plan. Supported names are INT, INTEGER, REAL, TEXT, BLOB and
+ANY (ASCII case-insensitive). SQLite controls lossless coercion, key nullability,
+INTEGER rowid allocation and ANY's preservation of value types. The descriptor's
+NOT NULL flag remains the caller's declaration, not a promise of observed metadata.
+Unknown tables/columns, duplicate table options and duplicate named CHECKs fail
+before execution. Existing `TableSpec::unsupported` still rejects creation; callers
+must describe these properties through the new options rather than an unsupported
+placeholder. WITHOUT ROWID/generated columns/conflict clauses remain unsupported.
+
+`VirtualTableSpec` provides independently quoted table/module identifiers and
+optional `VirtualTableArguments::trusted(...)`. The argument text is explicitly
+unparsed module grammar, allowing vec0 dimensions/keys, RTree or other modules;
+it is not an SQL string literal or a sanitizer. None omits the argument parentheses.
+Never derive raw arguments from untrusted requests. Module loading/registration,
+argument syntax/semantics, dynamic dimensions, extension ABI and unspecified shadow
+objects remain application-owned. Missing modules and module-owned shadow collisions
+are execution errors; the planner never loads extensions or replaces modules.
+Known ordinary/index/FTS/generic names and known FTS shadows are checked for
+collisions before a plan is returned. Generic shadows cannot be inferred.
+
+Order: ordinary tables, indexes, specialized FTS5, generic virtual tables, triggers.
+Split plans to retain existing consumer startup phases. IF NOT EXISTS is unchanged
+SQLite no-op behavior, not validation. Caller owns execution, transactions, rollback,
+markers, backfill and recovery. Existing read-only comparison does not establish
+STRICT/CHECK or arbitrary virtual-table properties; report unsupported/unavailable
+coverage instead of marking ordinary-table observations as complete.
+
+Verification: actual SQLite strict coercion/rejection, ANY, INT primary-key
+nullability, named/column/table CHECKs and NULL results, AUTOINCREMENT rollback,
+invalid definitions, module-name quoting, known collisions, attached-schema
+FTS5/RTree creation/query/idempotence, unknown-module transaction rollback, and
+a Crumbles-style runner ledger differential fixture with file reopen. A standalone
+consumer harness under `tests/fixtures/sqlite_vec_creation` registers sqlite-vec
+0.1.6 and exercises dynamic 2/3-dimensional vec0 creation, nearest-neighbor search,
+idempotence and dimension rejection. It owns the extension FFI; the shared library
+retains its unsafe-code prohibition and adds no runtime dependencies. The harness
+runs in `scripts/check` and carries its own lockfile.
+
+SQLite contracts: [STRICT](https://www.sqlite.org/stricttables.html),
+[CHECK/table creation](https://www.sqlite.org/lang_createtable.html),
+[virtual tables](https://www.sqlite.org/lang_createvtab.html). Consumer integrations
+and publication are recorded separately; this core does not mark Crumbles or
+Fausto Done before they adopt a published release.

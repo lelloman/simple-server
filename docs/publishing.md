@@ -34,6 +34,15 @@ overwritten. Record the source commit and archive checksum, then independently
 verify a consumer download and compile before migrating consumer lockfiles.
 A Git push and deployment are separate operations.
 
+## Prepared release: 0.1.2
+
+Additive STRICT/CHECK and generic virtual-table creation options. Existing public
+snapshot literals, creation APIs and runtime dependencies remain compatible.
+Real SQLite tests and a standalone sqlite-vec consumer harness verify the new
+creation behavior. This release is not published; user approval is required
+before publication. Crumbles/Fausto integrations remain Partial until actual
+consumer adoption is verified against the published package.
+
 ## Verified crates.io release: 0.1.1 (3 October 2026)
 
 Adds additive SQLite extended creation descriptions for AUTOINCREMENT, FTS5 and

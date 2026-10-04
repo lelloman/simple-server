@@ -82,6 +82,68 @@ impl<'a> ExtendedSchemaSnapshot<'a> {
         }
     }
 }
+/// Named or unnamed CHECK; an optional column selects column-level placement.
+/// SQL expressions are trusted, unparsed and evaluated by SQLite.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct CheckConstraint<'a> {
+    pub name: Option<Identifier<'a>>,
+    pub column: Option<Identifier<'a>>,
+    pub expression: SqlExpression<'a>,
+}
+impl CheckConstraint<'_> {
+    pub(super) fn sql(&self) -> String {
+        let prefix = self
+            .name
+            .as_ref()
+            .map(|name| format!("CONSTRAINT {} ", name.quoted()))
+            .unwrap_or_default();
+        format!("{prefix}CHECK ({}\n)", self.expression.as_str())
+    }
+}
+
+/// Creation-only additions for a declared ordinary table.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct TableCreationOptions<'a> {
+    pub table: Identifier<'a>,
+    /// SQLite STRICT typing (requires SQLite 3.37 or newer).
+    pub strict: bool,
+    pub checks: Cow<'a, [CheckConstraint<'a>]>,
+}
+
+/// Trusted module argument text, not SQL values or identifiers.
+/// No parser or sanitizer is implied. Never populate from untrusted input.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct VirtualTableArguments<'a>(Cow<'a, str>);
+impl<'a> VirtualTableArguments<'a> {
+    pub fn trusted(arguments: impl Into<Cow<'a, str>>) -> Result<Self, DefinitionError> {
+        let arguments = arguments.into();
+        if arguments.trim().is_empty() || arguments.contains('\0') {
+            return Err(invalid("virtual table arguments", "empty or contains NUL"));
+        }
+        Ok(Self(arguments))
+    }
+    pub fn as_str(&self) -> &str {
+        &self.0
+    }
+}
+
+/// Generic virtual-table creation. The caller loads/registers the module.
+/// Arguments, shadow objects, syntax and runtime behavior belong to that module.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct VirtualTableSpec<'a> {
+    pub name: Identifier<'a>,
+    pub module: Identifier<'a>,
+    /// None emits no parentheses, for modules requiring no arguments.
+    pub arguments: Option<VirtualTableArguments<'a>>,
+}
+
+/// Additive options; existing snapshot struct literals remain source-compatible.
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+pub struct CreationOptions<'a> {
+    pub tables: Cow<'a, [TableCreationOptions<'a>]>,
+    pub virtual_tables: Cow<'a, [VirtualTableSpec<'a>]>,
+}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum CreationMode {
     Create,
@@ -108,8 +170,68 @@ pub fn create_extended_plan(
     snapshot: &ExtendedSchemaSnapshot<'_>,
     mode: CreationMode,
 ) -> Result<CreationPlan, DefinitionError> {
+    create_extended_plan_with_options(snapshot, mode, &CreationOptions::default())
+}
+
+/// Extended creation with STRICT/CHECK and generic module options.
+/// All descriptors are checked before SQL is returned. Trusted SQL syntax,
+/// module availability and shadow-object collisions remain engine-owned.
+pub fn create_extended_plan_with_options(
+    snapshot: &ExtendedSchemaSnapshot<'_>,
+    mode: CreationMode,
+    options: &CreationOptions<'_>,
+) -> Result<CreationPlan, DefinitionError> {
     let schema = &snapshot.schema;
     validate_definition(schema)?;
+    unique_names(
+        "table creation options",
+        options.tables.iter().map(|t| t.table.as_str()),
+    )?;
+    for option in options.tables.iter() {
+        let table = schema
+            .tables
+            .iter()
+            .find(|t| t.name == option.table)
+            .ok_or_else(|| invalid("table creation options", "table not declared in snapshot"))?;
+        if option.strict
+            && table.columns.iter().any(|c| {
+                !["INT", "INTEGER", "REAL", "TEXT", "BLOB", "ANY"]
+                    .iter()
+                    .any(|kind| c.declared_type.eq_ignore_ascii_case(kind))
+            })
+        {
+            return Err(invalid(
+                "strict table",
+                "columns require INT, INTEGER, REAL, TEXT, BLOB or ANY",
+            ));
+        }
+        unique_names(
+            "check constraint names",
+            option
+                .checks
+                .iter()
+                .filter_map(|c| c.name.as_ref().map(Identifier::as_str)),
+        )?;
+        for check in option.checks.iter() {
+            if check
+                .column
+                .as_ref()
+                .is_some_and(|c| !table.columns.iter().any(|known| known.name == *c))
+            {
+                return Err(invalid("check constraint", "column not declared in table"));
+            }
+        }
+    }
+    for table in options.virtual_tables.iter() {
+        if table
+            .name
+            .as_str()
+            .to_ascii_lowercase()
+            .starts_with("sqlite_")
+        {
+            return Err(invalid("virtual table", "reserved table name"));
+        }
+    }
     unique_names(
         "extended schema objects",
         schema
@@ -118,7 +240,8 @@ pub fn create_extended_plan(
             .flat_map(|t| {
                 std::iter::once(t.name.as_str()).chain(t.indexes.iter().map(|i| i.name.as_str()))
             })
-            .chain(snapshot.fts5_tables.iter().map(|t| t.name.as_str())),
+            .chain(snapshot.fts5_tables.iter().map(|t| t.name.as_str()))
+            .chain(options.virtual_tables.iter().map(|t| t.name.as_str())),
     )?;
     // SQLite gives triggers a separate name namespace from tables/indexes.
     unique_names(
@@ -200,6 +323,10 @@ pub fn create_extended_plan(
                 .fts5_tables
                 .iter()
                 .any(|t| t.name.as_str().eq_ignore_ascii_case(&shadow))
+                || options
+                    .virtual_tables
+                    .iter()
+                    .any(|t| t.name.as_str().eq_ignore_ascii_case(&shadow))
             {
                 return Err(invalid(
                     "fts5 shadow tables",
@@ -241,7 +368,13 @@ pub fn create_extended_plan(
             }
         }
     }
-    let mut plan = create_ordinary_plan(schema, &snapshot.auto_increment, mode, true)?;
+    let mut plan = create_ordinary_plan(
+        schema,
+        &snapshot.auto_increment,
+        &options.tables,
+        mode,
+        true,
+    )?;
     for table in snapshot.fts5_tables.iter() {
         let mut args = table
             .columns
@@ -284,6 +417,20 @@ pub fn create_extended_plan(
             schema.database.quoted(),
             table.name.quoted(),
             args.join(", ")
+        ));
+    }
+    for table in options.virtual_tables.iter() {
+        let arguments = table
+            .arguments
+            .as_ref()
+            .map(|args| format!("({}\n)", args.as_str()))
+            .unwrap_or_default();
+        plan.statements.push(format!(
+            "CREATE VIRTUAL TABLE {}{}.{} USING {}{arguments};",
+            mode.clause(),
+            schema.database.quoted(),
+            table.name.quoted(),
+            table.module.quoted()
         ));
     }
     for trigger in snapshot.triggers.iter() {

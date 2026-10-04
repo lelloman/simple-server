@@ -1,0 +1,11 @@
+[package]
+name = "sqlite-virtual-canary"
+version = "0.0.0"
+edition = "2024"
+[dependencies]
+simple-server = { package = "lelloman-simple-server", path = "../../..", default-features = false, features = ["database-sqlite-schema"] }
+rusqlite = { version = "0.33", features = ["bundled"] }
+sqlite-vec = "=0.1.6"
+
+# Standalone consumer harness: extension FFI is owned here, not in the library.
+[workspace]

@@ -480,12 +480,13 @@ fn identifiers(names: &[Identifier<'_>]) -> String {
 }
 
 pub fn create_plan(snapshot: &SchemaSnapshot<'_>) -> Result<CreationPlan, DefinitionError> {
-    create_ordinary_plan(snapshot, &[], CreationMode::Create, false)
+    create_ordinary_plan(snapshot, &[], &[], CreationMode::Create, false)
 }
 
 fn create_ordinary_plan(
     snapshot: &SchemaSnapshot<'_>,
     auto_increment: &[AutoIncrementSpec<'_>],
+    table_options: &[TableCreationOptions<'_>],
     mode: CreationMode,
     strict_index_identifiers: bool,
 ) -> Result<CreationPlan, DefinitionError> {
@@ -501,6 +502,7 @@ fn create_ordinary_plan(
     let mut statements = Vec::new();
     for t in snapshot.tables.iter() {
         let auto = auto_increment.iter().find(|option| option.table == t.name);
+        let options = table_options.iter().find(|option| option.table == t.name);
         let mut parts = Vec::new();
         for c in t.columns.iter() {
             let mut part = c.name.quoted();
@@ -515,6 +517,15 @@ fn create_ordinary_plan(
             }
             if auto.is_some_and(|option| option.column == c.name) {
                 part.push_str(" PRIMARY KEY AUTOINCREMENT");
+            }
+            if let Some(options) = options {
+                for check in options
+                    .checks
+                    .iter()
+                    .filter(|check| check.column.as_ref() == Some(&c.name))
+                {
+                    part.push_str(&format!(" {}", check.sql()));
+                }
             }
             parts.push(part);
         }
@@ -534,12 +545,26 @@ fn create_ordinary_plan(
                 fk.on_delete.sql()
             ));
         }
+        if let Some(options) = options {
+            parts.extend(
+                options
+                    .checks
+                    .iter()
+                    .filter(|check| check.column.is_none())
+                    .map(CheckConstraint::sql),
+            );
+        }
         statements.push(format!(
-            "CREATE TABLE {}{}.{} ({});",
+            "CREATE TABLE {}{}.{} ({}){};",
             mode.clause(),
             snapshot.database.quoted(),
             t.name.quoted(),
-            parts.join(", ")
+            parts.join(", "),
+            if options.is_some_and(|options| options.strict) {
+                " STRICT"
+            } else {
+                ""
+            }
         ));
     }
     for t in snapshot.tables.iter() {
