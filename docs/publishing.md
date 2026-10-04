@@ -7,7 +7,7 @@ library target remains `simple_server`; the repository remains `simple-server`.
 
 ```toml
 [dependencies]
-simple-server = { package = "lelloman-simple-server", version = "=0.1.6", features = ["web"] }
+simple-server = { package = "lelloman-simple-server", version = "=0.1.7", features = ["web"] }
 ```
 
 Retain each consumer's existing features and `default-features` setting. Commit
@@ -33,6 +33,28 @@ Always bump the version for a subsequent release. Published versions cannot be
 overwritten. Record the source commit and archive checksum, then independently
 verify a consumer download and compile before migrating consumer lockfiles.
 A Git push and deployment are separate operations.
+
+## Verified crates.io release: 0.1.7 (4 October 2026)
+
+Adds optional driver-neutral SQLite backup coordination and bounded synchronous
+execution. See the [backup contract](step-07c-sqlite-backup.md) and
+[executor contract](step-07d-database-blocking.md). No consumer migration is
+implied by publication.
+
+Published with explicit user authorization from clean committed source
+`d59f067532ca7858adcc07e78ab272ff27ba055e`. Archive SHA256:
+`81ad9eef5bc3388727f06c97be1fa029c0baf39a6ba8efc021d2e9a033db74d0`.
+
+Full `scripts/check` passes **758 test executions**, strict all-target/all-feature
+Clippy, feature isolation, standalone sqlite-vec fixture, formatting and
+warnings-as-errors rustdoc. The release updates the fixture lockfile to 0.1.7 and
+adds both new feature-only suites to the standard check. Inspected **142 package
+files**, including both new contracts; clean publish dry run and real upload pass.
+Cargo confirms registry availability. An independent public archive download
+matches its embedded source commit and all **68 source files** byte-for-byte.
+A fresh credential-free Cargo home downloads, compiles and runs both new APIs
+with default features disabled. Its lockfile records crates.io, 0.1.7 and the
+same checksum. No Git push or deployment occurred.
 
 ## Verified crates.io release: 0.1.6 (4 October 2026)
 

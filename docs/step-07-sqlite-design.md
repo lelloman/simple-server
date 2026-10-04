@@ -2,7 +2,7 @@
 
 Status: 07e schema core implemented, 2026-09-29; Pezzottify versioned-helper canary complete.
 See the [implemented API and coverage](step-07e-sqlite-schema.md). Backup and
-blocking execution are implemented locally for 0.1.7 (2026-10-04); consumer
+blocking execution are published in crates.io 0.1.7 (2026-10-04); consumer
 adoption remains Pending. See [07c](step-07c-sqlite-backup.md) and
 [07d](step-07d-database-blocking.md) for the implemented contracts.
 
@@ -18,8 +18,8 @@ enabling database features does not require HTTP, authentication or lifecycle.
 | 07a — connection policy | Selected PRAGMAs and effective-setting verification | Implemented; applicable rollout complete |
 | 07b — migration preflight | Existing ledger/marker inspection and pending suffix | Implemented; applicable rollout complete |
 | 07e — SQLite schema | Versioned descriptions, creation plans, observations and validation | Shared core implemented; Pezzottify canary complete |
-| 07c — backup coordination | Checkpoint/copy strategies, verification and outcome reports | Implemented locally; consumer canaries pending |
-| 07d — synchronous execution | Bounded workers, priorities, lanes, deadlines and drain | Implemented locally; consumer canaries pending |
+| 07c — backup coordination | Checkpoint/copy strategies, verification and outcome reports | Published 0.1.7; consumer canaries pending |
+| 07d — synchronous execution | Bounded workers, priorities, lanes, deadlines and drain | Published 0.1.7; consumer canaries pending |
 
 07c/07d retain their existing roadmap identifiers. 07e is implemented ahead of
 them to address the current Pezzottify requirement without renumbering history.

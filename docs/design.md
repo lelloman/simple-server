@@ -58,7 +58,7 @@ and matches them; drivers, SQL, domain repositories and transaction ownership
 remain application-owned. See the [current matrix](migration-status.html) and
 [Torrentino completion](migration-status.md#torrentino-remaining-modules-complete--2026-10-04).
 
-The next increments are now implemented locally for 0.1.7:
+The next increments are implemented and published in crates.io 0.1.7:
 
 1. **07c: backup coordination.** Independent checkpoint-preparation reports and
    guarded staged copying, verification, atomic no-replace publication and
@@ -70,8 +70,8 @@ The next increments are now implemented locally for 0.1.7:
    The [contract](step-07d-database-blocking.md) retains running capacity after a
    caller timeout and shares scheduling between async and sync callers.
 
-Next: review these APIs against production adapters, publish when separately
-requested, canary backup coordination against Pezzottify and Crumbles, then
+Next: review these APIs against production adapters, canary backup coordination
+against Pezzottify and Crumbles, then
 canary blocking execution against Pezzottify's existing executor. Consumer
 adoption of 07c/07d remains Pending assessment/canary; no service behavior changed
 in this library implementation. Future rollout follows the

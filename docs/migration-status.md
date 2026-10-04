@@ -94,7 +94,7 @@ schema execution, queries and backups remain application-owned. See the
 and [roadmap](design.md).
 
 **SQLite backup and blocking execution (2026-10-04):** 07c and 07d are
-implemented locally for unpublished 0.1.7. See the [backup contract](step-07c-sqlite-backup.md)
+published in crates.io 0.1.7. See the [backup contract](step-07c-sqlite-backup.md)
 and [executor contract](step-07d-database-blocking.md). These new columns remain
 Pending consumer assessment/canary; no feature flag alone counts as adoption.
 07a/07b/07e adoption is independent. The next canaries should compare Pezzottify
@@ -814,8 +814,8 @@ records completion of all applicable active HTTP, lifecycle, observability,
 auth, task, rate-limit and 07a/07b/07e database migrations. The detailed sections
 below are dated implementation evidence, not an outstanding-work checklist.
 
-07c backup coordination and 07d bounded synchronous execution are implemented
-locally for 0.1.7, not yet published or adopted in consumers. Their new matrix
+07c backup coordination and 07d bounded synchronous execution are published
+in crates.io 0.1.7; consumers await assessment/canary. Their new matrix
 columns remain Pending assessment/canary. Backup canaries must preserve both
 checkpoint and staged-copy strategies; executor canaries must preserve actual
 priorities, lanes, cancellation and drain behavior. Quentin Torrentino remains
@@ -7446,3 +7446,28 @@ and Crumbles' staged-copy path, then a Pezzottify executor canary after exact
 production-policy review. Master was rebased onto the committed implementation,
 ancestry and tested/integrated trees verified, and the owned worktree/branch and
 temporary logs removed. Nothing was published, pushed or deployed.
+
+## Step 07c/07d publication — 2026-10-04
+
+Explicitly authorized by the user after the library implementation. Published
+`lelloman-simple-server 0.1.7` from clean committed source `d59f067532ca7858adcc07e78ab272ff27ba055e`;
+archive SHA256 `81ad9eef5bc3388727f06c97be1fa029c0baf39a6ba8efc021d2e9a033db74d0`.
+The preceding unpublished checkpoint is superseded for release availability,
+not consumer adoption: both new columns remain Pending assessment/canary;
+Quentin Torrentino remains excluded.
+
+Full release `scripts/check` passes **758 test executions**, strict all-feature
+Clippy, isolated feature suites, SQLite fixture, formatting and rustdoc with
+warnings denied. Fixed the fixture's stale 0.1.6 lock entry before release and
+added new feature-only suites to the check script. Inspected 142 package files;
+clean publication dry run and upload pass. Cargo confirms registry availability.
+Independent archive verification matches all 68 source files and the embedded
+Git commit. A fresh Cargo home, without registry credentials or path overrides,
+downloads, compiles and runs checkpoint preparation and bounded execution. Its
+lockfile matches crates.io source, version and public checksum.
+
+Release preparation and evidence are committed in an isolated worktree; master
+was rebased onto that branch, ancestry/tested-tree integration verified, and the
+owned worktree, branch and temporary consumer/logs removed. Consumer manifests
+were not changed. Nothing was pushed or deployed. See the
+[release record](publishing.md#verified-cratesio-release-017-4-october-2026).

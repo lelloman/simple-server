@@ -5,7 +5,7 @@ Status: original survey 2026-09-28; rollout summary updated 2026-10-04.
 [07b migration planning](step-07b-database-migrations.md) are adopted by all
 applicable in-scope services. The [richer SQLite design](step-07-sqlite-design.md)
 defines schema descriptions/validation ([07e core implemented](step-07e-sqlite-schema.md),
-applicable adoption complete), plus locally implemented backup coordination (07c) and synchronous
+applicable adoption complete), plus published 0.1.7 backup coordination (07c) and synchronous
 execution (07d), whose consumer canaries are pending.
 Domain typed access remains consumer-owned. Step 07 is separate from the
 completed HTTP abstraction.
@@ -71,10 +71,10 @@ below remain stable.
   migrations and newer database versions, and report what would run. Implement
   execution only for a driver/ledger combination with proven parity; never
   replace an existing ledger as part of a first adoption.
-- **07c — backup coordination (implemented locally; [contract](step-07c-sqlite-backup.md)):** model preparation and verification outcomes;
+- **07c — backup coordination (published 0.1.7; [contract](step-07c-sqlite-backup.md)):** model preparation and verification outcomes;
   prototype a SQLite-specific adapter against both Pezzottify's checkpoint
   contract and Crumbles' staged-copy contract. Treat them as distinct strategies.
-- **07d — optional synchronous execution (implemented locally; [contract](step-07d-database-blocking.md)):** dedicated bounded workers preserve explicit
+- **07d — optional synchronous execution (published 0.1.7; [contract](step-07d-database-blocking.md)):** dedicated bounded workers preserve explicit
   priorities, lanes, deadlines, cancellation and drain. Pezzottify's production
   executor is the proposed consumer canary; adoption remains pending.
 
