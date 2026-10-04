@@ -7,7 +7,7 @@ library target remains `simple_server`; the repository remains `simple-server`.
 
 ```toml
 [dependencies]
-simple-server = { package = "lelloman-simple-server", version = "=0.1.1", features = ["web"] }
+simple-server = { package = "lelloman-simple-server", version = "=0.1.2", features = ["web"] }
 ```
 
 Retain each consumer's existing features and `default-features` setting. Commit
@@ -34,14 +34,18 @@ overwritten. Record the source commit and archive checksum, then independently
 verify a consumer download and compile before migrating consumer lockfiles.
 A Git push and deployment are separate operations.
 
-## Prepared release: 0.1.2
+## Verified crates.io release: 0.1.2 (4 October 2026)
 
 Additive STRICT/CHECK and generic virtual-table creation options. Existing public
 snapshot literals, creation APIs and runtime dependencies remain compatible.
 Real SQLite tests and a standalone sqlite-vec consumer harness verify the new
-creation behavior. This release is not published; user approval is required
-before publication. Crumbles/Fausto integrations remain Partial until actual
-consumer adoption is verified against the published package.
+creation behavior. Published with user authorization from clean source
+`358a226a29d66e6f8a73df4573799c8b0970c8cd`. Archive SHA256:
+`d31aa705a4b51e0dfea8fdc334de20f8cf6048b049dedb970ef63227a7661d46`.
+Full library checks, package verification and publication dry-run passed.
+Independent crates.io archive download matches source commit and checksum.
+Fausto and Crumbles consume the published package with locked registry checks;
+see the migration trackers for adoption scope and test evidence.
 
 ## Verified crates.io release: 0.1.1 (3 October 2026)
 

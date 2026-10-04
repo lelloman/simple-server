@@ -222,7 +222,7 @@ checks, quoted literals, trigger comments/WHEN/UPDATE OF/views, attached-schema
 creation and file-backed restart. Publication and consumer integration status are
 recorded separately in the migration tracker.
 
-## STRICT, CHECK and generic virtual tables (prepared for 0.1.2)
+## STRICT, CHECK and generic virtual tables (published in 0.1.2)
 
 `create_extended_plan_with_options(snapshot, mode, &CreationOptions)` accepts
 creation-only additions without adding fields to existing public descriptors.

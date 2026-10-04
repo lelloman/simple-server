@@ -79,8 +79,8 @@ WebSocket APIs. Quentin Torrentino remains pending at user request. See the
 the shared library and adopted by all applicable in-scope services. Quentin
 Torrentino remains excluded at user request. The optional [07e schema core](step-07e-sqlite-schema.md) is now implemented;
 Pezzottify, SimpleAI, Paranza, Peerlo, Observo and Favzetto have scoped creation adoption;
-Fausto and Crumbles have Partial adoption for unsupported runtime vec0 and
-integration STRICT/CHECK creation respectively. Androidoscopy and lello-auth
+Fausto and Crumbles now have complete scoped runtime creation adoption using
+published 0.1.2 for vec0 and integration STRICT/CHECK. Androidoscopy and lello-auth
 have evidenced N/A assessments for the optional schema module.
 The extended creation core is published as 0.1.1 and Peerlo metadata is integrated
 with registry verification (2026-10-03). Both three-service batches are integrated (2026-10-04); seven remaining services
@@ -116,8 +116,8 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local canary)** | **Done (local; scoped canary)** | N/A (assessed) | N/A (no served probe) | **Done (local; scoped canary)** | **Done (local; primitives)** | **Done (local; primitives)** | **Done (local; sessions + route permissions)** | **Done (HTTP, MCP, durable quotas + outbound pacing)** | **Done (all production route groups)** | Done | Done (five versioned SQLite stores) | Done (versioned helper; scoped canary) | None. |
 | favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local canary)** | **Done (local; request work)** | **Done (local; bounded batches)** | **Done (local; retry scope)** | **Done (local canary)** | **Done (local; global + endpoint budgets)** | **Done (local)** | Done | Done (backend SQLite) | Done (migration-ledger creation; scoped) | None. |
 | androidoscopy | `server`; Android SDK pairing | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (no served probe) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; controller + LAN access)** | **Done (local; device JNI pairing gate)** | **Done (all production route groups)** | N/A (no SQLite database) | N/A (no Rust migration runner) | N/A (Rust has no SQLite; viewer uses Android platform API) | None. |
-| crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; durable primitives)** | **Done (local; retry primitives)** | **Done (local; main + integration)** | **Done (local; HTTP + MCP + durable dispatcher)** | **Done (both servers)** | Done (core + integration SQLite) | Done (core + integration ledgers) | Partial (core ledger creation; integration STRICT/CHECK unsupported) | None. |
-| fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; dynamic cron)** | N/A (assessed) | **Done (local; HTTP + WebSocket + admin/write)** | **Done (local; five API tiers)** | **Done (local)** | Done (storage SQLite) | Done (core SQLite store) | Partial (shared ledger creation; runtime vec0 unsupported) | None. |
+| crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; durable primitives)** | **Done (local; retry primitives)** | **Done (local; main + integration)** | **Done (local; HTTP + MCP + durable dispatcher)** | **Done (both servers)** | Done (core + integration SQLite) | Done (core + integration ledgers) | Done (core + integration ledger creation) | None. |
+| fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; dynamic cron)** | N/A (assessed) | **Done (local; HTTP + WebSocket + admin/write)** | **Done (local; five API tiers)** | **Done (local)** | Done (storage SQLite) | Done (core SQLite store) | Done (ledger + runtime vec0 creation) | None. |
 | lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (Rust; Caddy owns CORS) | **Done (local; scoped)** | **Done (local; webhook scope)** | **Done (local; capacity)** | **Done (local; retry scope)** | **Done (local; sessions + resource/admin access)** | **Done (endpoint budgets + persisted device polling)** | **Done (local)** | Done (SQLite backend) | Done (SQLite + PostgreSQL version markers) | N/A (versioned SQL owns creation; no independent SQLite bootstrap) | None. |
 | lellostore | `backend` | **Done** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; OIDC + admin)** | N/A (no inbound admission policy) | **Done (local)** | N/A (no explicit policy) | Done (backend SQLx) | Pending (applicability review) | None. |
 | meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; pipeline/gateway)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; weighted claims)** | **Done (local; budgets/retry)** | **Done (local; all three services)** | **Done (local; gateway budgets)** | **Done (local)** | Done (pipeline SQLite) | Done (weather-pipeline SQLite) | Pending (applicability review) | None. |
@@ -6301,4 +6301,35 @@ Crumbles and Fausto remain **Partial** until their actual production callers use
 a published new API and pass consumer verification. No consumer repository,
 historical SQL migration, production database, push or deployment was changed
 in this core increment. Matrix remains **6 Done, 2 Partial, 2 N/A, 7 Pending**.
-See [the API contract](step-07e-sqlite-schema.md#strict-check-and-generic-virtual-tables-prepared-for-012).
+See [the API contract](step-07e-sqlite-schema.md#strict-check-and-generic-virtual-tables-published-in-012).
+
+## Step 07e Fausto and Crumbles completion — 2026-10-04
+
+User authorized continuing publication and both consumer integrations.
+`lelloman-simple-server` **0.1.2** was published from clean reviewed source
+`358a226a29d66e6f8a73df4573799c8b0970c8cd`. Independent crates.io archive
+download matches its embedded source commit and SHA256
+`d31aa705a4b51e0dfea8fdc334de20f8cf6048b049dedb970ef63227a7661d46`.
+Both consumers use exact published 0.1.2 without a path override; lockfile
+changes are limited to shared package version/checksum. Full shared checks,
+package verification, archive inspection and publication dry-run passed earlier.
+
+| Consumer | Integrated production adoption | Registry-backed verification |
+| --- | --- | --- |
+| Fausto | **Done (ledger + optional runtime vec0 creation)**. `master` `9f1d6a1749a7560a57b5e3484de80918a95be105` → `b2ccfd6`. Production ensure_vector_table uses shared generic creation with original naming, text primary key and dynamic float dimensions. Existing-table no-op, module registration, locks, execution/errors and insertion/search/deletion stay local. | Baseline default **435 unit pass**; optional baseline compilation reproduced the previously recorded String-versus-Option model_version fixture error. The one-line fixture fix now enables optional tests. Final **438 sqlite-vec unit pass**, including legacy/shared metadata, 2/3 dimensions, nearest-neighbor search, duplicate/dimension errors, rollback, changed-dimension no-op and repeated legacy-file reopen. Default **435 unit + 4 integration pass**, existing four integration/one doctest ignores remain. Workspace all-target check/format/diff pass; two existing server warnings. Normal optional all-target Clippy completes with existing debt; strict cleanliness is not claimed. |
+| Crumbles | **Done (core + integration runtime ledger creation)**. `master` `599cbd2752ffa8d114013fa236b41b6c6d90501b` → `de7556a`. Integration migrate executes shared STRICT/CHECK ledger creation after unmanaged-schema check, before ledger reads/preflight. Original key/nullability/types/defaults, dirty CHECK and existing-object no-op remain. Core creation, authored migrations/fingerprints/checksums, staged upgrades and transactions unchanged. | Baseline **9 integration DB tests pass**. Final full integration **99 pass**, with two new SQLite differential tests for exact metadata/default/key/STRICT enforcement, dirty/NULL/duplicate errors, malformed/existing ledger preservation, rollback, retained marker and retry. Existing DB tests cover file restart, staged upgrade/restore, dirty/future/checksum and failed-migration rollback. Full core **681 pass**. Strict core/integration all-target Clippy, workspace formatting and diff checks pass. |
+
+Each consumer records evidence in `docs/step-07e-sqlite-schema.md`. Work was
+committed in isolated worktree branches; original `master` branches were rebased
+**onto** those branches. Ancestry and identical tested trees were verified before
+owned worktrees/branches were removed. The reviewed shared release worktree and
+owned transient release/test files were also cleaned after publication.
+All three original checkouts are clean. No Git push, deployment or production
+database operation occurred. Full consumer server/browser/Docker/Android E2E
+qualification was not run. Creation adoption does not claim new extended-object
+structural validation or ownership of authored SQL migration history.
+
+Matrix: **8 Done, 0 Partial, 2 N/A, 7 Pending**. Remaining in-scope services:
+LelloStore, Meteonesto, Pezzottflix, Pezzottify Downloader, SCT and Simple Agents.
+Torrentino remains excluded. This record supersedes both Partial gaps and the
+0.1.2 publication gate above.
