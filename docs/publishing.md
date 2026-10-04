@@ -34,14 +34,24 @@ overwritten. Record the source commit and archive checksum, then independently
 verify a consumer download and compile before migrating consumer lockfiles.
 A Git push and deployment are separate operations.
 
-## Release 0.1.4: mutable cookies
+## Verified crates.io release: 0.1.4 (4 October 2026)
 
 Adds optional owned mutable request jars and cookie middleware under
 `web::cookies`; see [the contract](cookies.md). Plain standard cookie data types
 are exposed without Tower Cookies middleware/jar types. Existing compatibility
-adapters and other features remain supported. Publication source/checksum and
-consumer download evidence are recorded after publishing in the migration
-trackers. Version 0.1.3 does not contain this feature.
+adapters and other features remain supported. Version 0.1.3 does not contain
+this feature.
+
+Published with user authorization from clean tested source
+`40c41291d9b0f90705c93f8528eead16a9eb2477`. Archive SHA256:
+`5526aea10c87982acc311e23401e6134f624f03d10470c982059163c325b595a`.
+Full library validation passes 657 test executions, strict Clippy, feature
+isolation and warnings-as-errors rustdoc. The root and standalone SQLite fixture
+lockfiles both record 0.1.4. Package contents (130 files), package verification
+and the publication dry run were checked before upload. Cargo confirmed registry
+availability. Independent public archive download matches the checksum and
+embedded Git commit. Lello-auth canary/adoption evidence is recorded in the
+migration trackers. No Git push or deployment is implied by publication.
 
 ## Verified crates.io release: 0.1.3 (4 October 2026)
 

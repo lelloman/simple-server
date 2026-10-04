@@ -121,7 +121,7 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | androidoscopy | `server`; Android SDK pairing | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (no served probe) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; controller + LAN access)** | **Done (local; device JNI pairing gate)** | **Done (all production route groups)** | N/A (no SQLite database) | N/A (no Rust migration runner) | N/A (Rust has no SQLite; viewer uses Android platform API) | None. |
 | crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; durable primitives)** | **Done (local; retry primitives)** | **Done (local; main + integration)** | **Done (local; HTTP + MCP + durable dispatcher)** | **Done (both servers)** | Done (core + integration SQLite) | Done (core + integration ledgers) | Done (core + integration ledger creation) | None. |
 | fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; dynamic cron)** | N/A (assessed) | **Done (local; HTTP + WebSocket + admin/write)** | **Done (local; five API tiers)** | **Done (local)** | Done (storage SQLite) | Done (core SQLite store) | Done (ledger + runtime vec0 creation) | None. |
-| lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (Rust; Caddy owns CORS) | **Done (local; scoped)** | **Done (local; webhook scope)** | **Done (local; capacity)** | **Done (local; retry scope)** | **Done (local; sessions + resource/admin access)** | **Done (endpoint budgets + persisted device polling)** | **Done (local)** | Done (SQLite backend) | Done (SQLite + PostgreSQL version markers) | N/A (versioned SQL owns creation; no independent SQLite bootstrap) | Tower Cookies mutable jar/layer remains in server/examples; pending adoption of shared web::cookies after a new crate release. |
+| lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (Rust; Caddy owns CORS) | **Done (local; scoped)** | **Done (local; webhook scope)** | **Done (local; capacity)** | **Done (local; retry scope)** | **Done (local; sessions + resource/admin access)** | **Done (endpoint budgets + persisted device polling)** | **Done (local)** | Done (SQLite backend) | Done (SQLite + PostgreSQL version markers) | N/A (versioned SQL owns creation; no independent SQLite bootstrap) | None. |
 | lellostore | `backend` | **Done** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; OIDC + admin)** | N/A (no inbound admission policy) | **Done (local)** | N/A (no explicit policy) | Done (backend SQLx) | Pending (deferred by user: active backend work) | Tower HTTP fs declaration needs removal-safety verification; cleanup deferred during active backend work. |
 | meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; pipeline/gateway)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; weighted claims)** | **Done (local; budgets/retry)** | **Done (local; all three services)** | **Done (local; gateway budgets)** | **Done (local)** | Done (pipeline SQLite) | Done (weather-pipeline SQLite) | N/A (versioned SQL owns creation; no independent bootstrap) | None. |
 | observo | `observo-server`; standalone extractor logging | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (no served probe) | **Done (local; scoped)** | **Done (local; primitives)** | N/A (assessed) | **Done (local; IP/key/JWT access)** | N/A (no request quota) | **Done (local)** | Done (server SQLite) | N/A (idempotent schema, no migration ledger) | Done (bootstrap creation; scoped) | Node worker HTTP management server remains outside Rust migration scope. |
@@ -6901,9 +6901,70 @@ master onto that feature branch. Ancestry and the tested tree were verified;
 owned worktree/branch, build caches and logs were removed after integration.
 No push, deployment or package publication was performed.
 
-**Consumer adoption remains pending.** Lello-auth master still uses its Tower
-Cookies API. Its last table cell now names adoption of the available shared API
-rather than a missing library capability. This source capability is unreleased:
-published 0.1.3 does not contain it. A new crate version/publication and subsequent
-canary are required before registry consumers can adopt it. No service status is
-marked Done merely because the library feature exists.
+At the implementation checkpoint, consumer adoption and a new crate release
+were pending: published 0.1.3 does not contain this capability. The subsequent
+0.1.4 publication and verified Lello-auth canary below supersede that checkpoint.
+No service was marked Done merely because the library feature existed.
+
+## Mutable cookie release 0.1.4 and Lello-auth canary — 2026-10-04
+
+Public `lelloman-simple-server` **0.1.4** was published with user authorization
+from clean tested source `40c41291d9b0f90705c93f8528eead16a9eb2477`. Package inspection checked 130 files,
+including cookie implementation/tests and excluding build/credential files.
+Package verification and publication dry run passed before upload; Cargo
+confirmed registry availability. Archive SHA256 is
+`5526aea10c87982acc311e23401e6134f624f03d10470c982059163c325b595a`. Independent public download matches both the archive checksum
+and embedded Git commit. The root and standalone SQLite fixture lockfiles both
+record the new version. Complete library validation passes **657 test executions**,
+strict Clippy, feature isolation, formatting and warnings-as-errors rustdoc.
+The archive/source revision is recorded in [the publishing record](publishing.md).
+
+Lello-auth's active master started at `2e42c18`. A dedicated
+`migration/owned-cookies` worktree held the implementation, tested and committed
+at `e0faab8`; original master was rebased onto it. Production server,
+shared session/authenticator/UI handlers, `session_layer()`, HTTP test fixture
+and embedded/external-OIDC examples now instantiate/extract shared owned
+`web::cookies` types. All direct package pins (workspace, core and examples) use
+public **=0.1.4**. No path/Git override or sibling library is required. Workspace
+and three example lockfiles each resolve one shared package whose checksum
+matches the independently verified archive, and no Tower Cookies package.
+The webhook example had no cookie use; its unused compatibility feature is
+removed without adding the new feature.
+
+Session, CSRF, authenticator/device-link and OIDC policy, names/attributes,
+expiry/deletion and middleware placement remain application-owned and unchanged.
+Both new real-HTTP cookie tests pass before and after migration: host-only
+__Host-/Secure/HttpOnly/Path=/, session Lax seven-day and CSRF Strict one-hour
+lifetimes, read-only requests without deltas, logout header/database revocation,
+protected-profile redirect and forged-CSRF replacement without authentication.
+An initial new-test expectation was corrected against the baseline observed
+`/login?redirect_to=/profile` redirect before migration, preserving that URL.
+
+Verification:
+
+- Unmodified baseline workspace tests/doctests: **991 passed, 22 ignored**;
+  the two added HTTP cookie tests then pass against the old layer.
+- Final workspace tests/doctests: **993 passed, 22 ignored**, including full
+  real-loopback browser/authentication/OAuth/OIDC/device-link/TOTP suites and
+  server process lifecycle/database contracts. The 22 existing ignores are
+  external PostgreSQL cases and example doctests.
+- Baseline/final strict workspace all-target Clippy passes on CI Rust **1.88.0**
+  with its two existing allowances. Formatting and Python CI contract pass.
+- All three excluded standalone HTTP examples compile before and after.
+  Existing example/local-compiler warnings remain; not claimed strict-clean.
+- Source audit finds no direct Axum, Tower HTTP or Tower Cookies imports in
+  production, tests or examples. Historical lello-auth-axum package naming,
+  generic Tower test ServiceExt, standard cookie value types, outbound reqwest,
+  proxy CORS and transitive framework implementation are intentional boundaries.
+- External PostgreSQL fixtures, unrelated auth-helper tests, Docker/browser
+  release gates and deployment were not run. Consumer details:
+  `lello-auth/docs/BACKEND_DEPENDENCY_CLEANUP.md#owned-cookie-adoption--2026-10-04`.
+
+Integration ancestry and tested trees were verified for both local master
+branches. Three original untracked identity-provider research files were
+preserved with matching hashes. Only the owned release/migration worktrees,
+branches, test/build/package artifacts, logs and temporary scripts were removed;
+pre-existing unrelated worktrees were untouched. Package publication does not
+include a Git push or deployment. The last table cell for Lello-auth now says
+None because its identified cookie compatibility boundary is migrated, rather
+than because a Cargo feature was merely selected.
