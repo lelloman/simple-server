@@ -122,7 +122,7 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; durable primitives)** | **Done (local; retry primitives)** | **Done (local; main + integration)** | **Done (local; HTTP + MCP + durable dispatcher)** | **Done (both servers)** | Done (core + integration SQLite) | Done (core + integration ledgers) | Done (core + integration ledger creation) | None. |
 | fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; dynamic cron)** | N/A (assessed) | **Done (local; HTTP + WebSocket + admin/write)** | **Done (local; five API tiers)** | **Done (local)** | Done (storage SQLite) | Done (core SQLite store) | Done (ledger + runtime vec0 creation) | None. |
 | lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (Rust; Caddy owns CORS) | **Done (local; scoped)** | **Done (local; webhook scope)** | **Done (local; capacity)** | **Done (local; retry scope)** | **Done (local; sessions + resource/admin access)** | **Done (endpoint budgets + persisted device polling)** | **Done (local)** | Done (SQLite backend) | Done (SQLite + PostgreSQL version markers) | N/A (versioned SQL owns creation; no independent SQLite bootstrap) | None. |
-| lellostore | `backend` | **Done** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; OIDC + admin)** | N/A (no inbound admission policy) | **Done (local)** | N/A (no explicit policy) | Done (backend SQLx) | Pending (deferred by user: active backend work) | Tower HTTP fs declaration needs removal-safety verification; cleanup deferred during active backend work. |
+| lellostore | `backend` | **Done** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; OIDC + admin)** | N/A (no inbound admission policy) | **Done (local)** | N/A (no explicit policy) | Done (backend SQLx) | N/A (versioned SQLx owns creation; no independent bootstrap) | None. |
 | meteonesto | `weather-api`, `weather-gateway`, `weather-pipeline` control API | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local; pipeline/gateway)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; weighted claims)** | **Done (local; budgets/retry)** | **Done (local; all three services)** | **Done (local; gateway budgets)** | **Done (local)** | Done (pipeline SQLite) | Done (weather-pipeline SQLite) | N/A (versioned SQL owns creation; no independent bootstrap) | None. |
 | observo | `observo-server`; standalone extractor logging | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | **Done (local; scoped)** | N/A (no served probe) | **Done (local; scoped)** | **Done (local; primitives)** | N/A (assessed) | **Done (local; IP/key/JWT access)** | N/A (no request quota) | **Done (local)** | Done (server SQLite) | N/A (idempotent schema, no migration ledger) | Done (bootstrap creation; scoped) | Node worker HTTP management server remains outside Rust migration scope. |
 | paranza | `apps/paranza-server` | **Done** | **Done (local; scoped)** | N/A (no logger) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | **Done (local; runner + PCM access)** | N/A (no implemented request quota) | **Done (local)** | N/A (driver defaults only) | N/A (idempotent DDL/column repairs, no migration ledger) | Done (store creation; scoped) | None. |
@@ -6968,3 +6968,39 @@ pre-existing unrelated worktrees were untouched. Package publication does not
 include a Git push or deployment. The last table cell for Lello-auth now says
 None because its identified cookie compatibility boundary is migrated, rather
 than because a Cargo feature was merely selected.
+
+## LelloStore SQLite applicability and backend cleanup — 2026-10-04
+
+The user resumed the previously deferred LelloStore work. Active clean `master`
+started at `061a7cc0c7864b334c24cd05c813ef3fbbf164c2`; migration commit
+`343353c9ef3d1c69646255a658957094f2ed8e43` is integrated into `master`.
+
+07e is **N/A**: all production tables and indexes are created by the authored
+SQLx versioned migration files. `backend/src/db/mod.rs::run_migrations` already
+uses shared migration preflight before running SQLx. There is no independent
+unversioned bootstrap or structural comparison policy to migrate. SQLx owns its
+internal migration ledger. The separate 07b adoption remains Done.
+
+Removed the unused direct Tower HTTP fs dependency and its 0.5 lockfile package.
+Moved direct Tower 0.4 to dev-dependencies for the HTTP tracing test. No direct
+Axum/Hyper/Tower HTTP source APIs remain. Embedded frontend serving and APK
+range/stream responses already use owned shared HTTP types. Remaining exposure
+is **None**; driver/client dependencies and the shared library's internal backend
+packages remain intentional. Public simple-server stays pinned at 0.1.0, checksum
+`1f3187c81c94701cd041df7ab17ce968b73c967db77c551170e3c24960b6c77a`; shared library
+reviewed at `64795a6`. No new API or release was needed.
+
+Baseline and final full all-feature backend tests: **227 passed, zero failed,
+nine existing ignores**. Initial final run failed the existing fake-aapt2 50 ms
+timeout assertion; it passed in isolation and the subsequent full run. Locked
+all-feature check, strict all-target/all-feature Clippy, formatting and diff
+checks pass. Existing frontend/dist assets were copied into the isolated
+worktree; frontend rebuild, Android interoperability and environment-dependent
+ignored tests were not run. No tests added for dependency-only cleanup.
+
+Consumer evidence: `lellostore/docs/step-07e-sqlite-schema.md`. Original master
+was rebased onto the dedicated migration branch; tested/integrated trees and
+ancestry verified, temporary worktree and branch removed. Original checkout is
+clean; its pre-existing detached release worktree is preserved. No pushes or
+deployments. Current 07e matrix totals: **11 Done, 5 N/A, 2 Pending** (Torrentino
+and excluded Quentin Torrentino); earlier totals remain dated checkpoints.
