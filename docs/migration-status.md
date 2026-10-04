@@ -118,7 +118,7 @@ Step 03a rollout verified: 2026-09-20. Earlier adoption evidence retains its ori
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | pezzottify | `pezzottify-server` | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | **Done (local)** | **Done (local canary)** | **Done (local; scoped canary)** | N/A (assessed) | N/A (no served probe) | **Done (local; scoped canary)** | **Done (local; primitives)** | **Done (local; primitives)** | **Done (local; sessions + route permissions)** | **Done (HTTP, MCP, durable quotas + outbound pacing)** | **Done (all production route groups)** | Done | Done (five versioned SQLite stores) | Done (versioned helper; scoped canary) | None. |
 | favzetto | `backend` | **Done** | **Done (local; scoped)** | **Done (local pilot)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (assessed) | **Done (local canary)** | **Done (local; request work)** | **Done (local; bounded batches)** | **Done (local; retry scope)** | **Done (local canary)** | **Done (local; global + endpoint budgets)** | **Done (local)** | Done | Done (backend SQLite) | Done (migration-ledger creation; scoped) | None. |
-| androidoscopy | `server`; Android SDK pairing | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (no served probe) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; controller + LAN access)** | **Done (local; device JNI pairing gate)** | **Done (all production route groups)** | N/A (no SQLite database) | N/A (no Rust migration runner) | N/A (Rust has no SQLite; viewer uses Android platform API) | Tower HTTP fs declaration needs removal-safety verification (no direct production use found). |
+| androidoscopy | `server`; Android SDK pairing | **Done** | **Done (local; scoped)** | **Done (local; legacy logger)** | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (assessed) | N/A (no served probe) | **Done (local; scoped)** | N/A (assessed) | N/A (assessed) | **Done (local; controller + LAN access)** | **Done (local; device JNI pairing gate)** | **Done (all production route groups)** | N/A (no SQLite database) | N/A (no Rust migration runner) | N/A (Rust has no SQLite; viewer uses Android platform API) | None. |
 | crumbles | `crumbles`, `crumbles-integration` | **Done** | **Done (scoped)** | **Done (local canary)** | **Done (local pilot; main HTTP server)** | **Done (local canary; main HTTP server)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped canary)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; durable primitives)** | **Done (local; retry primitives)** | **Done (local; main + integration)** | **Done (local; HTTP + MCP + durable dispatcher)** | **Done (both servers)** | Done (core + integration SQLite) | Done (core + integration ledgers) | Done (core + integration ledger creation) | None. |
 | fausto | `server`; associated plugin API and plugins | **Done** | **Done (local; scoped)** | **Done (local)** | **Done (local)** | **Done (local)** | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; scoped)** | **Done (local; dynamic cron)** | N/A (assessed) | **Done (local; HTTP + WebSocket + admin/write)** | **Done (local; five API tiers)** | **Done (local)** | Done (storage SQLite) | Done (core SQLite store) | Done (ledger + runtime vec0 creation) | Custom Tower/rust-embed static-file service; Tower HTTP RequestId compatibility types. Shared adapters need defined contracts before removal. |
 | lello-auth | `lello-auth-server`, `lello-auth-axum`; associated examples | **Done** | **Done (local; scoped)** | **Done (local)** | N/A (assessed) | N/A (assessed) | **Done (local; scoped)** | **Done (local; scoped)** | N/A (Rust; Caddy owns CORS) | **Done (local; scoped)** | **Done (local; webhook scope)** | **Done (local; capacity)** | **Done (local; retry scope)** | **Done (local; sessions + resource/admin access)** | **Done (endpoint budgets + persisted device polling)** | **Done (local)** | Done (SQLite backend) | Done (SQLite + PostgreSQL version markers) | N/A (versioned SQL owns creation; no independent SQLite bootstrap) | Tower Cookies mutable cookie jar and CookieManagerLayer in server/examples. Tower HTTP cors/trace declaration needs removal-safety verification. |
@@ -6713,3 +6713,34 @@ Library release and consumer migration worktrees/branches were removed after
 verification, and owned temporary builds/logs were cleaned up. No Git push or
 service deployment was performed. This section supersedes the earlier publication
 and consumer-integration pending notes.
+
+## Androidoscopy backend dependency cleanup — 2026-10-04
+
+Active clean master started at `fdb16f7`; cleanup commit `171cf75` was implemented
+in an isolated worktree and master rebased onto it. Ancestry/tree equality was
+verified and the owned migration worktree/branch removed. No other branches, user
+data, remote history or deployment were changed. See consumer
+`docs/backend-dependency-cleanup.md` for detailed scope.
+
+Removed unused direct Tower HTTP 0.5/fs declaration and its lockfile entries,
+including unused http-range-header. Dashboard files are rust-embed assets handled
+with owned simple-server HTTP types, not disk directory/file serving. Therefore
+static-files is N/A here: no new feature or public-version bump is introduced.
+Existing public simple-server 0.1.0 and pairing JNI scope remain unchanged; the
+reviewed optional disk API is public 0.1.3 source `dbc7f68`. Transitive Tower HTTP
+0.6 through reqwest and intentional client/asset/TLS libraries are not direct
+backend migration leftovers. Logging target strings preserve configuration
+compatibility and are not dependency references.
+
+Verification: baseline/final full server suites match at 79 passes each; locked
+all-target check and binary build pass; all six controller/legacy WS/legacy TLS
+SIGINT/SIGTERM shutdown cases pass with live sockets. Standalone E2E passes five
+unit plus seven full-stack tests. Its ignored generated lockfile is not committed.
+Strict production Clippy stops on the identical pre-existing derivable Config
+Default implementation; formatting output exactly matches baseline failures in
+untouched Rust files. These are reported baseline limits, not green checks.
+
+Both tracker remaining-backend cells now read None for Androidoscopy's Rust
+scope. Earlier audit's stale declaration candidate is resolved. Existing module
+statuses are unchanged. Central trackers are committed separately on
+simple-server master; owned temporary builds/logs are cleaned up.
