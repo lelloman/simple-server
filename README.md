@@ -307,3 +307,8 @@ WebSocket messages. Enable these in dev-dependencies; see the
 ## License
 
 Licensed under either [MIT](LICENSE-MIT) or [Apache-2.0](LICENSE-APACHE), at your option.
+
+Optional disk static files: enable `static-files` and use
+`web::static_files::{StaticDir, StaticFile}` for directory/single-file serving,
+explicit SPA/error-page fallback and opt-in precompressed assets. See
+[the static-file contract](docs/static-files.md).

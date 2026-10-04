@@ -27,6 +27,8 @@ pub mod routing;
 mod service;
 #[cfg(feature = "sse")]
 pub mod sse;
+#[cfg(feature = "static-files")]
+pub mod static_files;
 #[cfg(feature = "tls")]
 pub mod tls;
 #[cfg(feature = "http-tracing")]

@@ -21,5 +21,6 @@ cargo test --locked --no-default-features --features sse --test web_sse
 cargo test --locked --no-default-features --features test-harness --test test_harness
 cargo test --locked --no-default-features --features test-harness-ws --test test_harness --test test_harness_ws
 cargo test --locked --features lifecycle
+cargo test --locked --no-default-features --features static-files --test static_files
 cargo check --locked --no-default-features
 RUSTDOCFLAGS="-D warnings" cargo doc --locked --no-deps --all-features

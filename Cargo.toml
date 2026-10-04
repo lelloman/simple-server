@@ -1,6 +1,6 @@
 [package]
 name = "lelloman-simple-server"
-version = "0.1.2"
+version = "0.1.3"
 edition = "2024"
 license = "MIT OR Apache-2.0"
 description = "A modular foundation for Axum-based Rust services"
@@ -13,6 +13,7 @@ include = ["/src/**", "/tests/**", "!/tests/**/target/**", "/examples/**", "/Car
 name = "simple_server"
 
 [features]
+static-files = ["web", "dep:tower-http", "tower-http/fs"]
 database-migrations = []
 database-sqlite = []
 database-sqlite-schema = ["database-sqlite"]
@@ -37,7 +38,7 @@ correlation = ["http", "dep:http", "dep:tokio", "dep:rand"]
 body-limit = ["http", "dep:tower-layer"]
 response-headers = ["dep:http"]
 health = ["dep:http", "dep:tower-service"]
-cors = ["dep:http", "dep:tower-layer", "dep:tower-service", "dep:tower-http", "dep:pin-project-lite"]
+cors = ["dep:http", "dep:tower-layer", "dep:tower-service", "dep:tower-http", "tower-http/cors", "dep:pin-project-lite"]
 http-tracing = ["web", "dep:tracing", "dep:http-body"]
 http2 = ["http", "axum/http2"]
 macros = ["http", "axum/macros"]
@@ -59,7 +60,7 @@ cookie = { version = "0.18", features = ["percent-encode"], optional = true }
 cron = { version = "0.15", optional = true }
 chrono = { version = "0.4", default-features = false, features = ["std"], optional = true }
 pin-project-lite = { version = "0.2", optional = true }
-tower-http = { version = "0.6", default-features = false, features = ["cors"], optional = true }
+tower-http = { version = "0.6", default-features = false, optional = true }
 http = { version = "1", optional = true }
 tower-layer = { version = "0.3", optional = true }
 http-body = { version = "1", optional = true }
