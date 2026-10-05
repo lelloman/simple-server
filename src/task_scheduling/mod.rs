@@ -2,9 +2,12 @@
 //! static registration; `CronRegistry` provides dynamic timing without execution.
 //! Neither starts a hidden supervisor. Applications own reporting and storage.
 //!
-//! These APIs use the source runtime. The independent `task_drivers` module
-//! provides engine-backed bounded batches and polling without the full scheduler.
-use tokio::task as execution;
+//! The parent module selects source or engine execution explicitly.
+#[cfg(test)]
+use super::runtime_test;
+#[cfg(feature = "task-policy-core")]
+use super::task_instant;
+use super::{clock, execution, tasks};
 mod driver;
 pub use driver::{PollCadence, PollOutcome, run_bounded_batch, run_poll_worker};
 mod join_error;
@@ -23,18 +26,16 @@ pub use cron_registry::{
     CronEntryConfig, CronEntrySnapshot, CronRegistry, CronRegistryError, CronRevision,
     DueOccurrence, MissedTickPolicy,
 };
-#[cfg(feature = "task-policies")]
+#[cfg(feature = "task-policy-core")]
 mod policies;
 mod schedule;
-#[cfg(feature = "task-policies")]
+use crate::shutdown::Shutdown;
+#[cfg(feature = "task-policy-core")]
 use crate::task_policies::{
     CircuitBreaker, CircuitPermit, ExecutionPolicy, PauseScope, PauseState,
 };
-use crate::{
-    lifecycle::Shutdown,
-    tasks::{ShutdownBehavior, TaskCompletion, TaskContext, TaskId, TaskSet, WorkInfo},
-};
-#[cfg(feature = "task-policies")]
+use clock::Instant;
+#[cfg(feature = "task-policy-core")]
 pub use policies::SchedulerSnapshot;
 use rand::{Rng, SeedableRng, rngs::StdRng};
 pub use schedule::{CronSchedule, FirstRun, Schedule};
@@ -47,10 +48,8 @@ use std::{
     sync::Arc,
     time::{Duration, SystemTime},
 };
-use tokio::{
-    sync::{mpsc, oneshot, watch},
-    time::Instant,
-};
+use tasks::{ShutdownBehavior, TaskCompletion, TaskContext, TaskId, TaskSet, WorkInfo};
+use tokio::sync::{mpsc, oneshot, watch};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct ConfigError(pub String);
@@ -123,7 +122,7 @@ pub struct Job<P, E> {
     pub id: String,
     pub config: JobConfig,
     factory: Factory<P, E>,
-    #[cfg(feature = "task-policies")]
+    #[cfg(feature = "task-policy-core")]
     policy: ExecutionPolicy<E>,
 }
 impl<P, E> Job<P, E> {
@@ -135,7 +134,7 @@ impl<P, E> Job<P, E> {
         Self {
             id: id.into(),
             config,
-            #[cfg(feature = "task-policies")]
+            #[cfg(feature = "task-policy-core")]
             policy: ExecutionPolicy::default(),
             factory: Factory::Async(Arc::new(move |ctx| Box::pin(job(ctx)))),
         }
@@ -148,7 +147,7 @@ impl<P, E> Job<P, E> {
         Self {
             id: id.into(),
             config,
-            #[cfg(feature = "task-policies")]
+            #[cfg(feature = "task-policy-core")]
             policy: ExecutionPolicy::default(),
             factory: Factory::Blocking(Arc::new(job)),
         }
@@ -177,26 +176,26 @@ pub struct Admission {
 }
 #[derive(Debug)]
 pub enum Event<E> {
-    #[cfg(feature = "task-policies")]
+    #[cfg(feature = "task-policy-core")]
     RuntimeExceeded {
         job_id: String,
         run_id: RunId,
         attempt: u32,
     },
-    #[cfg(feature = "task-policies")]
+    #[cfg(feature = "task-policy-core")]
     QueueExpired {
         job_id: String,
         run_id: RunId,
         attempt: u32,
     },
-    #[cfg(feature = "task-policies")]
+    #[cfg(feature = "task-policy-core")]
     RetryScheduled {
         job_id: String,
         run_id: RunId,
         next_attempt: u32,
         delay: Duration,
     },
-    #[cfg(feature = "task-policies")]
+    #[cfg(feature = "task-policy-core")]
     StateChanged(SchedulerSnapshot),
     Admitted {
         job_id: String,
@@ -227,14 +226,14 @@ pub enum Event<E> {
     },
 }
 enum Command<P> {
-    #[cfg(feature = "task-policies")]
+    #[cfg(feature = "task-policy-core")]
     Pause {
         scope: PauseScope,
         paused: bool,
         cancel_running: bool,
         reply: oneshot::Sender<Result<(), ConfigError>>,
     },
-    #[cfg(feature = "task-policies")]
+    #[cfg(feature = "task-policy-core")]
     Snapshot {
         reply: oneshot::Sender<SchedulerSnapshot>,
     },
@@ -316,13 +315,13 @@ struct Registered<P, E> {
 }
 struct Run<P> {
     started_reported: bool,
-    #[cfg(feature = "task-policies")]
+    #[cfg(feature = "task-policy-core")]
     eligible: Instant,
-    #[cfg(feature = "task-policies")]
+    #[cfg(feature = "task-policy-core")]
     reserved: bool,
-    #[cfg(feature = "task-policies")]
+    #[cfg(feature = "task-policy-core")]
     exceeded: bool,
-    #[cfg(feature = "task-policies")]
+    #[cfg(feature = "task-policy-core")]
     circuit: Option<CircuitPermit>,
     id: RunId,
     job: String,
@@ -340,13 +339,13 @@ impl<P> Run<P> {
             parameters,
             attempt: 1,
             started_reported: false,
-            #[cfg(feature = "task-policies")]
+            #[cfg(feature = "task-policy-core")]
             eligible: Instant::now(),
-            #[cfg(feature = "task-policies")]
+            #[cfg(feature = "task-policy-core")]
             reserved: false,
-            #[cfg(feature = "task-policies")]
+            #[cfg(feature = "task-policy-core")]
             exceeded: false,
-            #[cfg(feature = "task-policies")]
+            #[cfg(feature = "task-policy-core")]
             circuit: None,
         }
     }
@@ -357,11 +356,11 @@ impl<P> Run<P> {
 pub struct Scheduler<P: Send + Sync + 'static, E: Send + 'static> {
     activity: watch::Sender<()>,
     run_shutdown: Option<Shutdown>,
-    #[cfg(feature = "task-policies")]
+    #[cfg(feature = "task-policy-core")]
     pause: PauseState,
-    #[cfg(feature = "task-policies")]
+    #[cfg(feature = "task-policy-core")]
     breakers: BTreeMap<String, CircuitBreaker>,
-    #[cfg(feature = "task-policies")]
+    #[cfg(feature = "task-policy-core")]
     restored: Option<SchedulerSnapshot>,
     limits: SchedulerLimits,
     jobs: BTreeMap<String, Registered<P, E>>,
@@ -391,11 +390,11 @@ impl<P: Send + Sync + 'static, E: Send + 'static> Scheduler<P, E> {
         Ok(Self {
             activity: watch::channel(()).0,
             run_shutdown: None,
-            #[cfg(feature = "task-policies")]
+            #[cfg(feature = "task-policy-core")]
             pause: PauseState::default(),
-            #[cfg(feature = "task-policies")]
+            #[cfg(feature = "task-policy-core")]
             breakers: BTreeMap::new(),
-            #[cfg(feature = "task-policies")]
+            #[cfg(feature = "task-policy-core")]
             restored: None,
             tasks: TaskSet::new(limits.max_running),
             limits,
@@ -416,7 +415,7 @@ impl<P: Send + Sync + 'static, E: Send + 'static> Scheduler<P, E> {
         }
     }
     pub fn register(&mut self, job: Job<P, E>) -> Result<(), ConfigError> {
-        #[cfg(feature = "task-policies")]
+        #[cfg(feature = "task-policy-core")]
         if self.restored.is_some() {
             return Err(ConfigError("registration is closed after restore".into()));
         }
@@ -445,7 +444,7 @@ impl<P: Send + Sync + 'static, E: Send + 'static> Scheduler<P, E> {
         {
             return Err(ConfigError("job capacity overflows".into()));
         }
-        #[cfg(feature = "task-policies")]
+        #[cfg(feature = "task-policy-core")]
         {
             job.policy
                 .validate()
@@ -472,7 +471,7 @@ impl<P: Send + Sync + 'static, E: Send + 'static> Scheduler<P, E> {
     pub fn in_flight(&self) -> usize {
         self.running.len() + self.queue.len()
     }
-    pub fn abort_async(&mut self, task: TaskId) -> Result<(), crate::tasks::AbortError> {
+    pub fn abort_async(&mut self, task: TaskId) -> Result<(), tasks::AbortError> {
         self.tasks.abort_async(task)
     }
     fn initialize(&mut self) {
@@ -494,7 +493,7 @@ impl<P: Send + Sync + 'static, E: Send + 'static> Scheduler<P, E> {
                 })
                 .collect();
         }
-        #[cfg(feature = "task-policies")]
+        #[cfg(feature = "task-policy-core")]
         self.restore_cursors();
     }
     fn cursor(
@@ -520,7 +519,7 @@ impl<P: Send + Sync + 'static, E: Send + 'static> Scheduler<P, E> {
             return false;
         }
         let mut owned = self.running.values().filter(|run| run.job == job).count();
-        #[cfg(feature = "task-policies")]
+        #[cfg(feature = "task-policy-core")]
         {
             owned += self
                 .queue
@@ -547,13 +546,13 @@ impl<P: Send + Sync + 'static, E: Send + 'static> Scheduler<P, E> {
         true
     }
     fn eligible(&self, run: &Run<P>) -> bool {
-        #[cfg(feature = "task-policies")]
+        #[cfg(feature = "task-policy-core")]
         {
             run.eligible <= Instant::now()
                 && self.policy_rejection(&run.job).is_none()
                 && self.can_start(&run.job, run.reserved)
         }
-        #[cfg(not(feature = "task-policies"))]
+        #[cfg(not(feature = "task-policy-core"))]
         self.can_start(&run.job, false)
     }
     fn admission_closed(&self) -> bool {
@@ -567,7 +566,7 @@ impl<P: Send + Sync + 'static, E: Send + 'static> Scheduler<P, E> {
         self.queue
             .iter()
             .filter(|run| {
-                #[cfg(feature = "task-policies")]
+                #[cfg(feature = "task-policy-core")]
                 if run.reserved {
                     return false;
                 }
@@ -582,7 +581,7 @@ impl<P: Send + Sync + 'static, E: Send + 'static> Scheduler<P, E> {
         parameters: Option<Arc<P>>,
         observer: &mut impl FnMut(Event<E>),
     ) -> Admission {
-        #[cfg(feature = "task-policies")]
+        #[cfg(feature = "task-policy-core")]
         if self.jobs.contains_key(&job)
             && !self.admission_closed()
             && let Some(reason) = self.policy_rejection(&job)
@@ -654,7 +653,7 @@ impl<P: Send + Sync + 'static, E: Send + 'static> Scheduler<P, E> {
             }
             #[allow(unused_mut)]
             let mut run = self.queue.remove(index).unwrap();
-            #[cfg(feature = "task-policies")]
+            #[cfg(feature = "task-policy-core")]
             {
                 run.reserved = true;
                 if let Some(breaker) = self.breakers.get_mut(&run.job) {
@@ -739,9 +738,9 @@ impl<P: Send + Sync + 'static, E: Send + 'static> Scheduler<P, E> {
                 attempt: run.attempt,
             });
         }
-        #[cfg(feature = "task-policies")]
+        #[cfg(feature = "task-policy-core")]
         self.complete_with_policy(run, completion, observer);
-        #[cfg(not(feature = "task-policies"))]
+        #[cfg(not(feature = "task-policy-core"))]
         {
             self.advance_delay(&run);
             observer(Event::Completed {
@@ -794,7 +793,7 @@ impl<P: Send + Sync + 'static, E: Send + 'static> Scheduler<P, E> {
                 }
             }
         }
-        #[cfg(feature = "task-policies")]
+        #[cfg(feature = "task-policy-core")]
         let changed = !due.is_empty();
         for (id, index) in due {
             let admission = self.admit(id.clone(), Trigger::Scheduled(index), None, observer);
@@ -803,7 +802,7 @@ impl<P: Send + Sync + 'static, E: Send + 'static> Scheduler<P, E> {
                 self.advance_delay(&run);
             }
         }
-        #[cfg(feature = "task-policies")]
+        #[cfg(feature = "task-policy-core")]
         if changed {
             observer(Event::StateChanged(self.snapshot()));
         }
@@ -835,14 +834,14 @@ impl<P: Send + Sync + 'static, E: Send + 'static> Scheduler<P, E> {
                 job_id: run.job,
                 run_id: id,
             });
-            #[cfg(feature = "task-policies")]
+            #[cfg(feature = "task-policy-core")]
             observer(Event::StateChanged(self.snapshot()));
             return true;
         }
         if let Some((&task, _)) = self.running.iter().find(|(_, run)| run.id == id) {
             return self
                 .tasks
-                .request_cancel(task, crate::tasks::CancellationReason::Explicit);
+                .request_cancel(task, tasks::CancellationReason::Explicit);
         }
         false
     }
@@ -874,7 +873,7 @@ impl<P: Send + Sync + 'static, E: Send + 'static> Scheduler<P, E> {
                 self.stop(&mut observer);
             }
             self.report_starts(&mut observer);
-            #[cfg(feature = "task-policies")]
+            #[cfg(feature = "task-policy-core")]
             self.policy_tick(&mut observer);
             if shutdown.is_requested() && !self.stopping {
                 self.stop(&mut observer);
@@ -892,7 +891,7 @@ impl<P: Send + Sync + 'static, E: Send + 'static> Scheduler<P, E> {
             } else {
                 self.next_wake()
             };
-            #[cfg(feature = "task-policies")]
+            #[cfg(feature = "task-policy-core")]
             {
                 wake = wake.min(self.policy_wake());
             }
@@ -907,13 +906,13 @@ impl<P: Send + Sync + 'static, E: Send + 'static> Scheduler<P, E> {
                         let results = ids.into_iter().map(|job| self.admit(job, Trigger::Event(event.clone()), parameters.clone(), &mut observer)).collect(); let _ = reply.send(results);
                     }
                     Some(Command::Cancel { run, reply }) => { let cancelled = self.cancel(run, &mut observer); let _ = reply.send(cancelled); }
-                    #[cfg(feature = "task-policies")]
+                    #[cfg(feature = "task-policy-core")]
                     Some(Command::Pause { scope, paused, cancel_running, reply }) => { let result = self.set_pause(scope, paused, cancel_running, &mut observer); let _ = reply.send(result); }
-                    #[cfg(feature = "task-policies")]
+                    #[cfg(feature = "task-policy-core")]
                     Some(Command::Snapshot { reply }) => { let _ = reply.send(self.snapshot()); }
                     None => self.stop(&mut observer),
                 } } },
-                _ = tokio::time::sleep_until(wake) => {},
+                _ = clock::sleep_until(wake) => {},
             }
         }
     }
@@ -930,7 +929,7 @@ mod clock_and_ingress_tests {
             pools: BTreeMap::new(),
         }
     }
-    #[tokio::test(start_paused = true)]
+    #[runtime_test(start_paused = true)]
     async fn intervals_ignore_wall_clock_displacement_and_cron_does_not_replay() {
         let mut scheduler = Scheduler::<(), ()>::new(limits()).unwrap();
         scheduler
@@ -969,7 +968,7 @@ mod clock_and_ingress_tests {
         };
         scheduler.due(&mut observer);
         scheduler.due(&mut observer);
-        tokio::time::advance(Duration::from_secs(86400)).await;
+        clock::advance(Duration::from_secs(86400)).await;
         scheduler.due(&mut observer);
         scheduler.due(&mut observer);
         assert_eq!(admitted, ["cron", "interval"]);
@@ -977,7 +976,7 @@ mod clock_and_ingress_tests {
         scheduler.tasks.request_shutdown();
         while scheduler.tasks.join_next().await.is_some() {}
     }
-    #[tokio::test]
+    #[runtime_test]
     async fn ingress_is_bounded_and_lost_acknowledgement_does_not_cancel_work() {
         let mut scheduler = Scheduler::<(), ()>::new(limits()).unwrap();
         let handle = scheduler.handle();

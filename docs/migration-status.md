@@ -1,5 +1,63 @@
 # Service migration status
 
+## Engine scheduler and policies — 2026-10-05
+
+Overall engine implementation remains **Partial**; all production engine adoption,
+including Favzetto, remains **Pending**. Work starts from clean local `master`
+`15bf9e7` in isolated branch `implementation/engine-scheduler`, worktree
+`target/worktrees/engine-scheduler`. No consumer repository is changed.
+
+The new `engine-scheduling` feature exposes `engine_scheduling`: the full
+scheduler, cron registry, capacity/priority helpers and polling drivers, with
+engine task ownership and clocks. Existing algorithms and contracts are shared
+with source `task_scheduling`. Coverage includes fixed-rate/delay/cron timing,
+manual/event ingress, bounded queues, resource limits, completion reporting,
+retry reservations, queue/runtime budgets, circuits, pause/restore and shutdown.
+Policies are shared through `task_policies`; engine scheduler task types come
+from `engine_tasks`. The pure `task-policy-core` feature makes policy definitions
+available without source task execution. Feature unification makes policy APIs
+available on both modules but does not switch source callers to the engine.
+
+Tokio remains a small wrapper dependency for synchronization and macros only.
+The standalone `tests/fixtures/engine_scheduler` consumer has 26 normal/build
+dependency packages beyond simple-server. A dedicated graph guard rejects
+Tokio executor/time/network/signal features and heavy HTTP/database stacks.
+It permits only Tokio `sync`, `macros` and the implicit `tokio-macros` feature.
+Source modules explicitly retain their previous Tokio features via
+`source-runtime`. Enabling those modules still compiles their source runtime.
+Calendar parsing and policy algorithms remain downstream. No compilation or
+execution speedup has been benchmarked, and the default source backend remains.
+
+The new fixture actually runs scheduled retries, paused-clock timers and
+explicit shutdown through the engine; it is not merely a feature declaration.
+It passed with the existing Bookworm x86_64 artifact at
+`/tmp/simple-server-lifecycle-artifact-amd64` (SHA256
+`88d175e260cfdb6768dfcebeba2d7f31a4c713146f8d4151aef94adc97b3162e`).
+No native implementation or ABI changes are needed. ARM was not retested.
+
+The original relevant source baseline passed 52 tests, including pure policy
+rules (`/tmp/simple-server-scheduler-baseline.log`). After migration, 42 shared
+integration contracts pass on each backend, plus two internal clock/ingress
+tests per backend and the common shutdown unit test. The existing additional
+blocking-executor queue-delay test passes on source only: engine Builder lacks
+`max_blocking_threads`, so that exact setup is not claimed verified on engine.
+Engine blocking shutdown and runtime budgets are covered by the shared policy
+contracts. The combined run passes 90 tests
+(`/tmp/simple-server-scheduler-contracts.log`). Standalone execution and its
+dependency guard pass (`/tmp/simple-server-scheduler-fixture.log`).
+
+The complete `bash scripts/check` passes
+(`/tmp/simple-server-scheduler-full.log`): strict workspace/native Clippy, source
+feature matrix, rustdoc, engine-only and combined-feature contracts, all six
+standalone binaries, graph guards, C ABI smoke and artifact installer checks.
+Source scheduling without policies also passes its 12 unit/integration tests
+(`/tmp/simple-server-scheduler-source-only.log`); the default library check passes
+(`/tmp/simple-server-scheduler-default.log`). Tracker JavaScript syntax and the
+new evidence link are validated.
+
+Public web execution and production adoption remain unfinished. No push,
+publication or deployment is performed.
+
 ## Engine task supervisor — 2026-10-05
 
 Library engine implementation remains **Partial**; all production engine adoption,

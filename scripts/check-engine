@@ -9,8 +9,9 @@ cargo fmt --all --check
 cargo fmt --manifest-path crates/engine/Cargo.toml --check
 cargo clippy --locked --manifest-path crates/engine/Cargo.toml --target-dir target/engine --all-targets -- -D warnings
 cargo test --locked -p lelloman-simple-server-abi -p lelloman-simple-server-sys
-cargo test --locked --no-default-features --features runtime,client,process,sqlite-client,task-drivers,engine-lifecycle,engine-tasks \
-  --test engine_runtime --test engine_io --test engine_sqlite --test engine_drivers --test engine_lifecycle --test engine_signals --test engine_tasks
+cargo test --locked --no-default-features --features runtime,client,process,sqlite-client,task-drivers,engine-lifecycle,engine-tasks,engine-scheduling \
+  --test engine_runtime --test engine_io --test engine_sqlite --test engine_drivers --test engine_lifecycle --test engine_signals --test engine_tasks --test engine_task_scheduling --test engine_scheduler_policies \
+  --test engine_cron_registry --test engine_execution_capacity --test engine_scheduling_selection
 cargo run --locked --manifest-path tests/fixtures/engine_consumer/Cargo.toml
 cargo run --locked --manifest-path tests/fixtures/engine_consumer/Cargo.toml --bin http
 cargo fmt --manifest-path tests/fixtures/engine_drivers/Cargo.toml --check
@@ -26,6 +27,9 @@ for fixture in engine_consumer engine_drivers engine_lifecycle engine_tasks; do
     exit 1
   fi
 done
+cargo fmt --manifest-path tests/fixtures/engine_scheduler/Cargo.toml --check
+cargo run --locked --manifest-path tests/fixtures/engine_scheduler/Cargo.toml
+python3 tests/scheduler_dependency_graph.py
 mkdir -p target/engine-abi
 cp "$SIMPLE_SERVER_ENGINE_DIR/libsimple_server_engine.so" target/engine-abi/libsimple_server_engine.so.1
 cc -std=c11 -Wall -Wextra -Werror -I crates/engine-abi/include tests/engine_abi.c \

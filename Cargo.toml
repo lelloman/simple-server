@@ -19,6 +19,9 @@ default-members = ["."]
 resolver = "2"
 
 [features]
+source-runtime = ["dep:tokio", "tokio/macros", "tokio/net", "tokio/signal", "tokio/sync", "tokio/time"]
+task-policy-core = []
+engine-scheduling = ["engine-tasks", "task-policy-core", "dep:tokio", "tokio/sync", "tokio/macros", "dep:cron", "dep:chrono", "dep:rand"]
 runtime = ["dep:simple-server-sys", "dep:simple-server-macros"]
 task-drivers = ["runtime"]
 engine-tasks = ["runtime"]
@@ -30,7 +33,7 @@ unix-http = ["web", "lifecycle", "dep:hyper", "dep:hyper-util", "dep:hyperlocal"
 compression = ["web", "dep:tower-http", "tower-http/compression-gzip", "dep:pin-project-lite"]
 cookies = ["web", "dep:cookie", "dep:pin-project-lite"]
 static-files = ["web", "dep:tower-http", "tower-http/fs"]
-database-blocking = ["dep:tokio"]
+database-blocking = ["source-runtime"]
 database-sqlite-backup = ["database-sqlite"]
 database-migrations = []
 database-sqlite = []
@@ -42,17 +45,17 @@ web = ["http", "extract", "dep:serde", "dep:bytes", "dep:http-body", "dep:tower-
 tls = ["web", "lifecycle", "dep:axum-server"]
 extract = ["dep:http"]
 auth-cookies = ["auth", "dep:cookie"]
-rate-limit-async = ["rate-limit", "dep:tokio", "tokio/rt"]
+rate-limit-async = ["rate-limit", "source-runtime", "tokio/rt"]
 rate-limit = ["dep:http", "dep:http-body", "dep:tower-layer", "dep:tower-service", "dep:pin-project-lite"]
 auth = ["dep:http", "dep:tower-layer", "dep:tower-service"]
 default = ["http"]
 http = ["dep:axum", "dep:tower-service"]
-task-policies = ["tasks"]
+task-policies = ["tasks", "task-policy-core"]
 task-scheduling = ["tasks", "dep:cron", "dep:chrono", "dep:rand"]
 tasks = ["lifecycle", "tokio/rt"]
-lifecycle = ["dep:tokio", "dep:futures-util"]
+lifecycle = ["source-runtime", "dep:futures-util"]
 logging = ["dep:tracing", "dep:tracing-subscriber"]
-correlation = ["http", "dep:http", "dep:tokio", "dep:rand"]
+correlation = ["http", "dep:http", "source-runtime", "dep:rand"]
 body-limit = ["http", "dep:tower-layer"]
 response-headers = ["dep:http"]
 health = ["dep:http", "dep:tower-service"]
@@ -89,7 +92,7 @@ rand = { version = "0.8", optional = true }
 axum = { version = "=0.8.9", optional = true }
 axum-server = { version = "0.7", features = ["tls-rustls"], optional = true }
 futures-util = { version = "0.3", default-features = false, features = ["alloc"], optional = true }
-tokio = { version = "1", features = ["macros", "net", "signal", "sync", "time"], optional = true }
+tokio = { version = "1", default-features = false, optional = true }
 tower-service = { version = "0.3", optional = true }
 tracing = { version = "0.1", default-features = false, features = ["std"], optional = true }
 tracing-subscriber = { version = "0.3", default-features = false, features = ["fmt", "env-filter", "ansi", "json"], optional = true }

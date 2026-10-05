@@ -73,6 +73,18 @@
   </header>
   <main>
     <section class="note" id="shared-engine">
+      <p><strong>Engine scheduler and policies (2026-10-05): implementation Partial; adoption Pending.</strong>
+      Engine scheduling now runs jobs and timers through the existing shared library,
+      preserving scheduling, bounded ingress, resource limits, retries, budgets,
+      pause/restore and shutdown. Source and engine share algorithms and 42
+      integration contracts; internal clock/ingress tests also pass on both.
+      The standalone consumer runs scheduled retries with 26 dependencies beyond
+      simple-server. Tokio remains only for synchronization and macros; a graph
+      guard excludes its executor, time, networking and signals. One blocking-queue
+      configuration test remains source-only. Public web execution and all production
+      engine adoption remain pending. The complete feature matrix, strict Clippy,
+      docs, engine and standalone checks pass. See the
+      <a href="migration-status.md#engine-scheduler-and-policies--2026-10-05">scope and evidence</a>.</p>
       <p><strong>Engine task supervisor (2026-10-05): implementation Partial; adoption Pending.</strong>
       The engine-tasks API runs bounded task ownership, cooperative shutdown and
       draining through the existing engine. Source and engine share their ownership

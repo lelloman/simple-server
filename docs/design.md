@@ -231,3 +231,29 @@ remain serialized by the state lock; waking happens outside that lock. An open
 empty tracker never reports completion. No Tokio synchronization primitive or
 new ABI entry is needed by the engine consumer. Full scheduling and public web
 execution remain pending.
+
+## Shared-engine scheduler (development)
+
+`engine_scheduling` selects engine tasks, clocks and polling drivers while
+sharing the existing scheduler, cron registry, capacity and selection algorithms
+with source `task_scheduling`. It includes execution policies via the pure
+`task-policy-core` feature. Existing `task-policies` continues to enable source
+task ownership plus those policy definitions. When features are unified, policy
+APIs become available on both schedulers; source execution stays on its runtime.
+
+The wrapper retains Tokio channels, watch notifications, semaphores and selection
+macros. These require no Tokio runtime. The normal/build consumer graph permits
+only `sync`, `macros` and the implicit `tokio-macros` feature; it rejects Tokio
+executor, time, networking and signal features. Source-facing modules explicitly
+enable their former Tokio feature set through `source-runtime`. Applications
+enabling source modules alongside engine scheduling still compile those source
+runtime features.
+
+Task timestamps are converted into the selected scheduler clock before budget
+comparisons. Engine timestamps never convert through standard-library Instant.
+Wall-clock cron and circuit-breaker behavior remains separate from monotonic
+intervals, queue/runtime budgets and retries. Snapshots still contain control
+state, not queued payloads or abandoned work. The engine builder currently lacks
+a blocking-thread-limit option: the existing single-thread blocking-queue delay
+test remains source-only, while engine blocking shutdown and runtime budgets
+are covered by shared contracts. No ABI or native artifact change is required.

@@ -9,6 +9,9 @@
 //! registration, and coordination of application-owned service futures. Combined
 //! with `http`, it also provides TCP binding. `web` owns HTTP serving.
 
+#[cfg(all(test, feature = "runtime"))]
+extern crate self as simple_server;
+
 /// Execution through the separately built engine runtime.
 #[cfg(feature = "runtime")]
 pub mod runtime {
@@ -114,14 +117,18 @@ pub mod engine_tasks;
 
 /// Bounded scheduling with application-owned execution and reporting.
 #[cfg(feature = "task-scheduling")]
+#[path = "task_scheduling/source.rs"]
 pub mod task_scheduling;
+
+#[cfg(feature = "engine-scheduling")]
+pub mod engine_scheduling;
 
 /// Engine-backed bounded batches and durable-work polling without the full scheduler.
 #[cfg(feature = "task-drivers")]
 pub mod task_drivers;
 
 /// Optional execution budgets, retries, circuit breakers and pause state.
-#[cfg(feature = "task-policies")]
+#[cfg(feature = "task-policy-core")]
 pub mod task_policies;
 
 /// Combined authentication and authorization without Axum or a required runtime.

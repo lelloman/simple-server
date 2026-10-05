@@ -1,8 +1,6 @@
+use super::tasks::{CancellationReason, TaskExit};
 use super::*;
-use crate::{
-    task_policies::{CircuitOutcome, CircuitSnapshot},
-    tasks::{CancellationReason, TaskExit},
-};
+use crate::task_policies::{CircuitOutcome, CircuitSnapshot};
 
 /// Control state only. No payloads, queues, active claims or retry attempts.
 /// Restore against the same job/schedule configuration before calling `run`.
@@ -236,11 +234,15 @@ impl<P: Send + Sync + 'static, E: Send + 'static> Scheduler<P, E> {
             }
             let budget = self.jobs[&run.job].job.policy.budget;
             if let Some(timing) = self.tasks.timing(task)
-                && let Some(deadline) = timing
-                    .started
-                    .and_then(|start| budget.runtime_deadline(start))
-                && deadline <= now.into_std()
-                && timing.finished.is_none_or(|finish| finish >= deadline)
+                && let Some(deadline) = timing.started.map(task_instant).and_then(|start| {
+                    budget
+                        .max_runtime
+                        .and_then(|duration| start.checked_add(duration))
+                })
+                && deadline <= now
+                && timing
+                    .finished
+                    .is_none_or(|finish| task_instant(finish) >= deadline)
             {
                 run.exceeded = true;
                 if timing.finished.is_none() {
@@ -259,8 +261,9 @@ impl<P: Send + Sync + 'static, E: Send + 'static> Scheduler<P, E> {
             let run = &self.queue[i];
             let budget = self.jobs[&run.job].job.policy.budget;
             if budget
-                .queue_deadline(run.eligible.into_std())
-                .is_some_and(|deadline| deadline <= now.into_std())
+                .queue_timeout
+                .and_then(|duration| run.eligible.checked_add(duration))
+                .is_some_and(|deadline| deadline <= now)
             {
                 let run = self.queue.remove(i).unwrap();
                 self.advance_delay(&run);
@@ -282,15 +285,16 @@ impl<P: Send + Sync + 'static, E: Send + 'static> Scheduler<P, E> {
             if !run.exceeded
                 && let Some(timing) = self.tasks.timing(task)
                 && timing.finished.is_none()
-                && let Some(deadline) = timing.started.and_then(|start| {
+                && let Some(deadline) = timing.started.map(task_instant).and_then(|start| {
                     self.jobs[&run.job]
                         .job
                         .policy
                         .budget
-                        .runtime_deadline(start)
+                        .max_runtime
+                        .and_then(|duration| start.checked_add(duration))
                 })
             {
-                next = next.min(deadline.into());
+                next = next.min(deadline);
             }
         }
         for run in &self.queue {
@@ -301,9 +305,10 @@ impl<P: Send + Sync + 'static, E: Send + 'static> Scheduler<P, E> {
                 .job
                 .policy
                 .budget
-                .queue_deadline(run.eligible.into_std())
+                .queue_timeout
+                .and_then(|duration| run.eligible.checked_add(duration))
             {
-                next = next.min(deadline.into());
+                next = next.min(deadline);
             }
         }
         let wall = SystemTime::now();

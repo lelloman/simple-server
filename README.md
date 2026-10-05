@@ -41,7 +41,6 @@ Engine tasks can now be collected with `runtime::JoinSet`: join by completion,
 retain task IDs through errors, abort and drain, or explicitly detach. Runtime
 handles support spawning from other threads without exposing Tokio. These APIs
 use the existing prebuilt engine and add no consumer dependencies.
-The full scheduler still needs execution migration.
 
 Bounded task ownership is available through `engine_tasks::{TaskSet, WorkTracker}`
 with `default-features = false, features = ["engine-tasks"]`. It preserves
@@ -64,7 +63,20 @@ consumer graph; the engine is supplied separately, and no timing speedup has
 been measured. Callers choose the engine backend through `task_drivers`;
 existing `task_scheduling` callers retain their source runtime even when both
 features are enabled. The modules share their driver algorithms and behavioral
-tests. Full scheduler execution migration is still pending.
+tests.
+
+The full scheduler is available through `engine_scheduling` with
+`default-features = false, features = ["engine-scheduling"]`. It includes
+fixed-delay/fixed-rate and cron timing, manual/event admission, resource limits,
+retry/budget/circuit policies, pause/restore, and explicit shutdown. Jobs and
+timers run in the engine; callers use `engine_tasks` task types and the shared
+`task_policies` configuration. Source `task_scheduling` remains source-backed.
+The standalone consumer has 26 dependencies beyond simple-server. This includes
+Tokio **only for synchronization and macros**, with no Tokio executor, networking,
+signals or timers in its normal/build graph. A check guards that feature boundary.
+Calendar parsing, policy logic and small synchronization helpers still compile
+downstream; the native artifact is unchanged. Public HTTP execution migration
+remains pending.
 
 Shutdown coordination is available through `engine_lifecycle` with
 `default-features = false, features = ["engine-lifecycle"]`. It preserves borrowed
