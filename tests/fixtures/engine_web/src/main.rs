@@ -27,7 +27,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
     let router = router.route(
         "/typed",
-        MethodRouter::new()?.on_state(Method::POST, "engine".to_owned(), typed)?,
+        MethodRouter::new()?.on_handler(Method::POST, typed)?,
     )?;
     async fn form(
         Extension(prefix): Extension<String>,
@@ -51,6 +51,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         "/items/{id}/{name}",
         MethodRouter::new()?.on_handler(Method::GET, path)?,
     )?;
+    let router = router.with_state("engine".to_owned())?;
     let listener = engine_web::bind("127.0.0.1:0").await?;
     let address = listener.local_addr();
     let url = format!("http://{}/echo/engine", listener.local_addr());

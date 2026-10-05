@@ -1,5 +1,55 @@
 # Service migration status
 
+## Generic engine router state — 2026-10-05
+
+Engine implementation remains **Partial** and all production adoption remains
+**Pending**. This checkpoint starts from clean local `master` `3e7875f`, in isolated
+branch `implementation/engine-router-state` and worktree
+`target/worktrees/engine-router-state`. No consumer repository is changed.
+
+`Router<S>` and `MethodRouter<S>` now represent missing state. Fallible
+`with_state<S2>` binds existing handlers while allowing later handlers to require
+a different type; only unit-state routers can serve. Typed normal/any handlers,
+fallbacks, method fallbacks, merge and nesting share this model. Bound method-local
+and handler-local state remains independent. Pending clones can bind different
+values without mutation. The standalone public HTTP fixture actually uses router
+state for its typed JSON route.
+
+The host retains native validation resources and state-binding plans. Unbound
+handlers have inert validation callbacks; those resources never reach serving.
+Paths/methods/composition are validated eagerly. Binding constructs fresh native
+callbacks and routers; already-bound resources are reused. This adds construction
+work and host plan storage, not a new per-request routing layer. Rust state never
+crosses the ABI. The native library and dependency set are unchanged; no measured
+compile/runtime improvement is claimed.
+
+Baseline: 42 existing tests pass (`/tmp/simple-server-router-state-baseline.log`):
+engine HTTP (8), extractors (8), forms (5), paths (7), source web core (14).
+The 28 existing engine contracts pass after the implementation
+(`/tmp/simple-server-router-state-regressions.log`). Five new state contracts pass
+(`/tmp/simple-server-router-state-contracts.log`), covering clone isolation,
+substate, method-local state, binding in stages, any/method fallbacks with
+HEAD/405/Allow behavior, raw/local/shared mixtures, eager invalid-route errors and
+state release after the last bound clone is dropped. Actual `.so` HTTP comparisons
+against the source router match status, headers and body (excluding transport Date)
+for shared/local/nested/merged/raw/fallback routes. Three compile-fail examples
+prevent serving unbound state, mixing state types and supplying the wrong type.
+
+The full `bash scripts/check` passes (`/tmp/simple-server-router-state-full.log`):
+strict workspace/native Clippy, source feature matrix and protocol regressions,
+rustdoc (including the three state compile-fail checks and successful binding
+example), all five state contracts and four engine-only state contracts, all seven
+standalone engine binaries, dependency guards, C ABI smoke and artifact installer
+tests. The HTTP fixture's normal/build graph remains 28 packages beyond library
+and fixture, without Axum, Tokio, Hyper, Reqwest, SQLx or Rustls
+(`/tmp/simple-server-router-state-graph.txt`). Tracker script syntax and evidence
+links pass validation.
+
+The existing Bookworm x86_64 artifact at
+`/tmp/simple-server-lifecycle-artifact-amd64` is reused. ARM is not retested.
+Tower layers/services, remaining response helpers and protocol adapters remain
+pending. No push, publication or deployment is performed.
+
 ## Typed engine path extraction — 2026-10-05
 
 Engine implementation remains **Partial** and all production adoption remains

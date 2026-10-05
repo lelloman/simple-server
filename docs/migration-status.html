@@ -73,6 +73,15 @@
   </header>
   <main>
     <section class="note" id="shared-engine">
+      <p><strong>Generic engine router state (2026-10-05): implementation Partial; adoption Pending.</strong>
+      Router and method groups now bind typed host state with with_state, preserving
+      local bindings, nesting, merging and fallback behavior. Unbound state cannot
+      be served; construction still validates native routes eagerly. The standalone
+      HTTP consumer uses router-wide state. No native ABI or dependency additions;
+      layers/services and protocol adapters remain pending. No production consumer
+      changed. Full source/engine checks, compile-fail contracts and standalone
+      execution pass; the HTTP graph remains 28 packages without Axum or Tokio. See the
+      <a href="migration-status.md#generic-engine-router-state--2026-10-05">scope and verification evidence</a>.</p>
       <p><strong>Typed engine path extraction (2026-10-05): implementation Partial; adoption Pending.</strong>
       Path now supports owned scalar, tuple, struct, map, sequence and enum
       extraction with source-compatible diagnostics. Real engine/source HTTP

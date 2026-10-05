@@ -2,8 +2,8 @@
 //! in the consumer graph. Handlers accept an owned `Request` and return `Response`.
 //!
 //! This is an explicit development API, not yet a drop-in replacement for `web`:
-//! generic router state, layers, TLS, Unix sockets and protocol
-//! upgrades remain unimplemented. Capture application state in handler closures.
+//! layers, TLS, Unix sockets and protocol
+//! upgrades remain unimplemented. Bind application state with `with_state`.
 //! Register handlers and serve inside the application's engine runtime.
 //! Typed handlers allow body extraction only in the final position:
 //! ```compile_fail
@@ -91,6 +91,7 @@ pub async fn bind(address: impl AsRef<str>) -> io::Result<TcpListener> {
 /// application deadline separately. Dropping this future alone does not promise
 /// cancellation of spawned connections; use explicit shutdown for graceful drain.
 pub async fn serve(listener: TcpListener, router: Router, shutdown: Shutdown) -> io::Result<()> {
+    let router = router.into_resource()?;
     let callback = Callback::new(move |_| {
         let shutdown = shutdown.clone();
         async move {
@@ -99,7 +100,7 @@ pub async fn serve(listener: TcpListener, router: Router, shutdown: Shutdown) ->
         }
     })?;
     let operation = Operation::new(&wire::encode(
-        json!({"op":"server_serve", "listener":listener.resource.id(), "router":router.resource.id(), "shutdown":callback.id()}),
+        json!({"op":"server_serve", "listener":listener.resource.id(), "router":router.id(), "shutdown":callback.id()}),
         &[],
     )?)?;
     let output = operation.await?;

@@ -178,7 +178,7 @@ termination of spawned connections; lifecycle integration must use explicit
 shutdown and its application-owned deadline.
 
 Current route operations support method registration, merge, nesting, fallback
-and method fallbacks. Public generic state, Tower layer/service composition,
+and method fallbacks. Tower layer/service composition,
 owned extractors, WebSocket/multipart/SSE adapters, TLS/Unix transport and test
 harness migration are still pending. Internal wire commands are developmental;
 no stable engine artifact has been published.
@@ -288,14 +288,14 @@ serve future alone retains the native server's cancellation semantics and does
 not promise to stop all connections. Dropped client connections cancel pending
 response work and release host bodies. Collection always requires a byte limit.
 
-Typed extractors, generic router state, response conversions, Tower middleware,
+The remaining response conversions, Tower middleware,
 TLS/Unix listeners, protocol upgrades and the public test harness remain parity
 work. No stable release or production adoption is implied. This checkpoint needs
 no engine ABI or native implementation change.
 
 ## Typed engine handlers and extraction (development)
 
-Engine typed registration uses `on_handler` with unit state, `on_state` with
+Engine typed registration uses `on_handler` with the group's missing state, `on_state` with
 per-handler state, and `fallback_handler`. The raw request closure APIs retain
 their parameter inference. Both backends instantiate the existing handler
 algorithm, which extracts arguments left-to-right and permits only the final
@@ -361,5 +361,31 @@ wire's raw UTF-8 error receives the typed Path `Invalid URL: ` prefix; missing
 path metadata retains the source missing-parameter rejection.
 
 All values and errors remain behind the existing HTTP/metadata boundary. No
-native or ABI changes are needed. This closes the typed Path gap; generic router
-state, Tower layers, response helpers and protocol adapters remain separate work.
+native or ABI changes are needed. This closes the typed Path gap; Tower layers, response helpers and protocol
+adapters remain separate work.
+
+## Generic engine router state (development)
+
+`Router<S>` and `MethodRouter<S>` carry the state their typed handlers still need.
+`with_state<S2>(state)` binds the existing handlers and returns a fallible router
+whose newly added handlers may require `S2`; serving accepts only `Router<()>`.
+The same model applies to nested and merged routes, typed fallbacks, method
+fallbacks and `any_handler`. Handler-local `on_state` and previously bound method
+groups retain their local values. Clone a pending router to bind independent
+state values, without mutating any earlier clone.
+
+State remains entirely in Rust host callbacks. Each pending route plan owns a
+native validation resource plus a state-binding function. Validation resources
+use inert placeholder callbacks for unbound typed handlers and never reach
+`serve`. Construction checks paths, duplicate methods and merge/nesting conflicts
+immediately. Binding materializes fresh callbacks and native routes with the
+chosen state; fully bound plans reuse their native resource. Serving a unit-state
+plan materializes any remaining unit-state handlers first. No native/ABI changes
+or additional dependencies are required.
+
+This introduces host-side storage for pending construction plans and additional
+native construction during binding. It does not add per-request routing work or
+claim a measured performance improvement. Failures propagate through io::Result;
+partially constructed resources and captured state follow RAII ownership. Tower
+layers/services, remaining response helpers and protocol adapters are still
+separate work. The source backend's APIs and default execution are unchanged.

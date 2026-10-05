@@ -98,7 +98,7 @@ build, set `SIMPLE_SERVER_ENGINE_DIR` to the directory containing
 The public `engine_web` module (`default-features = false, features = ["engine-web"]`)
 now exposes engine TCP listeners, route/method assembly, raw request handlers,
 streaming bodies and explicit graceful shutdown. Handlers accept `Request` and
-return `Response`; capture application state in closures. Route construction is
+return `Response`; application state can use closures or `with_state`. Route construction is
 fallible, and handler registration requires the caller's engine runtime. Request
 extensions provide `RequestMetadata` with peer, matched/original paths and path
 parameters. Bodies support collection limits, lazy streams and trailer frames.
@@ -106,6 +106,14 @@ See the runnable [public HTTP consumer](tests/fixtures/engine_web/src/main.rs).
 With the engine client enabled, its graph has 28 dependencies beyond simple-server,
 without Axum, Tokio, Hyper, Reqwest, SQLx or Rustls. The `.so` is supplied separately;
 this is not a measured performance claim.
+
+`Router<S>` and `MethodRouter<S>` describe state still to be supplied. Use
+`with_state(state)?` to bind existing handlers; only `Router<()>` can serve.
+Binding a method group first preserves its local state when the enclosing router
+later receives different state. Nested/merged routers, typed fallbacks and
+`MethodRouter::any_handler` follow the same rule. State stays in host callbacks;
+it never crosses the ABI. Construction and binding are fallible and validate
+native route/method conflicts before serving.
 
 Typed engine handlers use `MethodRouter::on_handler(method, handler)` or
 `on_state(method, state, handler)`; raw `on` closures retain their existing API.
@@ -124,7 +132,8 @@ Tower extension layers are not yet available on the engine router.
 tuple, struct, map, sequence and unit-enum semantics. Invalid UTF-8 and parsing
 errors retain the existing rejection status and text.
 
-This API is not yet interchangeable with `web`: generic router state, remaining response helpers, layers, TLS/Unix serving and WebSocket/multipart/SSE
+This API is not yet interchangeable with `web`: remaining response helpers,
+layers, TLS/Unix serving and WebSocket/multipart/SSE
 adapters still need migration. The existing `web` API and default backend remain
 source-based, and no production service has adopted the engine.
 
