@@ -54,6 +54,12 @@ Typed extractors, generic router state, response conversions, Tower middleware,
 TLS/Unix serving, WebSocket/multipart/SSE adapters and the public test harness
 remain parity work. No push, publication or deployment is performed.
 
+Reviewed implementation `d36b95e` is integrated into local `master` by rebasing
+onto `implementation/engine-web`. Ancestry and tree verification preserve the
+tested implementation. The original checkout remained clean; no concurrent
+commits or edits required restoration. The temporary worktree and branch are
+removed after integrating this verification record.
+
 ## Engine scheduler and policies — 2026-10-05
 
 Overall engine implementation remains **Partial**; all production engine adoption,
