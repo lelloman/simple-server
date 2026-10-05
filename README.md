@@ -41,7 +41,18 @@ Engine tasks can now be collected with `runtime::JoinSet`: join by completion,
 retain task IDs through errors, abort and drain, or explicitly detach. Runtime
 handles support spawning from other threads without exposing Tokio. These APIs
 use the existing prebuilt engine and add no consumer dependencies.
-`tasks::TaskSet` and the full scheduler still need execution migration.
+The full scheduler still needs execution migration.
+
+Bounded task ownership is available through `engine_tasks::{TaskSet, WorkTracker}`
+with `default-features = false, features = ["engine-tasks"]`. It preserves
+admission limits, cooperative shutdown, blocking jobs, panic outcomes and
+resumable draining. Dropping a set requests shutdown and detaches remaining work;
+only draining proves completion. Deadlines and task timestamps use
+`simple_server::time::Instant`. This selection has seven normal/build dependency
+packages beyond simple-server, with no Tokio. Existing `tasks` callers keep the
+source runtime and standard-library Instant API, even when both features are
+enabled. Both modules share the ownership algorithm; the engine is supplied
+separately and no compilation or execution speedup has been benchmarked.
 
 For bounded batches and durable-work polling alone, use
 `default-features = false, features = ["task-drivers"]` and the
@@ -53,7 +64,7 @@ consumer graph; the engine is supplied separately, and no timing speedup has
 been measured. Callers choose the engine backend through `task_drivers`;
 existing `task_scheduling` callers retain their source runtime even when both
 features are enabled. The modules share their driver algorithms and behavioral
-tests. Full scheduler and supervisor execution migration is still pending.
+tests. Full scheduler execution migration is still pending.
 
 Shutdown coordination is available through `engine_lifecycle` with
 `default-features = false, features = ["engine-lifecycle"]`. It preserves borrowed

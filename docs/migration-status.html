@@ -73,6 +73,16 @@
   </header>
   <main>
     <section class="note" id="shared-engine">
+      <p><strong>Engine task supervisor (2026-10-05): implementation Partial; adoption Pending.</strong>
+      The engine-tasks API runs bounded task ownership, cooperative shutdown and
+      draining through the existing engine. Source and engine share their ownership
+      algorithm, preserving blocking work, cancellation and detach-on-drop semantics.
+      WorkTracker needs no Tokio synchronization. The standalone feature graph has
+      seven dependencies beyond simple-server and no Tokio. Thirteen shared contracts
+      pass on each backend; the complete feature matrix, strict Clippy, docs,
+      engine tests and standalone consumer checks pass. Full scheduler/policy
+      and public web execution remain pending. No production consumer changed.
+      See the <a href="migration-status.md#engine-task-supervisor--2026-10-05">scope and evidence</a>.</p>
       <p><strong>Engine lifecycle and deadlines (2026-10-05): implementation Partial; adoption Pending.</strong>
       The engine-lifecycle API runs shutdown coordination and explicit SIGINT/SIGTERM
       registration through the shared engine. Source and engine backends share the

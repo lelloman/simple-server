@@ -9,15 +9,17 @@ cargo fmt --all --check
 cargo fmt --manifest-path crates/engine/Cargo.toml --check
 cargo clippy --locked --manifest-path crates/engine/Cargo.toml --target-dir target/engine --all-targets -- -D warnings
 cargo test --locked -p lelloman-simple-server-abi -p lelloman-simple-server-sys
-cargo test --locked --no-default-features --features runtime,client,process,sqlite-client,task-drivers,engine-lifecycle \
-  --test engine_runtime --test engine_io --test engine_sqlite --test engine_drivers --test engine_lifecycle --test engine_signals
+cargo test --locked --no-default-features --features runtime,client,process,sqlite-client,task-drivers,engine-lifecycle,engine-tasks \
+  --test engine_runtime --test engine_io --test engine_sqlite --test engine_drivers --test engine_lifecycle --test engine_signals --test engine_tasks
 cargo run --locked --manifest-path tests/fixtures/engine_consumer/Cargo.toml
 cargo run --locked --manifest-path tests/fixtures/engine_consumer/Cargo.toml --bin http
 cargo fmt --manifest-path tests/fixtures/engine_drivers/Cargo.toml --check
 cargo run --locked --manifest-path tests/fixtures/engine_drivers/Cargo.toml
 cargo fmt --manifest-path tests/fixtures/engine_lifecycle/Cargo.toml --check
 cargo run --locked --manifest-path tests/fixtures/engine_lifecycle/Cargo.toml
-for fixture in engine_consumer engine_drivers engine_lifecycle; do
+cargo fmt --manifest-path tests/fixtures/engine_tasks/Cargo.toml --check
+cargo run --locked --manifest-path tests/fixtures/engine_tasks/Cargo.toml
+for fixture in engine_consumer engine_drivers engine_lifecycle engine_tasks; do
   graph=$(cargo tree --locked --manifest-path "tests/fixtures/$fixture/Cargo.toml" --edges normal,build --prefix none)
   if printf '%s\n' "$graph" | rg '^(axum|tokio|reqwest|hyper|sqlx|rustls)(-| )'; then
     echo "Heavy runtime dependency leaked into $fixture" >&2

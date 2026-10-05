@@ -56,7 +56,11 @@ pub mod web;
 #[cfg(feature = "extract")]
 pub mod extract;
 
-#[cfg(any(feature = "lifecycle", feature = "engine-lifecycle"))]
+#[cfg(any(
+    feature = "lifecycle",
+    feature = "engine-lifecycle",
+    feature = "engine-tasks"
+))]
 mod shutdown;
 
 #[cfg(feature = "lifecycle")]
@@ -104,6 +108,9 @@ pub mod health;
 /// Explicit task ownership and cooperative cancellation.
 #[cfg(feature = "tasks")]
 pub mod tasks;
+
+#[cfg(feature = "engine-tasks")]
+pub mod engine_tasks;
 
 /// Bounded scheduling with application-owned execution and reporting.
 #[cfg(feature = "task-scheduling")]

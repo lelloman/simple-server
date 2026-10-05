@@ -207,4 +207,27 @@ operation returns interrupt or terminate and owns a reference until completion
 or cancellation. Dropping the registration releases its receivers; this does
 not restore process-wide default signal handlers. No signal registration is
 installed merely by creating a runtime or coordinator. Full task supervisors,
-the scheduler and public web execution still require migration.
+the scheduler and public web execution still require migration at that checkpoint.
+
+## Shared-engine task ownership (development)
+
+`engine-tasks` provides `engine_tasks::TaskSet` and `WorkTracker` using the existing
+engine task collection and clocks. Source `tasks` and engine ownership share one
+algorithm, with runtime and clock adapters supplied by their parent modules.
+Source callers retain standard-library Instant arguments and timestamps; engine
+callers use the owned engine Instant, including paused time. Feature unification
+does not change either module's runtime requirement.
+
+Unconsumed completions occupy admission slots. A cancellation request records its
+first reason independently of the actual task result. Draining closes admission,
+prefers an already-ready completion over deadline expiration, and retains owned
+work and collected outcomes if the wait times out or is cancelled. Blocking jobs
+cannot be explicitly aborted. Dropping a set requests cooperative shutdown and
+detaches unfinished tasks; it does not claim completion or stop execution.
+
+External work tracking uses a sticky completion notification that fires only
+after admission is closed and the last guard is dropped. Closing and acquiring
+remain serialized by the state lock; waking happens outside that lock. An open
+empty tracker never reports completion. No Tokio synchronization primitive or
+new ABI entry is needed by the engine consumer. Full scheduling and public web
+execution remain pending.

@@ -1,5 +1,54 @@
 # Service migration status
 
+## Engine task supervisor — 2026-10-05
+
+Library engine implementation remains **Partial**; all production engine adoption,
+including Favzetto, remains **Pending**. This checkpoint starts from clean local
+`master` at `dbb4c88`, using isolated branch `implementation/engine-supervisor`
+and worktree `target/worktrees/engine-supervisor`. No consumer repository changes.
+
+The new `engine-tasks` feature provides `engine_tasks::{TaskSet, WorkTracker}`.
+It shares the source ownership algorithm while selecting the engine runtime,
+task collection and clock. Admission limits include unconsumed completions;
+first cancellation reasons remain distinct from task outcomes. Blocking jobs
+cannot be explicitly aborted. Timed-out or cancelled drains retain ownership
+and collected results. Dropping a set requests cooperative shutdown and
+detaches unfinished execution; only draining proves completion.
+
+WorkTracker now uses the existing runtime-independent sticky notification,
+signalled only when closed and empty. Admission and close remain serialized;
+waiters are awakened outside the state lock. Existing `tasks` callers keep their
+source runtime and standard-library Instant API even when both features are
+enabled. Engine callers use `time::Instant` for deadlines and actual execution
+timestamps, including paused time. Full scheduler/policy execution and public
+web execution migration remain pending.
+
+The independent `tests/fixtures/engine_tasks` consumer enables only engine-tasks
+with default features disabled. Its normal/build graph has seven dependency
+packages excluding simple-server (eight including it), with no Tokio or heavy
+HTTP/database stack. This does not reduce the default source consumer graph and
+does not establish a measured compilation or runtime speedup. No new ABI or
+native engine change is needed; verification uses the existing Bookworm x86_64
+artifact at `/tmp/simple-server-lifecycle-artifact-amd64` (SHA256
+`88d175e260cfdb6768dfcebeba2d7f31a4c713146f8d4151aef94adc97b3162e`).
+
+The ten original task contracts passed before edits
+(`/tmp/simple-server-supervisor-baseline.log`). Thirteen shared contracts pass
+on each backend with both features enabled
+(`/tmp/simple-server-supervisor-contracts.log`). Added coverage checks admission
+without a runtime, paused-clock execution timestamps, and multiple tracker
+waiters awakened by external completion. Existing coverage checks cancellation,
+blocking ownership, panic reporting, bounded admission, detach-on-drop, and
+resumable/cancelled draining. The complete `bash scripts/check` passes
+(`/tmp/simple-server-supervisor-full.log`): strict workspace and native Clippy,
+source feature matrix and scheduler/policy regressions, rustdoc, engine-only and
+combined-feature contracts, five standalone consumer binaries, dependency graph
+guards, C ABI smoke and artifact installer tests. The new standalone consumer
+actually runs tracking, cooperative shutdown and paused-clock draining through
+the prebuilt engine. Tracker script syntax and the evidence link pass validation.
+ARM execution is not retested at this checkpoint. Nothing is pushed, published
+or deployed.
+
 ## Engine lifecycle and deadlines — 2026-10-05
 
 Library implementation remains **Partial**; all production engine adoption,
