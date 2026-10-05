@@ -1,5 +1,59 @@
 # Service migration status
 
+## Public engine HTTP core — 2026-10-05
+
+Overall engine implementation remains **Partial**, and all production engine
+adoption, including Favzetto, remains **Pending**. This checkpoint starts from
+clean local `master` `1c6c0fb`, using isolated branch `implementation/engine-web`
+and worktree `target/worktrees/engine-web`. No consumer repository is changed.
+
+The new `engine-web` feature exposes a public `engine_web` module for TCP binding,
+method routing, merge/nesting/fallbacks, raw request handlers, owned bodies and
+explicit graceful shutdown. Applications no longer need internal resource IDs,
+callbacks or byte commands for this subset. Handlers accept one `Request` and
+return `Response`; route construction is fallible and state is captured in
+closures. This is explicitly not yet a drop-in replacement for source `web`.
+
+Request metadata carries method/URI/version, binary and duplicate headers, peer,
+matched/original paths, decoded parameters and path-decoding errors. Independent
+incoming body ownership permits returning a request body after the handler ends.
+Data and trailer frames remain lazy; response callbacks retain host resources
+until the engine acquires them. Collection has explicit limits. Response status,
+headers and body cross the ABI; arbitrary extensions and explicit response-version
+overrides do not. Explicit shutdown drains responses; dropping the serve future
+alone does not promise connection termination.
+
+The independent `tests/fixtures/engine_web` consumer uses only public APIs to
+serve a streaming echo and request it through the engine client. Its normal/build
+graph has 26 dependency packages excluding the library and fixture, with no
+Axum, Tokio, Hyper, Reqwest, SQLx or Rustls. The graph guard now covers this fixture.
+The separately supplied native engine still contains those implementations;
+no compilation or runtime speedup has been benchmarked. Default/source web
+consumers retain their existing dependency graph and runtime behavior.
+
+The original internal HTTP fixture passed before edits
+(`/tmp/simple-server-public-web-baseline.log`). Eight new public API contracts
+pass (`/tmp/simple-server-public-web-contracts.log`): metadata and streaming echo,
+method/HEAD/fallback/merge/clone semantics, limits and body errors, wire trailers,
+draining an active response, disconnect cancellation/drop, listener error/release
+and already-requested shutdown, invalid route recovery and handler panic isolation.
+The implementation reuses the tested Bookworm x86_64 artifact at
+`/tmp/simple-server-lifecycle-artifact-amd64` (SHA256
+`88d175e260cfdb6768dfcebeba2d7f31a4c713146f8d4151aef94adc97b3162e`),
+without native or ABI changes. ARM was not retested for this checkpoint.
+
+The complete `bash scripts/check` passes
+(`/tmp/simple-server-public-web-full.log`): strict workspace/native Clippy,
+source feature matrix and protocol regressions, rustdoc, engine-only and combined
+features, all seven standalone binaries, dependency graph guards, C ABI smoke and
+artifact installer tests. This includes actual execution of the new public HTTP
+consumer against the prebuilt engine. Tracker script syntax and the evidence
+link pass validation.
+
+Typed extractors, generic router state, response conversions, Tower middleware,
+TLS/Unix serving, WebSocket/multipart/SSE adapters and the public test harness
+remain parity work. No push, publication or deployment is performed.
+
 ## Engine scheduler and policies — 2026-10-05
 
 Overall engine implementation remains **Partial**; all production engine adoption,

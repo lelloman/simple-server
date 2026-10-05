@@ -73,6 +73,16 @@
   </header>
   <main>
     <section class="note" id="shared-engine">
+      <p><strong>Public engine HTTP core (2026-10-05): implementation Partial; adoption Pending.</strong>
+      The new engine_web API exposes TCP serving, route/method assembly, raw handlers,
+      streaming request/response bodies and explicit graceful shutdown through the
+      existing engine. Eight public contracts cover ownership, trailers, routing,
+      errors, disconnects and draining. A standalone consumer uses public APIs with
+      26 dependencies beyond simple-server and no Axum or Tokio. Typed extractors,
+      generic state, response conversions, middleware, TLS/Unix and protocol adapters
+      remain parity work; source web callers and all production adoption are unchanged.
+      The full feature matrix, strict Clippy, docs, engine and standalone checks pass.
+      See the <a href="migration-status.md#public-engine-http-core--2026-10-05">scope and evidence</a>.</p>
       <p><strong>Engine scheduler and policies (2026-10-05): implementation Partial; adoption Pending.</strong>
       Engine scheduling now runs jobs and timers through the existing shared library,
       preserving scheduling, bounded ingress, resource limits, retries, budgets,

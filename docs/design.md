@@ -257,3 +257,38 @@ state, not queued payloads or abandoned work. The engine builder currently lacks
 a blocking-thread-limit option: the existing single-thread blocking-queue delay
 test remains source-only, while engine blocking shutdown and runtime budgets
 are covered by shared contracts. No ABI or native artifact change is required.
+
+## Public engine HTTP core (development)
+
+`engine_web` exposes the existing native transport through owned, fallible
+`Router`, `MethodRouter`, `TcpListener`, `Request`, `Response` and `Body` APIs.
+Handlers take one raw request and return a response. Application state is captured
+by closures. This explicit module coexists with source `web`; enabling its feature
+does not migrate existing web callers or switch their runtime. Handler registration
+and serving use the application-owned engine runtime.
+
+Route resources are immutable and reference-counted. Derived routers retain their
+handlers independently of earlier registrations; cloning does not mutate either
+route collection. Methods, merge, nesting and router/method fallbacks delegate to
+the engine. Invalid registration returns an error; native panic containment keeps
+the host alive. No resource ID or byte protocol is exposed by this public API.
+
+Incoming metadata preserves method, URI, HTTP version, binary/duplicate headers,
+peer address, matched/original paths, decoded path parameters and decoding errors.
+An incoming body acquires an independent registration before the borrowed request
+callback ends. A handler can return that body for a streaming echo. Each body frame
+is polled lazily, retaining data/trailers/errors and backpressure. Outgoing response
+callbacks remain alive until the engine acquires ownership, through `Reply`.
+Response status, headers and body cross the boundary; arbitrary extensions and
+explicit response-version overrides are not transported.
+
+`serve` consumes its non-cloneable listener. Explicit shutdown stops acceptance
+and drains active responses; an application deadline is separate. Dropping the
+serve future alone retains the native server's cancellation semantics and does
+not promise to stop all connections. Dropped client connections cancel pending
+response work and release host bodies. Collection always requires a byte limit.
+
+Typed extractors, generic router state, response conversions, Tower middleware,
+TLS/Unix listeners, protocol upgrades and the public test harness remain parity
+work. No stable release or production adoption is implied. This checkpoint needs
+no engine ABI or native implementation change.

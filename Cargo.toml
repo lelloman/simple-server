@@ -25,6 +25,7 @@ engine-scheduling = ["engine-tasks", "task-policy-core", "dep:tokio", "tokio/syn
 runtime = ["dep:simple-server-sys", "dep:simple-server-macros"]
 task-drivers = ["runtime"]
 engine-tasks = ["runtime"]
+engine-web = ["engine-lifecycle", "dep:bytes", "dep:http", "dep:http-body", "dep:http-body-util", "dep:serde_json"]
 engine-lifecycle = ["runtime", "dep:futures-util"]
 client = ["runtime", "dep:serde", "dep:serde_json", "dep:serde_urlencoded", "dep:bytes", "dep:http"]
 process = ["runtime", "dep:serde_json"]
@@ -101,6 +102,10 @@ tracing-subscriber = { version = "0.3", default-features = false, features = ["f
 hyper = { version = "1", features = ["client", "http1"], optional = true }
 hyper-util = { version = "0.1", features = ["client", "client-legacy", "tokio"], optional = true }
 hyperlocal = { version = "0.9", default-features = false, features = ["client"], optional = true }
+
+[dependencies.http-body-util]
+version = "0.1"
+optional = true
 
 [dev-dependencies]
 tempfile = "3"

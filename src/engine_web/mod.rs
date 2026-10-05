@@ -1,0 +1,82 @@
+//! HTTP routing and streaming through the shared engine, without Axum or Tokio
+//! in the consumer graph. Handlers accept an owned `Request` and return `Response`.
+//!
+//! This is an explicit development API, not yet a drop-in replacement for `web`:
+//! typed extractors, generic router state, layers, TLS, Unix sockets and protocol
+//! upgrades remain unimplemented. Capture application state in handler closures.
+//! Register handlers and serve inside the application's engine runtime.
+pub mod body;
+mod routing;
+mod wire;
+pub use crate::engine_lifecycle::Shutdown;
+pub use body::{Body, BodyError};
+pub use bytes::Bytes;
+pub use http::{self, HeaderMap, HeaderValue, Method, StatusCode, Uri, Version, header};
+pub use http_body::{Body as HttpBody, Frame, SizeHint};
+pub use routing::{MethodRouter, Router};
+use serde_json::json;
+use simple_server_sys::{Callback, Operation, Resource};
+use std::{io, net::SocketAddr};
+
+pub type Request = http::Request<Body>;
+pub type Response = http::Response<Body>;
+
+/// Engine routing metadata attached to request extensions. Headers preserve
+/// binary values and duplicates; the direct peer is not a forwarded address.
+#[derive(Clone, Debug)]
+pub struct RequestMetadata {
+    pub peer: Option<SocketAddr>,
+    pub matched_path: Option<String>,
+    pub original_uri: Option<Uri>,
+    pub path_params: Vec<(String, String)>,
+    /// Decoding failures remain available to raw handlers without silently
+    /// pretending an invalid path parameter was absent.
+    pub path_error: Option<(StatusCode, String)>,
+}
+
+/// An owned engine TCP listener. Dropping it before serving releases its socket.
+/// It is intentionally non-cloneable: serving consumes the listener.
+pub struct TcpListener {
+    resource: Resource,
+    address: SocketAddr,
+}
+impl TcpListener {
+    pub fn local_addr(&self) -> SocketAddr {
+        self.address
+    }
+}
+pub async fn bind(address: impl AsRef<str>) -> io::Result<TcpListener> {
+    let bytes = Operation::new(&wire::encode(
+        json!({"op":"server_bind","address":address.as_ref()}),
+        &[],
+    )?)?
+    .await?;
+    let (header, _) = wire::decode(&bytes)?;
+    wire::check(&header)?;
+    let resource = Resource::new(7, wire::id(&header)?);
+    let address = header["address"]
+        .as_str()
+        .ok_or_else(|| io::Error::other("missing bound address"))?
+        .parse()
+        .map_err(io::Error::other)?;
+    Ok(TcpListener { resource, address })
+}
+
+/// Stop accepting when requested, then drain active responses. Apply an
+/// application deadline separately. Dropping this future alone does not promise
+/// cancellation of spawned connections; use explicit shutdown for graceful drain.
+pub async fn serve(listener: TcpListener, router: Router, shutdown: Shutdown) -> io::Result<()> {
+    let callback = Callback::new(move |_| {
+        let shutdown = shutdown.clone();
+        async move {
+            shutdown.requested().await;
+            Vec::new()
+        }
+    })?;
+    let operation = Operation::new(&wire::encode(
+        json!({"op":"server_serve", "listener":listener.resource.id(), "router":router.resource.id(), "shutdown":callback.id()}),
+        &[],
+    )?)?;
+    let output = operation.await?;
+    wire::check(&wire::decode(&output)?.0)
+}

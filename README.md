@@ -95,7 +95,24 @@ a standalone consumer without heavy runtime dependencies. To use an existing
 build, set `SIMPLE_SERVER_ENGINE_DIR` to the directory containing
 `libsimple_server_engine.so`. See [engine artifact instructions](docs/publishing.md#shared-engine-artifacts-unpublished).
 
-The engine now contains TCP HTTP/1 and HTTP/2 transport, streaming bodies and
+The public `engine_web` module (`default-features = false, features = ["engine-web"]`)
+now exposes engine TCP listeners, route/method assembly, raw request handlers,
+streaming bodies and explicit graceful shutdown. Handlers accept `Request` and
+return `Response`; capture application state in closures. Route construction is
+fallible, and handler registration requires the caller's engine runtime. Request
+extensions provide `RequestMetadata` with peer, matched/original paths and path
+parameters. Bodies support collection limits, lazy streams and trailer frames.
+See the runnable [public HTTP consumer](tests/fixtures/engine_web/src/main.rs).
+With the engine client enabled, its graph has 26 dependencies beyond simple-server,
+without Axum, Tokio, Hyper, Reqwest, SQLx or Rustls. The `.so` is supplied separately;
+this is not a measured performance claim.
+
+This API is not yet interchangeable with `web`: typed extractors, generic router
+state, response conversions, layers, TLS/Unix serving and WebSocket/multipart/SSE
+adapters still need migration. The existing `web` API and default backend remain
+source-based, and no production service has adopted the engine.
+
+The engine contains TCP HTTP/1 and HTTP/2 transport, streaming bodies and
 basic route assembly. The standalone fixture's `http` binary exercises this
 through internal bindings with the same 22-package consumer graph. Adapting the
 public `Router`, middleware, protocol and listener APIs remains in progress.
