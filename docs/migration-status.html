@@ -81,7 +81,8 @@
       pass; the standalone consumer remains at 22 dependency packages without
       Tokio or the heavy HTTP/database stacks. Existing task supervisors and
       scheduling drivers still need execution migration. No production consumer
-      has migrated. Local integration is pending. See the
+      has migrated. Reviewed commit <code>a4791ae</code> is integrated on local
+      master with the tested tree preserved. See the
       <a href="migration-status.md#engine-task-collections--2026-10-05">evidence and remaining scope</a>.</p>
       <p><strong>Owned Tokio-facing contracts (2026-10-05): implementation Partial; adoption Pending.</strong>
       HTTP/TLS/Unix serving and the harness now use owned listener types; bind

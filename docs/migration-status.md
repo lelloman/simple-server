@@ -46,7 +46,13 @@ binaries. Workspace/all-target/all-feature strict Clippy passed
 matrix was not rerun for this engine-bindings-only change; it passed at the
 preceding checkpoint. Strict sys-crate rustdoc passed
 (`/tmp/simple-server-engine-taskset-doc.log`); tracker script syntax and the new
-evidence link were validated. Local integration is pending.
+evidence link were validated. Reviewed commit `a4791ae` was integrated by
+rebasing local `master` onto `implementation/engine-taskset`; ancestry and tree
+comparison confirm the tested tree is preserved. No concurrent local edits
+needed restoration. The stale missing-worktree registration and old baseline
+branch were removed. The replacement worktree/branch are removed after
+integrating this verification record. No push, publication or deployment was
+performed.
 
 ## Owned Tokio-facing contracts — 2026-10-05
 
