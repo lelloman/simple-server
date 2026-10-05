@@ -1,5 +1,58 @@
 # Service migration status
 
+## Typed engine handlers and extraction — 2026-10-05
+
+Engine implementation remains **Partial** and all production adoption, including
+Favzetto, remains **Pending**. Work starts from clean local `master` `49d9cb9`
+in branch `implementation/engine-extractors`, worktree
+`target/worktrees/engine-extractors`. No consumer repository is changed.
+
+Engine `on_handler`, `on_state` and `fallback_handler` now reuse the existing
+zero-to-sixteen-argument handler machinery. Raw request registration is unchanged.
+Engine State/substate, Query, Json/optional JSON, String/Bytes, raw query, matched
+path and direct peer extraction use owned HTTP types. Custom Extract and rejection
+contracts are shared. Primitive head and Result-capture implementations moved to
+the runtime-independent extraction module to avoid duplicate implementations
+when both HTTP backends are enabled.
+
+Body extractors preserve the 2 MiB default and accept a per-request BodyLimit
+override. Invalid optional JSON remains an error when a content type is present.
+Custom head rejections short-circuit before body polling. Common text/binary,
+JSON/HTML, status/HeaderMap tuples, Result and rejection responses now convert
+without Axum. Typed path/form extraction, extension adapters, router-wide generic
+state, remaining response helpers, middleware and protocol adapters are still
+pending; this is not a drop-in source web replacement.
+
+The standalone public HTTP fixture now actually runs both streaming echo and
+a typed state/query/JSON route. Its normal/build graph has 28 dependency packages
+beyond the library and fixture, with no Axum, Tokio, Hyper, Reqwest, SQLx or Rustls.
+MIME parsing and path-aware Serde error support add two packages to the previous
+26-package graph. This is dependency evidence, not a compile/runtime benchmark.
+The existing Bookworm x86_64 engine is reused without native or ABI changes;
+ARM is not retested and source/default execution is unchanged.
+
+The pre-edit baseline passed 25 tests: public engine HTTP (8), extraction (3),
+and all-feature source web core (14)
+(`/tmp/simple-server-extractors-baseline.log`). The focused comparison run passed
+seven new engine/parity tests plus source extraction/web regressions
+(`/tmp/simple-server-extractors-contracts.log`). It compares JSON/query/UTF-8
+rejection status, headers and exact bodies against source, checks body limits and
+stream errors, and exercises state/metadata over loopback HTTP. An additional
+response conversion parity test and two engine compile-fail handler-ordering
+examples are included in the final check matrix.
+
+The complete `bash scripts/check` passes
+(`/tmp/simple-server-extractors-full.log`): strict workspace/native Clippy,
+source feature matrix and protocol regressions, rustdoc (including the two new
+compile-fail examples), all eight engine/parity tests, engine-only execution,
+all seven standalone consumers, dependency graph guards, C ABI smoke and artifact
+installer tests. An engine-only unused test import was subsequently feature-gated;
+all four engine-only extractor tests pass again without that warning
+(`/tmp/simple-server-extractors-final.log`). Tracker script syntax and the evidence
+link pass validation.
+
+No push, publication or deployment is performed.
+
 ## Public engine HTTP core — 2026-10-05
 
 Overall engine implementation remains **Partial**, and all production engine

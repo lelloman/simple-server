@@ -73,6 +73,17 @@
   </header>
   <main>
     <section class="note" id="shared-engine">
+      <p><strong>Typed engine handlers and extraction (2026-10-05): implementation Partial; adoption Pending.</strong>
+      Typed registration now shares the existing handler algorithm, custom extraction
+      and rejection contracts. Engine state, query, JSON/optional JSON and bounded
+      body extraction support common response conversions. Source comparison tests
+      check rejection status, headers and text; body consumers must remain last.
+      The standalone typed HTTP consumer has 28 dependencies beyond simple-server
+      and no Axum or Tokio. Typed path/form extraction, generic router state,
+      remaining response helpers, middleware and protocol adapters remain pending.
+      Full source/engine checks, standalone consumers and compile-fail contracts pass.
+      No production consumer changed. See the
+      <a href="migration-status.md#typed-engine-handlers-and-extraction--2026-10-05">scope and evidence</a>.</p>
       <p><strong>Public engine HTTP core (2026-10-05): implementation Partial; adoption Pending.</strong>
       The new engine_web API exposes TCP serving, route/method assembly, raw handlers,
       streaming request/response bodies and explicit graceful shutdown through the

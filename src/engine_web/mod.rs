@@ -2,11 +2,34 @@
 //! in the consumer graph. Handlers accept an owned `Request` and return `Response`.
 //!
 //! This is an explicit development API, not yet a drop-in replacement for `web`:
-//! typed extractors, generic router state, layers, TLS, Unix sockets and protocol
+//! typed path/form extraction, generic router state, layers, TLS, Unix sockets and protocol
 //! upgrades remain unimplemented. Capture application state in handler closures.
 //! Register handlers and serve inside the application's engine runtime.
+//! Typed handlers allow body extraction only in the final position:
+//! ```compile_fail
+//! use simple_server::engine_web::{MethodRouter, Method, Json, State};
+//! async fn invalid(_: Json<String>, _: State<()>) {}
+//! let _ = MethodRouter::new().unwrap().on_handler(Method::POST, invalid);
+//! ```
+//! Two body consumers cannot be combined:
+//! ```compile_fail
+//! use simple_server::engine_web::{MethodRouter, Method, Json};
+//! async fn invalid(_: Json<String>, _: String) {}
+//! let _ = MethodRouter::new().unwrap().on_handler(Method::POST, invalid);
+//! ```
 pub mod body;
+pub mod extract;
+#[allow(clippy::duplicate_mod)]
+#[path = "../web/handler.rs"]
+mod handler;
+pub mod response;
 mod routing;
+pub use crate::extract::{Extract, FromRequestParts, IntoRejectionResponse, RejectionResponse};
+pub use extract::{
+    BodyLimit, ConnectInfo, FromRequest, FromState, Json, MatchedPath, Query, RawQuery, State,
+};
+pub use handler::Handler;
+pub use response::IntoResponse;
 mod wire;
 pub use crate::engine_lifecycle::Shutdown;
 pub use body::{Body, BodyError};

@@ -126,3 +126,37 @@ impl IntoRejectionResponse for (StatusCode, &'static str) {
         response
     }
 }
+
+// Runtime-independent head extractors shared by both HTTP backends.
+impl<S: Sync> FromRequestParts<S> for http::HeaderMap {
+    type Rejection = Infallible;
+    async fn from_request_parts(parts: &mut Parts, _: &S) -> Result<Self, Self::Rejection> {
+        Ok(parts.headers.clone())
+    }
+}
+
+impl<S, T> FromRequestParts<S> for Result<T, T::Rejection>
+where
+    S: Send + Sync,
+    T: FromRequestParts<S>,
+{
+    type Rejection = Infallible;
+    async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
+        Ok(T::from_request_parts(parts, state).await)
+    }
+}
+
+impl<S: Sync> FromRequestParts<S> for http::Uri {
+    type Rejection = Infallible;
+    async fn from_request_parts(parts: &mut Parts, _: &S) -> Result<Self, Self::Rejection> {
+        Ok(parts.uri.clone())
+    }
+}
+
+/// Extract the current request method without reading or changing the body.
+impl<S: Sync> FromRequestParts<S> for http::Method {
+    type Rejection = Infallible;
+    async fn from_request_parts(parts: &mut Parts, _: &S) -> Result<Self, Self::Rejection> {
+        Ok(parts.method.clone())
+    }
+}

@@ -135,26 +135,8 @@ macro_rules! body_extractor {
 body_extractor!(String);
 body_extractor!(bytes::Bytes);
 
-impl<S: Sync> FromRequestParts<S> for http::HeaderMap {
-    type Rejection = Infallible;
-    async fn from_request_parts(parts: &mut Parts, _: &S) -> Result<Self, Self::Rejection> {
-        Ok(parts.headers.clone())
-    }
-}
-
 // Result captures a rejection explicitly, for applications that need to render
 // a custom error envelope. It does not suppress the error or turn it anonymous.
-impl<S, T> FromRequestParts<S> for Result<T, T::Rejection>
-where
-    S: Send + Sync,
-    T: FromRequestParts<S>,
-{
-    type Rejection = Infallible;
-    async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
-        Ok(T::from_request_parts(parts, state).await)
-    }
-}
-
 impl<S, T> FromRequest<S> for Result<T, T::Rejection>
 where
     S: Send + Sync,
@@ -251,21 +233,6 @@ impl<S: Sync, T: Clone + Send + Sync + 'static> FromRequestParts<S> for Option<E
         Ok(parts.extensions.get::<T>().cloned().map(Extension))
     }
 }
-impl<S: Sync> FromRequestParts<S> for http::Uri {
-    type Rejection = Infallible;
-    async fn from_request_parts(parts: &mut Parts, _: &S) -> Result<Self, Self::Rejection> {
-        Ok(parts.uri.clone())
-    }
-}
-
-/// Extract the current request method without reading or changing the body.
-impl<S: Sync> FromRequestParts<S> for http::Method {
-    type Rejection = Infallible;
-    async fn from_request_parts(parts: &mut Parts, _: &S) -> Result<Self, Self::Rejection> {
-        Ok(parts.method.clone())
-    }
-}
-
 /// URL-encoded forms: GET/HEAD read the query; other methods read the body.
 #[derive(Debug, Clone, Copy)]
 pub struct Form<T>(pub T);

@@ -8,3 +8,4 @@ publish = false
 
 [dependencies]
 simple-server = { package = "lelloman-simple-server", path = "../../..", default-features = false, features = ["engine-web", "client"] }
+serde_json = "1"

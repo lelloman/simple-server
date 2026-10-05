@@ -292,3 +292,34 @@ Typed extractors, generic router state, response conversions, Tower middleware,
 TLS/Unix listeners, protocol upgrades and the public test harness remain parity
 work. No stable release or production adoption is implied. This checkpoint needs
 no engine ABI or native implementation change.
+
+## Typed engine handlers and extraction (development)
+
+Engine typed registration uses `on_handler` with unit state, `on_state` with
+per-handler state, and `fallback_handler`. The raw request closure APIs retain
+their parameter inference. Both backends instantiate the existing handler
+algorithm, which extracts arguments left-to-right and permits only the final
+argument to consume the body. Compile-fail examples guard this ordering and
+the prohibition on multiple body consumers.
+
+`FromRequestParts`, custom `Extract` and rejection responses are shared. The
+runtime-independent HeaderMap/URI/Method and Result-capture implementations now
+live with that contract instead of inside source `web`. Engine State/substate,
+Query, JSON/optional JSON, raw query, matched path and direct TCP peer extraction
+operate on the owned request boundary. Generic path/form and extension adapters
+remain separate parity work.
+
+String, Bytes and JSON extraction collect at most 2 MiB unless the request has a
+`BodyLimit(usize)` extension. Raw requests and lazy bodies are unaffected. Missing
+Content-Type alone makes optional JSON absent; declared invalid JSON still rejects.
+MIME parsing and path-aware Serde errors preserve source rejection status, headers
+and text. Body read failures map to 400; collection-limit failures map to 413.
+JSON syntax failures map to 400, schema failures to 422 and unsupported content
+types to 415. Head extraction failure returns before polling the body.
+
+Common response conversion covers text/binary bodies, JSON, HTML, status codes,
+HeaderMap, status/header tuples, Result and custom rejection responses. JSON
+serialization failure returns a plain-text 500 response. Header arrays, redirects,
+Form responses and the full source conversion surface are not yet implemented.
+Response extensions still remain host-side and do not cross the existing ABI.
+The native engine and ABI do not change in this checkpoint.

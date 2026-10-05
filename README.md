@@ -103,12 +103,22 @@ fallible, and handler registration requires the caller's engine runtime. Request
 extensions provide `RequestMetadata` with peer, matched/original paths and path
 parameters. Bodies support collection limits, lazy streams and trailer frames.
 See the runnable [public HTTP consumer](tests/fixtures/engine_web/src/main.rs).
-With the engine client enabled, its graph has 26 dependencies beyond simple-server,
+With the engine client enabled, its graph has 28 dependencies beyond simple-server,
 without Axum, Tokio, Hyper, Reqwest, SQLx or Rustls. The `.so` is supplied separately;
 this is not a measured performance claim.
 
-This API is not yet interchangeable with `web`: typed extractors, generic router
-state, response conversions, layers, TLS/Unix serving and WebSocket/multipart/SSE
+Typed engine handlers use `MethodRouter::on_handler(method, handler)` or
+`on_state(method, state, handler)`; raw `on` closures retain their existing API.
+The shared handler machinery supports zero to sixteen arguments, with body
+extraction only in the final position. Engine `State`, `Query`, `Json`, optional
+JSON, strings/bytes, raw query and connection/route metadata extractors are
+available alongside the shared custom `Extract` contract. Body-consuming
+extractors default to 2 MiB; a `BodyLimit` request extension overrides that limit.
+Common text/binary/JSON/HTML, status, HeaderMap, tuple and Result responses work
+without compiling a source HTTP framework.
+
+This API is not yet interchangeable with `web`: typed path/form extraction,
+generic router state, remaining response helpers, layers, TLS/Unix serving and WebSocket/multipart/SSE
 adapters still need migration. The existing `web` API and default backend remain
 source-based, and no production service has adopted the engine.
 

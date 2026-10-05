@@ -113,3 +113,36 @@ impl MethodRouter {
         })
     }
 }
+
+impl MethodRouter {
+    /// Register a typed handler with unit state; only its last argument may read
+    /// the body. The raw `on` API remains available without annotation changes.
+    pub fn on_handler<H, T>(self, method: super::Method, handler: H) -> io::Result<Self>
+    where
+        H: super::Handler<T, ()>,
+        T: 'static,
+    {
+        self.on_state(method, (), handler)
+    }
+    /// Bind application state to this handler. Router-wide generic state remains
+    /// separate parity work; state values are cloned for each request.
+    pub fn on_state<H, T, S>(self, method: super::Method, state: S, handler: H) -> io::Result<Self>
+    where
+        H: super::Handler<T, S>,
+        T: 'static,
+        S: Clone + Send + Sync + 'static,
+    {
+        self.on(method, move |request| {
+            handler.clone().call(request, state.clone())
+        })
+    }
+}
+impl Router {
+    pub fn fallback_handler<H, T>(self, handler: H) -> io::Result<Self>
+    where
+        H: super::Handler<T, ()>,
+        T: 'static,
+    {
+        self.fallback(move |request| handler.clone().call(request, ()))
+    }
+}
