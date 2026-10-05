@@ -61,7 +61,7 @@ pub type Response<B = Body> = http::Response<B>;
 /// Serve a fully configured shared router with explicit lifecycle shutdown.
 #[cfg(feature = "lifecycle")]
 pub async fn serve(
-    listener: tokio::net::TcpListener,
+    listener: crate::net::TcpListener,
     router: Router,
     shutdown: crate::lifecycle::Shutdown,
 ) -> std::io::Result<()> {
@@ -72,7 +72,7 @@ pub async fn serve(
 /// Forwarded headers are deliberately not interpreted.
 #[cfg(feature = "lifecycle")]
 pub async fn serve_with_connect_info(
-    listener: tokio::net::TcpListener,
+    listener: crate::net::TcpListener,
     router: Router,
     shutdown: crate::lifecycle::Shutdown,
 ) -> std::io::Result<()> {

@@ -7,9 +7,9 @@
 use std::convert::Infallible;
 use std::io;
 
+pub use crate::net::{TcpListener, ToSocketAddrs};
 #[cfg(feature = "web")]
 use axum::{extract::Request, response::Response, serve::IncomingStream};
-use tokio::net::{TcpListener, ToSocketAddrs};
 #[cfg(feature = "web")]
 use tower_service::Service;
 
@@ -34,10 +34,13 @@ pub(crate) async fn serve<M, S>(
     shutdown: Shutdown,
 ) -> io::Result<()>
 where
-    M: for<'a> Service<IncomingStream<'a, TcpListener>, Error = Infallible, Response = S>
-        + Send
+    M: for<'a> Service<
+            IncomingStream<'a, tokio::net::TcpListener>,
+            Error = Infallible,
+            Response = S,
+        > + Send
         + 'static,
-    for<'a> <M as Service<IncomingStream<'a, TcpListener>>>::Future: Send,
+    for<'a> <M as Service<IncomingStream<'a, tokio::net::TcpListener>>>::Future: Send,
     S: Service<Request, Response = Response, Error = Infallible> + Clone + Send + 'static,
     S::Future: Send,
 {
@@ -45,7 +48,7 @@ where
     if shutdown.is_requested() {
         return Ok(());
     }
-    axum::serve(listener, make_service)
+    axum::serve(listener.inner, make_service)
         .with_graceful_shutdown(async move { shutdown.requested().await })
         .await
 }

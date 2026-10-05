@@ -160,7 +160,7 @@ async fn tcp_external_client_and_shutdown_release_listener() {
         .unwrap();
     assert_eq!(response.bytes().await.unwrap().as_ref(), &[0, 255, 1]);
     server.shutdown().await.unwrap();
-    let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
+    let listener = simple_server::http::bind(addr).await.unwrap();
     drop(listener);
 }
 #[tokio::test]
@@ -170,7 +170,7 @@ async fn drop_releases_listener() {
     drop(server);
     tokio::time::timeout(Duration::from_secs(1), async {
         loop {
-            if let Ok(listener) = tokio::net::TcpListener::bind(addr).await {
+            if let Ok(listener) = simple_server::http::bind(addr).await {
                 drop(listener);
                 break;
             }

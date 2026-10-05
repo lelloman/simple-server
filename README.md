@@ -25,6 +25,18 @@ An unpublished shared-engine implementation is under development. The opt-in
 lifecycle/scheduling modules still use the source backend. This is not yet the
 planned complete engine release, and no production consumer has migrated.
 
+The unpublished migration also owns the public networking and task-error
+contracts: `http::bind` returns `net::TcpListener`, HTTP/TLS serving accepts that
+listener, and Unix serving accepts `net::UnixListener`. Generic bind helpers use
+`net::ToSocketAddrs`; common address values are unchanged. Application-configured
+standard-library sockets can be imported with `from_std` and exported with
+`into_std`. Bounded-batch callbacks use `task_scheduling::JoinError` (including
+panic payloads and an owned `BatchTaskId`); delayed admission uses
+`rate_limit::AcquireError`. Callers explicitly naming the former Tokio types
+must update those annotations. These source adapters still require Tokio;
+wrapping their public contracts does not yet move execution into the engine or
+reduce the default consumer dependency graph.
+
 For local development, run `bash scripts/check-engine`. It builds the engine
 separately, then verifies the bindings, C header, client/SQLite/process APIs and
 a standalone consumer without heavy runtime dependencies. To use an existing

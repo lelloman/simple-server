@@ -6,8 +6,8 @@
 
 use std::{io, path::Path};
 
+use crate::net::TcpListener;
 use axum_server::tls_rustls::RustlsConfig;
-use tokio::net::TcpListener;
 
 use super::Router;
 use crate::lifecycle::Shutdown;

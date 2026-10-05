@@ -101,7 +101,7 @@ async fn websocket_negotiates_server_preference_on_real_http() {
                 .on_upgrade(|_socket| async {})
         }),
     );
-    let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+    let listener = simple_server::http::bind("127.0.0.1:0").await.unwrap();
     let address = listener.local_addr().unwrap();
     let shutdown = simple_server::lifecycle::Shutdown::new();
     let task = tokio::spawn(web::serve(listener, app, shutdown.clone()));
@@ -150,7 +150,7 @@ async fn websocket_limits_reject_large_frames_and_fragmented_messages() {
             }
         }),
     );
-    let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+    let listener = simple_server::http::bind("127.0.0.1:0").await.unwrap();
     let address = listener.local_addr().unwrap();
     let shutdown = simple_server::lifecycle::Shutdown::new();
     let task = tokio::spawn(web::serve(listener, app, shutdown.clone()));

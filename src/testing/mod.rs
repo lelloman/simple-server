@@ -93,7 +93,7 @@ impl TestServer {
         if !address.ip().is_loopback() {
             return Err(error("test server requires a loopback address"));
         }
-        let listener = tokio::net::TcpListener::bind(address).await?;
+        let listener = crate::http::bind(address).await?;
         let mut server = Self::new(router.clone());
         server.transport = Transport::Tcp(listener.local_addr()?);
         server.task = Some(tokio::spawn(crate::web::serve_with_connect_info(

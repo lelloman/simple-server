@@ -1,6 +1,16 @@
 //! Opt-in Tokio waiting adapter; the synchronous rate-limit feature stays runtime-free.
-use std::{sync::Arc, time::Duration};
-use tokio::sync::{AcquireError, Semaphore};
+use std::{error::Error, fmt, sync::Arc, time::Duration};
+use tokio::sync::Semaphore;
+
+/// Admission failed because the limiter was closed.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct AcquireError;
+impl fmt::Display for AcquireError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str("semaphore closed")
+    }
+}
+impl Error for AcquireError {}
 
 /// FIFO semaphore admission whose permits return after a configured hold time.
 ///
@@ -28,7 +38,12 @@ impl DelayedReleaseLimiter {
         }
     }
     pub async fn acquire(&self) -> Result<(), AcquireError> {
-        let permit = self.semaphore.clone().acquire_owned().await?;
+        let permit = self
+            .semaphore
+            .clone()
+            .acquire_owned()
+            .await
+            .map_err(|_| AcquireError)?;
         let hold = self.hold;
         tokio::spawn(async move {
             tokio::time::sleep(hold).await;

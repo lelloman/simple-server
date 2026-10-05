@@ -5,10 +5,10 @@
 //! installs authentication, retries, request-ID/header policy or a timeout.
 use super::{Body, Request, Response, Router};
 use crate::lifecycle::Shutdown;
+pub use crate::net::UnixListener;
 use hyper_util::client::legacy::Client;
 use hyperlocal::{UnixClientExt, UnixConnector};
 use std::{error::Error, fmt, io, path::Path};
-use tokio::net::UnixListener;
 
 /// Serve an already-bound listener with owned routes and explicit shutdown.
 /// Pre-requested shutdown accepts no connections. Dropping this future alone
@@ -17,7 +17,7 @@ pub async fn serve(listener: UnixListener, router: Router, shutdown: Shutdown) -
     if shutdown.is_requested() {
         return Ok(());
     }
-    axum::serve(listener, router.inner)
+    axum::serve(listener.inner, router.inner)
         .with_graceful_shutdown(async move { shutdown.requested().await })
         .await
 }

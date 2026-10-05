@@ -161,3 +161,28 @@ fn preference_and_missing_ranks_have_stable_extreme_boundaries() {
     values.sort_by_key(|v| missing_last(*v));
     assert_eq!(values, vec![Some(i64::MIN), Some(0), Some(i64::MAX), None]);
 }
+
+#[tokio::test]
+async fn owned_batch_error_retains_typed_panic_payload_and_identity() {
+    #[derive(Debug, PartialEq)]
+    struct Payload(u32);
+    let mut observed = false;
+    run_bounded_batch(
+        [()],
+        NonZeroUsize::new(1).unwrap(),
+        |_| async { std::panic::panic_any(Payload(42)) },
+        |result: Result<(), simple_server::task_scheduling::JoinError>| {
+            let error = result.unwrap_err();
+            assert!(error.is_panic());
+            assert!(!error.is_cancelled());
+            let id: simple_server::task_scheduling::BatchTaskId = error.id();
+            assert_eq!(id, error.id());
+            assert!(!id.to_string().is_empty());
+            let payload = error.try_into_panic().unwrap();
+            assert_eq!(*payload.downcast::<Payload>().unwrap(), Payload(42));
+            observed = true;
+        },
+    )
+    .await;
+    assert!(observed);
+}

@@ -73,6 +73,14 @@
   </header>
   <main>
     <section class="note" id="shared-engine">
+      <p><strong>Owned Tokio-facing contracts (2026-10-05): implementation Partial; adoption Pending.</strong>
+      HTTP/TLS/Unix serving and the harness now use owned listener types; bind
+      inputs use an owned asynchronous address trait. Batch-task errors preserve
+      panic payloads and identity, and delayed admission exposes an owned error.
+      Source execution still uses Tokio and the default dependency graph is
+      unchanged. Baseline, focused contracts and the full feature matrix pass;
+      local integration is pending. No consumer has migrated. See the
+      <a href="migration-status.md#owned-tokio-facing-contracts--2026-10-05">contract changes and evidence</a>.</p>
       <p><strong>HTTP transport checkpoint (2026-10-05): engine implementation Partial; adoption Pending.</strong>
       The engine now serves HTTP/1 and HTTP/2 with basic routing and streaming
       bodies. Tests verify binary frames, trailers, header/path semantics,

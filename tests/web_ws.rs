@@ -20,7 +20,7 @@ async fn server(
     Shutdown,
     tokio::task::JoinHandle<std::io::Result<()>>,
 ) {
-    let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+    let listener = simple_server::http::bind("127.0.0.1:0").await.unwrap();
     let url = format!("ws://{}/", listener.local_addr().unwrap());
     let shutdown = Shutdown::new();
     let task = tokio::spawn(web::serve(listener, app, shutdown.clone()));

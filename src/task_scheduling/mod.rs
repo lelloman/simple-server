@@ -3,6 +3,8 @@
 //! Neither starts a hidden supervisor. Applications own reporting and storage.
 mod driver;
 pub use driver::{PollCadence, PollOutcome, run_bounded_batch, run_poll_worker};
+mod join_error;
+pub use join_error::{BatchTaskId, JoinError};
 mod priority;
 pub use priority::{PriorityAdmissionError, PriorityCapacity, PriorityPermit, PrioritySnapshot};
 mod selection;

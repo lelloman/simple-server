@@ -130,7 +130,7 @@ async fn real_server_inserts_direct_peer_and_shuts_down() {
     async fn peer(web::ConnectInfo(peer): web::ConnectInfo<std::net::SocketAddr>) -> String {
         peer.to_string()
     }
-    let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+    let listener = simple_server::http::bind("127.0.0.1:0").await.unwrap();
     let address = listener.local_addr().unwrap();
     let shutdown = simple_server::lifecycle::Shutdown::new();
     let server = tokio::spawn(web::serve_with_connect_info(

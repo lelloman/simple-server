@@ -1,6 +1,7 @@
 //! Drivers for application-owned durable work. No storage or leases are inferred.
+use super::JoinError;
 use std::{future::Future, num::NonZeroUsize, time::Duration};
-use tokio::task::{JoinError, JoinSet};
+use tokio::task::JoinSet;
 
 /// Result of a completed claim-and-execute cycle. The caller commits durable
 /// outcomes before returning. Errors can be logged/classified by the callback.
@@ -81,11 +82,11 @@ pub async fn run_bounded_batch<I, T, F, Fut, R, O>(
         if running.len() == concurrency.get()
             && let Some(result) = running.join_next().await
         {
-            observe(result);
+            observe(result.map_err(JoinError));
         }
         running.spawn(execute(item));
     }
     while let Some(result) = running.join_next().await {
-        observe(result);
+        observe(result.map_err(JoinError));
     }
 }

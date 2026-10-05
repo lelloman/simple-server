@@ -1,7 +1,7 @@
 # Unix HTTP transport
 
 Enable `unix-http` on Unix platforms to serve an already-bound
-`tokio::net::UnixListener` with `web::unix::serve(listener, router, shutdown)`.
+`simple_server::net::UnixListener` with `web::unix::serve(listener, router, shutdown)`.
 The transport uses the same owned `Router`, extractors, response/body and
 WebSocket APIs as TCP serving. The application owns socket creation, stale-file
 removal, permissions, signal installation, shutdown deadline and final cleanup.

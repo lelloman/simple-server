@@ -43,8 +43,9 @@ async fn zero_capacity_waits_and_close_wakes_waiters_without_charging() {
     tokio::task::yield_now().await;
     assert!(!waiter.is_finished());
     limiter.close();
-    assert!(waiter.await.unwrap().is_err());
-    assert!(limiter.acquire().await.is_err());
+    let error: simple_server::rate_limit::AcquireError = waiter.await.unwrap().unwrap_err();
+    assert_eq!(error.to_string(), "semaphore closed");
+    assert_eq!(limiter.acquire().await.unwrap_err(), error);
 }
 
 #[tokio::test(start_paused = true)]

@@ -386,7 +386,7 @@ async fn sixteen_argument_handler_uses_only_shared_contracts() {
 #[tokio::test]
 async fn shared_router_serves_real_http_and_shuts_down() {
     use tokio::io::{AsyncReadExt, AsyncWriteExt};
-    let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+    let listener = simple_server::http::bind("127.0.0.1:0").await.unwrap();
     let address = listener.local_addr().unwrap();
     let shutdown = simple_server::lifecycle::Shutdown::new();
     let server = tokio::spawn(web::serve(listener, shared_router(), shutdown.clone()));

@@ -353,7 +353,7 @@ async fn real_http_route_streams_reconnect_ids_and_releases_body_on_disconnect()
             ),
         )
         .with_state(dropped.clone());
-    let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+    let listener = simple_server::http::bind("127.0.0.1:0").await.unwrap();
     let address = listener.local_addr().unwrap();
     let shutdown = Shutdown::new();
     let server = tokio::spawn(web::serve(listener, app, shutdown.clone()));

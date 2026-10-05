@@ -13,7 +13,7 @@ use std::time::Duration;
 async fn forwards_method_query_headers_and_streamed_body() {
     let dir = tempfile::tempdir().unwrap();
     let path = dir.path().join("http.sock");
-    let listener = tokio::net::UnixListener::bind(&path).unwrap();
+    let listener = simple_server::net::UnixListener::bind(&path).unwrap();
     let app = Router::new().route(
         "/echo",
         post(|request: Request| async move {
@@ -96,7 +96,7 @@ async fn invalid_paths_and_transport_failures_are_distinct() {
 async fn shutdown_drains_active_requests() {
     let dir = tempfile::tempdir().unwrap();
     let path = dir.path().join("drain.sock");
-    let listener = tokio::net::UnixListener::bind(&path).unwrap();
+    let listener = simple_server::net::UnixListener::bind(&path).unwrap();
     let entered = std::sync::Arc::new(tokio::sync::Notify::new());
     let release = std::sync::Arc::new(tokio::sync::Notify::new());
     let app = Router::new().route(
@@ -173,7 +173,7 @@ fn uuid_header_matches_rfc_version_and_variant() {
 async fn response_stream_is_not_buffered_and_propagates_upstream_failure() {
     let dir = tempfile::tempdir().unwrap();
     let path = dir.path().join("stream.sock");
-    let listener = tokio::net::UnixListener::bind(&path).unwrap();
+    let listener = simple_server::net::UnixListener::bind(&path).unwrap();
     let (sender, receiver) = tokio::sync::mpsc::channel::<Result<bytes::Bytes, std::io::Error>>(1);
     let receiver = std::sync::Arc::new(tokio::sync::Mutex::new(Some(receiver)));
     let app = Router::new().route("/", web::routing::get(move || {
@@ -237,7 +237,7 @@ async fn response_stream_is_not_buffered_and_propagates_upstream_failure() {
 async fn pre_requested_shutdown_leaves_socket_ownership_unchanged() {
     let dir = tempfile::tempdir().unwrap();
     let path = dir.path().join("stopped.sock");
-    let listener = tokio::net::UnixListener::bind(&path).unwrap();
+    let listener = simple_server::net::UnixListener::bind(&path).unwrap();
     let shutdown = Shutdown::new();
     shutdown.request();
     web::unix::serve(listener, Router::new(), shutdown)
@@ -254,7 +254,7 @@ async fn websocket_upgrade_supports_text_binary_and_close_over_unix() {
     use web::ws::{Message, WebSocketUpgrade};
     let dir = tempfile::tempdir().unwrap();
     let path = dir.path().join("ws.sock");
-    let listener = tokio::net::UnixListener::bind(&path).unwrap();
+    let listener = simple_server::net::UnixListener::bind(&path).unwrap();
     let app = Router::new().route(
         "/ws",
         web::routing::get(|ws: WebSocketUpgrade| async {

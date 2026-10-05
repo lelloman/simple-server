@@ -1,5 +1,44 @@
 # Service migration status
 
+## Owned Tokio-facing contracts — 2026-10-05
+
+Shared-engine implementation remains **Partial**; all production adoption,
+including Favzetto, remains **Pending**. Work starts from clean library `master`
+`16305ff` in `implementation/owned-network`, isolated worktree
+`/tmp/simple-server-owned-network`. No consumer checkout is changed.
+
+The source HTTP/TLS/Unix adapters now use owned TCP and Unix listeners.
+`http::bind` retains string, host/port, IP/port, socket-address and reference
+inputs through `net::ToSocketAddrs`; slices preserve ordered bind fallback.
+Arrays, vectors and custom async resolvers are also supported. Standard-library
+listener import/export retains socket configuration and enables nonblocking
+mode. Unix socket paths remain application-owned. The harness uses owned
+binding, and transport tests pass owned listeners into the public serving APIs.
+Raw Axum comparison tests intentionally retain their backend listener setup.
+
+`task_scheduling::JoinError` and `BatchTaskId` replace exposed Tokio batch-task
+types, preserving panic payloads, cancellation classification and task identity.
+`rate_limit::AcquireError` owns the closed-admission error. These changes affect
+explicit Tokio type annotations and generic trait bounds; they belong to the
+unpublished breaking migration. Runtime/main/task/time engine APIs were already
+owned. General synchronization APIs and moving remaining source execution into
+the engine remain unfinished; public type ownership is not engine adoption.
+The default source dependency graph is unchanged, and this checkpoint claims no
+compilation or runtime speedup.
+
+The full unmodified baseline `bash scripts/check` passed
+(`/tmp/simple-server-owned-network-baseline.log`). New contract checks passed
+(`/tmp/simple-server-owned-network-contracts.log`): five listener cases cover
+address forms, IPv6 metadata, fallback/last-error behavior, empty/malformed
+addresses, resolver errors, port release, standard socket options and Unix path
+ownership. Six scheduling-driver and four delayed-admission tests pass,
+including typed panic recovery and owned closed-admission errors. Final
+`bash scripts/check` passed (`/tmp/simple-server-owned-network-final.log`),
+including strict Clippy, the feature matrix, doctests/docs, source HTTP/TLS/Unix
+and WebSocket tests, and engine ABI/artifact/standalone-consumer checks. Engine
+implementation and ABI are unchanged in this checkpoint. Local integration is
+pending at this point.
+
 ## Shared-engine HTTP transport checkpoint — 2026-10-05
 
 Library status remains **Partial** and all production consumers remain

@@ -43,4 +43,4 @@ pub use polling::{PollingDenial, PollingGate};
 #[cfg(feature = "rate-limit-async")]
 mod delayed_release;
 #[cfg(feature = "rate-limit-async")]
-pub use delayed_release::DelayedReleaseLimiter;
+pub use delayed_release::{AcquireError, DelayedReleaseLimiter};

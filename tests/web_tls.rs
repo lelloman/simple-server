@@ -26,7 +26,7 @@ async fn previously_requested_shutdown_does_not_start_tls_server() {
     )
     .await
     .unwrap();
-    let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+    let listener = simple_server::http::bind("127.0.0.1:0").await.unwrap();
     let address = listener.local_addr().unwrap();
     let shutdown = Shutdown::new();
     shutdown.request();
@@ -34,6 +34,6 @@ async fn previously_requested_shutdown_does_not_start_tls_server() {
     tls::serve(listener, Router::new(), config, shutdown)
         .await
         .unwrap();
-    let rebound = tokio::net::TcpListener::bind(address).await.unwrap();
+    let rebound = simple_server::http::bind(address).await.unwrap();
     drop(rebound);
 }
