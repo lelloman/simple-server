@@ -50,6 +50,12 @@ the target architecture. The bindings check the ABI table size, ABI version and
 exact engine version at runtime. Do not use a development library as a portable
 release artifact merely because it links on the development machine.
 
+The lifecycle checkpoint appends monotonic clock functions to the provisional
+ABI table and adds native shutdown signal registrations. Rebuild the engine
+before using the updated bindings: earlier development artifacts have a smaller
+table and are rejected. Version `0.2.0` remains provisional; these local builds
+are not immutable published releases.
+
 Deploy the engine alongside the application. The loader needs a file named
 `libsimple_server_engine.so.1`, matching the engine's SONAME, in its search path.
 For a container, copy the reviewed library to

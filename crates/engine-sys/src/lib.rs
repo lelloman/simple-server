@@ -668,17 +668,11 @@ pub use join_set::JoinSet;
 mod callback;
 pub use callback::{Callback, Reply};
 
-pub async fn sleep(duration: Duration) {
-    let command = format!(
-        "{{\"op\":\"sleep\",\"secs\":{},\"nanos\":{}}}",
-        duration.as_secs(),
-        duration.subsec_nanos()
-    );
-    Operation::new(command.as_bytes())
-        .expect("sleep requires an engine runtime")
-        .await
-        .expect("engine timer failed");
-}
+mod time;
+pub use time::{Instant, Sleep, sleep, sleep_until, timeout, timeout_at};
+mod signals;
+pub use signals::Signals;
+
 pub async fn yield_now() {
     Operation::new(b"{\"op\":\"yield\"}")
         .expect("yield requires an engine runtime")
@@ -686,7 +680,11 @@ pub async fn yield_now() {
         .expect("engine yield failed");
 }
 pub async fn advance(duration: Duration) {
-    let command = format!("{{\"op\":\"advance\",\"nanos\":{}}}", duration.as_nanos());
+    let command = format!(
+        "{{\"op\":\"advance\",\"secs\":{},\"nanos\":{}}}",
+        duration.as_secs(),
+        duration.subsec_nanos()
+    );
     Operation::new(command.as_bytes())
         .expect("advance requires an engine runtime")
         .await
@@ -701,15 +699,3 @@ impl fmt::Display for Elapsed {
     }
 }
 impl std::error::Error for Elapsed {}
-
-pub async fn timeout<F: Future>(duration: Duration, future: F) -> Result<F::Output, Elapsed> {
-    let mut future = Box::pin(future);
-    let mut timer = Box::pin(sleep(duration));
-    std::future::poll_fn(|cx| {
-        if let Poll::Ready(value) = future.as_mut().poll(cx) {
-            return Poll::Ready(Ok(value));
-        }
-        timer.as_mut().poll(cx).map(|()| Err(Elapsed))
-    })
-    .await
-}

@@ -106,4 +106,17 @@ pub struct Api {
     pub runtime_spawn_blocking: unsafe extern "C" fn(*mut c_void, Task) -> *mut c_void,
     /// Consumes Callback and returns its resource ID (kind 5), zero on failure.
     pub callback_new: unsafe extern "C" fn(Callback) -> u64,
+    /// Read the selected runtime clock, or the real clock when runtime is null.
+    /// Writes output only for READY. Timestamps are process-local, not wall time.
+    pub clock_now: unsafe extern "C" fn(*mut c_void, *mut MonotonicInstant) -> i32,
+    /// Whether the timestamp is representable by the engine's monotonic clock.
+    pub clock_valid: unsafe extern "C" fn(MonotonicInstant) -> u8,
+}
+
+/// Signed seconds relative to an engine-local origin, plus normalized nanos.
+#[repr(C)]
+#[derive(Clone, Copy)]
+pub struct MonotonicInstant {
+    pub seconds: i64,
+    pub nanoseconds: u32,
 }

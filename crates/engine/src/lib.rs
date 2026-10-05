@@ -13,10 +13,12 @@ use std::{
     time::Duration,
 };
 mod callback;
+mod clock;
 mod database;
 mod operations;
 mod routing;
 mod server;
+mod signals;
 
 thread_local! { static ERROR: RefCell<String> = const { RefCell::new(String::new()) }; }
 
@@ -205,10 +207,36 @@ unsafe extern "C" fn operation_new(
                 tokio::task::yield_now().await;
                 Vec::new()
             }),
-            Some("advance") => {
-                let nanos = command["nanos"].as_u64().ok_or("missing nanoseconds")?;
+            Some("sleep_until") => {
+                let deadline = clock::decode(MonotonicInstant {
+                    seconds: command["seconds"]
+                        .as_i64()
+                        .ok_or("invalid deadline seconds")?,
+                    nanoseconds: command["nanoseconds"]
+                        .as_u64()
+                        .ok_or("invalid deadline nanos")?
+                        .try_into()
+                        .map_err(|_| "invalid deadline nanos")?,
+                })
+                .ok_or("deadline out of range")?;
+                let sleep = tokio::time::sleep_until(deadline);
                 Box::pin(async move {
-                    tokio::time::advance(Duration::from_nanos(nanos)).await;
+                    sleep.await;
+                    Vec::new()
+                })
+            }
+            Some("advance") => {
+                let duration = if let Some(seconds) = command["secs"].as_u64() {
+                    let nanos = command["nanos"]
+                        .as_u64()
+                        .filter(|n| *n < 1_000_000_000)
+                        .ok_or("invalid nanoseconds")?;
+                    Duration::new(seconds, nanos as u32)
+                } else {
+                    Duration::from_nanos(command["nanos"].as_u64().ok_or("missing nanoseconds")?)
+                };
+                Box::pin(async move {
+                    tokio::time::advance(duration).await;
                     Vec::new()
                 })
             }
@@ -274,6 +302,8 @@ static API: Api = Api {
     resource_release,
     runtime_spawn_blocking,
     callback_new,
+    clock_now: clock::now,
+    clock_valid: clock::valid,
 };
 
 unsafe extern "C" fn callback_new(callback: simple_server_abi::Callback) -> u64 {

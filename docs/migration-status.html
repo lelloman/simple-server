@@ -73,6 +73,17 @@
   </header>
   <main>
     <section class="note" id="shared-engine">
+      <p><strong>Engine lifecycle and deadlines (2026-10-05): implementation Partial; adoption Pending.</strong>
+      The engine-lifecycle API runs shutdown coordination and explicit SIGINT/SIGTERM
+      registration through the shared engine. Source and engine backends share the
+      coordination algorithm and sticky shutdown notification. Owned clocks and
+      absolute deadlines preserve paused time and a single drain/cleanup budget.
+      A standalone consumer runs this API with 12 dependencies beyond simple-server
+      and no Tokio. Source checks and the engine check script pass; the appended
+      clock ABI requires a rebuilt artifact. A fresh Bookworm x86_64 build is
+      verified by the complete engine checks; ARM was not reverified. Full supervisor, scheduler and
+      public web execution migration remain pending. No production consumer changed.
+      See the <a href="migration-status.md#engine-lifecycle-and-deadlines--2026-10-05">scope and evidence</a>.</p>
       <p><strong>Engine scheduling drivers (2026-10-05): implementation Partial; adoption Pending.</strong>
       The new task-drivers feature runs bounded batches and polling through the
       engine without the full scheduler. For helper-only users, the library's

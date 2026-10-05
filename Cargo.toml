@@ -21,6 +21,7 @@ resolver = "2"
 [features]
 runtime = ["dep:simple-server-sys", "dep:simple-server-macros"]
 task-drivers = ["runtime"]
+engine-lifecycle = ["runtime", "dep:futures-util"]
 client = ["runtime", "dep:serde", "dep:serde_json", "dep:serde_urlencoded", "dep:bytes", "dep:http"]
 process = ["runtime", "dep:serde_json"]
 sqlite-client = ["runtime", "database-sqlite", "dep:serde_json"]

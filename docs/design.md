@@ -182,3 +182,29 @@ and method fallbacks. Public generic state, Tower layer/service composition,
 owned extractors, WebSocket/multipart/SSE adapters, TLS/Unix transport and test
 harness migration are still pending. Internal wire commands are developmental;
 no stable engine artifact has been published.
+
+## Shared-engine lifecycle boundary (development)
+
+`engine-lifecycle` supplies the `engine_lifecycle` coordinator without Tokio in
+the consumer dependency graph. Source `lifecycle` and engine coordination share
+the same algorithm and runtime-independent sticky shutdown token. Each module
+selects its own clock and signal implementation; enabling both features does
+not change source callers' runtime requirements. Services may borrow application
+state. Draining and cleanup consume one budget beginning at shutdown, and
+dropping coordination cancels its futures without running cleanup.
+
+The appended `clock_now` and `clock_valid` ABI functions exchange signed seconds
+plus normalized nanoseconds relative to a native process-local monotonic origin.
+Rust `Instant` layouts never cross the boundary. A runtime pointer selects its
+clock (including paused time); null selects the real clock. Timestamps must not
+be persisted or compared across clock domains. `Sleep` and timeouts create their
+deadline at construction; `sleep_until` and `timeout_at` accept absolute engine
+deadlines. Interval/reset and standard-library Instant conversion are not yet
+provided.
+
+Explicit `shutdown_signals` registration returns resource kind 10. Its wait
+operation returns interrupt or terminate and owns a reference until completion
+or cancellation. Dropping the registration releases its receivers; this does
+not restore process-wide default signal handlers. No signal registration is
+installed merely by creating a runtime or coordinator. Full task supervisors,
+the scheduler and public web execution still require migration.

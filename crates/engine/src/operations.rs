@@ -66,6 +66,7 @@ fn number(command: &Value, key: &str) -> Result<u64, String> {
 
 pub fn resource_new(command: Value, _: Vec<u8>) -> Result<Vec<u8>, String> {
     match command["op"].as_str() {
+        Some("shutdown_signals") => crate::signals::install(),
         Some("server_body_clone") => crate::server::resource_new(&command),
         Some(operation) if operation.starts_with("router_") || operation.starts_with("method_") => {
             crate::routing::resource_new(&command)
@@ -100,6 +101,7 @@ pub fn resource_new(command: Value, _: Vec<u8>) -> Result<Vec<u8>, String> {
 }
 pub fn resource_release(kind: u32, id: u64) {
     match kind {
+        crate::signals::SIGNALS => crate::signals::release(id),
         1 => {
             clients().lock().unwrap().remove(&id);
         }
@@ -117,6 +119,7 @@ pub fn resource_release(kind: u32, id: u64) {
 
 pub fn operation(command: Value, body: Vec<u8>) -> Result<FutureBytes, String> {
     match command["op"].as_str() {
+        Some("shutdown_signal_wait") => crate::signals::wait(number(&command, "id")?),
         Some("server_bind" | "server_serve" | "server_body_frame") => {
             crate::server::operation(command)
         }

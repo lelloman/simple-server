@@ -50,6 +50,12 @@ typedef struct {
     void (*release)(void *);
 } ss_callback;
 
+/* Process-local monotonic time: signed seconds plus nanos in [0, 1000000000). */
+typedef struct {
+    int64_t seconds;
+    uint32_t nanoseconds;
+} ss_monotonic_instant;
+
 typedef struct {
     size_t size;
     uint32_t abi_version;
@@ -71,6 +77,9 @@ typedef struct {
     void (*resource_release)(uint32_t, uint64_t);
     void *(*runtime_spawn_blocking)(void *, ss_task);
     uint64_t (*callback_new)(ss_callback);
+    /* Null runtime reads real time; output initialized only for SS_READY. */
+    int32_t (*clock_now)(void *, ss_monotonic_instant *);
+    uint8_t (*clock_valid)(ss_monotonic_instant);
 } ss_api_v1;
 
 /* Unpublished development ABI; freeze table and protocol together at release. */

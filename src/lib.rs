@@ -35,7 +35,9 @@ pub mod process;
 /// Timers owned by the engine runtime.
 #[cfg(feature = "runtime")]
 pub mod time {
-    pub use simple_server_sys::{Elapsed, advance, sleep, timeout};
+    pub use simple_server_sys::{
+        Elapsed, Instant, Sleep, advance, sleep, sleep_until, timeout, timeout_at,
+    };
 }
 
 /// Optional, driver-independent database contracts.
@@ -54,8 +56,15 @@ pub mod web;
 #[cfg(feature = "extract")]
 pub mod extract;
 
+#[cfg(any(feature = "lifecycle", feature = "engine-lifecycle"))]
+mod shutdown;
+
 #[cfg(feature = "lifecycle")]
 pub mod lifecycle;
+
+/// Lifecycle coordination and explicit signals executed by the shared engine.
+#[cfg(feature = "engine-lifecycle")]
+pub mod engine_lifecycle;
 
 /// Explicit process-wide logging setup, independent of HTTP and lifecycle.
 #[cfg(feature = "logging")]

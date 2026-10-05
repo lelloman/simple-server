@@ -21,6 +21,11 @@ int main(void) {
     ss_runtime_options options = { sizeof(ss_runtime_options), 0, 0 };
     void *runtime = api->runtime_new(options);
     assert(runtime);
+    ss_monotonic_instant now;
+    assert(api->clock_now(runtime, &now) == SS_READY);
+    assert(api->clock_valid(now) == 1);
+    now.nanoseconds = 1000000000;
+    assert(api->clock_valid(now) == 0);
     unsigned calls = 0;
     ss_task root = { &calls, poll_root, release_root };
     assert(api->runtime_run(runtime, root) == SS_READY && calls == 1);

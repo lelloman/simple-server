@@ -21,8 +21,8 @@ including applicability checks and updates to both adoption trackers.
 
 An unpublished shared-engine implementation is under development. The opt-in
 `runtime`, `client`, `process`, and `sqlite-client` features use a Rust-built
-`libsimple_server_engine.so.1` through a C ABI. The HTTP server and existing
-lifecycle/scheduling modules still use the source backend. This is not yet the
+`libsimple_server_engine.so.1` through a C ABI. The public HTTP server and existing
+source lifecycle/scheduling modules still use the source backend. This is not yet the
 planned complete engine release, and no production consumer has migrated.
 
 The unpublished migration also owns the public networking and task-error
@@ -54,6 +54,17 @@ been measured. Callers choose the engine backend through `task_drivers`;
 existing `task_scheduling` callers retain their source runtime even when both
 features are enabled. The modules share their driver algorithms and behavioral
 tests. Full scheduler and supervisor execution migration is still pending.
+
+Shutdown coordination is available through `engine_lifecycle` with
+`default-features = false, features = ["engine-lifecycle"]`. It preserves borrowed
+service futures and one deadline shared by draining and cleanup. Explicit
+`Signals::install()` registers SIGINT/SIGTERM in the engine. This selection has
+12 normal/build dependencies beyond simple-server and no Tokio dependency.
+The existing `lifecycle` module keeps its source runtime; both modules share
+the coordination algorithm and runtime-independent `Shutdown` notification.
+`time::{Instant, Sleep, sleep_until, timeout_at}` use the engine clock, including
+paused time. Timers fix their deadline when constructed. These additions require
+a rebuilt development engine; older artifacts lack the appended clock ABI.
 
 For local development, run `bash scripts/check-engine`. It builds the engine
 separately, then verifies the bindings, C header, client/SQLite/process APIs and

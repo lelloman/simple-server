@@ -1,5 +1,59 @@
 # Service migration status
 
+## Engine lifecycle and deadlines — 2026-10-05
+
+Library implementation remains **Partial**; all production engine adoption,
+including Favzetto, remains **Pending**. This checkpoint starts from clean local
+`master` at `e0d5d86`, in isolated branch `implementation/engine-lifecycle` and
+worktree `target/worktrees/engine-lifecycle`. No consumer repository is changed.
+
+The new `engine-lifecycle` feature exposes `engine_lifecycle::{Lifecycle,
+Shutdown, Signals}`. Coordination preserves borrowed service futures, explicit
+signal installation, cancellation, error reporting and one deadline shared by
+service draining and cleanup. Source and engine APIs share the coordination
+algorithm and a runtime-independent sticky shutdown notification. Selecting the
+engine module is explicit; enabling both features leaves existing source
+callers on their source runtime. Full `TaskSet`, `Scheduler`, and public web
+execution migration remain unfinished.
+
+Owned engine `Instant`, `Sleep`, `sleep_until` and `timeout_at` now support
+absolute deadlines and paused clocks. Timer deadlines are fixed at construction,
+including when first polled later. The ABI appends `clock_now` and `clock_valid`,
+with signed seconds and normalized nanoseconds relative to a process-local
+native origin; no Rust Instant representation crosses the boundary. Native
+signal registrations use resource kind 10. Dropping them releases receivers but
+does not restore process-wide default signal handlers. The larger ABI table
+requires a rebuilt development engine; old artifacts are not compatible with
+the new bindings. Interval/reset and standard Instant conversions remain absent.
+
+The standalone `tests/fixtures/engine_lifecycle` consumer runs borrowed work,
+paused-clock draining/cleanup and explicit signal registration. Its normal/build
+graph has 12 dependencies excluding simple-server (13 including it), with no
+Tokio, Axum, Reqwest, Hyper, SQLx or Rustls. This is a feature-specific dependency
+count, not a measured compile-time or execution speedup. Default consumers still
+compile the source backend.
+
+Verification: the original ten lifecycle contracts passed before edits
+(`/tmp/simple-server-engine-lifecycle-baseline.log`). The same ten contracts pass
+on each backend, including deadline exhaustion and borrowed futures; four new
+clock/timer contracts pass. Source and engine child-process SIGINT/SIGTERM tests
+pass outside the sandbox; the first sandboxed engine attempt timed out. Strict
+workspace Clippy passed. The full source feature matrix, tests and rustdoc passed
+in `/tmp/simple-server-engine-lifecycle-full.log`; that run then caught a borrowed
+capture error in the new standalone fixture. After correcting only that fixture,
+the complete engine script passed (`/tmp/simple-server-engine-lifecycle-final-engine.log`),
+including native Clippy, sys/runtime tests, all four standalone binaries,
+heavy-dependency guards, C ABI smoke and artifact installer checks.
+
+A fresh Bookworm x86_64 artifact was built locally at
+`/tmp/simple-server-lifecycle-artifact-amd64`; its SHA256 is
+`88d175e260cfdb6768dfcebeba2d7f31a4c713146f8d4151aef94adc97b3162e`,
+with SONAME `libsimple_server_engine.so.1`. ARM was not rebuilt or retested for
+this checkpoint. The complete engine script also passed against this release
+artifact on the host (`/tmp/simple-server-engine-lifecycle-release-check.log`),
+including clocks, lifecycle, signals, standalone consumers and C ABI checks.
+No release, push, or deployment is authorized or performed.
+
 ## Engine scheduling drivers — 2026-10-05
 
 Engine implementation remains **Partial** and all production adoption remains
