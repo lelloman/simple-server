@@ -36,8 +36,12 @@ including typed panic recovery and owned closed-admission errors. Final
 `bash scripts/check` passed (`/tmp/simple-server-owned-network-final.log`),
 including strict Clippy, the feature matrix, doctests/docs, source HTTP/TLS/Unix
 and WebSocket tests, and engine ABI/artifact/standalone-consumer checks. Engine
-implementation and ABI are unchanged in this checkpoint. Local integration is
-pending at this point.
+implementation and ABI are unchanged in this checkpoint. Tracker JavaScript
+syntax and the new evidence link were validated. Reviewed commit `c057c34` was
+integrated by rebasing local `master` onto `implementation/owned-network`; the
+integrated tree matched the tested tree and there were no concurrent local edits
+to preserve. The temporary worktree and branch are removed after integrating
+this verification record. No push, publication or deployment was performed.
 
 ## Shared-engine HTTP transport checkpoint — 2026-10-05
 
