@@ -39,7 +39,14 @@ and Tower composition, protocols, TLS/Unix transport, runtime-dependent library
 modules, Favzetto adoption, full ARM verification and performance/release gates.
 The public web backend is still the source implementation. No public signature,
 consumer checkout, remote branch, release or deployment was changed here.
-Integration and cleanup evidence will be recorded after the checkpoint commit.
+Reviewed implementation commit `28dea84` was integrated by rebasing library
+`master` onto `implementation/engine-http`. The integrated tree matched the
+tested tree, with no concurrent edits to preserve. Workspace strict Clippy and
+the seven final transport tests also passed against the release-built Bookworm
+library after adding explicit stale-body-registration checks. The original
+checkout is clean. The temporary worktree/branch are removed after integrating
+this verification record; the public adapter and consumer migration remain
+unfinished.
 
 ## Shared engine implementation — 2026-10-05 (in progress)
 
