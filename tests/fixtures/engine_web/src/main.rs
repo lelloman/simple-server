@@ -1,7 +1,8 @@
 use simple_server::{
     client::Client,
     engine_web::{
-        self, Json, Method, MethodRouter, Query, RequestMetadata, Response, Router, Shutdown, State,
+        self, Extension, Form, Handler, Json, Method, MethodRouter, Query, RequestMetadata,
+        Response, Router, Shutdown, State,
     },
     runtime::spawn,
 };
@@ -28,6 +29,21 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         "/typed",
         MethodRouter::new()?.on_state(Method::POST, "engine".to_owned(), typed)?,
     )?;
+    async fn form(
+        Extension(prefix): Extension<String>,
+        Form(mut fields): Form<std::collections::BTreeMap<String, String>>,
+    ) -> Form<std::collections::BTreeMap<String, String>> {
+        fields.insert("prefix".into(), prefix);
+        Form(fields)
+    }
+    let router = router.route(
+        "/form",
+        MethodRouter::new()?.on(Method::POST, |mut request| async move {
+            // Host-local request context is installed before typed extraction.
+            request.extensions_mut().insert("engine".to_owned());
+            form.call(request, ()).await
+        })?,
+    )?;
     let listener = engine_web::bind("127.0.0.1:0").await?;
     let address = listener.local_addr();
     let url = format!("http://{}/echo/engine", listener.local_addr());
@@ -52,6 +68,19 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         response.json::<serde_json::Value>().await?,
         serde_json::json!({"prefix":"engine","word":"hello","input":{"count":7}})
     );
+    let response = Client::builder()
+        .no_proxy()
+        .build()?
+        .post(format!("http://{address}/form"))
+        .header("content-type", "application/x-www-form-urlencoded")
+        .body(b"word=a+b%2Bc".to_vec())
+        .send()
+        .await?;
+    assert_eq!(
+        response.headers()["content-type"],
+        "application/x-www-form-urlencoded"
+    );
+    assert_eq!(response.text().await?, "prefix=engine&word=a+b%2Bc");
     shutdown.request();
     server.await??;
     println!("public engine HTTP consumer passed");

@@ -233,7 +233,8 @@ impl<S: Sync, T: Clone + Send + Sync + 'static> FromRequestParts<S> for Option<E
         Ok(parts.extensions.get::<T>().cloned().map(Extension))
     }
 }
-/// URL-encoded forms: GET/HEAD read the query; other methods read the body.
+/// URL-encoded forms: GET reads the query; other methods (including HEAD) read
+/// the body, preserving the source backend's behavior.
 #[derive(Debug, Clone, Copy)]
 pub struct Form<T>(pub T);
 impl<S, T> FromRequest<S> for Form<T>

@@ -306,11 +306,11 @@ the prohibition on multiple body consumers.
 runtime-independent HeaderMap/URI/Method and Result-capture implementations now
 live with that contract instead of inside source `web`. Engine State/substate,
 Query, JSON/optional JSON, raw query, matched path and direct TCP peer extraction
-operate on the owned request boundary. Generic path/form and extension adapters
-remain separate parity work.
+operate on the owned request boundary. Typed path extraction remains separate
+parity work.
 
-String, Bytes and JSON extraction collect at most 2 MiB unless the request has a
-`BodyLimit(usize)` extension. Raw requests and lazy bodies are unaffected. Missing
+String, Bytes, JSON and body-based Form extraction collect at most 2 MiB unless
+the request has a `BodyLimit(usize)` extension. Raw requests and lazy bodies are unaffected. Missing
 Content-Type alone makes optional JSON absent; declared invalid JSON still rejects.
 MIME parsing and path-aware Serde errors preserve source rejection status, headers
 and text. Body read failures map to 400; collection-limit failures map to 413.
@@ -320,6 +320,25 @@ types to 415. Head extraction failure returns before polling the body.
 Common response conversion covers text/binary bodies, JSON, HTML, status codes,
 HeaderMap, status/header tuples, Result and custom rejection responses. JSON
 serialization failure returns a plain-text 500 response. Header arrays, redirects,
-Form responses and the full source conversion surface are not yet implemented.
+and the full source conversion surface are not yet implemented.
 Response extensions still remain host-side and do not cross the existing ABI.
 The native engine and ABI do not change in this checkpoint.
+
+## Engine forms and request extensions (development)
+
+`Form<T>` uses GET queries and otherwise reads the bounded body, including for
+HEAD. This follows the actual source backend, whose former wrapper comment
+incorrectly described HEAD as reading the query. Deserialization errors retain
+400 for GET/HEAD and 422 for other methods. The current content-type prefix check,
+path-aware Serde diagnostics, repeated-field behavior and percent/plus decoding
+match the source backend. Missing or unsupported content types return 415 without
+polling the body. Form serialization emits URL-encoded responses or a plain-text
+500 when serialization fails.
+
+`Extension<T>` and `Option<Extension<T>>` clone typed values from the host request.
+Missing required values preserve the source rejection exactly (including its
+legacy Axum reference); only absence makes the optional form return None.
+Request extensions are local Rust values, not wire data. A raw handler or custom
+head extractor can install them before invoking typed extraction. This does not
+provide Tower extension layers, engine-side extension storage or a generic router
+middleware pipeline. No native code, ABI or dependency additions are required.

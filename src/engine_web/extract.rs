@@ -17,6 +17,14 @@ pub struct State<T>(pub T);
 pub struct Query<T>(pub T);
 #[derive(Clone, Copy, Debug)]
 pub struct Json<T>(pub T);
+/// URL-encoded forms. GET reads the query; other methods (including HEAD) read
+/// the bounded body. This preserves the source backend's extraction behavior.
+#[derive(Clone, Copy, Debug)]
+pub struct Form<T>(pub T);
+/// A value installed in the host request's extensions before typed extraction.
+/// Arbitrary extensions are local to the host and never cross the engine ABI.
+#[derive(Clone, Copy, Debug)]
+pub struct Extension<T>(pub T);
 #[derive(Clone, Debug)]
 pub struct RawQuery(pub Option<String>);
 #[derive(Clone, Debug)]
@@ -86,6 +94,26 @@ impl<S: Sync> FromRequestParts<S> for RawQuery {
     type Rejection = Infallible;
     async fn from_request_parts(parts: &mut Parts, _: &S) -> Result<Self, Self::Rejection> {
         Ok(Self(parts.uri.query().map(str::to_owned)))
+    }
+}
+impl<S: Sync, T: Clone + Send + Sync + 'static> FromRequestParts<S> for Extension<T> {
+    type Rejection = RejectionResponse;
+    async fn from_request_parts(parts: &mut Parts, _: &S) -> Result<Self, Self::Rejection> {
+        parts.extensions.get::<T>().cloned().map(Self).ok_or_else(|| {
+            rejection(
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!(
+                    "Missing request extension: Extension of type `{}` was not found. Perhaps you forgot to add it? See `axum::Extension`.",
+                    std::any::type_name::<T>()
+                ),
+            )
+        })
+    }
+}
+impl<S: Sync, T: Clone + Send + Sync + 'static> FromRequestParts<S> for Option<Extension<T>> {
+    type Rejection = Infallible;
+    async fn from_request_parts(parts: &mut Parts, _: &S) -> Result<Self, Self::Rejection> {
+        Ok(parts.extensions.get::<T>().cloned().map(Extension))
     }
 }
 impl<S: Sync> FromRequestParts<S> for MatchedPath {
@@ -233,6 +261,47 @@ impl<S: Send + Sync, T: FromRequest<S>> FromRequest<S> for Result<T, T::Rejectio
         Ok(T::from_request(request, state).await)
     }
 }
+impl<S: Send + Sync, T: serde::de::DeserializeOwned> FromRequest<S> for Form<T> {
+    type Rejection = RejectionResponse;
+    async fn from_request(request: Request, state: &S) -> Result<Self, Self::Rejection> {
+        let query_error =
+            request.method() == http::Method::GET || request.method() == http::Method::HEAD;
+        let bytes = if request.method() == http::Method::GET {
+            Bytes::copy_from_slice(request.uri().query().unwrap_or_default().as_bytes())
+        } else {
+            // Preserve the source backend's prefix check, including its handling
+            // of parameters, rather than silently tightening MIME validation.
+            if !request
+                .headers()
+                .get(http::header::CONTENT_TYPE)
+                .and_then(|value| value.to_str().ok())
+                .is_some_and(|value| value.starts_with("application/x-www-form-urlencoded"))
+            {
+                return Err(rejection(
+                    StatusCode::UNSUPPORTED_MEDIA_TYPE,
+                    "Form requests must have `Content-Type: application/x-www-form-urlencoded`",
+                ));
+            }
+            Bytes::from_request(request, state).await?
+        };
+        let deserializer = serde_urlencoded::Deserializer::new(form_urlencoded::parse(&bytes));
+        serde_path_to_error::deserialize(deserializer)
+            .map(Self)
+            .map_err(|error| {
+                if query_error {
+                    rejection(
+                        StatusCode::BAD_REQUEST,
+                        format!("Failed to deserialize form: {error}"),
+                    )
+                } else {
+                    rejection(
+                        StatusCode::UNPROCESSABLE_ENTITY,
+                        format!("Failed to deserialize form body: {error}"),
+                    )
+                }
+            })
+    }
+}
 macro_rules! deref {
     ($ty:ident) => {
         impl<T> std::ops::Deref for $ty<T> {
@@ -250,3 +319,4 @@ macro_rules! deref {
 }
 deref!(State);
 deref!(Json);
+deref!(Form);

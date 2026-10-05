@@ -1,5 +1,5 @@
 //! Common response conversions without a source HTTP framework.
-use super::{Body, HeaderMap, Json, Response, StatusCode};
+use super::{Body, Form, HeaderMap, Json, Response, StatusCode};
 use crate::extract::RejectionResponse;
 pub trait IntoResponse {
     fn into_response(self) -> Response;
@@ -49,6 +49,14 @@ impl<T: serde::Serialize> IntoResponse for Json<T> {
     fn into_response(self) -> Response {
         match serde_json::to_vec(&self.0) {
             Ok(bytes) => content(Body::from(bytes), "application/json"),
+            Err(error) => (StatusCode::INTERNAL_SERVER_ERROR, error.to_string()).into_response(),
+        }
+    }
+}
+impl<T: serde::Serialize> IntoResponse for Form<T> {
+    fn into_response(self) -> Response {
+        match serde_urlencoded::to_string(&self.0) {
+            Ok(body) => content(Body::from(body), "application/x-www-form-urlencoded"),
             Err(error) => (StatusCode::INTERNAL_SERVER_ERROR, error.to_string()).into_response(),
         }
     }

@@ -1,5 +1,45 @@
 # Service migration status
 
+## Engine forms and request extensions — 2026-10-05
+
+Engine implementation remains **Partial** and all production adoption remains
+**Pending**. This checkpoint starts from clean local `master` `fae18de`, in
+`implementation/engine-forms` and isolated worktree `target/worktrees/engine-forms`.
+No consumer repository is changed.
+
+Engine Form extraction and responses, plus required/optional host-local Extension
+extraction, are implemented. GET reads the query; HEAD and other methods read the
+bounded body. This preserves the actual source behavior and corrects the source
+wrapper's misleading HEAD comment. Source status/header/body contracts, MIME
+prefix acceptance, decoding, default 2 MiB limits and per-request overrides are
+preserved. Extension errors retain the legacy source diagnostic text. No arbitrary
+Rust extension crosses the ABI; Tower layers and generic middleware remain pending.
+Typed path extraction needs a dedicated scalar/tuple/struct deserializer and is
+still pending, alongside generic router state, response helpers and protocol work.
+
+The baseline passed 25 tests: existing engine extraction/parity (8), source web
+core (14) and extraction (3), recorded in `/tmp/simple-server-forms-baseline.log`.
+Five new focused tests pass (`/tmp/simple-server-forms-contracts.log`), including
+120 method/content-type/payload comparisons against source, form response success
+and serialization failure, exact missing-extension rejection, body limits, stream
+errors and proof that rejected requests do not poll their body. The standalone
+public HTTP fixture additionally serves a form route using a host-local extension.
+
+The full `bash scripts/check` passes (`/tmp/simple-server-forms-full.log`):
+strict workspace/native Clippy, source feature matrix and protocol regressions,
+rustdoc, combined and engine-only contracts, all seven standalone engine binaries,
+dependency guards, C ABI smoke and artifact installer tests. The engine-only test
+import was subsequently feature-gated; three minimal engine-web tests pass again
+without the unused-import warning (`/tmp/simple-server-forms-final.log`). Tracker
+script syntax and evidence links pass validation. The HTTP fixture graph remains
+28 dependency packages excluding library and fixture, with no Axum, Tokio, Hyper,
+Reqwest, SQLx or Rustls (`/tmp/simple-server-forms-graph.txt`).
+
+No native/ABI or dependency changes are needed. The existing Bookworm x86_64
+artifact at `/tmp/simple-server-lifecycle-artifact-amd64` is reused; ARM is not
+retested. No measured compile/runtime speedup or production adoption is claimed.
+No push, publication or deployment is performed.
+
 ## Typed engine handlers and extraction — 2026-10-05
 
 Engine implementation remains **Partial** and all production adoption, including

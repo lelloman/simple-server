@@ -2,7 +2,7 @@
 //! in the consumer graph. Handlers accept an owned `Request` and return `Response`.
 //!
 //! This is an explicit development API, not yet a drop-in replacement for `web`:
-//! typed path/form extraction, generic router state, layers, TLS, Unix sockets and protocol
+//! typed path extraction, generic router state, layers, TLS, Unix sockets and protocol
 //! upgrades remain unimplemented. Capture application state in handler closures.
 //! Register handlers and serve inside the application's engine runtime.
 //! Typed handlers allow body extraction only in the final position:
@@ -26,7 +26,8 @@ pub mod response;
 mod routing;
 pub use crate::extract::{Extract, FromRequestParts, IntoRejectionResponse, RejectionResponse};
 pub use extract::{
-    BodyLimit, ConnectInfo, FromRequest, FromState, Json, MatchedPath, Query, RawQuery, State,
+    BodyLimit, ConnectInfo, Extension, Form, FromRequest, FromState, Json, MatchedPath, Query,
+    RawQuery, State,
 };
 pub use handler::Handler;
 pub use response::IntoResponse;
