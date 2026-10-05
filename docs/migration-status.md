@@ -1,5 +1,60 @@
 # Service migration status
 
+## Engine scheduling drivers — 2026-10-05
+
+Engine implementation remains **Partial** and all production adoption remains
+**Pending**, including Favzetto. Work starts from clean library `master`
+`814f64d` in isolated branch `implementation/engine-drivers`, worktree
+`target/worktrees/engine-drivers`. No consumer repository is changed.
+
+`task-drivers` now exposes engine-backed `task_drivers::run_bounded_batch` and
+`run_poll_worker` independently of the full scheduler. Both reuse the existing
+algorithms: batches keep bounded admission, report typed panic payloads, and
+abort children when dropped; polling drains the accepted cycle, uses the
+caller-selected cadence and yields on zero delay. The application supplies the
+engine runtime, persistence and reporting. No hidden runtime is created.
+
+Backend selection is explicit by API module: `task_drivers` uses the engine,
+while `task_scheduling` keeps source execution even when both features are
+enabled. This avoids changing an existing caller's runtime requirements through
+Cargo feature unification. The modules share the driver/error implementation
+files and behavioral test contracts. Full `Scheduler`, `TaskSet`, lifecycle clocks/signals and
+public web adapters are still on the source backend. This checkpoint adds no
+engine ABI or native implementation change.
+
+For applications using only these helpers, normal/build dependency packages
+excluding simple-server drop from 30 (`--no-default-features --features
+task-scheduling`) to seven (`--no-default-features --features task-drivers`).
+The new standalone `engine_drivers` fixture has eight dependencies including
+simple-server, contains no direct or transitive Tokio, and actually runs bounded
+work and polling through the prebuilt engine. Graphs are recorded in
+`/tmp/simple-server-engine-drivers-source-graph.txt` and
+`/tmp/simple-server-engine-drivers-engine-graph.txt`. This compares the available
+feature selections for that helper-only use case; the engine is prebuilt
+separately, full scheduler parity is not claimed, and compile/runtime timing has
+not been benchmarked. The default source consumer graph is unchanged.
+
+The six original driver tests passed before edits
+(`/tmp/simple-server-engine-drivers-baseline.log`). Five shared behavioral tests
+pass with the engine-only feature
+(`/tmp/simple-server-engine-drivers-contracts.log`); the sixth checks selection
+helpers belonging to the full scheduler. Source scheduler, policy, selection,
+driver and task-set tests also pass
+(`/tmp/simple-server-engine-drivers-source-tests.log`). The independent fixture
+runs successfully (`/tmp/simple-server-engine-drivers-fixture.log`). The same
+contract tests exercise both API modules on their respective runtimes when both
+features are enabled.
+The engine check script now runs the drivers and fixture and rejects heavy
+runtime dependencies in both standalone fixture graphs. Final `bash scripts/check`
+passed (`/tmp/simple-server-engine-drivers-final-check.log`), including strict
+Clippy, all source feature checks, engine-only and combined-feature contracts,
+docs, ABI/artifact checks and all three standalone binaries. The final
+coexistence run separately records both backend contracts
+(`/tmp/simple-server-engine-drivers-coexistence.log`). The new fixture also
+passes strict Clippy (`/tmp/simple-server-engine-drivers-fixture-clippy.log`).
+Tracker JavaScript syntax and the new evidence link were validated. Local
+integration is pending.
+
 ## Engine task collections — 2026-10-05
 
 Library implementation remains **Partial**; production engine adoption,

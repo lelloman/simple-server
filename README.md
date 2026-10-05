@@ -40,8 +40,20 @@ reduce the default consumer dependency graph.
 Engine tasks can now be collected with `runtime::JoinSet`: join by completion,
 retain task IDs through errors, abort and drain, or explicitly detach. Runtime
 handles support spawning from other threads without exposing Tokio. These APIs
-use the existing prebuilt engine and add no consumer dependencies. Existing
-`tasks::TaskSet` and scheduling drivers still need to be migrated to them.
+use the existing prebuilt engine and add no consumer dependencies.
+`tasks::TaskSet` and the full scheduler still need execution migration.
+
+For bounded batches and durable-work polling alone, use
+`default-features = false, features = ["task-drivers"]` and the
+`simple_server::task_drivers::{run_bounded_batch, run_poll_worker}` APIs inside an
+owned engine runtime. This feature has seven normal/build dependency packages
+(excluding simple-server), compared with 30 for source `task-scheduling` without
+default features. It does not compile Tokio. These counts describe the Rust
+consumer graph; the engine is supplied separately, and no timing speedup has
+been measured. Callers choose the engine backend through `task_drivers`;
+existing `task_scheduling` callers retain their source runtime even when both
+features are enabled. The modules share their driver algorithms and behavioral
+tests. Full scheduler and supervisor execution migration is still pending.
 
 For local development, run `bash scripts/check-engine`. It builds the engine
 separately, then verifies the bindings, C header, client/SQLite/process APIs and

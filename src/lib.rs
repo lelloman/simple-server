@@ -100,6 +100,10 @@ pub mod tasks;
 #[cfg(feature = "task-scheduling")]
 pub mod task_scheduling;
 
+/// Engine-backed bounded batches and durable-work polling without the full scheduler.
+#[cfg(feature = "task-drivers")]
+pub mod task_drivers;
+
 /// Optional execution budgets, retries, circuit breakers and pause state.
 #[cfg(feature = "task-policies")]
 pub mod task_policies;

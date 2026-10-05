@@ -1,6 +1,10 @@
 //! Application-owned scheduling. `Scheduler` provides bounded execution with
 //! static registration; `CronRegistry` provides dynamic timing without execution.
 //! Neither starts a hidden supervisor. Applications own reporting and storage.
+//!
+//! These APIs use the source runtime. The independent `task_drivers` module
+//! provides engine-backed bounded batches and polling without the full scheduler.
+use tokio::task as execution;
 mod driver;
 pub use driver::{PollCadence, PollOutcome, run_bounded_batch, run_poll_worker};
 mod join_error;

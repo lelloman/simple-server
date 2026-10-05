@@ -1,7 +1,7 @@
 //! Drivers for application-owned durable work. No storage or leases are inferred.
-use super::JoinError;
+use super::{JoinError, execution};
+use execution::JoinSet;
 use std::{future::Future, num::NonZeroUsize, time::Duration};
-use tokio::task::JoinSet;
 
 /// Result of a completed claim-and-execute cycle. The caller commits durable
 /// outcomes before returning. Errors can be logged/classified by the callback.
@@ -53,7 +53,7 @@ pub async fn run_poll_worker<S, C, CF, W, WF>(
         let outcome = cycle().await;
         let delay = cadence.delay(outcome);
         if delay.is_zero() {
-            tokio::task::yield_now().await;
+            execution::yield_now().await;
         } else {
             wait(outcome, delay).await;
         }

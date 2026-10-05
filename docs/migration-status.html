@@ -73,6 +73,17 @@
   </header>
   <main>
     <section class="note" id="shared-engine">
+      <p><strong>Engine scheduling drivers (2026-10-05): implementation Partial; adoption Pending.</strong>
+      The new task-drivers feature runs bounded batches and polling through the
+      engine without the full scheduler. For helper-only users, the library's
+      normal/build dependency count drops from 30 to seven, excluding the
+      library itself; a standalone consumer actually runs the helpers without
+      Tokio. Callers select the backend by module; enabling both features preserves
+      existing source callers' runtime requirements. The full scheduler, supervisor,
+      lifecycle and public web execution migration remain unfinished. The full
+      feature matrix, engine contracts, source regression tests, docs and strict
+      Clippy pass. Local integration is pending. No production consumer changed.
+      See the <a href="migration-status.md#engine-scheduling-drivers--2026-10-05">scope and evidence</a>.</p>
       <p><strong>Engine task collections (2026-10-05): implementation Partial; adoption Pending.</strong>
       Owned JoinSet, task IDs and runtime handles execute through the existing
       engine with no new consumer dependency or ABI change. Tests cover
