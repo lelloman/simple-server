@@ -13,7 +13,10 @@ use std::{
     panic::{AssertUnwindSafe, catch_unwind, resume_unwind},
     pin::Pin,
     ptr::NonNull,
-    sync::{Arc, Mutex, OnceLock, Weak},
+    sync::{
+        Arc, Mutex, OnceLock, Weak,
+        atomic::{AtomicBool, AtomicU64, Ordering},
+    },
     task::{Context, Poll, Waker},
     time::Duration,
 };
@@ -141,6 +144,11 @@ impl Runtime {
     pub fn new() -> io::Result<Self> {
         Builder::new_multi_thread().build()
     }
+    /// Obtain a handle usable for spawning from other threads. A handle does
+    /// not keep the runtime alive; retain this Runtime until work is drained.
+    pub fn handle(&self) -> Handle {
+        Handle(Arc::downgrade(&self.0))
+    }
     pub fn block_on<F: Future>(&self, future: F) -> F::Output {
         assert!(
             CURRENT.with(|current| current.borrow().upgrade().is_none()),
@@ -193,6 +201,42 @@ impl Runtime {
     }
 }
 
+/// A non-owning handle to an engine runtime. Dropping it does not stop tasks.
+#[derive(Clone)]
+pub struct Handle(Weak<Inner>);
+impl Handle {
+    /// Look up the runtime currently polling the application callback.
+    pub fn try_current() -> io::Result<Self> {
+        current().map(|inner| Self(Arc::downgrade(&inner)))
+    }
+    pub fn current() -> Self {
+        Self::try_current().expect("no active simple-server engine runtime")
+    }
+    /// Spawn from any thread. Panics if the owning runtime has been dropped.
+    pub fn spawn<F>(&self, future: F) -> JoinHandle<F::Output>
+    where
+        F: Future + Send + 'static,
+        F::Output: Send + 'static,
+    {
+        spawn_on(
+            self.0.upgrade().expect("engine runtime has been dropped"),
+            future,
+            false,
+        )
+    }
+    pub fn spawn_blocking<F, R>(&self, function: F) -> JoinHandle<R>
+    where
+        F: FnOnce() -> R + Send + 'static,
+        R: Send + 'static,
+    {
+        spawn_on(
+            self.0.upgrade().expect("engine runtime has been dropped"),
+            async move { function() },
+            true,
+        )
+    }
+}
+
 pub struct Builder {
     workers: u32,
     paused: bool,
@@ -232,11 +276,33 @@ impl Builder {
     }
 }
 
+/// Identity of an engine task. IDs are never reused by this bindings instance.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct Id(u64);
+impl Id {
+    fn next() -> Self {
+        static NEXT: AtomicU64 = AtomicU64::new(1);
+        Self(
+            NEXT.fetch_update(Ordering::Relaxed, Ordering::Relaxed, |id| id.checked_add(1))
+                .expect("engine task IDs exhausted"),
+        )
+    }
+}
+impl fmt::Display for Id {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.0.fmt(f)
+    }
+}
+
 /// Cancellation or an application panic. Panic payloads never enter the engine.
 pub struct JoinError {
+    id: Id,
     panic: Option<Box<dyn Any + Send>>,
 }
 impl JoinError {
+    pub fn id(&self) -> Id {
+        self.id
+    }
     pub fn is_cancelled(&self) -> bool {
         self.panic.is_none()
     }
@@ -273,16 +339,17 @@ impl std::error::Error for JoinError {}
 struct Completion<T> {
     result: Option<Result<T, JoinError>>,
     waker: Option<Waker>,
-    finished: bool,
+    finished: Arc<AtomicBool>,
 }
 impl<T> Completion<T> {
     fn finish(&mut self, result: Result<T, JoinError>) -> Option<Waker> {
-        self.finished = true;
         self.result = Some(result);
+        self.finished.store(true, Ordering::Release);
         self.waker.take()
     }
 }
 struct Spawned<F: Future> {
+    id: Id,
     future: Option<Pin<Box<F>>>,
     completion: Arc<Mutex<Completion<F::Output>>>,
     runtime: Weak<Inner>,
@@ -306,7 +373,13 @@ unsafe extern "C" fn poll_spawned<F: Future>(context: *mut c_void, wake: Wake) -
     let (result, status) = match result {
         Ok(Poll::Pending) => return PENDING,
         Ok(Poll::Ready(value)) => (Ok(value), READY),
-        Err(panic) => (Err(JoinError { panic: Some(panic) }), PANICKED),
+        Err(panic) => (
+            Err(JoinError {
+                id: task.id,
+                panic: Some(panic),
+            }),
+            PANICKED,
+        ),
     };
     let waker = task
         .completion
@@ -325,13 +398,15 @@ unsafe extern "C" fn release_spawned<F: Future>(context: *mut c_void) {
         let task = unsafe { Box::from_raw(context.cast::<Spawned<F>>()) };
         let _entered = Enter::new(task.runtime.clone());
         let completion = task.completion.clone();
+        let id = task.id;
         let dropped = catch_unwind(AssertUnwindSafe(|| drop(task)));
         let waker = {
             let mut completion = completion.lock().unwrap();
-            if completion.finished {
+            if completion.finished.load(Ordering::Acquire) {
                 None
             } else {
                 completion.finish(Err(JoinError {
+                    id,
                     panic: dropped.err(),
                 }))
             }
@@ -342,21 +417,31 @@ unsafe extern "C" fn release_spawned<F: Future>(context: *mut c_void) {
     });
 }
 
-struct TaskControl(NonNull<c_void>);
+struct TaskControl {
+    pointer: NonNull<c_void>,
+    id: Id,
+    finished: Arc<AtomicBool>,
+}
 // Abort handles may be used concurrently and outlive runtime shutdown.
 unsafe impl Send for TaskControl {}
 unsafe impl Sync for TaskControl {}
 impl Drop for TaskControl {
     fn drop(&mut self) {
-        unsafe { (api().task_release)(self.0.as_ptr()) };
+        unsafe { (api().task_release)(self.pointer.as_ptr()) };
     }
 }
 
 #[derive(Clone)]
 pub struct AbortHandle(Arc<TaskControl>);
 impl AbortHandle {
+    pub fn id(&self) -> Id {
+        self.0.id
+    }
+    pub fn is_finished(&self) -> bool {
+        self.0.finished.load(Ordering::Acquire)
+    }
     pub fn abort(&self) {
-        unsafe { (api().task_abort)(self.0.0.as_ptr()) };
+        unsafe { (api().task_abort)(self.0.pointer.as_ptr()) };
     }
 }
 
@@ -365,6 +450,9 @@ pub struct JoinHandle<T> {
     control: AbortHandle,
 }
 impl<T> JoinHandle<T> {
+    pub fn id(&self) -> Id {
+        self.control.id()
+    }
     pub fn abort(&self) {
         self.control.abort();
     }
@@ -372,7 +460,7 @@ impl<T> JoinHandle<T> {
         self.control.clone()
     }
     pub fn is_finished(&self) -> bool {
-        self.completion.lock().unwrap().finished
+        self.control.is_finished()
     }
 }
 impl<T> Future for JoinHandle<T> {
@@ -382,7 +470,10 @@ impl<T> Future for JoinHandle<T> {
         if let Some(result) = completion.result.take() {
             Poll::Ready(result)
         } else {
-            assert!(!completion.finished, "JoinHandle polled after completion");
+            assert!(
+                !completion.finished.load(Ordering::Acquire),
+                "JoinHandle polled after completion"
+            );
             completion.waker = Some(cx.waker().clone());
             Poll::Pending
         }
@@ -410,13 +501,26 @@ where
     F: Future + Send + 'static,
     F::Output: Send + 'static,
 {
-    let runtime = current().expect("spawn requires an engine runtime");
+    spawn_on(
+        current().expect("spawn requires an engine runtime"),
+        future,
+        blocking,
+    )
+}
+fn spawn_on<F>(runtime: Arc<Inner>, future: F, blocking: bool) -> JoinHandle<F::Output>
+where
+    F: Future + Send + 'static,
+    F::Output: Send + 'static,
+{
+    let id = Id::next();
+    let finished = Arc::new(AtomicBool::new(false));
     let completion = Arc::new(Mutex::new(Completion {
         result: None,
         waker: None,
-        finished: false,
+        finished: finished.clone(),
     }));
     let task = Box::new(Spawned {
+        id,
         future: Some(Box::pin(future)),
         completion: completion.clone(),
         runtime: Arc::downgrade(&runtime),
@@ -436,7 +540,11 @@ where
         NonNull::new(control).unwrap_or_else(|| panic!("engine spawn failed: {}", last_error()));
     JoinHandle {
         completion,
-        control: AbortHandle(Arc::new(TaskControl(control))),
+        control: AbortHandle(Arc::new(TaskControl {
+            pointer: control,
+            id,
+            finished,
+        })),
     }
 }
 
@@ -553,6 +661,9 @@ impl Drop for Operation {
         unsafe { (api().operation_release)(self.pointer.as_ptr()) };
     }
 }
+
+mod join_set;
+pub use join_set::JoinSet;
 
 mod callback;
 pub use callback::{Callback, Reply};

@@ -73,6 +73,16 @@
   </header>
   <main>
     <section class="note" id="shared-engine">
+      <p><strong>Engine task collections (2026-10-05): implementation Partial; adoption Pending.</strong>
+      Owned JoinSet, task IDs and runtime handles execute through the existing
+      engine with no new consumer dependency or ABI change. Tests cover
+      cancellation, abort/detach, typed panics, concurrent completion, foreign
+      threads and runtime shutdown. Engine checks and strict workspace Clippy
+      pass; the standalone consumer remains at 22 dependency packages without
+      Tokio or the heavy HTTP/database stacks. Existing task supervisors and
+      scheduling drivers still need execution migration. No production consumer
+      has migrated. Local integration is pending. See the
+      <a href="migration-status.md#engine-task-collections--2026-10-05">evidence and remaining scope</a>.</p>
       <p><strong>Owned Tokio-facing contracts (2026-10-05): implementation Partial; adoption Pending.</strong>
       HTTP/TLS/Unix serving and the harness now use owned listener types; bind
       inputs use an owned asynchronous address trait. Batch-task errors preserve

@@ -37,6 +37,12 @@ must update those annotations. These source adapters still require Tokio;
 wrapping their public contracts does not yet move execution into the engine or
 reduce the default consumer dependency graph.
 
+Engine tasks can now be collected with `runtime::JoinSet`: join by completion,
+retain task IDs through errors, abort and drain, or explicitly detach. Runtime
+handles support spawning from other threads without exposing Tokio. These APIs
+use the existing prebuilt engine and add no consumer dependencies. Existing
+`tasks::TaskSet` and scheduling drivers still need to be migrated to them.
+
 For local development, run `bash scripts/check-engine`. It builds the engine
 separately, then verifies the bindings, C header, client/SQLite/process APIs and
 a standalone consumer without heavy runtime dependencies. To use an existing

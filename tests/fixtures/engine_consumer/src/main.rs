@@ -26,6 +26,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     })
     .await?;
     assert_eq!(value, 42);
+    let mut tasks = runtime::JoinSet::new();
+    let async_task = tasks.spawn(async { 7 });
+    let blocking_task = tasks.spawn_blocking(|| 11);
+    let mut sum = 0;
+    while let Some(result) = tasks.join_next_with_id().await {
+        let (id, value) = result?;
+        assert!(id == async_task.id() || id == blocking_task.id());
+        sum += value;
+    }
+    assert_eq!(sum, 18);
+    assert!(runtime::Handle::try_current().is_ok());
     let _client = simple_server::client::Client::builder()
         .no_proxy()
         .build()?;

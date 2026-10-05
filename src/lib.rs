@@ -13,7 +13,8 @@
 #[cfg(feature = "runtime")]
 pub mod runtime {
     pub use simple_server_sys::{
-        AbortHandle, Builder, JoinError, JoinHandle, Runtime, spawn, spawn_blocking, yield_now,
+        AbortHandle, Builder, Handle, Id, JoinError, JoinHandle, JoinSet, Runtime, spawn,
+        spawn_blocking, yield_now,
     };
 }
 

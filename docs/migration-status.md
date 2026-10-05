@@ -1,5 +1,53 @@
 # Service migration status
 
+## Engine task collections — 2026-10-05
+
+Library implementation remains **Partial**; production engine adoption,
+including Favzetto, remains **Pending**. Work starts from clean library `master`
+`c317ba8`. Initial isolated branch `implementation/engine-tasks` lost its
+`/tmp/simple-server-engine-tasks` directory during validation; the main checkout
+was unchanged. Recorded patches were restored on `implementation/engine-taskset`
+in the ignored, isolated worktree
+`target/worktrees/engine-taskset`, and validation was rerun there. No consumer
+checkout was changed.
+
+The engine-backed runtime now exposes owned `JoinSet`, `Id` and `Handle` APIs.
+Task IDs remain available on join handles, abort handles and panic/cancellation
+errors. Collections support asynchronous or nonblocking joins (with or without
+IDs), bounded ready-queue polling, abort/drain, explicit detach, and spawning on
+selected runtimes from foreign threads. Drop requests cancellation rather than
+pretending work already stopped; a running blocking function still completes
+normally. Application results and typed panic payloads remain in the host.
+Handles do not keep a runtime alive and reject spawning after its owner drops.
+
+The implementation adds no dependency and does not change the C ABI or native
+engine. It runs against the existing local x86_64 Bookworm HTTP engine artifact
+with SHA-256
+`4337d1b6a3d3e1c6cdd9c7b4eb832c4783eace8c2ec5ad8b7ddec5c0c1a08126`.
+The standalone consumer now exercises task collections and runtime lookup; its
+22-package normal/build dependency graph still excludes Tokio, Axum, Hyper,
+Reqwest, SQLx and Rustls. This is fixture adoption, not production adoption or a
+claim that the default source-library build is lean. Existing `tasks::TaskSet`,
+scheduling drivers, lifecycle clocks/signals and public web adapters still need
+the execution migration. Full parity, Favzetto, ARM and release/performance gates
+remain pending.
+
+Baseline engine checks passed before edits
+(`/tmp/simple-server-engine-tasks-baseline.log`). Recovered-source verification:
+11 task-collection/handle tests and eight original runtime tests pass
+(`/tmp/simple-server-engine-taskset-contracts.log`), covering cancellation-safe
+waits, 2,000 concurrent task completions, abort/detach ownership, typed panics,
+nonblocking joins, multiple runtimes, shutdown, foreign-thread spawning and a
+panicking application waker. `bash scripts/check-engine` passed
+(`/tmp/simple-server-engine-taskset-final.log`), including HTTP transports,
+callbacks, client/process/SQLite, C ABI, artifact installer and both standalone
+binaries. Workspace/all-target/all-feature strict Clippy passed
+(`/tmp/simple-server-engine-taskset-clippy.log`). The full source feature-test
+matrix was not rerun for this engine-bindings-only change; it passed at the
+preceding checkpoint. Strict sys-crate rustdoc passed
+(`/tmp/simple-server-engine-taskset-doc.log`); tracker script syntax and the new
+evidence link were validated. Local integration is pending.
+
 ## Owned Tokio-facing contracts — 2026-10-05
 
 Shared-engine implementation remains **Partial**; all production adoption,
