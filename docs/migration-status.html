@@ -75,7 +75,8 @@
     <section class="note" id="shared-engine">
       <p><strong>Shared engine: library Partial; consumer adoption Pending (2026-10-05).</strong>
       The C ABI runtime, outbound client, process and SQLite foundation is being
-      implemented in an isolated worktree. The standalone subset consumer has
+      integrated locally in foundation commit <code>d21ddb1</code>, following
+      isolated-worktree verification. The standalone subset consumer has
       22 dependency packages and no Tokio, Reqwest, SQLx, Hyper or Rustls build
       dependency. The HTTP server still uses the source backend. Favzetto and all
       other active services remain Pending for dynamic-engine adoption; existing

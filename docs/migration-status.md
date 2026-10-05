@@ -7,10 +7,12 @@ all active services, including the selected Favzetto canary. Existing routing
 and other Done cells describe source-library adoption, not dynamic linking.
 Quentin Torrentino remains excluded from consumer migration.
 
-Work is isolated on `implementation/shared-engine`, based on simple-server
-`master` at `bdfa076`, in `/tmp/simple-server-engine-work`. The original library
-checkout and Favzetto `master` at `6bcbc8f` have not been migrated or integrated.
-There is no consumer migration commit or production adoption evidence yet.
+The foundation was implemented on `implementation/shared-engine`, based on
+simple-server `master` at `bdfa076`, in `/tmp/simple-server-engine-work`.
+Reviewed foundation commit `d21ddb1` was integrated by rebasing library `master`
+onto that branch; the integrated tree matched the tested tree. Favzetto `master`
+at `6bcbc8f` remains unchanged. There is no consumer migration commit or
+production adoption evidence yet.
 
 Implemented so far: a C-compatible versioned function table, producer-owned
 buffers and callbacks, engine runtime and timers, owned outbound HTTP,
@@ -53,8 +55,9 @@ Remaining: the server/router and streaming protocol boundary, owned listeners,
 all runtime-dependent module migrations, full feature parity, Favzetto's
 production migration, full ARM feature checks, final artifact pins and
 performance acceptance. The default backend is still the source backend.
-No upload, push or deployment has occurred. The worktree is retained while
-implementation continues; integration and cleanup are pending.
+No upload, push or deployment has occurred. The tested foundation is integrated
+locally; the complete engine plan remains unfinished. The temporary foundation
+worktree and branch are removed after integration of this verification record.
 
 ## Pezzottify crates.io dependency — 2026-09-29
 
