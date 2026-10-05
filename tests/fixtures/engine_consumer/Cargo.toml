@@ -1,0 +1,10 @@
+[package]
+name = "simple-server-engine-consumer"
+version = "0.0.0"
+edition = "2024"
+publish = false
+
+[workspace]
+
+[dependencies]
+simple-server = { package = "lelloman-simple-server", path = "../../..", default-features = false, features = ["runtime", "client", "sqlite-client", "process"] }

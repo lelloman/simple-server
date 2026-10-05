@@ -17,6 +17,20 @@ across 17 active services plus excluded Quentin Torrentino and the completed ste
 All consumer migrations follow the [reusable worktree and verification workflow](docs/consumer-migration-workflow.md),
 including applicability checks and updates to both adoption trackers.
 
+## Shared engine development
+
+An unpublished shared-engine implementation is under development. The opt-in
+`runtime`, `client`, `process`, and `sqlite-client` features use a Rust-built
+`libsimple_server_engine.so.1` through a C ABI. The HTTP server and existing
+lifecycle/scheduling modules still use the source backend. This is not yet the
+planned complete engine release, and no production consumer has migrated.
+
+For local development, run `bash scripts/check-engine`. It builds the engine
+separately, then verifies the bindings, C header, client/SQLite/process APIs and
+a standalone consumer without heavy runtime dependencies. To use an existing
+build, set `SIMPLE_SERVER_ENGINE_DIR` to the directory containing
+`libsimple_server_engine.so`. See [engine artifact instructions](docs/publishing.md#shared-engine-artifacts-unpublished).
+
 ## Owned HTTP API
 
 `simple-server` pins its internal Axum implementation to **0.8.9**. The public

@@ -72,6 +72,22 @@
     <p class="note"><strong>Public crates.io migration — Complete locally.</strong> Published <code>lelloman-simple-server</code> 0.1.0 under MIT OR Apache-2.0. Public download verified; all 18 active consumer development branches and Homelab build scripts are integrated. Legacy Torrentino HTTP code retains direct Axum, and baseline verification limits are recorded. See <a href="migration-status.md#public-cratesio-package-migration--2026-09-29">scope and verification</a>.</p>
   </header>
   <main>
+    <section class="note" id="shared-engine">
+      <p><strong>Shared engine: library Partial; consumer adoption Pending (2026-10-05).</strong>
+      The C ABI runtime, outbound client, process and SQLite foundation is being
+      implemented in an isolated worktree. The standalone subset consumer has
+      22 dependency packages and no Tokio, Reqwest, SQLx, Hyper or Rustls build
+      dependency. The HTTP server still uses the source backend. Favzetto and all
+      other active services remain Pending for dynamic-engine adoption; existing
+      Done cells are source-library adoption only. No artifacts were published.</p>
+      <p>The full regression suite passed with the x86_64 Bookworm engine.
+      Both target builds and C ABI smoke tests passed; an x86_64 Rust 1.88
+      consumer also ran against the Rust 1.96 engine in Bookworm. Full ARM
+      feature verification remains pending.</p>
+      <p>Server/protocol parity, runtime-dependent module migration, the Favzetto
+      canary and final performance/release validation remain outstanding.
+      See the <a href="migration-status.md#shared-engine-implementation--2026-10-05-in-progress">implementation evidence and remaining work</a>.</p>
+    </section>
     <section class="summary" aria-label="Migration overview">
       <div class="stat"><strong id="service-count">17</strong><span>Services in scope</span></div>
       <div class="stat complete"><strong id="done-count">16 / 17</strong><span>Axum centralization complete</span></div>
@@ -201,7 +217,7 @@
       ['Axum centralization', true], ['Lifecycle / main()', true],
       ['Logging setup', true], ['Request correlation', true], ['HTTP tracing', true],
       ['Body limits', true], ['Response headers', true], ['CORS configuration', true], ['Health', true],
-      ['Task ownership', true], ['Scheduling', true], ['Execution policies', true], ['Auth (identity + access)', true], ['Rate limiting', true], ['Routing / HTTP core', true], ['SQLite connection policy', true], ['Migration preflight', true], ['SQLite schema', true], ['SQLite backups (07c)', true], ['Blocking DB work (07d)', true]
+      ['Task ownership', true], ['Scheduling', true], ['Execution policies', true], ['Auth (identity + access)', true], ['Rate limiting', true], ['Routing / HTTP core', true], ['SQLite connection policy', true], ['Migration preflight', true], ['SQLite schema', true], ['SQLite backups (07c)', true], ['Blocking DB work (07d)', true], ['Shared engine', false]
     ];
     const services = [
       {name: 'pezzottify', databaseSchema: 'done', databaseMigrations: 'done', databaseSqlite: 'done', routing: 'done', axumObservations: "None.", rateLimit: 'done', auth: 'done', tasks: 'done', scheduling: 'done', taskPolicies: 'done', health: 'na', cors: 'na', responseHeaders: 'done', bodyLimit: 'done', tracing: 'done', correlation: 'na', logging: 'done', components: 'API/metrics · scheduler · tracked application work', axum: 'done', lifecycle: 'done'},
@@ -263,8 +279,8 @@
         const components = document.createElement('small');
         components.textContent = service.components; name.append(components); row.append(name);
         steps.forEach((step, index) => {
-          const keys = ['axum', 'lifecycle', 'logging', 'correlation', 'tracing', 'bodyLimit', 'responseHeaders', 'cors', 'health', 'tasks', 'scheduling', 'taskPolicies', 'auth', 'rateLimit', 'routing', 'databaseSqlite', 'databaseMigrations', 'databaseSchema', 'databaseBackup', 'databaseBlocking'];
-          const status = service[keys[index]] || (step[1] ? 'pending' : 'planned');
+          const keys = ['axum', 'lifecycle', 'logging', 'correlation', 'tracing', 'bodyLimit', 'responseHeaders', 'cors', 'health', 'tasks', 'scheduling', 'taskPolicies', 'auth', 'rateLimit', 'routing', 'databaseSqlite', 'databaseMigrations', 'databaseSchema', 'databaseBackup', 'databaseBlocking', 'engine'];
+          const status = service[keys[index]] || (keys[index] === 'engine' || step[1] ? 'pending' : 'planned');
           const cell = document.createElement('td');
           const badge = document.createElement('span');
           badge.className = `badge ${status}`;

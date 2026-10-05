@@ -1,0 +1,9 @@
+[package]
+name = "lelloman-simple-server-abi"
+version = "0.2.0"
+edition = "2024"
+license = "MIT OR Apache-2.0"
+description = "C-compatible interface shared by the simple-server engine and bindings"
+
+[lib]
+name = "simple_server_abi"

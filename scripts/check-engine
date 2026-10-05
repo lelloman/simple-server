@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "${BASH_SOURCE[0]}")/.."
+if [[ -z ${SIMPLE_SERVER_ENGINE_DIR:-} ]]; then
+  cargo build --locked --manifest-path crates/engine/Cargo.toml --target-dir target/engine
+  export SIMPLE_SERVER_ENGINE_DIR="$PWD/target/engine/debug"
+fi
+cargo fmt --all --check
+cargo fmt --manifest-path crates/engine/Cargo.toml --check
+cargo clippy --locked --manifest-path crates/engine/Cargo.toml --target-dir target/engine --all-targets -- -D warnings
+cargo test --locked -p lelloman-simple-server-abi -p lelloman-simple-server-sys
+cargo test --locked --no-default-features --features runtime,client,process,sqlite-client \
+  --test engine_runtime --test engine_io --test engine_sqlite
+cargo run --locked --manifest-path tests/fixtures/engine_consumer/Cargo.toml
+graph=$(cargo tree --locked --manifest-path tests/fixtures/engine_consumer/Cargo.toml --edges normal,build --prefix none)
+if printf '%s\n' "$graph" | rg '^(axum|tokio|reqwest|hyper|sqlx|rustls)(-| )'; then
+  echo "Heavy runtime dependency leaked into the standalone consumer" >&2
+  exit 1
+fi
+mkdir -p target/engine-abi
+cp "$SIMPLE_SERVER_ENGINE_DIR/libsimple_server_engine.so" target/engine-abi/libsimple_server_engine.so.1
+cc -std=c11 -Wall -Wextra -Werror -I crates/engine-abi/include tests/engine_abi.c \
+  -L "$SIMPLE_SERVER_ENGINE_DIR" -lsimple_server_engine -o target/engine-abi/smoke
+LD_LIBRARY_PATH="$PWD/target/engine-abi${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" target/engine-abi/smoke
+python3 tests/engine_artifacts.py

@@ -1,0 +1,16 @@
+[package]
+name = "lelloman-simple-server-sys"
+version = "0.2.0"
+edition = "2024"
+license = "MIT OR Apache-2.0"
+description = "Safe bindings and artifact installation for the simple-server engine"
+links = "simple_server_engine"
+
+[lib]
+name = "simple_server_sys"
+
+[dependencies]
+simple-server-abi = { package = "lelloman-simple-server-abi", path = "../engine-abi", version = "=0.2.0" }
+
+[lints.rust]
+unsafe_op_in_unsafe_fn = "deny"

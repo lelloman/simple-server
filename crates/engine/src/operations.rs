@@ -1,0 +1,245 @@
+use serde_json::{Value, json};
+use std::{
+    collections::HashMap,
+    future::Future,
+    pin::Pin,
+    sync::{
+        Arc, Mutex, OnceLock,
+        atomic::{AtomicU64, Ordering},
+    },
+    time::Duration,
+};
+
+type FutureBytes = Pin<Box<dyn Future<Output = Vec<u8>> + Send>>;
+static NEXT: AtomicU64 = AtomicU64::new(1);
+static CLIENTS: OnceLock<Mutex<HashMap<u64, reqwest::Client>>> = OnceLock::new();
+type ResponseResources = Mutex<HashMap<u64, Arc<tokio::sync::Mutex<Option<reqwest::Response>>>>>;
+static RESPONSES: OnceLock<ResponseResources> = OnceLock::new();
+fn clients() -> &'static Mutex<HashMap<u64, reqwest::Client>> {
+    CLIENTS.get_or_init(Default::default)
+}
+fn responses() -> &'static ResponseResources {
+    RESPONSES.get_or_init(Default::default)
+}
+pub(crate) fn id() -> u64 {
+    NEXT.fetch_update(Ordering::Relaxed, Ordering::Relaxed, |id| id.checked_add(1))
+        .expect("engine resource IDs exhausted")
+}
+
+pub fn encode(header: Value, payload: &[u8]) -> Vec<u8> {
+    let header = serde_json::to_vec(&header).expect("engine metadata serialization");
+    let length = u32::try_from(header.len()).expect("engine metadata exceeds framing limit");
+    let mut bytes = Vec::with_capacity(8 + header.len() + payload.len());
+    bytes.extend_from_slice(b"SS01");
+    bytes.extend_from_slice(&length.to_le_bytes());
+    bytes.extend_from_slice(&header);
+    bytes.extend_from_slice(payload);
+    bytes
+}
+pub fn decode(bytes: &[u8]) -> Result<(Value, Vec<u8>), String> {
+    if !bytes.starts_with(b"SS01") {
+        return serde_json::from_slice(bytes)
+            .map(|v| (v, Vec::new()))
+            .map_err(|e| e.to_string());
+    }
+    if bytes.len() < 8 {
+        return Err("truncated engine command".into());
+    }
+    let end = 8_usize
+        .checked_add(u32::from_le_bytes(bytes[4..8].try_into().unwrap()) as usize)
+        .filter(|end| *end <= bytes.len())
+        .ok_or("invalid engine command length")?;
+    let command = serde_json::from_slice(&bytes[8..end]).map_err(|e| e.to_string())?;
+    Ok((command, bytes[end..].to_vec()))
+}
+fn failure(error: reqwest::Error) -> Vec<u8> {
+    encode(
+        json!({"ok":false,"message":error.to_string(),"timeout":error.is_timeout(),"connect":error.is_connect()}),
+        &[],
+    )
+}
+fn number(command: &Value, key: &str) -> Result<u64, String> {
+    command[key]
+        .as_u64()
+        .ok_or_else(|| format!("missing {key}"))
+}
+
+pub fn resource_new(command: Value, _: Vec<u8>) -> Result<Vec<u8>, String> {
+    match command["op"].as_str() {
+        Some("client") => {
+            let mut builder = reqwest::Client::builder();
+            if let Some(timeout) = command["timeout_ms"].as_u64() {
+                builder = builder.timeout(Duration::from_millis(timeout));
+            }
+            if let Some(timeout) = command["connect_timeout_ms"].as_u64() {
+                builder = builder.connect_timeout(Duration::from_millis(timeout));
+            }
+            if let Some(agent) = command["user_agent"].as_str() {
+                builder = builder.user_agent(agent);
+            }
+            if command["no_proxy"].as_bool() == Some(true) {
+                builder = builder.no_proxy();
+            }
+            if command["no_redirect"].as_bool() == Some(true) {
+                builder = builder.redirect(reqwest::redirect::Policy::none());
+            }
+            let client = builder.build().map_err(|e| e.to_string())?;
+            let id = id();
+            clients().lock().unwrap().insert(id, client);
+            Ok(encode(json!({"ok":true,"id":id}), &[]))
+        }
+        _ => Err("unknown engine resource".into()),
+    }
+}
+pub fn resource_release(kind: u32, id: u64) {
+    match kind {
+        1 => {
+            clients().lock().unwrap().remove(&id);
+        }
+        2 => {
+            responses().lock().unwrap().remove(&id);
+        }
+        5 => crate::callback::remove(id),
+        _ => {
+            crate::database::release(kind, id);
+        }
+    }
+}
+
+pub fn operation(command: Value, body: Vec<u8>) -> Result<FutureBytes, String> {
+    match command["op"].as_str() {
+        Some("callback") => {
+            let callback = crate::callback::get(number(&command, "callback")?)?;
+            Ok(Box::pin(async move {
+                match callback.call(&body).await {
+                    Ok(bytes) => encode(json!({"ok":true}), &bytes),
+                    Err(error) => encode(json!({"ok":false,"message":error}), &[]),
+                }
+            }))
+        }
+        Some("sqlite") => Ok(Box::pin(crate::database::run(command, body))),
+        Some("http_send") => {
+            let client = clients()
+                .lock()
+                .unwrap()
+                .get(&number(&command, "client")?)
+                .cloned()
+                .ok_or("HTTP client already released")?;
+            let method = reqwest::Method::from_bytes(
+                command["method"]
+                    .as_str()
+                    .ok_or("missing method")?
+                    .as_bytes(),
+            )
+            .map_err(|e| e.to_string())?;
+            let url = command["url"].as_str().ok_or("missing URL")?;
+            let mut request = client.request(method, url).body(body);
+            if let Some(headers) = command["headers"].as_array() {
+                for pair in headers {
+                    let name = pair[0].as_str().ok_or("invalid header name")?;
+                    let bytes: Vec<u8> =
+                        serde_json::from_value(pair[1].clone()).map_err(|e| e.to_string())?;
+                    let value = reqwest::header::HeaderValue::from_bytes(&bytes)
+                        .map_err(|e| e.to_string())?;
+                    request = request.header(name, value);
+                }
+            }
+            if let Some(timeout) = command["timeout_ms"].as_u64() {
+                request = request.timeout(Duration::from_millis(timeout));
+            }
+            Ok(Box::pin(async move {
+                match request.send().await {
+                    Err(error) => failure(error),
+                    Ok(response) => {
+                        let id = id();
+                        let headers: Vec<_> = response
+                            .headers()
+                            .iter()
+                            .map(|(k, v)| json!([k.as_str(), v.as_bytes()]))
+                            .collect();
+                        let metadata = json!({"ok":true,"id":id,"status":response.status().as_u16(),"headers":headers,"url":response.url().as_str(),"content_length":response.content_length()});
+                        responses()
+                            .lock()
+                            .unwrap()
+                            .insert(id, Arc::new(tokio::sync::Mutex::new(Some(response))));
+                        encode(metadata, &[])
+                    }
+                }
+            }))
+        }
+        Some("http_chunk") => {
+            let response = responses()
+                .lock()
+                .unwrap()
+                .get(&number(&command, "response")?)
+                .cloned()
+                .ok_or("HTTP response already released")?;
+            Ok(Box::pin(async move {
+                let mut guard = response.lock().await;
+                let Some(response) = guard.as_mut() else {
+                    return encode(
+                        json!({"ok":false,"message":"response already consumed"}),
+                        &[],
+                    );
+                };
+                match response.chunk().await {
+                    Ok(Some(bytes)) => encode(json!({"ok":true,"eof":false}), &bytes),
+                    Ok(None) => encode(json!({"ok":true,"eof":true}), &[]),
+                    Err(error) => failure(error),
+                }
+            }))
+        }
+        Some("http_text") => {
+            let response = responses()
+                .lock()
+                .unwrap()
+                .get(&number(&command, "response")?)
+                .cloned()
+                .ok_or("HTTP response already released")?;
+            Ok(Box::pin(async move {
+                let Some(response) = response.lock().await.take() else {
+                    return encode(
+                        json!({"ok":false,"message":"response already consumed"}),
+                        &[],
+                    );
+                };
+                match response.text().await {
+                    Ok(text) => encode(json!({"ok":true}), text.as_bytes()),
+                    Err(error) => failure(error),
+                }
+            }))
+        }
+        Some("process_output") => {
+            use std::os::unix::ffi::OsStringExt;
+            let executable: Vec<u8> = serde_json::from_value(command["program_bytes"].clone())
+                .map_err(|e| e.to_string())?;
+            let executable = std::ffi::OsString::from_vec(executable);
+            let args: Vec<Vec<u8>> =
+                serde_json::from_value(command["args_bytes"].clone()).map_err(|e| e.to_string())?;
+            let args: Vec<_> = args.into_iter().map(std::ffi::OsString::from_vec).collect();
+            Ok(Box::pin(async move {
+                use std::os::unix::process::ExitStatusExt;
+                match tokio::process::Command::new(executable)
+                    .args(args)
+                    .output()
+                    .await
+                {
+                    Ok(output) => {
+                        let stdout_len = output.stdout.len();
+                        let mut body = output.stdout;
+                        body.extend(output.stderr);
+                        encode(
+                            json!({"ok":true,"status":output.status.into_raw(),"stdout_len":stdout_len}),
+                            &body,
+                        )
+                    }
+                    Err(error) => encode(
+                        json!({"ok":false,"message":error.to_string(),"os_error":error.raw_os_error()}),
+                        &[],
+                    ),
+                }
+            }))
+        }
+        _ => Err("unsupported engine operation".into()),
+    }
+}

@@ -9,6 +9,34 @@
 //! registration, and coordination of application-owned service futures. Combined
 //! with `http`, it also provides TCP binding. `web` owns HTTP serving.
 
+/// Execution through the separately built engine runtime.
+#[cfg(feature = "runtime")]
+pub mod runtime {
+    pub use simple_server_sys::{
+        AbortHandle, Builder, JoinError, JoinHandle, Runtime, spawn, spawn_blocking, yield_now,
+    };
+}
+
+#[cfg(feature = "runtime")]
+pub use simple_server_macros::{main, test};
+
+#[cfg(any(feature = "client", feature = "process", feature = "sqlite-client"))]
+mod engine_wire;
+
+/// Outbound HTTP executed by the engine, without a downstream HTTP client stack.
+#[cfg(feature = "client")]
+pub mod client;
+
+/// Asynchronous child processes executed by the engine.
+#[cfg(feature = "process")]
+pub mod process;
+
+/// Timers owned by the engine runtime.
+#[cfg(feature = "runtime")]
+pub mod time {
+    pub use simple_server_sys::{Elapsed, advance, sleep, timeout};
+}
+
 /// Optional, driver-independent database contracts.
 #[cfg(any(
     feature = "database-sqlite",
