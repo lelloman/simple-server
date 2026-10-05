@@ -64,6 +64,14 @@ and build dependency graph excludes Tokio, Reqwest, SQLx, Hyper and Rustls.
 This proves only the implemented subset: the existing web backend still
 compiles Axum and its dependencies downstream.
 
+The fixture also has an `http` binary that serves a parameterized route and
+calls it through the owned HTTP client, with transport and routing both inside
+the engine. It uses the internal bindings while the public Router adapter is
+pending. Run it with `cargo run --manifest-path tests/fixtures/engine_consumer/Cargo.toml --bin http`
+and a freshly built `SIMPLE_SERVER_ENGINE_DIR`. Foundation-only development
+artifacts do not contain these new wire operations, despite sharing the
+provisional unreleased version number.
+
 The canonical consumer package is `lelloman-simple-server` on crates.io. The
 library target remains `simple_server`; the repository remains `simple-server`.
 

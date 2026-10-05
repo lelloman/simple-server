@@ -6,11 +6,32 @@ use simple_server_abi::{BytesFuture, Callback as AbiCallback};
 #[derive(Clone)]
 pub struct Callback(Resource);
 
+/// Bytes plus host-owned resources borrowed by the engine while it decodes the
+/// reply. The producer releases both only when the engine releases its buffer.
+/// This makes returning another callback safe without leaking a registration
+/// or dropping it before the engine has acquired its own reference.
+pub struct Reply {
+    bytes: Vec<u8>,
+    retained: Vec<Box<dyn Send>>,
+}
+impl Reply {
+    pub fn new(bytes: Vec<u8>) -> Self {
+        Self {
+            bytes,
+            retained: Vec::new(),
+        }
+    }
+    pub fn keep_alive<T: Send + 'static>(mut self, value: T) -> Self {
+        self.retained.push(Box::new(value));
+        self
+    }
+}
+
 struct ContextData<F> {
     function: Arc<F>,
     runtime: Weak<Inner>,
 }
-type ByteTask = Pin<Box<dyn Future<Output = Vec<u8>> + Send>>;
+type ByteTask = Pin<Box<dyn Future<Output = Reply> + Send>>;
 struct FutureData {
     future: ByteTask,
     runtime: Weak<Inner>,
@@ -28,15 +49,15 @@ fn discard_panic(panic: Box<dyn Any + Send>) {
         std::mem::forget(second_panic);
     }
 }
-fn output_buffer(bytes: Vec<u8>) -> Buffer {
+fn output_buffer(reply: Reply) -> Buffer {
     unsafe extern "C" fn release(context: *mut c_void) {
-        drop(unsafe { Box::from_raw(context.cast::<Vec<u8>>()) });
+        release_safely(|| drop(unsafe { Box::from_raw(context.cast::<Reply>()) }));
     }
-    let bytes = Box::new(bytes);
+    let reply = Box::new(reply);
     Buffer {
-        data: bytes.as_ptr(),
-        len: bytes.len(),
-        context: Box::into_raw(bytes).cast(),
+        data: reply.bytes.as_ptr(),
+        len: reply.bytes.len(),
+        context: Box::into_raw(reply).cast(),
         release,
     }
 }
@@ -75,7 +96,7 @@ unsafe extern "C" fn release_future(context: *mut c_void) {
 unsafe extern "C" fn call<F, Fut>(context: *mut c_void, bytes: *const u8, len: usize) -> BytesFuture
 where
     F: Fn(Vec<u8>) -> Fut + Send + Sync + 'static,
-    Fut: Future<Output = Vec<u8>> + Send + 'static,
+    Fut: Future<Output = Reply> + Send + 'static,
 {
     let context = unsafe { &*context.cast::<ContextData<F>>() };
     let function = context.function.clone();
@@ -106,6 +127,16 @@ impl Callback {
     where
         F: Fn(Vec<u8>) -> Fut + Send + Sync + 'static,
         Fut: Future<Output = Vec<u8>> + Send + 'static,
+    {
+        Self::with_reply(move |input| {
+            let future = function(input);
+            async move { Reply::new(future.await) }
+        })
+    }
+    pub fn with_reply<F, Fut>(function: F) -> io::Result<Self>
+    where
+        F: Fn(Vec<u8>) -> Fut + Send + Sync + 'static,
+        Fut: Future<Output = Reply> + Send + 'static,
     {
         let runtime = current()?;
         let context = Box::new(ContextData {

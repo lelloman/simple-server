@@ -145,3 +145,40 @@ outcome counters, bounded storage and streaming-preserving HTTP admission.
 Pezzottify was the initial canary; all 16 in-scope services now use owned
 routing, protocol, middleware, serving and test interfaces. The transitional
 Axum re-export has been removed. Quentin Torrentino remains excluded.
+
+## Shared-engine HTTP boundary (development)
+
+The unpublished engine contains TCP binding, HTTP/1 and HTTP/2 serving, route
+assembly and asynchronous host-handler dispatch. These internal bindings are
+exercised by `tests/fixtures/engine_consumer/src/bin/http.rs`; the public web API
+still uses the source backend until the remaining adapters have feature parity.
+
+Requests cross the C ABI as framed metadata: method, URI, HTTP version, binary
+header values, peer address, matched/original paths, decoded path parameters and
+a borrowed body ID. No body is collected during dispatch. Path extraction
+failures include their original rejection status and message.
+
+| Resource | Ownership |
+| --- | --- |
+| Listener (kind 7) | Binding returns an owned registration. Constructing a serve operation consumes it after validating the handler/router and shutdown callbacks. |
+| Incoming body (kind 6) | Dispatch owns a temporary registration. `server_body_clone` creates an independent registration for a host body that must survive dispatch, including an echo response. Each frame is polled lazily under the shared body lock. |
+| Host callback (kind 5) | The engine acquires a reference before the host releases its registration. `Reply::keep_alive` holds response-stream callbacks until the engine finishes interpreting the reply. |
+| Router/method group (kinds 8/9) | Assembly returns new immutable registrations. Each owns references to its handlers. Releasing the original host callbacks does not invalidate the routes. |
+
+Response body callbacks produce data, trailers, end-of-stream or error frames.
+The engine polls one future at a time, preserves backpressure and drops pending
+host futures on connection cancellation. Producer-owned reply buffers remain
+alive through decoding; releasing the buffer before acquiring referenced
+callbacks could invalidate them before the engine can use them.
+
+The explicit shutdown callback stops acceptance and drains active responses.
+Already-requested shutdown is checked before serving. Dropping the serve future
+alone retains Axum's existing cancellation semantics and does not guarantee
+termination of spawned connections; lifecycle integration must use explicit
+shutdown and its application-owned deadline.
+
+Current route operations support method registration, merge, nesting, fallback
+and method fallbacks. Public generic state, Tower layer/service composition,
+owned extractors, WebSocket/multipart/SSE adapters, TLS/Unix transport and test
+harness migration are still pending. Internal wire commands are developmental;
+no stable engine artifact has been published.

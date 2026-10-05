@@ -19,30 +19,35 @@ impl Drop for ForeignCallback {
     }
 }
 pub struct ForeignFuture(BytesFuture);
+pub struct ForeignBytes(Buffer);
+// Buffer data and its producer-owned release context are movable. The ABI
+// requires all reply captures to be Send and release to run on any worker.
+unsafe impl Send for ForeignBytes {}
+impl std::ops::Deref for ForeignBytes {
+    type Target = [u8];
+    fn deref(&self) -> &[u8] {
+        if self.0.len == 0 {
+            &[]
+        } else {
+            unsafe { std::slice::from_raw_parts(self.0.data, self.0.len) }
+        }
+    }
+}
+impl Drop for ForeignBytes {
+    fn drop(&mut self) {
+        unsafe { (self.0.release)(self.0.context) };
+    }
+}
 // The ABI requires movable futures, with serialized poll/release.
 unsafe impl Send for ForeignFuture {}
 impl Future for ForeignFuture {
-    type Output = Result<Vec<u8>, String>;
+    type Output = Result<ForeignBytes, String>;
     fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
         let mut output = MaybeUninit::uninit();
         match unsafe { (self.0.poll)(self.0.context, export_wake(cx.waker()), output.as_mut_ptr()) }
         {
             PENDING => Poll::Pending,
-            READY => {
-                struct Owned(Buffer);
-                impl Drop for Owned {
-                    fn drop(&mut self) {
-                        unsafe { (self.0.release)(self.0.context) };
-                    }
-                }
-                let output = Owned(unsafe { output.assume_init() });
-                let bytes = if output.0.len == 0 {
-                    Vec::new()
-                } else {
-                    unsafe { std::slice::from_raw_parts(output.0.data, output.0.len) }.to_vec()
-                };
-                Poll::Ready(Ok(bytes))
-            }
+            READY => Poll::Ready(Ok(ForeignBytes(unsafe { output.assume_init() }))),
             _ => Poll::Ready(Err("application callback panicked".into())),
         }
     }

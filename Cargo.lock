@@ -1107,6 +1107,8 @@ name = "lelloman-simple-server-sys"
 version = "0.2.0"
 dependencies = [
  "lelloman-simple-server-abi",
+ "serde_json",
+ "socket2",
 ]
 
 [[package]]

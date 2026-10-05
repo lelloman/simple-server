@@ -19,6 +19,9 @@ pub const CANCELLED: i32 = 3;
 pub const INVALID: i32 = 4;
 
 /// An immutable buffer owned by the producer. Release once, even when empty.
+/// The buffer and its release context must be movable between threads. The
+/// recipient may retain it while decoding referenced resources; release may
+/// also destroy producer-owned captures that keep those resources alive.
 #[repr(C)]
 pub struct Buffer {
     pub data: *const u8,

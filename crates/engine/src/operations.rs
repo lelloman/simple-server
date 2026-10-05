@@ -10,7 +10,7 @@ use std::{
     time::Duration,
 };
 
-type FutureBytes = Pin<Box<dyn Future<Output = Vec<u8>> + Send>>;
+pub(crate) type FutureBytes = Pin<Box<dyn Future<Output = Vec<u8>> + Send>>;
 static NEXT: AtomicU64 = AtomicU64::new(1);
 static CLIENTS: OnceLock<Mutex<HashMap<u64, reqwest::Client>>> = OnceLock::new();
 type ResponseResources = Mutex<HashMap<u64, Arc<tokio::sync::Mutex<Option<reqwest::Response>>>>>;
@@ -66,6 +66,10 @@ fn number(command: &Value, key: &str) -> Result<u64, String> {
 
 pub fn resource_new(command: Value, _: Vec<u8>) -> Result<Vec<u8>, String> {
     match command["op"].as_str() {
+        Some("server_body_clone") => crate::server::resource_new(&command),
+        Some(operation) if operation.starts_with("router_") || operation.starts_with("method_") => {
+            crate::routing::resource_new(&command)
+        }
         Some("client") => {
             let mut builder = reqwest::Client::builder();
             if let Some(timeout) = command["timeout_ms"].as_u64() {
@@ -82,6 +86,9 @@ pub fn resource_new(command: Value, _: Vec<u8>) -> Result<Vec<u8>, String> {
             }
             if command["no_redirect"].as_bool() == Some(true) {
                 builder = builder.redirect(reqwest::redirect::Policy::none());
+            }
+            if command["http2_prior_knowledge"].as_bool() == Some(true) {
+                builder = builder.http2_prior_knowledge();
             }
             let client = builder.build().map_err(|e| e.to_string())?;
             let id = id();
@@ -100,6 +107,8 @@ pub fn resource_release(kind: u32, id: u64) {
             responses().lock().unwrap().remove(&id);
         }
         5 => crate::callback::remove(id),
+        crate::server::BODY | crate::server::LISTENER => crate::server::release(kind, id),
+        crate::routing::ROUTER | crate::routing::METHODS => crate::routing::release(kind, id),
         _ => {
             crate::database::release(kind, id);
         }
@@ -108,6 +117,9 @@ pub fn resource_release(kind: u32, id: u64) {
 
 pub fn operation(command: Value, body: Vec<u8>) -> Result<FutureBytes, String> {
     match command["op"].as_str() {
+        Some("server_bind" | "server_serve" | "server_body_frame") => {
+            crate::server::operation(command)
+        }
         Some("callback") => {
             let callback = crate::callback::get(number(&command, "callback")?)?;
             Ok(Box::pin(async move {
@@ -157,7 +169,7 @@ pub fn operation(command: Value, body: Vec<u8>) -> Result<FutureBytes, String> {
                             .iter()
                             .map(|(k, v)| json!([k.as_str(), v.as_bytes()]))
                             .collect();
-                        let metadata = json!({"ok":true,"id":id,"status":response.status().as_u16(),"headers":headers,"url":response.url().as_str(),"content_length":response.content_length()});
+                        let metadata = json!({"ok":true,"id":id,"status":response.status().as_u16(),"headers":headers,"url":response.url().as_str(),"content_length":response.content_length(),"version":format!("{:?}",response.version())});
                         responses()
                             .lock()
                             .unwrap()

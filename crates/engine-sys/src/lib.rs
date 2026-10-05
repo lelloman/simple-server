@@ -555,7 +555,7 @@ impl Drop for Operation {
 }
 
 mod callback;
-pub use callback::Callback;
+pub use callback::{Callback, Reply};
 
 pub async fn sleep(duration: Duration) {
     let command = format!(

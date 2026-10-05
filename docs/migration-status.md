@@ -1,5 +1,46 @@
 # Service migration status
 
+## Shared-engine HTTP transport checkpoint — 2026-10-05
+
+Library status remains **Partial** and all production consumers remain
+**Pending** for the shared engine. Work started from clean library `master`
+`de2bab8` in isolated branch `implementation/engine-http` and worktree
+`/tmp/simple-server-engine-http`. Favzetto remains unchanged; this checkpoint
+has no consumer migration commit or production adoption claim.
+
+The engine now owns TCP listeners, HTTP/1 and HTTP/2 transport, basic route and
+method assembly, nesting/merge/fallback, and streaming request/response bodies.
+Host callbacks receive request metadata and borrow body registrations; an
+explicit clone retains a body beyond dispatch. Producer-owned callback reply
+buffers retain response streams until the engine acquires them. This avoids
+premature release without leaking registrations.
+
+Seven transport tests cover an incremental binary echo, repeated headers and
+trailers, body-registration cleanup, nested/original paths and percent decoding,
+HEAD/405/Allow/404 behavior, malformed replies and handler panic cleanup,
+disconnect cancellation, pre-requested shutdown, in-flight stream draining and
+HTTP/2 with both client and server in the engine. The full `bash scripts/check`
+suite passed; its log is `/tmp/simple-server-http-full-check.log`. The unchanged
+baseline engine checks passed first (`/tmp/simple-server-http-baseline.log`).
+
+The independent fixture's new `http` binary serves and calls a parameterized
+route using internal bindings. Its normal/build dependency graph still has 22
+dependency packages and excludes Axum, Hyper, Tokio, Reqwest, SQLx and Rustls.
+A Rust 1.88 build of this fixture ran against the Rust 1.96 engine inside a
+network-disabled Bookworm container, using container loopback only.
+
+The current x86_64 Bookworm artifact is local and unpublished, SHA-256
+`4337d1b6a3d3e1c6cdd9c7b4eb832c4783eace8c2ec5ad8b7ddec5c0c1a08126`.
+The new HTTP code has not yet been built or tested on ARM. Foundation artifact
+hashes recorded below describe the earlier subset and are not current artifacts.
+
+Remaining work includes the public Router/Body/listener adapters, generic state
+and Tower composition, protocols, TLS/Unix transport, runtime-dependent library
+modules, Favzetto adoption, full ARM verification and performance/release gates.
+The public web backend is still the source implementation. No public signature,
+consumer checkout, remote branch, release or deployment was changed here.
+Integration and cleanup evidence will be recorded after the checkpoint commit.
+
 ## Shared engine implementation — 2026-10-05 (in progress)
 
 Library implementation is **Partial**. Production adoption is **Pending** for

@@ -31,6 +31,11 @@ a standalone consumer without heavy runtime dependencies. To use an existing
 build, set `SIMPLE_SERVER_ENGINE_DIR` to the directory containing
 `libsimple_server_engine.so`. See [engine artifact instructions](docs/publishing.md#shared-engine-artifacts-unpublished).
 
+The engine now contains TCP HTTP/1 and HTTP/2 transport, streaming bodies and
+basic route assembly. The standalone fixture's `http` binary exercises this
+through internal bindings with the same 22-package consumer graph. Adapting the
+public `Router`, middleware, protocol and listener APIs remains in progress.
+
 ## Owned HTTP API
 
 `simple-server` pins its internal Axum implementation to **0.8.9**. The public
