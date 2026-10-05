@@ -1,5 +1,48 @@
 # Service migration status
 
+## Typed engine path extraction — 2026-10-05
+
+Engine implementation remains **Partial** and all production adoption remains
+**Pending**. Work starts from clean local `master` `f30edc7`, in isolated branch
+`implementation/engine-path` and worktree `target/worktrees/engine-path`.
+No consumer repository is changed.
+
+Engine `Path<T>` now deserializes the owned, already-decoded capture metadata.
+Scalars, newtypes, tuples, structs, maps, sequences, unit enums and custom Serde
+string visitors preserve the source backend's behavior. Metadata is borrowed,
+not consumed; failed path extraction short-circuits body reads. Invalid UTF-8 and
+value errors preserve 400 responses, while wrong capture counts and unsupported
+types preserve 500 responses. The Serde-only parser is adapted from Axum 0.8.9,
+with its full MIT license notice retained in `src/engine_web/path_de.rs`; no Axum
+runtime types or dependency are introduced in the engine consumer.
+
+The pre-edit baseline passed 35 tests: existing engine extractors (8), forms (5),
+public HTTP (8) and all-feature source web core (14), recorded in
+`/tmp/simple-server-path-baseline.log`. Seven new contracts pass in
+`/tmp/simple-server-path-contracts.log`. They cover metadata reuse, missing
+metadata, Result rejection capture, no body polling after path rejection, and
+actual `.so` HTTP comparisons against the source router. The HTTP comparisons
+check status, headers and exact bodies, excluding the transport-generated Date
+header; cases include UTF-8 errors, plus signs, encoded slashes/double encoding,
+custom errors, incorrect arity, unsupported shapes, wildcard routes, dynamic
+nesting and duplicate parameter names.
+
+The complete `bash scripts/check` passes (`/tmp/simple-server-path-full.log`):
+strict workspace/native Clippy, source feature matrix and protocol regressions,
+rustdoc, all seven path contracts and three engine-only path contracts, all seven
+standalone engine binaries, graph guards, C ABI smoke and artifact installer tests.
+Tracker script syntax and evidence links pass validation. The standalone HTTP
+normal/build graph remains 28 packages beyond fixture and library, without Axum,
+Tokio, Hyper, Reqwest, SQLx or Rustls (`/tmp/simple-server-path-graph.txt`).
+
+The standalone HTTP consumer now serves a typed tuple path route and verifies
+successful decoding, numeric parse failure and invalid UTF-8. No native/ABI or
+dependency changes are required. The existing Bookworm x86_64 artifact at
+`/tmp/simple-server-lifecycle-artifact-amd64` is reused; ARM is not retested.
+No compile/runtime speedup is claimed. Generic router state, Tower layers,
+remaining response helpers and protocol adapters remain pending.
+No push, publication or deployment is performed.
+
 ## Engine forms and request extensions — 2026-10-05
 
 Engine implementation remains **Partial** and all production adoption remains

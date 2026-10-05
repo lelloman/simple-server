@@ -1,7 +1,7 @@
 use simple_server::{
     client::Client,
     engine_web::{
-        self, Extension, Form, Handler, Json, Method, MethodRouter, Query, RequestMetadata,
+        self, Extension, Form, Handler, Json, Method, MethodRouter, Path, Query, RequestMetadata,
         Response, Router, Shutdown, State,
     },
     runtime::spawn,
@@ -44,6 +44,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             form.call(request, ()).await
         })?,
     )?;
+    async fn path(Path((id, name)): Path<(u32, String)>) -> Json<serde_json::Value> {
+        Json(serde_json::json!({"id":id,"name":name}))
+    }
+    let router = router.route(
+        "/items/{id}/{name}",
+        MethodRouter::new()?.on_handler(Method::GET, path)?,
+    )?;
     let listener = engine_web::bind("127.0.0.1:0").await?;
     let address = listener.local_addr();
     let url = format!("http://{}/echo/engine", listener.local_addr());
@@ -81,6 +88,33 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         "application/x-www-form-urlencoded"
     );
     assert_eq!(response.text().await?, "prefix=engine&word=a+b%2Bc");
+    let client = Client::builder().no_proxy().build()?;
+    let response = client
+        .get(format!("http://{address}/items/7/a%252Fb+c"))
+        .send()
+        .await?;
+    assert_eq!(
+        response.json::<serde_json::Value>().await?,
+        serde_json::json!({"id":7,"name":"a%2Fb+c"})
+    );
+    let response = client
+        .get(format!("http://{address}/items/bad/name"))
+        .send()
+        .await?;
+    assert_eq!(response.status().as_u16(), 400);
+    assert_eq!(
+        response.text().await?,
+        "Invalid URL: Cannot parse value at index 0 with value `bad` to a `u32`"
+    );
+    let response = client
+        .get(format!("http://{address}/items/7/%FF"))
+        .send()
+        .await?;
+    assert_eq!(response.status().as_u16(), 400);
+    assert_eq!(
+        response.text().await?,
+        "Invalid URL: Invalid UTF-8 in `name`"
+    );
     shutdown.request();
     server.await??;
     println!("public engine HTTP consumer passed");

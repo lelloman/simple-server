@@ -306,8 +306,7 @@ the prohibition on multiple body consumers.
 runtime-independent HeaderMap/URI/Method and Result-capture implementations now
 live with that contract instead of inside source `web`. Engine State/substate,
 Query, JSON/optional JSON, raw query, matched path and direct TCP peer extraction
-operate on the owned request boundary. Typed path extraction remains separate
-parity work.
+operate on the owned request boundary. Typed path extraction is described below.
 
 String, Bytes, JSON and body-based Form extraction collect at most 2 MiB unless
 the request has a `BodyLimit(usize)` extension. Raw requests and lazy bodies are unaffected. Missing
@@ -342,3 +341,25 @@ Request extensions are local Rust values, not wire data. A raw handler or custom
 head extractor can install them before invoking typed extraction. This does not
 provide Tower extension layers, engine-side extension storage or a generic router
 middleware pipeline. No native code, ABI or dependency additions are required.
+
+## Typed engine path extraction (development)
+
+`engine_web::Path<T>` reads the owned `RequestMetadata` capture list. Matching and
+percent decoding stay in the native engine; the host never decodes a second time
+or changes literal plus signs into spaces. Captures retain their ordering across
+nested routes and repeated names. Extraction borrows metadata, so multiple path
+extractors can read the same request without consuming captures or the body.
+
+The private Serde deserializer is adapted from Axum 0.8.9's MIT-licensed path
+implementation; its complete copyright and permission notice are retained in
+`src/engine_web/path_de.rs`. It uses existing Serde and owned strings, with no
+Axum types or dependency added to the engine consumer. This includes scalars,
+newtypes, tuples, structs, maps, sequences, unit enums and custom string visitors.
+Unsupported shapes and wrong capture counts preserve source 500 responses;
+invalid values and UTF-8 preserve 400 responses and exact diagnostics. The native
+wire's raw UTF-8 error receives the typed Path `Invalid URL: ` prefix; missing
+path metadata retains the source missing-parameter rejection.
+
+All values and errors remain behind the existing HTTP/metadata boundary. No
+native or ABI changes are needed. This closes the typed Path gap; generic router
+state, Tower layers, response helpers and protocol adapters remain separate work.

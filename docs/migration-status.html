@@ -73,6 +73,16 @@
   </header>
   <main>
     <section class="note" id="shared-engine">
+      <p><strong>Typed engine path extraction (2026-10-05): implementation Partial; adoption Pending.</strong>
+      Path now supports owned scalar, tuple, struct, map, sequence and enum
+      extraction with source-compatible diagnostics. Real engine/source HTTP
+      comparisons cover decoding, invalid values, nested and duplicate captures;
+      the standalone consumer executes typed paths. No native ABI or dependency
+      additions. Full source/engine checks and standalone execution pass; the HTTP
+      consumer graph remains 28 packages without Axum or Tokio. Generic state,
+      layers and protocol adapters remain pending.
+      No production consumer changed. See the
+      <a href="migration-status.md#typed-engine-path-extraction--2026-10-05">scope and verification evidence</a>.</p>
       <p><strong>Engine forms and request extensions (2026-10-05): implementation Partial; adoption Pending.</strong>
       Form extraction/responses and required/optional host-local extensions now
       preserve source behavior, including HEAD body extraction, rejection details

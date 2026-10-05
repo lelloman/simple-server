@@ -110,7 +110,7 @@ this is not a measured performance claim.
 Typed engine handlers use `MethodRouter::on_handler(method, handler)` or
 `on_state(method, state, handler)`; raw `on` closures retain their existing API.
 The shared handler machinery supports zero to sixteen arguments, with body
-extraction only in the final position. Engine `State`, `Query`, `Json`, optional
+extraction only in the final position. Engine `State`, `Path`, `Query`, `Json`, optional
 JSON, `Form`, `Extension`/optional Extension, strings/bytes, raw query and
 connection/route metadata extractors are available alongside the shared custom
 `Extract` contract. Body-consuming
@@ -120,9 +120,11 @@ without compiling a source HTTP framework. Forms preserve source behavior: GET
 reads the query; other methods, including HEAD, read the bounded body. Extensions
 are host-local values installed before typed extraction; they do not cross the ABI.
 Tower extension layers are not yet available on the engine router.
+`Path<T>` reads already-decoded engine captures using source-compatible scalar,
+tuple, struct, map, sequence and unit-enum semantics. Invalid UTF-8 and parsing
+errors retain the existing rejection status and text.
 
-This API is not yet interchangeable with `web`: typed path extraction,
-generic router state, remaining response helpers, layers, TLS/Unix serving and WebSocket/multipart/SSE
+This API is not yet interchangeable with `web`: generic router state, remaining response helpers, layers, TLS/Unix serving and WebSocket/multipart/SSE
 adapters still need migration. The existing `web` API and default backend remain
 source-based, and no production service has adopted the engine.
 

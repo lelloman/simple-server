@@ -13,6 +13,11 @@ impl<T: Clone> FromState<T> for T {
 }
 #[derive(Clone, Copy, Debug)]
 pub struct State<T>(pub T);
+/// Deserialize route captures already percent-decoded by the native engine.
+/// Supports scalars, tuples, structs, maps, sequences and unit enums using the
+/// source backend's path semantics. This never consumes the body.
+#[derive(Clone, Copy, Debug)]
+pub struct Path<T>(pub T);
 #[derive(Clone, Copy, Debug)]
 pub struct Query<T>(pub T);
 #[derive(Clone, Copy, Debug)]
@@ -73,6 +78,30 @@ pub(super) fn rejection(status: StatusCode, text: impl Into<String>) -> Rejectio
     );
     *response.body_mut() = text.into().into_bytes();
     response
+}
+impl<S: Sync, T: serde::de::DeserializeOwned + Send> FromRequestParts<S> for Path<T> {
+    type Rejection = RejectionResponse;
+    async fn from_request_parts(parts: &mut Parts, _: &S) -> Result<Self, Self::Rejection> {
+        let metadata = parts.extensions.get::<RequestMetadata>().ok_or_else(|| {
+            rejection(
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "No paths parameters found for matched route",
+            )
+        })?;
+        if let Some((status, message)) = &metadata.path_error {
+            // The wire carries RawPathParams errors. Typed Path adds this prefix
+            // for invalid UTF-8, while missing metadata keeps its original text.
+            let text = if *status == StatusCode::BAD_REQUEST {
+                format!("Invalid URL: {message}")
+            } else {
+                message.clone()
+            };
+            return Err(rejection(*status, text));
+        }
+        T::deserialize(super::path_de::PathDeserializer::new(&metadata.path_params))
+            .map(Self)
+            .map_err(super::path_de::PathDeserializationError::into_rejection)
+    }
 }
 impl<S: Send + Sync, T: serde::de::DeserializeOwned + Send> FromRequestParts<S> for Query<T> {
     type Rejection = RejectionResponse;
