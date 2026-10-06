@@ -103,7 +103,7 @@ fallible, and handler registration requires the caller's engine runtime. Request
 extensions provide `RequestMetadata` with peer, matched/original paths and path
 parameters. Bodies support collection limits, lazy streams and trailer frames.
 See the runnable [public HTTP consumer](tests/fixtures/engine_web/src/main.rs).
-With the engine client enabled, its graph has 28 dependencies beyond simple-server,
+With the engine client enabled, its graph has 29 dependencies beyond simple-server,
 without Axum, Tokio, Hyper, Reqwest, SQLx or Rustls. The `.so` is supplied separately;
 this is not a measured performance claim.
 
@@ -135,7 +135,14 @@ Tower extension layers are not yet available on the engine router.
 tuple, struct, map, sequence and unit-enum semantics. Invalid UTF-8 and parsing
 errors retain the existing rejection status and text.
 
-This API is not yet interchangeable with `web`: layers/services, TLS/Unix serving
+Tower services can register through `MethodRouter::on_service`,
+`MethodRouter::any_service` and `Router::fallback_service`. Implement the reexported
+`engine_web::Service<Request>` trait with infallible response errors, or adapt
+errors into responses first. Each request waits for readiness and calls the same
+service clone; response bodies remain lazy. This adds only `tower-service` to the
+consumer graph, without Tower utilities or a Tokio runtime.
+
+This API is not yet interchangeable with `web`: router layers, nested services, TLS/Unix serving
 and WebSocket/multipart/SSE
 adapters still need migration. The existing `web` API and default backend remain
 source-based, and no production service has adopted the engine.

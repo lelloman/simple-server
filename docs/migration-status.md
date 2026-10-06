@@ -1,5 +1,50 @@
 # Service migration status
 
+## Engine method and fallback services — 2026-10-06
+
+Engine implementation remains **Partial** and all production adoption remains
+**Pending**. Work starts from clean local `master` `679640f`, in isolated branch
+`implementation/engine-services`, worktree `target/worktrees/engine-services`.
+No consumer repository is changed.
+
+MethodRouter on_service/any_service and Router fallback_service now dispatch
+runtime-independent Tower services over owned engine requests. Each request
+clones its service, awaits that clone's readiness and calls the same instance.
+Service errors must be Infallible; body errors retain the existing BoxError
+boundary. Response bodies are wrapped lazily. Services coexist with pending typed
+state, raw handlers and method fallbacks. Native matching, HEAD/405/Allow and
+fallback behavior are preserved. No service readiness is polled at registration.
+
+The standalone public HTTP fixture now executes its streaming echo through a
+service implemented against the reexported engine_web::Service trait. Enabling
+engine-web adds tower-service only; the normal/build graph grows from 28 to 29
+packages beyond the library and fixture, without Axum, Tokio, Hyper, Reqwest,
+SQLx or Rustls. No compile/runtime speedup is claimed. No native source or ABI
+changes are needed. Tests reuse the local x86_64 debug engine at
+`/tmp/simple-server-responses-engine/debug` from the previous checkpoint;
+Bookworm/release distribution and ARM are not retested.
+
+Baseline: 27 tests pass (`/tmp/simple-server-services-baseline.log`): engine HTTP
+(8), router state (5), source web core (14). Five new focused contracts pass
+(`/tmp/simple-server-services-contracts.log`): readiness and same-clone call,
+cancellation both before readiness and during call, bidirectional incremental
+streaming, pending-state/method-fallback composition and source parity over real
+HTTP on both sides. The streaming test receives the first chunk before sending
+the next. Comparisons exclude only Date; both sides use socket transport so
+transport-generated Content-Length is compared consistently.
+
+The full `bash scripts/check` passes (`/tmp/simple-server-services-full.log`):
+strict workspace/native Clippy, source feature matrix and protocol regressions,
+rustdoc, all five service contracts and four engine-only service contracts,
+all seven standalone engine binaries, dependency graph guards, C ABI smoke and
+artifact installer tests. The actual HTTP consumer graph is recorded in
+`/tmp/simple-server-services-graph.txt`. Tracker script syntax and evidence links
+pass validation.
+
+Router-wide Tower layers, Route service exposure, nested services, make-service
+adapters and protocol adapters remain pending. No push, publication or deployment
+is performed.
+
 ## Engine header arrays and redirects — 2026-10-06
 
 Engine implementation remains **Partial** and all production adoption remains

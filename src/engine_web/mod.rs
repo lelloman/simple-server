@@ -25,6 +25,7 @@ mod handler;
 mod path_de;
 pub mod response;
 mod routing;
+mod service;
 pub use crate::extract::{Extract, FromRequestParts, IntoRejectionResponse, RejectionResponse};
 pub use extract::{
     BodyLimit, ConnectInfo, Extension, Form, FromRequest, FromState, Json, MatchedPath, Path,
@@ -32,6 +33,8 @@ pub use extract::{
 };
 pub use handler::Handler;
 pub use response::IntoResponse;
+/// Runtime-independent Tower service contract for engine request adapters.
+pub use tower_service::Service;
 mod wire;
 pub use crate::engine_lifecycle::Shutdown;
 pub use body::{Body, BodyError};

@@ -408,5 +408,30 @@ rather than panic during construction. These helpers preserve source status,
 headers and body behavior. Existing host-local response extensions and versions
 are preserved by successful array conversion, but arbitrary extensions still do
 not cross the native ABI and response-version overrides remain outside that wire
-contract. No native/ABI or dependency changes are needed. Tower services/layers
-and protocol response adapters remain separate work.
+contract. No native/ABI or dependency changes are needed for these response helpers.
+Router-wide layers, nested services and protocol response adapters remain
+separate work.
+
+## Engine method and fallback services (development)
+
+`MethodRouter::on_service`, `MethodRouter::any_service` and
+`Router::fallback_service` accept Clone + Send + Sync Tower services over owned
+engine Requests. The runtime-independent Service trait is reexported from
+`engine_web`; the feature enables only `tower-service`, not Tower utilities.
+Services must expose Infallible call/readiness errors; application errors must
+be converted into responses by the service or its wrappers. Response bodies can
+be any Send HTTP body with Bytes data and errors convertible into BoxError.
+
+Dispatch clones the service, waits with poll_fn for that clone's readiness, then
+calls it without cloning again. This preserves reservations made in poll_ready.
+Readiness is per dispatched request, not listener-level admission control. Dropping
+a disconnected request drops its pending readiness wait or service call; bodies
+are wrapped lazily and can stream the incoming body after the service returns.
+Method matching, HEAD suppression and 405/Allow behavior remain in the native
+router. Services can coexist with pending typed handlers and state binding.
+
+No native/ABI changes are needed. The standalone HTTP consumer now runs its echo
+through a service; its graph grows from 28 to 29 packages because of tower-service.
+Router-wide Tower layers, Route service exposure, nest_service and make-service
+adapters remain separate work. The new registration methods do not claim those
+capabilities or automatic compatibility with every runtime-dependent service.

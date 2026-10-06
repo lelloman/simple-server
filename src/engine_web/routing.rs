@@ -177,6 +177,22 @@ impl<S: Clone + Send + Sync + 'static> Router<S> {
                 .map(move |router| route_handler(router, &handler))?,
         })
     }
+    /// Use a Tower service for unmatched routes. Each request gets a clone;
+    /// readiness is awaited on that same clone before call. Service errors must
+    /// already be mapped into responses. Bodies remain lazy.
+    pub fn fallback_service<T, B>(self, service: T) -> io::Result<Self>
+    where
+        T: super::Service<Request, Response = http::Response<B>, Error = std::convert::Infallible>
+            + Clone
+            + Send
+            + Sync
+            + 'static,
+        T::Future: Send + 'static,
+        B: http_body::Body<Data = super::Bytes> + Send + 'static,
+        B::Error: Into<super::body::BoxError>,
+    {
+        self.fallback(move |request| super::service::call(service.clone(), request))
+    }
     pub fn fallback_methods(self, methods: MethodRouter<S>) -> io::Result<Self> {
         Ok(Self { plan: self.plan.combine(methods.plan, |router, methods| {
             wire::resource(8, json!({"op":"router_fallback_methods","router":router.id(),"methods":methods.id()}))
@@ -246,6 +262,37 @@ impl<S: Clone + Send + Sync + 'static> MethodRouter<S> {
         Ok(Self {
             plan: Plan::ready(any_handler(&callback(handler)?)?),
         })
+    }
+    /// Register a Tower service for one method. GET retains native HEAD support
+    /// and unmatched methods retain native 405/Allow behavior.
+    pub fn on_service<T, B>(self, method: super::Method, service: T) -> io::Result<Self>
+    where
+        T: super::Service<Request, Response = http::Response<B>, Error = std::convert::Infallible>
+            + Clone
+            + Send
+            + Sync
+            + 'static,
+        T::Future: Send + 'static,
+        B: http_body::Body<Data = super::Bytes> + Send + 'static,
+        B::Error: Into<super::body::BoxError>,
+    {
+        self.on(method, move |request| {
+            super::service::call(service.clone(), request)
+        })
+    }
+    /// Register a Tower service for any method, awaiting readiness per request.
+    pub fn any_service<T, B>(service: T) -> io::Result<Self>
+    where
+        T: super::Service<Request, Response = http::Response<B>, Error = std::convert::Infallible>
+            + Clone
+            + Send
+            + Sync
+            + 'static,
+        T::Future: Send + 'static,
+        B: http_body::Body<Data = super::Bytes> + Send + 'static,
+        B::Error: Into<super::body::BoxError>,
+    {
+        Self::any(move |request| super::service::call(service.clone(), request))
     }
     /// Register a typed handler requiring this method group's missing state.
     /// Only its last argument may consume the body.

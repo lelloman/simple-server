@@ -7,16 +7,31 @@ use simple_server::{
     runtime::spawn,
 };
 
+#[derive(Clone)]
+struct EchoService;
+impl engine_web::Service<engine_web::Request> for EchoService {
+    type Response = Response;
+    type Error = std::convert::Infallible;
+    type Future = std::future::Ready<Result<Response, Self::Error>>;
+    fn poll_ready(
+        &mut self,
+        _: &mut std::task::Context<'_>,
+    ) -> std::task::Poll<Result<(), Self::Error>> {
+        std::task::Poll::Ready(Ok(()))
+    }
+    fn call(&mut self, request: engine_web::Request) -> Self::Future {
+        let metadata = request.extensions().get::<RequestMetadata>().unwrap();
+        assert_eq!(metadata.path_params[0].1, "engine");
+        // The service returns before its response body finishes streaming.
+        std::future::ready(Ok(Response::new(request.into_body())))
+    }
+}
+
 #[simple_server::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let router = Router::new()?.route(
         "/echo/{name}",
-        MethodRouter::new()?.on(Method::POST, |request| async move {
-            let metadata = request.extensions().get::<RequestMetadata>().unwrap();
-            assert_eq!(metadata.path_params[0].1, "engine");
-            // Stream the incoming body after the handler itself has returned.
-            Response::new(request.into_body())
-        })?,
+        MethodRouter::new()?.on_service(Method::POST, EchoService)?,
     )?;
     async fn typed(
         State(prefix): State<String>,
