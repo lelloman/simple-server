@@ -2,7 +2,7 @@
 
 ## ScT runtime migration — 2026-10-06
 
-**Implementation verified; local integration pending.** This completes the
+**Production runtime adoption Done locally; overall engine Partial.** This completes the
 application-runtime boundary left outside the earlier HTTP-only canary. Start:
 clean simple-server master `4197fd6`, ScT master `b3cf795`. Isolated sibling
 worktrees: `/tmp/sct-runtime-migration/simple-server` on
@@ -27,7 +27,7 @@ buffer destruction restore engine context, so streaming body destruction can
 spawn read-pin cleanup without an EOF poll. Source correlation now uses
 executor-independent scopes.
 
-Evidence so far:
+Verification:
 
 - Baseline workspace tests pass (`/tmp/sct-runtime-baseline.log`); four baseline
   host-adapter contracts pass (`/tmp/simple-runtime-baseline.log`). Initial
@@ -53,11 +53,59 @@ Evidence so far:
   an authorization error from quay.io and no matching local image exists
   (`/tmp/runtime-sct-s3.log`). No production S3 endpoint was used.
 
-Final consumer verification, artifact pin, measurements, local commits and
-integration/cleanup evidence will be recorded here before marking adoption done.
+Final consumer evidence:
+
+- Workspace: 61 passed / 92 ignored with all features; baseline was 59 / 92
+  without all features, so the counts are not a like-for-like increase.
+  Strict workspace/all-target/all-feature Clippy, formatting, protocol/client
+  checks and the dependency/ELF guard pass. Production graph: 160 unique package
+  names, versus 225 at the source baseline and 221 at the HTTP-only canary.
+- All 12 server database tests pass, including real process startup, writer
+  exclusion, crash recovery, shutdown, authentication and download cleanup.
+  Logs: `/tmp/runtime-sct-workspace-final.log`, `/tmp/runtime-sct-clippy-final.log`,
+  `/tmp/runtime-sct-server-db-final.log`, `/tmp/runtime-sct-link-check.log`.
+- Lease test passes; PostgreSQL catalog tests pass 4/5. The failing
+  `management_upgrade_preserves_m3_accounting_and_generation_identity` has the
+  same version-6 `draft_names` / `draft names` mismatch on the unchanged baseline
+  executable. The separately excluded foundation case is
+  `archive_catalog_migrates_existing_database_without_rewriting_online_history`.
+  Neither database history nor test expectations were rewritten to hide this.
+- Seven new shared contracts cover PostgreSQL (3), filesystem/process cleanup (3)
+  and callback destruction (1). Full browser/large qualification workloads were
+  not rerun; S3 remains blocked as above. This is not a fully green qualification
+  claim.
+
+Three alternating paired fresh-target builds, eight jobs, dev profile, cached
+crate downloads: median **50.457s source / 28.079s engine**, **22.379s (44%)**
+less downstream compilation. Individual paired reductions range **30–47%**.
+Engine prebuild cost is excluded. Timestamp-only incremental medians are
+1.090s / 0.972s, with one slower engine trial: little consistent incremental
+benefit. No runtime-throughput improvement was measured. Source baseline
+`9e118e6`; engine bindings/native source `be6dde0`. See
+[raw measurements](measurements/sct-runtime-build-2026-10-06.json), mirrored in
+ScT; logs `/tmp/runtime-benchmark.log` and `/tmp/sct-runtime-build-measurement-*.log`.
+
+ScT pins shared commit `be6dde034e34c038755aeef417510e1688050342`.
+Local engine image `sct-engine:be6dde034e34`, service image
+`sct-engine-runtime:local` (`sha256:a6e79a7b90d247b8d0031ba4cb063eb93ac545145067b25da372e832b729a384`).
+Release engine SHA256:
+`5d8f2cf975a8c4d1c19b0539bffe75d1719a51b44946398603ed17a1e573a8ba`.
+Release container smoke verifies `.so.1` loading/checksum, DB readiness, static
+and API routing, SIGTERM exit 0, writer-release/restart and SIGINT exit 0
+(`/tmp/runtime-container-smoke.log`).
+
+Integrated shared implementation `be6dde0` and ScT migration
+`a9217a4516fa97a31b725117d753903cdb80c949` into their original local master branches
+by rebasing onto the isolated migration branches. Both ancestry and tested-tree
+identity checks passed; original worktrees were clean with no concurrent edits.
+ScT temporary worktree/branch and disposable database container are removed.
+The shared evidence commit follows the same integration/cleanup workflow.
 No artifacts have been pushed or deployed.
 
 ## ScT engine canary — 2026-10-06
+
+**Historical HTTP-only milestone.** The runtime/dependency ownership and timings
+below are superseded by the completed runtime migration above.
 
 ScT engine adoption is **Done locally** for its production HTTP entry points.
 The overall engine remains **Partial** beyond this canary. Start:

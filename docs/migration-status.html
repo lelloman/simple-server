@@ -73,16 +73,23 @@
   </header>
   <main>
     <section class="note" id="shared-engine">
-      <p><strong>ScT runtime migration (2026-10-06): implementation verified; local integration pending.</strong>
-      Production uses <code>#[simple_server::main]</code> and engine-backed PostgreSQL,
-      outbound HTTP, tasks, timers and storage I/O. Its normal/build graph excludes
-      Tokio, SQLx, Reqwest, Axum and Hyper. The 65 bounded core database contracts and
-      engine-only streaming cleanup pass. The independent SDK/recovery tools and
-      test clients remain separate. S3 verification is blocked by the pinned MinIO
-      image registry authorization error. Artifact pinning, final consumer checks,
-      measurements and integration are pending; nothing is published or deployed.
-      <a href="migration-status.md#sct-runtime-migration--2026-10-06">Detailed evidence</a>.</p>
-      <p><strong>ScT engine canary (2026-10-06): adoption Done locally; overall engine Partial.</strong>
+      <p><strong>ScT runtime migration (2026-10-06): production adoption Done locally; overall engine Partial.</strong>
+      Production uses <code>#[simple_server::main]</code> and engine PostgreSQL,
+      HTTP, tasks, timers and storage I/O. The normal/build graph excludes Tokio,
+      SQLx, Reqwest, Axum and Hyper (160 package names). Workspace tests (61),
+      bounded core database contracts (65), server database tests (12), lease,
+      strict Clippy and local release-container startup/shutdown pass.
+      Seven new shared contracts pass. Existing migration-name failures remain;
+      S3 checks are blocked by MinIO registry authorization, and browser/large
+      qualification was not rerun. Three paired clean builds improve 30–47%,
+      median 50.46s to 28.08s (44%), excluding engine prebuild. Incremental benefit
+      is small/inconsistent; runtime throughput was not measured.
+      ScT <code>a9217a4</code> and shared implementation <code>be6dde0</code> are
+      integrated into local master. ScT temporary worktree/branch and test DB are
+      removed. Nothing was published or deployed.
+      <a href="migration-status.md#sct-runtime-migration--2026-10-06">Detailed evidence and limitations</a>;
+      <a href="measurements/sct-runtime-build-2026-10-06.json">raw measurements</a>.</p>
+      <p><strong>Historical ScT HTTP-only canary (2026-10-06): superseded by runtime migration above.</strong>
       Production HTTP, static files, correlation/tracing and shutdown now use the
       shared engine. SQLx, Reqwest and application Tokio remain. Four new library
       contracts, 61 workspace tests, 12 server database tests, 65 core database
