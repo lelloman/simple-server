@@ -210,6 +210,22 @@ and forwarding policy; arbitrary Rust extensions and protocol upgrades do not
 cross this ABI. The client requires a newly built engine; older artifacts reject
 client creation.
 
+For applications retaining Tokio-backed database or client libraries, optional
+`engine-tokio` captures their runtime at handler/layer registration and restores
+it while polling and destroying callbacks and streaming producers. Keep that
+application runtime alive until HTTP drains. `runtime::Runtime::with_current`
+constructs engine resources from an external executor; `Runtime::scope` polls a
+future there with the engine context. Use a multithread engine runtime so its
+I/O drivers run independently; this does not drive a current-thread engine.
+
+`engine-tracing` provides `engine_web::tracing` with the same observer and lazy
+body lifecycle as the source facade. Spans/subscribers and `correlation-core`
+request scopes survive callbacks without compiling Axum. `correlation-core`
+retains Tokio task-local support, but does not enable the source HTTP backend.
+`Router::fallback_static_dir(path)?` serves trusted disk roots inside the engine,
+including GET/HEAD, ranges, conditionals and directory redirects. These APIs
+require a rebuilt engine with native operation context and static-directory support.
+
 This API is not yet interchangeable with `web`: TLS serving
 and WebSocket
 adapters still need migration. The existing `web` API and default backend remain

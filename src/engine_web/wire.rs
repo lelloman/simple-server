@@ -106,6 +106,15 @@ pub(super) fn request(bytes: &[u8]) -> io::Result<Request> {
     };
     *request.extensions_mut() =
         super::continuation::request_extensions(header["context"].as_u64().unwrap_or(0));
+    if let Some(path) = metadata.matched_path.as_ref() {
+        request
+            .extensions_mut()
+            .insert(super::extract::MatchedPath(path.clone()));
+    } else {
+        request
+            .extensions_mut()
+            .remove::<super::extract::MatchedPath>();
+    }
     request.extensions_mut().insert(metadata);
     if let Some(id) = header["native_extensions"].as_u64() {
         let resource = resource(17, json!({"op":"tower_extensions_clone","extensions":id}))?;

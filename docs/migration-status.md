@@ -1,5 +1,37 @@
 # Service migration status
 
+## ScT engine canary — 2026-10-06
+
+In progress from clean ScT master `9e118e6` and simple-server master `16203f8`.
+Isolated branches: ScT `migration/shared-engine` and library
+`implementation/sct-engine`. ScT uses real routing, custom correlation UUIDs,
+header-time metrics/tracing, static files and graceful shutdown. SQLx/PostgreSQL,
+Reqwest/OIDC and application Tokio remain application dependencies.
+
+The library now supplies native static-directory fallback, source-free tracing,
+`correlation-core`, explicit external-executor runtime scopes, and optional
+`engine-tokio` context restoration. Context applies to polling AND destruction
+of callback-owned values. The first canary exposed a stream-drop bug: a download
+destructor could not schedule release of a PostgreSQL read pin outside its host
+Tokio context, leaving tree cleanup stuck. An exact content-length/body-drop
+regression and the previously failing ScT tree workflow now pass. Tracing
+subscribers/spans and trusted correlation scopes propagate across callbacks;
+untrusted request headers do not establish task-local context.
+
+Baseline workspace tests pass; library baseline covers Tower, source tracing
+and static files. Four new engine host-adapter contracts pass, as do strict ScT
+workspace Clippy and its regular server HTTP tests. ScT database verification
+and packaging/measurement are still being finalized; adoption is not yet marked
+Done. Logs use `/tmp/sct-engine-*.log`.
+
+Native debug artifact `/tmp/sct-shared-engine-native/debug/libsimple_server_engine.so`
+has SHA256 `ce981a84b866028aae057483bce473732a93063b5eafee23d20e13fb7c451eec`.
+The engine adds tower-http filesystem support and router_static_dir; native
+operation polling/drop enters its own runtime. C ABI signatures/layout are
+unchanged. Legacy engines must be rebuilt for this adapter set. The minimal
+engine consumer still excludes source HTTP/runtime libraries; ScT intentionally
+retains its application runtime and clients. No push, publication or deployment.
+
 ## Engine general Tower layers — 2026-10-06
 
 The Tower-layer compatibility increment is implemented; the overall engine

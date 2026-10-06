@@ -249,6 +249,7 @@ impl Correlation {
         F: FnOnce(http::Request<B>) -> Fut,
         Fut: Future<Output = http::Response<R>>,
     {
+        request.extensions_mut().insert(context.clone());
         request.extensions_mut().remove::<RequestId>();
         if let Some(id) = &context.validated {
             request.extensions_mut().insert(id.clone());
@@ -284,5 +285,18 @@ impl Correlation {
         }
         response.extensions_mut().insert(final_id);
         response
+    }
+}
+
+// Restore only a context installed by Correlation, never an incoming header.
+#[cfg(feature = "engine-web")]
+pub(crate) async fn resume<B, F, Fut, R>(request: http::Request<B>, next: F) -> R
+where
+    F: FnOnce(http::Request<B>) -> Fut,
+    Fut: Future<Output = R>,
+{
+    match request.extensions().get::<Context>().cloned() {
+        Some(context) => CURRENT.scope(context, async { next(request).await }).await,
+        None => next(request).await,
     }
 }

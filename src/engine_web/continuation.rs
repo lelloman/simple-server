@@ -57,6 +57,10 @@ pub(super) fn response_extensions(id: u64, extensions: http::Extensions) {
         drop(old);
     }
 }
+#[cfg(feature = "engine-tracing")]
+#[derive(Clone)]
+pub(super) struct TraceContext(pub tracing::Span);
+
 #[derive(Clone)]
 pub(super) struct NativeExtensions(pub Resource);
 
@@ -69,6 +73,10 @@ impl Route {
     async fn run(self, request: Request) -> io::Result<Response> {
         let (mut parts, body) = request.into_parts();
         let native = parts.extensions.remove::<NativeExtensions>();
+        #[cfg(feature = "engine-tracing")]
+        parts
+            .extensions
+            .insert(TraceContext(tracing::Span::current()));
         let guard = Guard::new(parts.extensions);
         let hint = body.size_hint();
         let callback = body::export(body)?;

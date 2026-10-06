@@ -33,7 +33,7 @@ pub struct Extension<T>(pub T);
 #[derive(Clone, Debug)]
 pub struct RawQuery(pub Option<String>);
 #[derive(Clone, Debug)]
-pub struct MatchedPath(String);
+pub struct MatchedPath(pub(super) String);
 impl MatchedPath {
     pub fn as_str(&self) -> &str {
         &self.0

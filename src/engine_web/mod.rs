@@ -125,3 +125,13 @@ async fn serve_resource(
     let output = operation.await?;
     wire::check(&wire::decode(&output)?.0)
 }
+
+mod host_runtime;
+#[cfg(feature = "engine-tracing")]
+mod tracing_backend {
+    use super::{Body, Bytes, HttpBody, Response, extract::MatchedPath};
+    use http::{Method, Request, StatusCode};
+    include!("../http_tracing_core.rs");
+}
+#[cfg(feature = "engine-tracing")]
+pub mod tracing;

@@ -66,6 +66,8 @@ pub fn resource_new(command: &Value) -> Result<Vec<u8>, String> {
     if operation.starts_with("router_") {
         let result = match operation {
             "router_new" => Router::new(),
+            "router_static_dir" => router(number(command, "router")?)?
+                .fallback_service(tower_http::services::ServeDir::new(text(command, "path")?)),
             "router_tower_layer" | "router_tower_route_layer" => {
                 // Resolve native unit state before layering: factories must not
                 // be deferred to connection/request dispatch. Host state is separate.

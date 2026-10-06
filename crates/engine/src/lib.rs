@@ -180,7 +180,10 @@ unsafe extern "C" fn task_release(task: *mut c_void) {
     drop(unsafe { Box::from_raw(task.cast::<tokio::task::AbortHandle>()) });
 }
 
-struct Operation(Pin<Box<dyn Future<Output = Vec<u8>> + Send>>);
+struct Operation(
+    Pin<Box<dyn Future<Output = Vec<u8>> + Send>>,
+    tokio::runtime::Handle,
+);
 
 unsafe extern "C" fn operation_new(
     runtime: *mut c_void,
@@ -247,7 +250,7 @@ unsafe extern "C" fn operation_new(
             }
             _ => operations::operation(command, payload)?,
         };
-        Ok(Box::into_raw(Box::new(Operation(future))).cast())
+        Ok(Box::into_raw(Box::new(Operation(future, runtime.handle().clone()))).cast())
     })
 }
 
@@ -273,6 +276,7 @@ unsafe extern "C" fn operation_poll(
     let waker = import_wake(wake);
     guarded(PANICKED, || {
         let operation = unsafe { &mut *operation.cast::<Operation>() };
+        let _entered = operation.1.enter();
         match operation.0.as_mut().poll(&mut Context::from_waker(&waker)) {
             Poll::Pending => Ok(PENDING),
             Poll::Ready(result) => {
@@ -284,7 +288,10 @@ unsafe extern "C" fn operation_poll(
 }
 unsafe extern "C" fn operation_release(operation: *mut c_void) {
     guarded((), || {
-        drop(unsafe { Box::from_raw(operation.cast::<Operation>()) });
+        let operation = unsafe { Box::from_raw(operation.cast::<Operation>()) };
+        let handle = operation.1.clone();
+        let _entered = handle.enter();
+        drop(operation);
         Ok(())
     });
 }

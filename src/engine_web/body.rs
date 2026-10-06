@@ -209,10 +209,11 @@ pub(super) fn response_context(response: super::Response, context: u64) -> io::R
 }
 
 pub(super) fn export(body: Body) -> io::Result<Callback> {
-    let body = Arc::new(Mutex::new(body));
+    let host = super::host_runtime::HostRuntime::capture();
+    let body = Arc::new(host.own(Mutex::new(body)));
     Callback::new(move |_| {
         let body = body.clone();
-        async move {
+        host.scope(async move {
             let frame = poll_fn(|cx| Pin::new(&mut *body.lock().unwrap()).poll_frame(cx)).await;
             let (header, payload) = match frame {
                 None => (json!({"kind":"end"}), Bytes::new()),
@@ -235,6 +236,6 @@ pub(super) fn export(body: Body) -> io::Result<Callback> {
                 },
             };
             wire::encode(header, &payload).expect("body frame metadata is serializable")
-        }
+        })
     })
 }

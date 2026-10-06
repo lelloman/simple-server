@@ -8,12 +8,39 @@ where
     F: Fn(Request) -> Fut + Clone + Send + Sync + 'static,
     Fut: Future<Output = Response> + Send + 'static,
 {
+    let host = super::host_runtime::HostRuntime::capture();
+    let handler = Arc::new(host.own(handler));
     Callback::with_reply(move |bytes| {
         let handler = handler.clone();
-        async move {
+        host.scope(async move {
             let result = async {
                 let (header, _) = wire::decode(&bytes)?;
-                let response = handler(wire::request(&bytes)?).await;
+                let request = wire::request(&bytes)?;
+                #[cfg(feature = "engine-tracing")]
+                let span = request
+                    .extensions()
+                    .get::<super::continuation::TraceContext>()
+                    .map(|context| context.0.clone())
+                    .unwrap_or_else(tracing::Span::none);
+                let response = async move {
+                    #[cfg(feature = "correlation-core")]
+                    {
+                        crate::correlation::resume(request, |request| handler(request)).await
+                    }
+                    #[cfg(not(feature = "correlation-core"))]
+                    {
+                        handler(request).await
+                    }
+                };
+                #[cfg(feature = "engine-tracing")]
+                let response = {
+                    use tracing::instrument::WithSubscriber;
+                    let dispatcher =
+                        tracing::Span::with_subscriber(&span, |(_, dispatcher)| dispatcher.clone())
+                            .unwrap_or_else(|| tracing::dispatcher::get_default(Clone::clone));
+                    tracing::Instrument::instrument(response, span).with_subscriber(dispatcher)
+                };
+                let response = response.await;
                 body::response_context(response, header["context"].as_u64().unwrap_or(0))
             }
             .await;
@@ -23,7 +50,7 @@ where
                         .expect("static response is serializable"),
                 )
             })
-        }
+        })
     })
 }
 // The preview is a native router used only for eager validation. Pending
@@ -224,6 +251,28 @@ impl<S: Clone + Send + Sync + 'static> Router<S> {
     {
         Ok(Self {
             plan: layered(self.plan, layer, 8, "router_tower_route_layer")?,
+        })
+    }
+    /// Serve a directory as the native fallback, retaining GET/HEAD, ranges,
+    /// conditionals and directory redirects. Symlinks are followed; use a trusted root.
+    pub fn fallback_static_dir(self, path: impl AsRef<std::path::Path>) -> io::Result<Self> {
+        let path = path
+            .as_ref()
+            .to_str()
+            .ok_or_else(|| {
+                io::Error::new(
+                    io::ErrorKind::InvalidInput,
+                    "static directory path must be UTF-8",
+                )
+            })?
+            .to_owned();
+        Ok(Self {
+            plan: self.plan.map(move |router| {
+                wire::resource(
+                    8,
+                    json!({"op":"router_static_dir","router":router.id(),"path":path}),
+                )
+            })?,
         })
     }
     pub fn merge(self, other: Self) -> io::Result<Self> {

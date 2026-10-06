@@ -10,6 +10,6 @@ RUN mkdir /artifact && \
     rustc -Vv > /artifact/toolchain.txt && \
     readelf --version-info /artifact/libsimple_server_engine.so > /artifact/symbol-versions.txt && \
     readelf -d /artifact/libsimple_server_engine.so > /artifact/dynamic-section.txt && \
-    sha256sum /artifact/libsimple_server_engine.so > /artifact/SHA256SUMS
+    cd /artifact && sha256sum libsimple_server_engine.so > SHA256SUMS
 FROM scratch AS artifact
 COPY --from=build /artifact/ /

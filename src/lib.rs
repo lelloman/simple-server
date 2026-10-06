@@ -81,7 +81,7 @@ pub mod engine_lifecycle;
 pub mod logging;
 
 /// Optional request identifiers, independent of logging initialization.
-#[cfg(feature = "correlation")]
+#[cfg(feature = "correlation-core")]
 pub mod correlation;
 
 /// Optional HTTP request spans and response-body lifecycle events.

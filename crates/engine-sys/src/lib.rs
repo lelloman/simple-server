@@ -149,6 +149,43 @@ impl Runtime {
     pub fn handle(&self) -> Handle {
         Handle(Arc::downgrade(&self.0))
     }
+    /// Construct engine resources while another executor owns the calling thread.
+    /// Restores the previous context on return or panic; this does not block.
+    pub fn with_current<R>(&self, function: impl FnOnce() -> R) -> R {
+        let _entered = Enter::new(Arc::downgrade(&self.0));
+        function()
+    }
+    /// Poll a future on an external executor with this engine as its resource
+    /// context. The returned future retains the engine and restores context on
+    /// every poll and cancellation. It does not move work to an engine worker.
+    pub fn scope<F: Future>(&self, future: F) -> impl Future<Output = F::Output> + use<F> {
+        struct Scoped<F> {
+            runtime: Runtime,
+            future: Option<Pin<Box<F>>>,
+        }
+        impl<F: Future> Future for Scoped<F> {
+            type Output = F::Output;
+            fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
+                let runtime = self.runtime.clone();
+                runtime.with_current(|| {
+                    self.future
+                        .as_mut()
+                        .expect("future alive")
+                        .as_mut()
+                        .poll(cx)
+                })
+            }
+        }
+        impl<F> Drop for Scoped<F> {
+            fn drop(&mut self) {
+                self.runtime.with_current(|| drop(self.future.take()));
+            }
+        }
+        Scoped {
+            runtime: self.clone(),
+            future: Some(Box::pin(future)),
+        }
+    }
     pub fn block_on<F: Future>(&self, future: F) -> F::Output {
         assert!(
             CURRENT.with(|current| current.borrow().upgrade().is_none()),

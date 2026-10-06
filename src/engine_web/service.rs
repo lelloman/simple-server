@@ -35,9 +35,11 @@ where
     use super::wire;
     use serde_json::json;
     use simple_server_sys::{Callback, Reply};
+    let host = super::host_runtime::HostRuntime::capture();
+    let layer = std::sync::Arc::new(host.own(layer));
     Callback::with_reply(move |bytes| {
-        let layer = layer.clone();
-        async move {
+        let layer = (**layer).clone();
+        host.scope(async move {
             // This factory must remain synchronous when polled. Layer::layer is
             // called once for each native route, never in the request callback.
             let result = (|| -> std::io::Result<Reply> {
@@ -61,6 +63,6 @@ where
                         .expect("factory error"),
                 )
             })
-        }
+        })
     })
 }
