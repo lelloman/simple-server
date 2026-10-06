@@ -42,6 +42,13 @@ Bookworm/release distribution and ARM are not retested. Router layers, Route
 service exposure, make-service, WebSocket/multipart, TLS/Unix transport and test
 harness parity remain pending. No push, publication or deployment.
 
+Implementation commit **`da5f059`** is integrated into local `master` by rebasing
+master onto the implementation branch. Original master remained clean at
+`90d7309`; no intervening commits or unrelated edits appeared. Ancestry and exact
+tree equality were verified, so the integrated implementation is the tested tree.
+This evidence commit is integrated the same way; the temporary worktree and
+merged branch are then removed after verification.
+
 ## Engine nested services — 2026-10-06
 
 Engine implementation remains **Partial** and production adoption remains
