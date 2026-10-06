@@ -38,6 +38,12 @@ contributors. No ScT files were changed, built or migrated. TLS/WebSocket servin
 was not found in the inspected startup/routes, so it is not this service's next
 blocker. No push, artifact publication or deployment.
 
+Benchmark commit `8b598ea` was integrated by rebasing local master onto the
+implementation branch. The original checkout remained clean at `63da312`; no
+concurrent commits or edits appeared. Ancestry and exact tested-tree equality
+passed; ScT remained clean at the inspected revision. Temporary branch/worktree
+cleanup follows integration of this evidence update.
+
 ## Engine dependency isolation guard — 2026-10-06
 
 Engine implementation remains **Partial**; production adoption remains **Pending**.
