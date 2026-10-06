@@ -18,6 +18,10 @@ class DependencyGuard(unittest.TestCase):
             "rustls-pki-types", "sqlx-core", "tokio-util",
         ])
 
+    def test_oidc_implementation_is_rejected(self):
+        self.assertEqual(guard.native_dependencies("openidconnect v4.0.1\noauth2 v5.0.0\nrsa v0.9.10"),
+                         ["oauth2", "openidconnect", "rsa"])
+
     def test_host_http_types_and_package_paths_are_allowed(self):
         graph = "\n\nhttp v1.0.0\nhttp-body v1.0.0\nhttp-body-util v0.1.0\nbytes v1.0.0\n"
         graph += "my-consumer v0.1.0 (/tmp/hyperlocal)\nhyperlocality v0.1.0\n"

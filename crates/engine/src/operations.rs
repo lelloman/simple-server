@@ -78,6 +78,7 @@ pub fn resource_new(command: Value, _: Vec<u8>) -> Result<Vec<u8>, String> {
         Some(operation) if operation.starts_with("router_") || operation.starts_with("method_") => {
             crate::routing::resource_new(&command)
         }
+        Some("oidc_new") => crate::oidc::new(command),
         Some("postgres_pool") => crate::postgres::connect_lazy(command),
         Some("client") => {
             let mut builder = reqwest::Client::builder();
@@ -115,6 +116,7 @@ pub fn resource_new(command: Value, _: Vec<u8>) -> Result<Vec<u8>, String> {
 }
 pub fn resource_release(kind: u32, id: u64) {
     match kind {
+        crate::oidc::CLIENT => crate::oidc::release(id),
         crate::multipart::PARSER | crate::multipart::FIELD => crate::multipart::release(kind, id),
         #[cfg(unix)]
         crate::unix_client::CLIENT => crate::unix_client::release(id),
@@ -162,6 +164,7 @@ pub fn operation(command: Value, body: Vec<u8>) -> Result<FutureBytes, String> {
                 }
             }))
         }
+        Some("oidc_discover" | "oidc_begin" | "oidc_finish") => crate::oidc::operation(command),
         Some("postgres") => Ok(Box::pin(crate::postgres::run(command, body))),
         Some("sqlite") => Ok(Box::pin(crate::database::run(command, body))),
         Some("http_send") => {

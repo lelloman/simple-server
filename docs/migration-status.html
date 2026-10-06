@@ -73,6 +73,16 @@
   </header>
   <main>
     <section class="note" id="shared-engine">
+      <p><strong>ScT OIDC migration (2026-10-07): implementation verified; integration pending.</strong>
+      Discovery, PKCE, token exchange and ID-token verification now execute inside
+      the engine. ScT keeps browser-bound flow storage, sessions and permissions.
+      Original and extended login tests, four shared contracts, native cancellation
+      and standalone consumer checks pass. The normal/build graph drops from 164
+      to 109 package/version entries; OIDC remains dev-only for the signing fixture.
+      Workspace tests, strict linting, process tests, shared feature matrix and engine
+      checks pass (rustdoc links fixed before resuming its final stage). Pinning,
+      measurement and integration are pending.
+      <a href="migration-status.md#sct-oidc-migration--2026-10-07">Scope and evidence</a>.</p>
       <p><strong>ScT runtime migration (2026-10-06): production adoption Done locally; overall engine Partial.</strong>
       Production uses <code>#[simple_server::main]</code> and engine PostgreSQL,
       HTTP, tasks, timers and storage I/O. The normal/build graph excludes Tokio,

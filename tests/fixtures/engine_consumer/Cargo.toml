@@ -8,6 +8,6 @@ default-run = "simple-server-engine-consumer"
 [workspace]
 
 [dependencies]
-simple-server = { package = "lelloman-simple-server", path = "../../..", default-features = false, features = ["runtime", "client", "sqlite-client", "process"] }
+simple-server = { package = "lelloman-simple-server", path = "../../..", default-features = false, features = ["runtime", "client", "sqlite-client", "process", "oidc"] }
 simple-server-sys = { package = "lelloman-simple-server-sys", path = "../../../crates/engine-sys" }
 serde_json = "1"

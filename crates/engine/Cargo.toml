@@ -13,6 +13,7 @@ name = "simple_server_engine"
 crate-type = ["cdylib"]
 
 [dependencies]
+openidconnect = { version = "=4.0.1", default-features = false }
 simple-server-abi = { package = "lelloman-simple-server-abi", path = "../engine-abi", version = "=0.2.0" }
 tokio = { version = "1", features = ["full", "test-util"] }
 serde_json = "1"

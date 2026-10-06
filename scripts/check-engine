@@ -8,15 +8,18 @@ fi
 cargo fmt --all --check
 cargo fmt --manifest-path crates/engine/Cargo.toml --check
 cargo clippy --locked --manifest-path crates/engine/Cargo.toml --target-dir target/engine --all-targets -- -D warnings
+cargo test --locked --manifest-path crates/engine/Cargo.toml --target-dir target/engine oidc::tests
 cargo test --locked -p lelloman-simple-server-abi -p lelloman-simple-server-sys
 cargo test --locked --no-default-features --features runtime,client,process,sqlite-client,task-drivers,engine-lifecycle,engine-tasks,engine-scheduling,engine-web \
   --test engine_runtime --test engine_io --test engine_sqlite --test engine_drivers --test engine_lifecycle --test engine_signals --test engine_tasks --test engine_task_scheduling --test engine_scheduler_policies \
   --test engine_cron_registry --test engine_execution_capacity --test engine_scheduling_selection --test engine_web --test engine_extractors --test engine_forms --test engine_path --test engine_router_state --test engine_responses --test engine_services --test engine_middleware --test engine_router_middleware --test engine_layer_scopes --test engine_tower_layers --test engine_sse --test engine_multipart --test engine_unix --test engine_unix_client
 cargo test --locked --no-default-features --features engine-io,process,postgres-client --test engine_files --test engine_postgres
+cargo test --locked --no-default-features --features oidc,engine-web --test engine_oidc
 cargo test --locked --no-default-features --features engine-web,client --test engine_callback_drop
 cargo test --locked --no-default-features --features engine-tokio,engine-tracing,correlation-core,client --test engine_host_adapters
 cargo run --locked --manifest-path tests/fixtures/engine_consumer/Cargo.toml
 cargo run --locked --manifest-path tests/fixtures/engine_consumer/Cargo.toml --bin http
+cargo run --locked --manifest-path tests/fixtures/engine_consumer/Cargo.toml --bin oidc
 cargo fmt --manifest-path tests/fixtures/engine_drivers/Cargo.toml --check
 cargo run --locked --manifest-path tests/fixtures/engine_drivers/Cargo.toml
 cargo fmt --manifest-path tests/fixtures/engine_lifecycle/Cargo.toml --check

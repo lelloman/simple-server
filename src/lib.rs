@@ -28,9 +28,14 @@ pub use simple_server_macros::{main, test};
     feature = "client",
     feature = "process",
     feature = "sqlite-client",
-    feature = "postgres-client"
+    feature = "postgres-client",
+    feature = "oidc"
 ))]
 mod engine_wire;
+
+/// OpenID Connect authorization code flows executed by the engine.
+#[cfg(feature = "oidc")]
+pub mod oidc;
 
 /// Outbound HTTP executed by the engine, without a downstream HTTP client stack.
 #[cfg(feature = "client")]

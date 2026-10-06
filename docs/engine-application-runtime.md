@@ -63,3 +63,37 @@ ScT's `simple-server.rev` selects the source exported into Docker; the engine im
 is reused by its builder and runtime stages. No artifacts are published by the
 local migration. See the central migration trackers for actual checks, revisions,
 measurements and remaining qualification limits.
+
+## OpenID Connect
+
+Enable `oidc` with default features disabled to use `simple_server::oidc::Client`.
+The native engine contains `openidconnect` and its verification/crypto dependencies;
+only owned configuration strings, authorization-flow material and verified subject
+strings cross the existing framed ABI. No OIDC types are re-exported to consumers.
+Rebuild the engine from the same pinned source revision as these bindings; older
+engines do not implement the new commands. ABI table layout is unchanged.
+
+`Client::discover(Config)` performs discovery and loads provider keys.
+`begin()` produces an authorization URL, fresh state, nonce and S256 PKCE verifier.
+The application stores those secrets with its browser binding. It must validate
+state/browser binding and atomically consume the flow before calling
+`finish(code, nonce, verifier)`. `finish` exchanges the code and verifies signature,
+issuer, audience, expiration, nonce and the access-token hash when present, then
+returns the subject. Associate the subject with the configured issuer, never as a
+globally unique account identifier. Sessions, authorization and database ownership
+remain with the application. This API covers confidential-client authorization
+code flows; it does not add refresh, logout, user-info or automatic JWKS refresh.
+
+Requests retain the ten-second timeout, proxy defaults and disabled redirects.
+HTTPS is required; the explicit development option permits HTTP only to localhost,
+127.0.0.1 or [::1]. This check covers discovered endpoints and each outgoing
+request, including the JWKS fetch during discovery. Credentials in endpoint URLs
+are rejected. Errors contain only fixed categories, never provider responses,
+codes or secrets; Debug output redacts configuration and flow material.
+
+The host owns a resource before discovery starts, so cancellation releases it.
+Clones retain the provider; in-flight operations retain it until completion or
+cancellation. There is no global application session state inside the engine.
+`tests/engine_oidc.rs` checks discovery policy, generated flows and clone lifetime;
+the standalone engine consumer and dependency guard ensure no host OIDC stack.
+ScT's real login fixture covers token verification, PKCE, replay, sessions and CSRF.

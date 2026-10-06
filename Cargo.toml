@@ -33,6 +33,7 @@ engine-web = ["dep:tower-layer", "dep:tower-service", "extract", "dep:serde", "d
 engine-lifecycle = ["runtime", "dep:futures-util"]
 client = ["runtime", "dep:serde", "dep:serde_json", "dep:serde_urlencoded", "dep:bytes", "dep:http", "dep:futures-util"]
 process = ["runtime", "dep:serde_json"]
+oidc = ["runtime", "dep:serde_json"]
 postgres-client = ["runtime", "dep:serde", "dep:serde_json", "dep:sha2"]
 sqlite-client = ["runtime", "database-sqlite", "dep:serde_json"]
 unix-http = ["web", "lifecycle", "dep:hyper", "dep:hyper-util", "dep:hyperlocal"]

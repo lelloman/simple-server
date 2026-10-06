@@ -1,5 +1,52 @@
 # Service migration status
 
+## ScT OIDC migration — 2026-10-07
+
+**Implementation verified; integration pending.** Production ScT uses OIDC for
+browser login. Clean starting branches: simple-server master `103ea47`, ScT
+master `a9217a4`. Isolated sibling worktrees under `/tmp/sct-oidc-migration` on
+`implementation/engine-oidc` and `migration/engine-oidc` preserve path dependencies.
+
+The new optional `oidc` host API passes owned configuration, flow material and
+verified subject strings across the existing framed ABI. The engine owns
+`openidconnect` 4.0.1, discovery/JWKS, S256 PKCE, authorization URL generation,
+token exchange and signature/issuer/audience/expiry/nonce/optional at_hash
+verification. ScT retains browser binding, atomic single-use flow consumption,
+issuer/subject account mapping, sessions, CSRF and permissions. See the
+[contract](engine-application-runtime.md#openid-connect).
+
+The HTTP policy retains ten-second requests, no redirects and HTTPS with explicit
+loopback-only development HTTP. Endpoint checks now also run before discovery's
+JWKS fetch, and endpoint URLs containing credentials are rejected. Errors and
+Debug do not expose secrets or provider bodies. Discovery allocates its host-owned
+resource before awaiting; an additional cancellation test verifies cleanup.
+
+Baseline OIDC login passes unchanged (`/tmp/sct-oidc-baseline.log`). The migrated
+suite passes original issuer/audience/expiry/nonce/signature/at_hash negatives,
+replay, sessions and CSRF, plus missing nonce/ID-token, provider rejection and
+valid absent-at_hash coverage (`/tmp/sct-oidc-migrated.log`). Four shared OIDC
+contracts and two native endpoint-policy/cancellation tests pass (`/tmp/sct-oidc-contracts.log`,
+`/tmp/sct-oidc-library-final.log`). A standalone consumer calls the engine without
+host OIDC dependencies (`/tmp/sct-oidc-standalone.log`). Production normal/build
+package/version entries drop **164 → 109** (55 removed, none added), or unique
+package names **160 → 106**. OIDC remains dev-only in ScT for its signing fixture;
+URL/IDNA and S3 dependencies are intentionally still host-side. Both dependency
+guards reject OIDC/crypto implementation families leaking into production.
+
+ScT workspace all-feature tests, strict all-target/all-feature Clippy, two real
+process tests and production dependency/ELF linking pass
+(`/tmp/sct-oidc-service-checks.log`). Shared source/default/all-feature and feature
+matrix checks pass; strict rustdoc initially found two new documentation links.
+After correction, rustdoc and the full engine stage pass, including native Clippy,
+six new OIDC contracts, standalone consumers, dependency guards, ABI smoke and
+installer tests (`/tmp/sct-oidc-library-checks.log`,
+`/tmp/sct-oidc-library-final.log`). These are a completed matrix plus resumed final
+stages, not one uninterrupted script run. S3/browser/large qualification and the
+previously documented unrelated database migration-name failures were not rerun.
+
+Source pin, benchmark, local commits and integration/cleanup will be recorded
+before marking adoption Done. No push or deployment authorized.
+
 ## ScT runtime migration — 2026-10-06
 
 **Production runtime adoption Done locally; overall engine Partial.** This completes the

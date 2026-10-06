@@ -234,6 +234,9 @@ local development branch, with verified HTTP/database/shutdown behavior and a
 working local Docker image. The subsequent runtime migration removes Tokio,
 SQLx, Reqwest, Axum and Hyper from the production server graph. See the
 [runtime migration evidence](docs/migration-status.md#sct-runtime-migration--2026-10-06).
+The optional `oidc` feature also moves discovery, authorization-code exchange and
+ID-token verification into the engine; applications retain login-flow storage
+and sessions. See [the OIDC contract](docs/engine-application-runtime.md#openid-connect).
 The canary has not been published or deployed.
 
 The engine contains TCP HTTP/1 and HTTP/2 transport, streaming bodies and
