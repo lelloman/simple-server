@@ -15,6 +15,7 @@ use std::{
 mod callback;
 mod clock;
 mod database;
+mod multipart;
 mod operations;
 mod routing;
 mod server;

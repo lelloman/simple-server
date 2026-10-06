@@ -155,8 +155,16 @@ an engine-only consumer. Ready events, errors and completion take priority over
 heartbeats. Keepalive timers start at response conversion inside an engine
 runtime; IDs, subscriptions, authorization and replay remain application-owned.
 
+`engine_web::multipart::{Multipart, OwnedMultipart}` parses uploads inside the
+engine. Borrowed fields enforce exclusivity at compile time; owned fields enforce
+it at runtime and may outlive their reader. Metadata and streamed chunks cross
+the body ABI; only `bytes` and `text` collect fields. The default total request
+limit is 2 MiB, overridden with a `BodyLimit` extension. Multipart requires an
+updated engine artifact with multipart operations; older artifacts return an
+extraction error. No multipart parser dependency is added to consumers.
+
 This API is not yet interchangeable with `web`: router layers, TLS/Unix serving
-and WebSocket/multipart
+and WebSocket
 adapters still need migration. The existing `web` API and default backend remain
 source-based, and no production service has adopted the engine.
 

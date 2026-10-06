@@ -482,3 +482,41 @@ standalone HTTP fixture now calls the SSE API and still has 29 normal/build
 packages beyond the fixture and library, without Axum or Tokio. Router layers,
 Route service exposure, make-service, WebSocket/multipart, TLS/Unix transport and
 test-harness parity remain separate work. No production adoption is implied.
+
+## Engine multipart uploads (development)
+
+The engine-web feature now exposes borrowed Multipart/Field and owned
+OwnedMultipart/OwnedField, plus MultipartError, under engine_web::multipart.
+Multer 3.1.0 is compiled only into the engine, preserving its parsing and charset
+behavior without adding downstream packages. The existing source-backed
+multipart APIs are unchanged. Field metadata is host-owned; parsing state and
+field buffers remain native. Parser errors preserve status and diagnostic text;
+MultipartError::source is a host-owned diagnostic, not the native Rust error.
+Borrowed limit errors retain Axum's “Request payload is too large” text while
+owned limit errors retain the owned source adapter's parser diagnostic.
+
+Requests export their lazy body through the existing callback mechanism. The
+engine applies the total request limit (2 MiB by default, with host BodyLimit
+overrides) before parsing. Fields expose name, filename, content type, headers,
+Stream/chunk, bytes and charset-aware text. Only bytes/text collect complete
+fields. File storage, filename validation and additional per-file limits remain
+application-owned. The borrowed wrapper prevents overlapping fields at compile
+time. Owned fields retain native state after their reader is dropped and reject
+concurrent next-field calls until the previous field is dropped or consumed.
+
+Parser resources use kind 11; field slots use kind 12. Slots are allocated
+synchronously before awaiting next-field operations and held by host RAII guards.
+Cancellation drops the slot registration and in-flight operation, so async
+completion never creates an unclaimed resource ID. Native map entries are dropped
+outside their locks because callback destruction may reenter resource release.
+Tests cover cancellation at header, chunk and text stages, including switching
+from a pending chunk to text, as well as dropped-field skipping and reader drop.
+
+New resource/operation commands require a rebuilt engine artifact. C ABI
+signatures and layout are unchanged; an old library cannot extract multipart and
+returns HTTP 500 through the typed extractor's rejection path. The standalone
+HTTP fixture demonstrates both that failure and successful binary upload with
+the new library. Its normal/build graph remains 29 packages beyond fixture and
+library, without Multer, Axum or Tokio. No runtime speedup is claimed. Router
+layers, Route service exposure, make-service, WebSocket, TLS/Unix transport and
+public test-harness parity remain pending.

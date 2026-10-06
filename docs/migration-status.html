@@ -73,6 +73,15 @@
   </header>
   <main>
     <section class="note" id="shared-engine">
+      <p><strong>Engine multipart uploads (2026-10-06): implementation Partial; adoption Pending.</strong>
+      Borrowed/owned fields, streaming chunks, charset-aware text and request limits
+      now use a native multipart parser. Cancellation and reader/field lifetimes
+      are covered by contracts. The consumer graph remains 29 packages without
+      Multer, Axum or Tokio. New operations require a rebuilt engine; the previous
+      artifact returns an extraction error. Full source/engine checks, standalone
+      uploads and dependency guards pass. Router layers, WebSocket and transport
+      adapters remain pending. See the
+      <a href="migration-status.md#engine-multipart-uploads--2026-10-06">scope and verification evidence</a>.</p>
       <p><strong>Engine server-sent events (2026-10-06): implementation Partial; adoption Pending.</strong>
       SSE encoding, lazy streaming and opt-in keepalives now use the engine body
       and clock. Source encoding comparisons, paused-clock contracts and socket

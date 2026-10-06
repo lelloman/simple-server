@@ -116,6 +116,22 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .keep_alive(KeepAlive::default())
         })?,
     )?;
+    async fn upload(
+        mut multipart: engine_web::multipart::Multipart,
+    ) -> Result<Json<serde_json::Value>, engine_web::multipart::MultipartError> {
+        let field = multipart.next_field().await?.unwrap();
+        let name = field.name().map(str::to_owned);
+        let filename = field.file_name().map(str::to_owned);
+        let data = field.bytes().await?;
+        assert!(multipart.next_field().await?.is_none());
+        Ok(Json(
+            serde_json::json!({"name": name, "filename": filename, "data": data.to_vec()}),
+        ))
+    }
+    let router = router.route(
+        "/upload",
+        MethodRouter::new()?.on_handler(Method::POST, upload)?,
+    )?;
     let router = router.with_state("engine".to_owned())?;
     let listener = engine_web::bind("127.0.0.1:0").await?;
     let address = listener.local_addr();
@@ -211,6 +227,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     assert_eq!(
         response.text().await?,
         "event: update\nid: 1\ndata: ready\n\n"
+    );
+    let response = client.post(format!("http://{address}/upload"))
+        .header("content-type", "multipart/form-data; boundary=test")
+        .body(b"--test\r\nContent-Disposition: form-data; name=\"file\"; filename=\"x.bin\"\r\n\r\n\x00\xffdata\r\n--test--\r\n".to_vec()).send().await?;
+    assert_eq!(response.status().as_u16(), 200);
+    assert_eq!(
+        response.json::<serde_json::Value>().await?,
+        serde_json::json!({"name":"file", "filename":"x.bin", "data":[0,255,100,97,116,97]})
     );
     shutdown.request();
     server.await??;

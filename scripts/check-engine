@@ -11,7 +11,7 @@ cargo clippy --locked --manifest-path crates/engine/Cargo.toml --target-dir targ
 cargo test --locked -p lelloman-simple-server-abi -p lelloman-simple-server-sys
 cargo test --locked --no-default-features --features runtime,client,process,sqlite-client,task-drivers,engine-lifecycle,engine-tasks,engine-scheduling,engine-web \
   --test engine_runtime --test engine_io --test engine_sqlite --test engine_drivers --test engine_lifecycle --test engine_signals --test engine_tasks --test engine_task_scheduling --test engine_scheduler_policies \
-  --test engine_cron_registry --test engine_execution_capacity --test engine_scheduling_selection --test engine_web --test engine_extractors --test engine_forms --test engine_path --test engine_router_state --test engine_responses --test engine_services --test engine_sse
+  --test engine_cron_registry --test engine_execution_capacity --test engine_scheduling_selection --test engine_web --test engine_extractors --test engine_forms --test engine_path --test engine_router_state --test engine_responses --test engine_services --test engine_sse --test engine_multipart
 cargo run --locked --manifest-path tests/fixtures/engine_consumer/Cargo.toml
 cargo run --locked --manifest-path tests/fixtures/engine_consumer/Cargo.toml --bin http
 cargo fmt --manifest-path tests/fixtures/engine_drivers/Cargo.toml --check
@@ -24,8 +24,8 @@ cargo fmt --manifest-path tests/fixtures/engine_web/Cargo.toml --check
 cargo run --locked --manifest-path tests/fixtures/engine_web/Cargo.toml
 for fixture in engine_consumer engine_drivers engine_lifecycle engine_tasks engine_web; do
   graph=$(cargo tree --locked --manifest-path "tests/fixtures/$fixture/Cargo.toml" --edges normal,build --prefix none)
-  if printf '%s\n' "$graph" | rg '^(axum|tokio|reqwest|hyper|sqlx|rustls)(-| )'; then
-    echo "Heavy runtime dependency leaked into $fixture" >&2
+  if printf '%s\n' "$graph" | rg '^(axum|tokio|reqwest|hyper|sqlx|rustls|multer)(-| )'; then
+    echo "Native engine dependency leaked into $fixture" >&2
     exit 1
   fi
 done

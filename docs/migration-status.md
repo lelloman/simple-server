@@ -1,5 +1,62 @@
 # Service migration status
 
+## Engine multipart uploads — 2026-10-06
+
+Engine implementation remains **Partial** and production adoption remains
+**Pending**. Work starts from clean local master `d0473d1`, in isolated branch
+`implementation/engine-multipart`, worktree `target/worktrees/engine-multipart`.
+No consumer repository is changed.
+
+The engine-web API now exposes borrowed/owned multipart readers and fields,
+metadata, streaming chunks and collected bytes/charset-aware text. Multer 3.1.0
+is compiled only in the native engine. Total request limits default to 2 MiB and
+honor BodyLimit overrides. Borrowed and owned adapters preserve their different
+source limit-rejection texts. Error status and diagnostics cross the wire;
+error sources are host-owned diagnostics rather than native Rust error objects.
+Borrowed fields enforce exclusivity at compile time. Owned fields enforce it at
+runtime, may outlive their reader, and support dropping/skipping a field.
+
+Field slots are allocated synchronously before async parsing so cancellation
+cannot orphan a newly allocated ID. Host guards release registrations; native
+map removals drop outside locks to permit callback reentry. Existing response
+body export is factored into a reusable callback helper. Body/error/trailer and
+response-disconnect tests cover this shared change.
+
+Baseline: 21 tests pass (source multipart 5, engine extractors 8, engine HTTP 8),
+recorded in `/tmp/simple-server-multipart-baseline.log`. Eight new multipart
+contracts and eight HTTP regressions pass
+(`/tmp/simple-server-multipart-contracts.log`). Contracts cover source status,
+headers and bytes for normal/malformed/oversized uploads; borrowed and owned
+fields; lazy chunks and body release; cancellation during header/chunk/text
+reads; charset/BOM/replacement decoding; field lifetime after reader drop;
+and default/overridden total limits. A compile-fail example prevents concurrent
+borrowed fields. No whole-request collection is introduced.
+
+The full `bash scripts/check` passes (`/tmp/simple-server-multipart-full.log`):
+strict workspace/native Clippy, source feature matrix and protocol regressions,
+rustdoc including the borrowed-field compile-fail contract, eight all-feature
+and seven engine-only multipart contracts, all seven standalone engine binaries,
+dependency guards, C ABI smoke and five artifact installer tests. The standalone
+HTTP consumer successfully parses binary uploads with the rebuilt engine.
+Multer is also added to the downstream dependency guard; the strengthened guard
+is separately verified for all five guarded fixture graphs. Tracker scripts and
+evidence links pass validation.
+
+New native multipart commands and resource kinds 11/12 require updated artifacts;
+C ABI signatures/layout remain unchanged. The updated standalone fixture fails
+against the previous engine with HTTP 500 at multipart extraction, as expected
+(`/tmp/simple-server-multipart-old-engine.log`). Verification uses the newly
+built local x86_64 debug engine at `/tmp/simple-server-multipart-engine/debug`,
+from this checkpoint; build log `/tmp/simple-server-multipart-engine-build.log`.
+SHA256 `c76ae40d8b82d9e360fcf31c80576a7785b5bbd3d592073df615711cc23a693a`.
+Bookworm/release distribution and ARM are not retested. The HTTP consumer graph
+remains 29 normal/build packages beyond fixture and library, without Multer,
+Axum, Tokio, Hyper, Reqwest, SQLx or Rustls
+(`/tmp/simple-server-multipart-graph.txt`). No speedup is claimed.
+
+Router layers, Route service exposure, make-service, WebSocket, TLS/Unix transport
+and public test-harness parity remain pending. No push, publication or deployment.
+
 ## Engine server-sent events — 2026-10-06
 
 Engine implementation remains **Partial** and production adoption remains

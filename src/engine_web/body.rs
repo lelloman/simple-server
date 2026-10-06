@@ -199,8 +199,17 @@ impl HttpBody for Incoming {
 pub(super) fn response(response: super::Response) -> io::Result<Reply> {
     let (parts, body) = response.into_parts();
     let hint = body.size_hint();
+    let callback = export(body)?;
+    let bytes = wire::encode(
+        json!({"status":parts.status.as_u16(),"headers":wire::headers(&parts.headers),"body":callback.id(),"lower":hint.lower(),"upper":hint.upper()}),
+        &[],
+    )?;
+    Ok(Reply::new(bytes).keep_alive(callback))
+}
+
+pub(super) fn export(body: Body) -> io::Result<Callback> {
     let body = Arc::new(Mutex::new(body));
-    let callback = Callback::new(move |_| {
+    Callback::new(move |_| {
         let body = body.clone();
         async move {
             let frame = poll_fn(|cx| Pin::new(&mut *body.lock().unwrap()).poll_frame(cx)).await;
@@ -226,10 +235,5 @@ pub(super) fn response(response: super::Response) -> io::Result<Reply> {
             };
             wire::encode(header, &payload).expect("body frame metadata is serializable")
         }
-    })?;
-    let bytes = wire::encode(
-        json!({"status":parts.status.as_u16(),"headers":wire::headers(&parts.headers),"body":callback.id(),"lower":hint.lower(),"upper":hint.upper()}),
-        &[],
-    )?;
-    Ok(Reply::new(bytes).keep_alive(callback))
+    })
 }

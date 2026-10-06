@@ -92,6 +92,14 @@ fn headers_from_wire(value: &Value) -> Result<HeaderMap, String> {
     Ok(headers)
 }
 
+pub(crate) fn callback_body(id: u64) -> Result<Body, String> {
+    Ok(Body::new(CallbackBody {
+        callback: Some(callback::get(id)?),
+        pending: None,
+        hint: SizeHint::new(),
+    }))
+}
+
 struct CallbackBody {
     callback: Option<Arc<ForeignCallback>>,
     pending: Option<ForeignFuture>,
