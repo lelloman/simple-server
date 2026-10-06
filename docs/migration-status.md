@@ -63,6 +63,12 @@ artifact release and production adoption remain pending. No new performance
 claim, push, publication or deployment. Release/Bookworm distribution, ARM and
 non-Unix targets are not retested.
 
+Implementation `35018b5` was integrated by rebasing local master onto the
+implementation branch. Original master remained clean at `93b9d9f`; no concurrent
+commits or unrelated edits appeared. Ancestry and exact tested-tree equality
+passed. Temporary branch/worktree cleanup follows integration of this evidence
+update; no external repository was changed.
+
 ## Engine route and method layer scopes — 2026-10-06
 
 Implementation remains **Partial**, production adoption **Pending**. Start:
