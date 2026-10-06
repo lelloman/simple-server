@@ -23,6 +23,11 @@ graph also passed. These are check-script changes only: the Rust suites and nati
 artifact build are not rerun, and the previous Unix-client artifact remains
 applicable. No compilation-speed claim, production adoption, push or deployment.
 
+Implementation `4544f21` was integrated by rebasing local master onto the
+implementation branch. Original master remained clean at `49af123`; no concurrent
+edits or commits appeared. Ancestry and exact tested-tree equality passed.
+Temporary branch/worktree cleanup follows integration of this evidence update.
+
 ## Engine Unix HTTP client — 2026-10-06
 
 Engine implementation remains **Partial** and production adoption remains

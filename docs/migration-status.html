@@ -77,7 +77,8 @@
       The consumer graph check now catches Hyperlocal and native dependency
       subcrates consistently, including the scheduler's restricted Tokio policy.
       Five regression tests, five standalone graphs and the scheduler graph pass.
-      Runtime code and artifacts are unchanged. See the
+      Runtime code and artifacts are unchanged. Commit <code>4544f21</code> is
+      integrated into local master with ancestry and tested-tree equality verified. See the
       <a href="migration-status.md#engine-dependency-isolation-guard--2026-10-06">scope and verification evidence</a>.</p>
       <p><strong>Engine Unix HTTP client (2026-10-06): implementation Partial; adoption Pending.</strong>
       Pooled client requests now run in the engine with streaming bodies/trailers,
