@@ -66,13 +66,19 @@ pub fn resource_new(command: &Value) -> Result<Vec<u8>, String> {
     if operation.starts_with("router_") {
         let result = match operation {
             "router_new" => Router::new(),
-            "router_layer" => {
+            "router_layer" | "router_route_layer" => {
                 let callback = callback::get(number(command, "handler")?)?;
-                router(number(command, "router")?)?.layer(axum::middleware::from_fn(
+                let layer = axum::middleware::from_fn(
                     move |request: axum::extract::Request, next: axum::middleware::Next| {
                         crate::middleware::run(request, next, callback.clone())
                     },
-                ))
+                );
+                let router = router(number(command, "router")?)?;
+                if operation == "router_layer" {
+                    router.layer(layer)
+                } else {
+                    router.route_layer(layer)
+                }
             }
             "router_route" => router(number(command, "router")?)?.route(
                 text(command, "path")?,
@@ -99,6 +105,21 @@ pub fn resource_new(command: &Value) -> Result<Vec<u8>, String> {
     }
     let result = match operation {
         "method_new" => MethodRouter::new(),
+        "method_layer" | "method_route_layer" => {
+            let callback = callback::get(number(command, "handler")?)?;
+            let layer = axum::middleware::from_fn(
+                move |request: axum::extract::Request, next: axum::middleware::Next| {
+                    crate::middleware::run(request, next, callback.clone())
+                },
+            );
+            let methods = method_router(number(command, "methods")?)?;
+            if operation == "method_layer" {
+                methods.layer(layer)
+            } else {
+                methods.route_layer(layer)
+            }
+        }
+
         "method_handler" => {
             let handler = HostHandler(callback::get(number(command, "handler")?)?);
             let base = method_router(number(command, "methods")?)?;

@@ -145,8 +145,33 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     ));
     let router = router.route(
         "/middleware",
-        MethodRouter::new()?.on_service(Method::GET, service)?,
+        MethodRouter::new()?
+            .on_service(Method::GET, service)?
+            .route_layer(middleware::map_response(
+                |mut response: Response| async move {
+                    response
+                        .headers_mut()
+                        .insert("x-method-route", "yes".parse().unwrap());
+                    response
+                },
+            ))?
+            .layer(middleware::map_response(
+                |mut response: Response| async move {
+                    response
+                        .headers_mut()
+                        .insert("x-method-layer", "yes".parse().unwrap());
+                    response
+                },
+            ))?,
     )?;
+    let router = router.route_layer(middleware::map_response(
+        |mut response: Response| async move {
+            response
+                .headers_mut()
+                .insert("x-route-layer", "yes".parse().unwrap());
+            response
+        },
+    ))?;
     let router = router.layer(middleware::map_response(
         |mut response: Response| async move {
             response
@@ -200,6 +225,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .await?;
     assert_eq!(response.headers()["x-middleware"], "host");
     assert_eq!(response.headers()["x-router-layer"], "yes");
+    assert_eq!(response.headers()["x-route-layer"], "yes");
+    assert_eq!(response.headers()["x-method-layer"], "yes");
+    assert_eq!(response.headers()["x-method-route"], "yes");
     assert_eq!(response.bytes().await?.as_ref(), b"middleware state");
     let response = client
         .get(format!("http://{address}/items/7/a%252Fb+c"))

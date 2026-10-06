@@ -73,6 +73,14 @@
   </header>
   <main>
     <section class="note" id="shared-engine">
+      <p><strong>Engine route/method layer scopes (2026-10-06): implementation Partial; adoption Pending.</strong>
+      Router::route_layer and both method-layer scopes now match source routing,
+      including their different 404/405 behavior, later additions and typed state.
+      Five scope contracts and thirteen regressions pass. General Tower adapters
+      and production adoption remain pending. An updated engine is required;
+      dependencies and the C ABI layout are unchanged. Full repository checks and
+      standalone consumers pass; the previous engine rejects construction. See the
+      <a href="migration-status.md#engine-route-and-method-layer-scopes--2026-10-06">scope and verification evidence</a>.</p>
       <p><strong>Engine router async middleware (2026-10-06): implementation Partial; adoption Pending.</strong>
       Router layers now include native 404/405 replies and preserve host extensions
       through guarded continuations. Eight contracts cover source parity, scope,

@@ -148,8 +148,13 @@ including native 404/405 responses. Routes added afterwards are not wrapped.
 Nested routing, typed state, headers and host extensions survive the continuation;
 bodies remain streaming. `RequestMetadata` is refreshed from native routing at
 each callback. Router layers require a rebuilt engine with continuation support;
-older artifacts reject construction. Arbitrary third-party Tower layers and
-`route_layer`/method-router layers remain unsupported.
+older artifacts reject construction. `Router::route_layer` wraps matched paths
+(including their 405) and leaves the 404 fallback alone. `MethodRouter::layer`
+wraps its existing methods and fallback, while `MethodRouter::route_layer` wraps
+only existing matched methods, leaving 405 responses alone. Later-added routes
+or methods are outside these layers. Empty route-layer applications are rejected
+at construction. These scope APIs require an engine with their new commands;
+arbitrary third-party Tower layers remain unsupported.
 
 `Path<T>` reads already-decoded engine captures using source-compatible scalar,
 tuple, struct, map, sequence and unit-enum semantics. Invalid UTF-8 and parsing

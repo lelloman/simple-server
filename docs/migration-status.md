@@ -1,5 +1,50 @@
 # Service migration status
 
+## Engine route and method layer scopes — 2026-10-06
+
+Implementation remains **Partial**, production adoption **Pending**. Start:
+clean local master `07b6179`; isolated branch `implementation/engine-layer-scopes`,
+worktree `target/worktrees/engine-layer-scopes`. No consumer repository changes.
+
+Added owned async Router::route_layer, MethodRouter::layer and
+MethodRouter::route_layer. Router::route_layer leaves 404 alone but wraps a
+matched path's 405; MethodRouter::route_layer leaves its 405 fallback alone too.
+MethodRouter::layer includes the method fallback. Later-added routes/methods
+are not wrapped. Native placement and the existing continuation bridge preserve
+headers, streaming and host extensions; pending state replays the same scope.
+Empty route-layer calls reject eagerly, including fallback-only method groups.
+Arbitrary third-party Tower layers remain pending; no ScT adoption is claimed.
+
+Baseline router middleware 8 and state 5 tests pass
+(`/tmp/simple-server-layer-scopes-baseline.log`). Five scope contracts and those
+thirteen regressions pass (`/tmp/simple-server-layer-scopes-contracts.log`).
+Coverage includes real source HTTP comparisons for all three APIs, HEAD/custom
+methods, 404/405/Allow, later registration, short-circuit authorization behavior,
+nested captures, layer order, host extensions, independent pending-state binding
+and invalid empty construction. The standalone HTTP fixture now executes all
+three scope APIs together with router-wide and service-local middleware.
+
+Full `scripts/check` passes (`/tmp/simple-server-layer-scopes-full.log`):
+workspace/native strict Clippy, source feature matrix, rustdoc, five all-feature
+and four engine-only scope contracts, all engine regressions, seven standalone
+engine binaries, dependency guards and their regression tests, C ABI smoke and
+five installer tests. Tracker scripts/anchors, graph count and diff whitespace
+checks pass. Graph evidence: `/tmp/simple-server-layer-scopes-graph.txt`.
+
+Against the previous router-middleware artifact, the updated standalone fixture
+fails method route-layer construction with `unknown method router command`,
+before serving (`/tmp/simple-server-layer-scopes-old-engine.log`).
+
+New local x86_64 debug engine:
+`/tmp/simple-server-layer-scopes-engine/debug/libsimple_server_engine.so`,
+SHA256 `76e3a09b0113944fceb7bc9793676746f7f778324ec6083688a2ef7dfe26f8a1`.
+Build log `/tmp/simple-server-layer-scopes-build.log`. New wire commands:
+router_route_layer, method_layer, method_route_layer. Resource kinds and C ABI
+layout/signatures are unchanged; host graph remains 30 packages without native
+transport/runtime dependencies. No build/runtime speedup is claimed.
+Release/Bookworm distribution, ARM and non-Unix targets are not retested.
+No push, publication or deployment.
+
 ## Engine router async middleware — 2026-10-06
 
 Implementation remains **Partial**, production adoption **Pending**. Start:

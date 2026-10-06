@@ -694,8 +694,8 @@ Axum routing: existing routes and fallback are wrapped, native 404/405 responses
 are included, and later-added routes remain outside the layer. Pending typed
 state plans replay layer construction when bound. Source comparisons verify
 status, headers and bodies including HEAD, 404/405, custom methods and URI edits.
-Arbitrary third-party Tower layers, route_layer and method-router layers remain
-unsupported; this does not finish ScT's middleware migration.
+Arbitrary third-party Tower layers remain unsupported; route/method scope APIs
+are described below. This does not finish ScT's middleware migration.
 
 Each native middleware invocation retains an Axum Next and native request
 extensions behind continuation resource kind 15. A borrowed registration lasts
@@ -724,3 +724,40 @@ C ABI layout/signatures remain unchanged. Older artifacts fail router-layer
 construction rather than silently skipping middleware. A newly built engine is
 required. Consumer dependencies remain 30 beyond fixture/library; no new host
 or native Cargo dependencies were added. No build/runtime speedup is claimed.
+
+
+## Engine middleware scopes (development)
+
+The engine now exposes all four owned async layer placements. They delegate to
+native Axum placement and preserve the source backend's scope:
+
+| API | Existing matched handlers | Matched-path 405 | Router 404 fallback |
+| --- | --- | --- | --- |
+| Router::layer | Wrapped | Wrapped | Wrapped |
+| Router::route_layer | Wrapped | Wrapped | Unwrapped |
+| MethodRouter::layer | Wrapped | Wrapped | Outside its scope |
+| MethodRouter::route_layer | Wrapped | Unwrapped | Outside its scope |
+
+These APIs accept from_fn/from_fn_with_state/map_response. They are not general
+Tower Layer adapters. Later-added routes/methods are outside the layer. Empty
+Router::route_layer and empty/fallback-only MethodRouter::route_layer calls
+return construction errors, including for pending typed state. An empty
+MethodRouter::layer can still wrap its method fallback. Native construction
+panics are caught at the ABI boundary and surfaced as errors, as with invalid
+routes elsewhere.
+
+Scope matters for authorization: MethodRouter::route_layer can reject a matched
+method without changing a missing path's 404 or an unsupported method's 405 into
+an authorization failure. Router::route_layer deliberately has different 405
+behavior, matching the source backend. No authorization policy is installed by
+default.
+
+The existing continuation and host extension guards are reused; no additional
+resource kinds, ABI layout changes or Cargo dependencies are introduced. The
+new wire commands are router_route_layer, method_layer and method_route_layer.
+An updated engine is required; older engines fail construction. Tests compare
+all three scopes with actual source-backend HTTP responses (status, headers and
+body), including HEAD/custom methods, later additions and Allow headers. Nested
+captures, layer order, custom extensions, independent pending-state bindings,
+empty construction and short-circuit scope are covered. The standalone HTTP
+consumer composes all three new APIs with Router::layer and service middleware.

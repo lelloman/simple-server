@@ -172,6 +172,30 @@ impl<S: Clone + Send + Sync + 'static> Router<S> {
             })?,
         })
     }
+    /// Apply owned async middleware only to existing matched paths.
+    /// Leaves the 404 fallback alone but includes each matched path's 405.
+    /// Add routes first: an empty router is rejected eagerly, including before
+    /// state binding.
+    /// Requires an engine supporting router_route_layer.
+    pub fn route_layer<F, Local, T>(
+        self,
+        layer: super::middleware::FromFnLayer<F, Local, T>,
+    ) -> io::Result<Self>
+    where
+        F: super::middleware::Middleware<T, Local>,
+        Local: Clone + Send + Sync + 'static,
+        T: 'static,
+    {
+        let callback = super::middleware::router_callback(layer)?;
+        Ok(Self {
+            plan: self.plan.map(move |router| {
+                wire::resource(
+                    8,
+                    json!({"op":"router_route_layer","router":router.id(),"handler":callback.id()}),
+                )
+            })?,
+        })
+    }
     pub fn merge(self, other: Self) -> io::Result<Self> {
         Ok(Self {
             plan: self.plan.combine(other.plan, |router, other| {
@@ -291,6 +315,45 @@ impl<S: Clone + Send + Sync + 'static> MethodRouter<S> {
         Ok(Self {
             plan: Plan::ready(wire::resource(9, json!({"op":"method_new"}))?),
         })
+    }
+    /// Wrap existing methods and their fallback with owned async middleware.
+    /// Includes native 405 replies. Methods added later are not wrapped.
+    /// Requires an engine supporting method_layer.
+    pub fn layer<F, Local, T>(
+        self,
+        layer: super::middleware::FromFnLayer<F, Local, T>,
+    ) -> io::Result<Self>
+    where
+        F: super::middleware::Middleware<T, Local>,
+        Local: Clone + Send + Sync + 'static,
+        T: 'static,
+    {
+        let callback = super::middleware::router_callback(layer)?;
+        Ok(Self {
+            plan: self.plan.map(move |methods| {
+                wire::resource(
+                    9,
+                    json!({"op":"method_layer","methods":methods.id(),"handler":callback.id()}),
+                )
+            })?,
+        })
+    }
+    /// Wrap only existing matched methods, leaving the native 405 fallback alone.
+    /// An empty or fallback-only method group is rejected eagerly. Methods added
+    /// later are not wrapped. Requires an engine supporting method_route_layer.
+    pub fn route_layer<F, Local, T>(
+        self,
+        layer: super::middleware::FromFnLayer<F, Local, T>,
+    ) -> io::Result<Self>
+    where
+        F: super::middleware::Middleware<T, Local>,
+        Local: Clone + Send + Sync + 'static,
+        T: 'static,
+    {
+        let callback = super::middleware::router_callback(layer)?;
+        Ok(Self { plan: self.plan.map(move |methods| {
+            wire::resource(9, json!({"op":"method_route_layer","methods":methods.id(),"handler":callback.id()}))
+        })? })
     }
     pub fn on<F, Fut>(self, method: super::Method, handler: F) -> io::Result<Self>
     where
