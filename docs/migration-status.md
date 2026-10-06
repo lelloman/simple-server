@@ -45,6 +45,11 @@ public service API. No native code, C ABI or wire changes; verification reuses
 (SHA256 `98d4cff50e4237d50e6235b3c1fb84b8a775bd86e8c3b929df9d099989db3fc7`).
 The older 29-package benchmark remains historical. No push/publication/deployment.
 
+Implementation `6672dec` was integrated by rebasing local master onto the
+implementation branch. Original master remained clean at `26c1b68`; no concurrent
+commits or edits appeared. Ancestry and exact tested-tree equality passed.
+Temporary branch/worktree cleanup follows integration of this evidence update.
+
 ## Engine downstream build measurement — 2026-10-06
 
 Implementation remains **Partial**, production adoption **Pending**. Start:
