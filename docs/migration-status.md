@@ -1,5 +1,56 @@
 # Service migration status
 
+## Engine Unix-socket serving — 2026-10-06
+
+Engine implementation remains **Partial** and production adoption remains
+**Pending**. Work starts from clean local master `26314cc`, in isolated branch
+`implementation/engine-unix-serving`, worktree
+`target/worktrees/engine-unix-serving`. No consumer repository is changed.
+
+On Unix, engine-web now exposes unix::bind, unix::serve and UnixListener.
+The engine binds raw path bytes and owns acceptance; the host keeps the supplied
+path. Native bind errors retain OS error codes. Existing sockets, files and
+symlinks are never replaced or removed. Listener drop closes the socket but
+retains its filesystem entry; permissions and cleanup remain application-owned.
+TCP and Unix share routing, streaming callbacks and shutdown handling. Unix
+requests have no TCP peer address. Pre-requested shutdown accepts no queued
+requests; normal shutdown drains active responses, with deadlines caller-owned.
+
+Baseline: 15 tests pass (source Unix 7, engine HTTP 8), recorded in
+`/tmp/simple-server-unix-baseline.log`. Five Unix contracts and eight TCP HTTP
+regressions pass (`/tmp/simple-server-unix-contracts.log`). Unix contracts cover
+non-UTF-8 paths, existing files/symlinks, OS errors and listener drop; nested
+captures/original URI, duplicate headers, incremental bidirectional streaming and
+trailers; pre-requested shutdown; graceful response drain and disconnect cleanup.
+Source comparison uses real Unix sockets on both sides for GET/HEAD/405/404,
+encoded paths and queries, excluding only Date and header order. Incremental
+streaming receives response data before the request upload finishes.
+
+The standalone HTTP consumer now also binds and serves a Unix socket and cleans
+up its own test path. Running it with the previous engine rejects bind with
+`unsupported engine operation`, as expected (`/tmp/simple-server-unix-old-engine.log`).
+New operations and listener resource kind 13 require an updated artifact; C ABI
+signatures/layout remain unchanged. No dependencies are added: the HTTP consumer
+retains 29 normal/build packages beyond fixture and library, without Axum,
+Tokio, Hyper, Reqwest, SQLx, Rustls or Multer
+(`/tmp/simple-server-unix-graph.txt`). No speedup is claimed.
+
+The full `bash scripts/check` passes (`/tmp/simple-server-unix-full.log`): strict
+workspace/native Clippy, source feature matrix and protocol regressions, rustdoc,
+five all-feature and four engine-only Unix contracts, all seven standalone engine
+binaries, dependency guards, C ABI smoke and five artifact installer tests. The
+HTTP standalone consumer successfully serves both TCP and Unix with the rebuilt
+engine. Tracker scripts and evidence links pass validation.
+
+Verification uses the newly built local x86_64 debug engine at
+`/tmp/simple-server-unix-engine/debug`, built from this checkpoint; build log:
+`/tmp/simple-server-unix-engine-build.log`.
+SHA256 `0b4786cfc12f02263fc369df71ff96a8377f023002aad7be5992ee4639c1c732`.
+Bookworm/release distribution, ARM and non-Unix targets are not retested.
+Unix client requests, externally supplied listener descriptors, peer credentials,
+TLS, WebSocket, router layers, Route/make-service exposure and public test-harness
+parity remain pending. No push, publication or deployment.
+
 ## Engine multipart uploads — 2026-10-06
 
 Engine implementation remains **Partial** and production adoption remains

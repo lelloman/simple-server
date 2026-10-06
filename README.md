@@ -163,7 +163,15 @@ limit is 2 MiB, overridden with a `BodyLimit` extension. Multipart requires an
 updated engine artifact with multipart operations; older artifacts return an
 extraction error. No multipart parser dependency is added to consumers.
 
-This API is not yet interchangeable with `web`: router layers, TLS/Unix serving
+On Unix, `engine_web::unix::{bind, serve, UnixListener}` binds and serves named
+Unix sockets inside the engine. Paths retain non-UTF-8 bytes; existing paths are
+never removed or replaced. Applications own permissions, stale-socket handling
+and cleanup after shutdown. Serving drains active responses on explicit shutdown
+and reports no TCP peer address for Unix requests. This requires an engine with
+Unix listener operations. The Unix HTTP client and externally supplied listener
+file descriptors are not supported by this adapter yet.
+
+This API is not yet interchangeable with `web`: router layers, TLS serving
 and WebSocket
 adapters still need migration. The existing `web` API and default backend remain
 source-based, and no production service has adopted the engine.

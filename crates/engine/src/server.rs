@@ -26,6 +26,8 @@ use tokio::net::TcpListener;
 
 pub const BODY: u32 = 6;
 pub const LISTENER: u32 = 7;
+#[cfg(unix)]
+pub const UNIX_LISTENER: u32 = 13;
 type SharedBody = Arc<tokio::sync::Mutex<Body>>;
 static BODIES: OnceLock<Mutex<HashMap<u64, SharedBody>>> = OnceLock::new();
 static LISTENERS: OnceLock<Mutex<HashMap<u64, TcpListener>>> = OnceLock::new();
@@ -34,6 +36,38 @@ fn bodies() -> &'static Mutex<HashMap<u64, SharedBody>> {
 }
 fn listeners() -> &'static Mutex<HashMap<u64, TcpListener>> {
     LISTENERS.get_or_init(Default::default)
+}
+#[cfg(unix)]
+static UNIX_LISTENERS: OnceLock<Mutex<HashMap<u64, tokio::net::UnixListener>>> = OnceLock::new();
+#[cfg(unix)]
+fn unix_listeners() -> &'static Mutex<HashMap<u64, tokio::net::UnixListener>> {
+    UNIX_LISTENERS.get_or_init(Default::default)
+}
+enum Listener {
+    Tcp(TcpListener),
+    #[cfg(unix)]
+    Unix(tokio::net::UnixListener),
+}
+fn take_listener(command: &Value) -> Result<Listener, String> {
+    let id = number(command, "listener")?;
+    if command["op"] == "server_serve" {
+        return listeners()
+            .lock()
+            .unwrap()
+            .remove(&id)
+            .map(Listener::Tcp)
+            .ok_or_else(|| "listener released or already serving".into());
+    }
+    #[cfg(unix)]
+    if command["op"] == "server_unix_serve" {
+        return unix_listeners()
+            .lock()
+            .unwrap()
+            .remove(&id)
+            .map(Listener::Unix)
+            .ok_or_else(|| "Unix listener released or already serving".into());
+    }
+    Err("unsupported listener transport".into())
 }
 fn number(value: &Value, key: &str) -> Result<u64, String> {
     value[key].as_u64().ok_or_else(|| format!("missing {key}"))
@@ -48,6 +82,11 @@ pub fn release(kind: u32, id: u64) {
         }
         LISTENER => {
             let value = listeners().lock().unwrap().remove(&id);
+            drop(value);
+        }
+        #[cfg(unix)]
+        UNIX_LISTENER => {
+            let value = unix_listeners().lock().unwrap().remove(&id);
             drop(value);
         }
         _ => (),
@@ -257,8 +296,30 @@ impl axum::handler::Handler<(HandlerMarker,), ()> for HostHandler {
     }
 }
 
-pub fn operation(command: Value) -> Result<crate::operations::FutureBytes, String> {
+pub fn operation(
+    command: Value,
+    _payload: Vec<u8>,
+) -> Result<crate::operations::FutureBytes, String> {
     match command["op"].as_str() {
+        #[cfg(unix)]
+        Some("server_unix_bind") => {
+            use std::os::unix::ffi::OsStrExt;
+            Ok(Box::pin(async move {
+                match tokio::net::UnixListener::bind(std::path::Path::new(
+                    std::ffi::OsStr::from_bytes(&_payload),
+                )) {
+                    Ok(listener) => {
+                        let id = id();
+                        unix_listeners().lock().unwrap().insert(id, listener);
+                        encode(json!({"ok":true,"id":id}), &[])
+                    }
+                    Err(error) => encode(
+                        json!({"ok":false,"message":error.to_string(),"raw_os_error":error.raw_os_error()}),
+                        &[],
+                    ),
+                }
+            }))
+        }
         Some("server_bind") => {
             let address = command["address"]
                 .as_str()
@@ -308,7 +369,7 @@ pub fn operation(command: Value) -> Result<crate::operations::FutureBytes, Strin
                 }
             }))
         }
-        Some("server_serve") => {
+        Some("server_serve" | "server_unix_serve") => {
             let router = if let Some(id) = command["router"].as_u64() {
                 crate::routing::router(id)?
             } else {
@@ -316,11 +377,7 @@ pub fn operation(command: Value) -> Result<crate::operations::FutureBytes, Strin
                     .fallback(HostHandler(callback::get(number(&command, "handler")?)?))
             };
             let shutdown = callback::get(number(&command, "shutdown")?)?;
-            let listener = listeners()
-                .lock()
-                .unwrap()
-                .remove(&number(&command, "listener")?)
-                .ok_or("listener released or already serving")?;
+            let listener = take_listener(&command)?;
             Ok(Box::pin(async move {
                 let mut stop = Box::pin(shutdown.call(&[]));
                 // Honor a shutdown already requested without accepting a connection.
@@ -339,16 +396,27 @@ pub fn operation(command: Value) -> Result<crate::operations::FutureBytes, Strin
                 }
                 let shutdown_error = Arc::new(Mutex::new(None));
                 let error_slot = shutdown_error.clone();
-                let result = axum::serve(
-                    listener,
-                    router.into_make_service_with_connect_info::<SocketAddr>(),
-                )
-                .with_graceful_shutdown(async move {
+                let shutdown = async move {
                     if let Err(error) = stop.await {
                         *error_slot.lock().unwrap() = Some(error);
                     }
-                })
-                .await;
+                };
+                let result = match listener {
+                    Listener::Tcp(listener) => {
+                        axum::serve(
+                            listener,
+                            router.into_make_service_with_connect_info::<SocketAddr>(),
+                        )
+                        .with_graceful_shutdown(shutdown)
+                        .await
+                    }
+                    #[cfg(unix)]
+                    Listener::Unix(listener) => {
+                        axum::serve(listener, router)
+                            .with_graceful_shutdown(shutdown)
+                            .await
+                    }
+                };
                 let error = shutdown_error
                     .lock()
                     .unwrap()

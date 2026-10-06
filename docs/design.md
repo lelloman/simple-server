@@ -520,3 +520,35 @@ the new library. Its normal/build graph remains 29 packages beyond fixture and
 library, without Multer, Axum or Tokio. No runtime speedup is claimed. Router
 layers, Route service exposure, make-service, WebSocket, TLS/Unix transport and
 public test-harness parity remain pending.
+
+## Engine Unix-socket serving (development)
+
+On Unix targets, engine-web exposes unix::bind, unix::serve and a non-cloneable
+UnixListener. Binding and acceptance occur inside the engine, so neither Tokio
+nor a Unix HTTP transport dependency is added to the consumer. The host retains
+the supplied PathBuf; raw path bytes cross the wire, preserving non-UTF-8 paths.
+Bind failures preserve OS error codes. Binding never removes an existing file,
+symlink or socket. Dropping a listener closes it but leaves the filesystem entry;
+applications own permissions, stale-file handling and final cleanup.
+
+The native listener registry uses resource kind 13. New server_unix_bind and
+server_unix_serve commands share route dispatch, callback bodies and graceful
+shutdown with TCP. TCP continues to attach SocketAddr metadata; Unix serving
+leaves RequestMetadata::peer absent. Pre-requested shutdown accepts no queued
+requests; active bodies drain on shutdown. Dropping the serve future alone does
+not promise to terminate all spawned connections, matching the existing TCP
+contract. Callers retain ownership of shutdown deadlines.
+
+Tests compare Unix HTTP status, headers and bytes with source serving, excluding
+only Date and header order. Native Unix tests also cover incremental request and
+response streaming, trailers, duplicate headers, nested paths and captures,
+non-UTF-8 bind paths, existing-file/symlink preservation, listener drop,
+pre-requested shutdown, graceful drain and disconnect-driven body cleanup. The
+standalone engine HTTP consumer now serves over both TCP and Unix.
+
+C ABI signatures and layout are unchanged, but Unix serving requires a rebuilt
+engine artifact; an older library rejects the bind operation. The normal/build
+HTTP consumer graph stays at 29 packages beyond the library and fixture. Unix
+client requests, importing externally bound descriptors, peer credentials,
+WebSocket upgrades, TLS, router layers and public test-harness parity remain
+separate work. This checkpoint does not imply production consumer adoption.

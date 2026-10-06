@@ -2,7 +2,7 @@
 //! in the consumer graph. Handlers accept an owned `Request` and return `Response`.
 //!
 //! This is an explicit development API, not yet a drop-in replacement for `web`:
-//! layers, TLS, Unix sockets and protocol
+//! layers, TLS and protocol
 //! upgrades remain unimplemented. Bind application state with `with_state`.
 //! Register handlers and serve inside the application's engine runtime.
 //! Typed handlers allow body extraction only in the final position:
@@ -28,6 +28,8 @@ pub mod response;
 mod routing;
 mod service;
 pub mod sse;
+#[cfg(unix)]
+pub mod unix;
 pub use crate::extract::{Extract, FromRequestParts, IntoRejectionResponse, RejectionResponse};
 pub use extract::{
     BodyLimit, ConnectInfo, Extension, Form, FromRequest, FromState, Json, MatchedPath, Path,
@@ -96,6 +98,15 @@ pub async fn bind(address: impl AsRef<str>) -> io::Result<TcpListener> {
 /// application deadline separately. Dropping this future alone does not promise
 /// cancellation of spawned connections; use explicit shutdown for graceful drain.
 pub async fn serve(listener: TcpListener, router: Router, shutdown: Shutdown) -> io::Result<()> {
+    serve_resource(listener.resource, router, shutdown, "server_serve").await
+}
+
+async fn serve_resource(
+    listener: Resource,
+    router: Router,
+    shutdown: Shutdown,
+    operation: &'static str,
+) -> io::Result<()> {
     let router = router.into_resource()?;
     let callback = Callback::new(move |_| {
         let shutdown = shutdown.clone();
@@ -105,7 +116,7 @@ pub async fn serve(listener: TcpListener, router: Router, shutdown: Shutdown) ->
         }
     })?;
     let operation = Operation::new(&wire::encode(
-        json!({"op":"server_serve", "listener":listener.resource.id(), "router":router.id(), "shutdown":callback.id()}),
+        json!({"op":operation, "listener":listener.id(), "router":router.id(), "shutdown":callback.id()}),
         &[],
     )?)?;
     let output = operation.await?;

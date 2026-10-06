@@ -111,6 +111,8 @@ pub fn resource_release(kind: u32, id: u64) {
             responses().lock().unwrap().remove(&id);
         }
         5 => crate::callback::remove(id),
+        #[cfg(unix)]
+        crate::server::UNIX_LISTENER => crate::server::release(kind, id),
         crate::server::BODY | crate::server::LISTENER => crate::server::release(kind, id),
         crate::routing::ROUTER | crate::routing::METHODS => crate::routing::release(kind, id),
         _ => {
@@ -123,9 +125,10 @@ pub fn operation(command: Value, body: Vec<u8>) -> Result<FutureBytes, String> {
     match command["op"].as_str() {
         Some(op) if op.starts_with("multipart_") => crate::multipart::operation(command),
         Some("shutdown_signal_wait") => crate::signals::wait(number(&command, "id")?),
-        Some("server_bind" | "server_serve" | "server_body_frame") => {
-            crate::server::operation(command)
-        }
+        Some(
+            "server_bind" | "server_serve" | "server_body_frame" | "server_unix_bind"
+            | "server_unix_serve",
+        ) => crate::server::operation(command, body),
         Some("callback") => {
             let callback = crate::callback::get(number(&command, "callback")?)?;
             Ok(Box::pin(async move {

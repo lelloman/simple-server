@@ -238,6 +238,58 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     );
     shutdown.request();
     server.await??;
+    #[cfg(unix)]
+    unix_smoke().await?;
     println!("public engine HTTP consumer passed");
+    Ok(())
+}
+
+#[cfg(unix)]
+async fn unix_smoke() -> Result<(), Box<dyn std::error::Error>> {
+    use simple_server::{engine_web::unix, runtime::spawn_blocking};
+    use std::{
+        io::{Read, Write},
+        time::{Duration, SystemTime, UNIX_EPOCH},
+    };
+    struct SocketDir(std::path::PathBuf);
+    impl Drop for SocketDir {
+        fn drop(&mut self) {
+            let _ = std::fs::remove_file(self.0.join("http.sock"));
+            let _ = std::fs::remove_dir(&self.0);
+        }
+    }
+    let directory = std::env::temp_dir().join(format!(
+        "ss-unix-{}-{}",
+        std::process::id(),
+        SystemTime::now().duration_since(UNIX_EPOCH)?.as_nanos()
+    ));
+    std::fs::create_dir(&directory)?;
+    let directory = SocketDir(directory);
+    let path = directory.0.join("http.sock");
+    let listener = unix::bind(&path).await?;
+    assert_eq!(listener.path(), path);
+    let router = Router::new()?.route(
+        "/",
+        MethodRouter::new()?.on_handler(Method::GET, || async { "unix engine" })?,
+    )?;
+    let stop = Shutdown::new();
+    let server = spawn(unix::serve(listener, router, stop.clone()));
+    let response = spawn_blocking(move || -> std::io::Result<String> {
+        let mut socket = std::os::unix::net::UnixStream::connect(path)?;
+        socket.set_read_timeout(Some(Duration::from_secs(3)))?;
+        socket.write_all(b"GET / HTTP/1.1\r\nHost: local\r\nConnection: close\r\n\r\n")?;
+        let mut output = String::new();
+        socket.read_to_string(&mut output)?;
+        Ok(output)
+    })
+    .await??;
+    assert!(response.starts_with("HTTP/1.1 200"));
+    assert!(response.ends_with("unix engine"));
+    stop.request();
+    simple_server::time::timeout(Duration::from_secs(3), server).await???;
+    assert!(
+        directory.0.join("http.sock").exists(),
+        "socket cleanup belongs to application"
+    );
     Ok(())
 }

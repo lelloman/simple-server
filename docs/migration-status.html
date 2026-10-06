@@ -73,6 +73,14 @@
   </header>
   <main>
     <section class="note" id="shared-engine">
+      <p><strong>Engine Unix-socket serving (2026-10-06): implementation Partial; adoption Pending.</strong>
+      Unix bind/serve now run in the engine with byte-preserving paths, streamed
+      bodies and explicit shutdown. Tests cover source parity, path ownership,
+      incremental streaming, drain and disconnect cleanup. The consumer graph
+      remains 29 packages without Axum or Tokio. New operations require an updated
+      engine artifact. Full source/engine checks, standalone serving and dependency
+      guards pass. Unix clients, TLS, WebSocket and router layers remain pending.
+      See the <a href="migration-status.md#engine-unix-socket-serving--2026-10-06">scope and verification evidence</a>.</p>
       <p><strong>Engine multipart uploads (2026-10-06): implementation Partial; adoption Pending.</strong>
       Borrowed/owned fields, streaming chunks, charset-aware text and request limits
       now use a native multipart parser. Cancellation and reader/field lifetimes
