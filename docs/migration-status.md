@@ -2,7 +2,7 @@
 
 ## ScT OIDC migration — 2026-10-07
 
-**Implementation verified; integration pending.** Production ScT uses OIDC for
+**OIDC production adoption Done locally; overall engine Partial.** Production ScT uses OIDC for
 browser login. Clean starting branches: simple-server master `103ea47`, ScT
 master `a9217a4`. Isolated sibling worktrees under `/tmp/sct-oidc-migration` on
 `implementation/engine-oidc` and `migration/engine-oidc` preserve path dependencies.
@@ -44,8 +44,35 @@ installer tests (`/tmp/sct-oidc-library-checks.log`,
 stages, not one uninterrupted script run. S3/browser/large qualification and the
 previously documented unrelated database migration-name failures were not rerun.
 
-Source pin, benchmark, local commits and integration/cleanup will be recorded
-before marking adoption Done. No push or deployment authorized.
+Shared implementation/source pin: `5050786abbc5cbda032bd340b785b85718894c6c`.
+ScT migration: `74255e3172075656c5e4f7cb5249af41abd45ff2`. Both are integrated into
+original local master branches by rebasing onto their migration branches.
+Ancestry and exact tested-tree comparisons pass; original checkouts were clean
+and had no concurrent commits or unrelated edits. The ScT temporary worktree and
+branch, test database and smoke containers are removed. The shared evidence
+worktree/branch follows the same cleanup after this final evidence integration.
+
+Three alternating paired fresh-target dev builds, eight jobs and cached offline
+downloads, compare the previous engine-backed ScT `a9217a4` against this OIDC
+migration. Median **24.406s before / 22.420s after**: **1.986s (8.14%)** additional
+clean-build saving; paired reductions **7.5–8.3%**. Timestamp-only incremental
+medians **0.889s / 0.740s**; no semantic edit or runtime-throughput claim. Engine
+prebuild cost excluded; both sides link the same new prebuilt engine. These are
+OIDC-only measurements, not a comparison against the original source backend.
+[Raw results](measurements/sct-oidc-build-2026-10-07.json) are mirrored in ScT.
+Debug engine SHA256:
+`e35f53beb30a6bb90403d9debe7bad6475de988c6f4408a1065ee4cfa1166837`.
+
+The pinned local engine image `sct-engine:5050786abbc5` and release service image
+`sct-engine-oidc:local` build successfully. Service image ID:
+`sha256:e5f3f8222d641b0ba8cc40f474312fdb3beeca61d65f7c3acdc9ed82b5a93a48`.
+Release engine SHA256:
+`17c7cc2ae9fda542e9a4492eb1db3b6ea12c63d58d0f785df1ef4d621c22be08`.
+The extended login fixture passes against that extracted release engine
+(`/tmp/sct-oidc-release-login.log`). The actual release service container passes
+`.so.1` loading/checksum, PostgreSQL readiness, static/API routing, SIGTERM exit 0,
+writer release/restart and SIGINT exit 0 (`/tmp/sct-oidc-container-smoke.log`).
+Nothing was pushed, published or deployed.
 
 ## ScT runtime migration — 2026-10-06
 
