@@ -57,6 +57,14 @@ Axum, Tokio, Hyper, Reqwest, SQLx or Rustls
 Router layers, Route service exposure, make-service, WebSocket, TLS/Unix transport
 and public test-harness parity remain pending. No push, publication or deployment.
 
+Implementation commit **`89b51aa`** is integrated into local `master` by rebasing
+master onto the implementation branch. Original master remained clean at
+`d0473d1`; no intervening commits or unrelated edits appeared. Ancestry and exact
+tree equality were verified. The integrated implementation is the tested tree;
+the final strengthened dependency guard was separately checked against all five
+fixture graphs. This evidence update is integrated the same way; the temporary
+worktree and merged branch are then removed after verification.
+
 ## Engine server-sent events — 2026-10-06
 
 Engine implementation remains **Partial** and production adoption remains
