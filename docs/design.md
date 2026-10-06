@@ -409,7 +409,7 @@ headers and body behavior. Existing host-local response extensions and versions
 are preserved by successful array conversion, but arbitrary extensions still do
 not cross the native ABI and response-version overrides remain outside that wire
 contract. No native/ABI or dependency changes are needed for these response helpers.
-Router-wide layers, nested services and protocol response adapters remain
+Router-wide layers and protocol response adapters remain
 separate work.
 
 ## Engine method and fallback services (development)
@@ -432,6 +432,25 @@ router. Services can coexist with pending typed handlers and state binding.
 
 No native/ABI changes are needed. The standalone HTTP consumer now runs its echo
 through a service; its graph grows from 28 to 29 packages because of tower-service.
-Router-wide Tower layers, Route service exposure, nest_service and make-service
+Router-wide Tower layers, Route service exposure and make-service
 adapters remain separate work. The new registration methods do not claim those
 capabilities or automatic compatibility with every runtime-dependent service.
+
+## Engine nested services (development)
+
+`Router::nest_service` mounts the same infallible, runtime-independent Tower
+services as the method/fallback adapters. The native engine owns prefix matching
+and URI stripping; the host owns service cloning, readiness, call futures and
+lazy response bodies. Original URI and parent captures cross the existing request
+metadata boundary. Native route validation runs immediately, including on routers
+with pending typed state; state binding replays the mount without sharing state
+between independently bound clones. Root mounting is rejected consistently with
+the source router; use fallback_service for that case.
+
+The additive `router_nest_service` wire operation requires a rebuilt engine.
+C ABI signatures/layout and version remain unchanged, but an older engine returns
+`unknown router command` during registration. Artifacts and consumers must be
+updated together when adopting this method. No new dependencies are introduced;
+the standalone HTTP consumer retains its 29-package normal/build graph and now
+executes a mounted echo under a captured parent prefix. Router layers, Route
+service exposure, make-service and protocol adapters remain separate work.

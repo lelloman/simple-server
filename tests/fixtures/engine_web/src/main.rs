@@ -22,6 +22,19 @@ impl engine_web::Service<engine_web::Request> for EchoService {
     fn call(&mut self, request: engine_web::Request) -> Self::Future {
         let metadata = request.extensions().get::<RequestMetadata>().unwrap();
         assert_eq!(metadata.path_params[0].1, "engine");
+        if metadata
+            .original_uri
+            .as_ref()
+            .unwrap()
+            .path()
+            .starts_with("/mounted/")
+        {
+            assert_eq!(request.uri(), "/tail?x=1");
+            assert_eq!(
+                metadata.original_uri.as_ref().unwrap(),
+                "/mounted/engine/echo/tail?x=1"
+            );
+        }
         // The service returns before its response body finishes streaming.
         std::future::ready(Ok(Response::new(request.into_body())))
     }
@@ -86,6 +99,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 )
             })?,
         )?;
+    let router = router.nest(
+        "/mounted/{name}",
+        Router::new()?.nest_service("/echo", EchoService)?,
+    )?;
     let router = router.with_state("engine".to_owned())?;
     let listener = engine_web::bind("127.0.0.1:0").await?;
     let address = listener.local_addr();
@@ -166,6 +183,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .await?;
     assert_eq!(response.status().as_u16(), 500);
     assert_eq!(response.text().await?, "failed to parse header value");
+    let response = client
+        .post(format!("http://{address}/mounted/engine/echo/tail?x=1"))
+        .body(b"mounted service".to_vec())
+        .send()
+        .await?;
+    assert_eq!(response.text().await?, "mounted service");
     shutdown.request();
     server.await??;
     println!("public engine HTTP consumer passed");

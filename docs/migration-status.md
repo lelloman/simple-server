@@ -1,5 +1,56 @@
 # Service migration status
 
+## Engine nested services — 2026-10-06
+
+Engine implementation remains **Partial** and production adoption remains
+**Pending**. Work starts from clean local `master` `436c87c`, in isolated branch
+`implementation/engine-nested-services`, worktree
+`target/worktrees/engine-nested-services`. No consumer repository is changed.
+
+`Router::nest_service` mounts host-owned Tower services through the native
+router. Prefix stripping preserves queries and encoded path segments; original
+URI and parent captures remain available in RequestMetadata. Services preserve
+same-clone readiness, cancellation and lazy streaming bodies. Mounts compose with
+pending typed state, independently bound clones and merged routers. Invalid,
+root, wildcard and conflicting mounts fail eagerly without corrupting clones.
+The standalone HTTP consumer now exercises a mounted streaming echo underneath
+a captured parent route and checks both stripped and original URIs.
+
+This adds the native `router_nest_service` wire operation. C ABI signatures and
+layout remain unchanged, but consumers adopting this method need an updated
+engine artifact. Running the updated fixture against the previous engine fails
+at construction with `unknown router command`, as expected
+(`/tmp/simple-server-nested-services-old-engine.log`). No new dependencies:
+the HTTP consumer retains 29 normal/build packages excluding the library and
+fixture, without Axum, Tokio, Hyper, Reqwest, SQLx or Rustls
+(`/tmp/simple-server-nested-services-graph.txt`). No speedup is claimed.
+
+Baseline: 18 engine service/router-state/HTTP tests pass before edits
+(`/tmp/simple-server-nested-services-baseline.log`). The focused suite then
+passes 19 tests, including mount/state validation and source parity over HTTP
+(`/tmp/simple-server-nested-services-contracts.log`). Comparisons cover mount
+boundaries, trailing slashes, queries, encoded paths, GET/HEAD/POST/custom methods
+and captured parent prefixes, excluding only Date. Existing readiness,
+disconnect and incremental bidirectional streaming tests now also exercise
+mounted services. Root mounting is unsupported by the source router too and
+is explicitly tested as an error; root dispatch uses fallback_service.
+
+Verification uses the newly built local x86_64 debug engine from this checkpoint
+at `/tmp/simple-server-nested-services-engine/debug`; build log:
+`/tmp/simple-server-nested-services-engine-build.log`. SHA256:
+`8a66f5cb8ecf760ef0e5d1ca8dfc515e8dfe3f32ed85afd93ac053dfc2adcc4c`.
+The full `bash scripts/check` passes (`/tmp/simple-server-nested-services-full.log`):
+strict workspace/native Clippy, source feature matrix and protocol regressions,
+rustdoc, six all-feature service contracts and five engine-only contracts,
+all seven standalone engine binaries, dependency guards, C ABI smoke and five
+artifact installer tests. The updated standalone HTTP consumer executes
+successfully against the rebuilt engine. Tracker scripts and evidence links
+pass validation.
+
+Bookworm/release distribution and ARM are not retested. Router-wide layers,
+Route service exposure, make-service and protocol adapters remain pending.
+No push, publication or deployment.
+
 ## Engine method and fallback services — 2026-10-06
 
 Engine implementation remains **Partial** and all production adoption remains

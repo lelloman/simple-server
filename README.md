@@ -136,13 +136,19 @@ tuple, struct, map, sequence and unit-enum semantics. Invalid UTF-8 and parsing
 errors retain the existing rejection status and text.
 
 Tower services can register through `MethodRouter::on_service`,
-`MethodRouter::any_service` and `Router::fallback_service`. Implement the reexported
+`MethodRouter::any_service`, `Router::fallback_service` and `Router::nest_service`.
+Implement the reexported
 `engine_web::Service<Request>` trait with infallible response errors, or adapt
 errors into responses first. Each request waits for readiness and calls the same
 service clone; response bodies remain lazy. This adds only `tower-service` to the
 consumer graph, without Tower utilities or a Tokio runtime.
 
-This API is not yet interchangeable with `web`: router layers, nested services, TLS/Unix serving
+Nested services receive a prefix-stripped URI while `RequestMetadata` retains the
+original URI and parent captures. Mounting at `/` is rejected; use a fallback
+service for root dispatch. `nest_service` requires a rebuilt engine with the
+`router_nest_service` operation; older libraries return a construction error.
+
+This API is not yet interchangeable with `web`: router layers, TLS/Unix serving
 and WebSocket/multipart/SSE
 adapters still need migration. The existing `web` API and default backend remain
 source-based, and no production service has adopted the engine.

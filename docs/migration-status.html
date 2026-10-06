@@ -73,6 +73,15 @@
   </header>
   <main>
     <section class="note" id="shared-engine">
+      <p><strong>Engine nested services (2026-10-06): implementation Partial; adoption Pending.</strong>
+      Router nest_service preserves native prefix/query matching, original URI,
+      parent captures, typed state, readiness, cancellation and streaming. The
+      standalone HTTP consumer exercises the mount with the same 29-package graph.
+      The new native wire operation requires an updated engine artifact; the old
+      library rejects registration explicitly. Full source/engine checks, standalone
+      consumers and dependency guards pass. Router layers, make-service and
+      protocol adapters remain pending. See the
+      <a href="migration-status.md#engine-nested-services--2026-10-06">scope and verification evidence</a>.</p>
       <p><strong>Engine method and fallback services (2026-10-06): implementation Partial; adoption Pending.</strong>
       Method/any/fallback service registration now awaits readiness on the same
       service clone used for call, preserving cancellation and lazy bodies.

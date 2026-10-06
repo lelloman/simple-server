@@ -198,6 +198,28 @@ impl<S: Clone + Send + Sync + 'static> Router<S> {
             wire::resource(8, json!({"op":"router_fallback_methods","router":router.id(),"methods":methods.id()}))
         })? })
     }
+    /// Mount a Tower service below a prefix, stripping it from the request URI.
+    /// RequestMetadata retains the original URI. Requires an engine implementing
+    /// router_nest_service; older engines return a construction error.
+    pub fn nest_service<T, B>(self, path: &str, service: T) -> io::Result<Self>
+    where
+        T: super::Service<Request, Response = http::Response<B>, Error = std::convert::Infallible>
+            + Clone
+            + Send
+            + Sync
+            + 'static,
+        T::Future: Send + 'static,
+        B: http_body::Body<Data = super::Bytes> + Send + 'static,
+        B::Error: Into<super::body::BoxError>,
+    {
+        let path = path.to_owned();
+        let handler = callback(move |request| super::service::call(service.clone(), request))?;
+        Ok(Self {
+            plan: self.plan.map(move |router| {
+                wire::resource(8, json!({"op":"router_nest_service","router":router.id(),"path":path,"handler":handler.id()}))
+            })?,
+        })
+    }
     pub fn fallback_handler<H, T>(self, handler: H) -> io::Result<Self>
     where
         H: super::Handler<T, S>,

@@ -7,6 +7,7 @@ use crate::{
 };
 use axum::{
     Router,
+    handler::Handler,
     routing::{MethodFilter, MethodRouter},
 };
 use serde_json::{Value, json};
@@ -74,6 +75,10 @@ pub fn resource_new(command: &Value) -> Result<Vec<u8>, String> {
             }
             "router_nest" => router(number(command, "router")?)?
                 .nest(text(command, "path")?, router(number(command, "other")?)?),
+            "router_nest_service" => router(number(command, "router")?)?.nest_service(
+                text(command, "path")?,
+                HostHandler(callback::get(number(command, "handler")?)?).with_state(()),
+            ),
             "router_fallback" => router(number(command, "router")?)?
                 .fallback(HostHandler(callback::get(number(command, "handler")?)?)),
             "router_fallback_methods" => router(number(command, "router")?)?
