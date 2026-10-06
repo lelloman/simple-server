@@ -2,8 +2,8 @@
 //! in the consumer graph. Handlers accept an owned `Request` and return `Response`.
 //!
 //! This is an explicit development API, not yet a drop-in replacement for `web`:
-//! arbitrary Tower layers, TLS and protocol
-//! upgrades remain unimplemented. Bind application state with `with_state`.
+//! TLS and protocol upgrades remain unimplemented. Tower layers wrap the opaque
+//! `Route` service with infallible responses and streaming byte bodies. Bind application state with `with_state`.
 //! Register handlers and serve inside the application's engine runtime.
 //! Typed handlers allow body extraction only in the final position:
 //! ```compile_fail
@@ -19,6 +19,7 @@
 //! ```
 pub mod body;
 mod continuation;
+pub use continuation::Route;
 pub mod extract;
 #[allow(clippy::duplicate_mod)]
 #[path = "../web/handler.rs"]

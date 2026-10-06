@@ -233,6 +233,7 @@ pub(crate) async fn forward_with_next(
     continuation: Option<u64>,
 ) -> Result<Response<Body>, String> {
     let (mut parts, body) = request.into_parts();
+    let native_extensions = crate::tower_bridge::capture(parts.extensions.clone());
     let matched_path = parts
         .extensions
         .get::<MatchedPath>()
@@ -261,7 +262,7 @@ pub(crate) async fn forward_with_next(
         .get::<ConnectInfo<SocketAddr>>()
         .map(|peer| peer.0.to_string());
     let request = encode(
-        json!({"continuation":continuation,"context":parts.extensions.get::<crate::middleware::HostContext>().map(|context| context.0),"method":parts.method.as_str(),"uri":parts.uri.to_string(),"version":format!("{:?}",parts.version),"headers":headers_to_wire(&parts.headers),"peer":peer,"body":body_id,"lower":hint.lower(),"upper":hint.upper(),"matched_path":matched_path,"original_uri":original_uri,"path_params":path_params.as_ref().ok(),"path_error":path_params.as_ref().err().map(ToString::to_string),"path_status":path_params.as_ref().err().map(|error| error.status().as_u16())}),
+        json!({"native_extensions":native_extensions.1,"continuation":continuation,"context":parts.extensions.get::<crate::middleware::HostContext>().map(|context| context.0),"method":parts.method.as_str(),"uri":parts.uri.to_string(),"version":format!("{:?}",parts.version),"headers":headers_to_wire(&parts.headers),"peer":peer,"body":body_id,"lower":hint.lower(),"upper":hint.upper(),"matched_path":matched_path,"original_uri":original_uri,"path_params":path_params.as_ref().ok(),"path_error":path_params.as_ref().err().map(ToString::to_string),"path_status":path_params.as_ref().err().map(|error| error.status().as_u16())}),
         &[],
     );
     let reply = callback.call(&request).await?;

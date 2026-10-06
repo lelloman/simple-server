@@ -2,10 +2,9 @@
 //!
 //! Using Layer::layer wraps only the supplied service. Router::layer applies
 //! these owned async layers to existing routes and fallback, including native
-//! 404/405 responses, and requires a continuation-capable engine. Custom host
-//! extensions and streaming bodies survive continuations; native routing
-//! metadata remains authoritative. Arbitrary Tower router layers are not yet
-//! supported.
+//! 404/405 responses, and requires a Tower-capable engine. Custom host
+//! extensions and streaming bodies survive calls to the inner Route service.
+//! Router and method-router layer APIs also accept compatible third-party layers.
 use super::Service;
 use super::{FromRequestParts, IntoRejectionResponse, IntoResponse, Request, Response};
 use std::{
@@ -219,42 +218,4 @@ where
     fn call(self, request: Request, _: (), next: Next) -> ResponseFuture {
         Box::pin(async move { (self.0)(next.run(request).await).await.into_response() })
     }
-}
-
-pub(super) fn router_callback<F, S, T>(
-    layer: FromFnLayer<F, S, T>,
-) -> std::io::Result<simple_server_sys::Callback>
-where
-    F: Middleware<T, S>,
-    S: Clone + Send + Sync + 'static,
-    T: 'static,
-{
-    use super::{body, wire};
-    use serde_json::json;
-    simple_server_sys::Callback::with_reply(move |bytes| {
-        let layer = layer.clone();
-        async move {
-            let result = async {
-                let (header, _) = wire::decode(&bytes)?;
-                let next = wire::resource(
-                    15,
-                    json!({"op":"middleware_next_clone","continuation":header["continuation"]}),
-                )?;
-                let request = wire::request(&bytes)?;
-                let response = super::service::call(
-                    layer.layer(super::continuation::Continuation(next)),
-                    request,
-                )
-                .await;
-                body::response_context(response, header["context"].as_u64().unwrap_or(0))
-            }
-            .await;
-            result.unwrap_or_else(|_: std::io::Error| {
-                simple_server_sys::Reply::new(
-                    wire::encode(json!({"status":500,"headers":[]}), b"internal server error")
-                        .expect("static response"),
-                )
-            })
-        }
-    })
 }

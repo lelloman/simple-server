@@ -21,6 +21,7 @@ mod operations;
 mod routing;
 mod server;
 mod signals;
+mod tower_bridge;
 #[cfg(unix)]
 mod unix_client;
 

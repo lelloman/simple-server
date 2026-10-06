@@ -130,8 +130,7 @@ without compiling a source HTTP framework. Header arrays and
 locations produce the source-compatible plain-text 500 response. Forms preserve source behavior: GET
 reads the query; other methods, including HEAD, read the bounded body. Extensions
 are host-local values installed before typed extraction; they do not cross the ABI.
-Router async middleware can install host extensions; arbitrary Tower extension
-layers are not yet accepted by the engine router.
+Router middleware and compatible Tower layers can install host extensions.
 
 `engine_web::middleware` provides host service middleware: `from_fn`,
 `from_fn_with_state`, `Next`, `map_response`, and `handler_service` for binding
@@ -147,14 +146,20 @@ native 404/405 responses or wrap the whole router. The sole added dependency is
 including native 404/405 responses. Routes added afterwards are not wrapped.
 Nested routing, typed state, headers and host extensions survive the continuation;
 bodies remain streaming. `RequestMetadata` is refreshed from native routing at
-each callback. Router layers require a rebuilt engine with continuation support;
+each callback. Router layers require a rebuilt engine with Tower bridge support;
 older artifacts reject construction. `Router::route_layer` wraps matched paths
 (including their 405) and leaves the 404 fallback alone. `MethodRouter::layer`
 wraps its existing methods and fallback, while `MethodRouter::route_layer` wraps
 only existing matched methods, leaving 405 responses alone. Later-added routes
 or methods are outside these layers. Empty route-layer applications are rejected
-at construction. These scope APIs require an engine with their new commands;
-arbitrary third-party Tower layers remain unsupported.
+at construction. All four APIs accept Tower `Layer<engine_web::Route>` with a
+cloneable, Send + Sync, infallible service returning a streaming byte body.
+This includes compatible third-party layers and the owned async helpers above.
+The engine constructs the service per native route and clones it per request,
+awaiting readiness on that same clone. Pending typed state delays construction
+until binding. Custom layers need only the re-exported `Layer` and `Service`
+contracts; no Tower utilities are added to the host dependency graph.
+Layers tied to a backend-specific body or runtime still need adaptation.
 
 `Path<T>` reads already-decoded engine captures using source-compatible scalar,
 tuple, struct, map, sequence and unit-enum semantics. Invalid UTF-8 and parsing
@@ -205,7 +210,7 @@ and forwarding policy; arbitrary Rust extensions and protocol upgrades do not
 cross this ABI. The client requires a newly built engine; older artifacts reject
 client creation.
 
-This API is not yet interchangeable with `web`: arbitrary Tower layers, TLS serving
+This API is not yet interchangeable with `web`: TLS serving
 and WebSocket
 adapters still need migration. The existing `web` API and default backend remain
 source-based, and no production service has adopted the engine.

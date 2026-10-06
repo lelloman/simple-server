@@ -73,11 +73,20 @@
   </header>
   <main>
     <section class="note" id="shared-engine">
+      <p><strong>Engine general Tower layers (2026-10-06): overall implementation Partial; adoption Pending.</strong>
+      All four router/method layer APIs accept compatible Tower layers over an
+      opaque Route. Constructed service state persists across requests; readiness,
+      cancellation, request replacement and streaming bodies are covered by seven
+      new contracts, including third-party gzip compression. A rebuilt engine is
+      required; C ABI layout and host dependencies are unchanged. Full repository
+      checks, standalone consumers, dependency guards and ABI smoke pass. Source-specific
+      runtime/body adapters and production adoption remain pending. See the
+      <a href="migration-status.md#engine-general-tower-layers--2026-10-06">scope and verification evidence</a>.</p>
       <p><strong>Engine route/method layer scopes (2026-10-06): implementation Partial; adoption Pending.</strong>
       Router::route_layer and both method-layer scopes now match source routing,
       including their different 404/405 behavior, later additions and typed state.
       Five scope contracts and thirteen regressions pass. General Tower adapters
-      and production adoption remain pending. An updated engine is required;
+      are completed in the later increment above; production adoption remains pending. An updated engine is required;
       dependencies and the C ABI layout are unchanged. Full repository checks and
       standalone consumers pass; the previous engine rejects construction. Commit
       <code>cc38630</code> is integrated into local master with ancestry and
@@ -86,8 +95,8 @@
       <p><strong>Engine router async middleware (2026-10-06): implementation Partial; adoption Pending.</strong>
       Router layers now include native 404/405 replies and preserve host extensions
       through guarded continuations. Eight contracts cover source parity, scope,
-      streaming, state and cleanup. Arbitrary Tower layers and service adoption
-      remain pending. A new engine artifact is required; the host graph stays at
+      streaming, state and cleanup. General Tower support is completed above; service
+      adoption remains pending. A new engine artifact is required; the host graph stays at
       30 packages. Full repository checks and standalone consumers pass; older
       engines reject layer construction. Commit <code>a06e394</code> is integrated
       into local master with ancestry and tested-tree equality verified. See the

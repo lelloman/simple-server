@@ -40,6 +40,47 @@ impl engine_web::Service<engine_web::Request> for EchoService {
     }
 }
 
+// No Tower utilities or runtime dependency: only the re-exported contracts.
+#[derive(Clone)]
+struct CountLayer;
+#[derive(Clone)]
+struct CountService {
+    inner: engine_web::Route,
+    count: std::sync::Arc<std::sync::atomic::AtomicUsize>,
+}
+impl engine_web::middleware::Layer<engine_web::Route> for CountLayer {
+    type Service = CountService;
+    fn layer(&self, inner: engine_web::Route) -> Self::Service {
+        CountService {
+            inner,
+            count: std::sync::Arc::new(std::sync::atomic::AtomicUsize::new(0)),
+        }
+    }
+}
+impl engine_web::Service<engine_web::Request> for CountService {
+    type Response = Response;
+    type Error = std::convert::Infallible;
+    type Future =
+        std::pin::Pin<Box<dyn std::future::Future<Output = Result<Response, Self::Error>> + Send>>;
+    fn poll_ready(
+        &mut self,
+        cx: &mut std::task::Context<'_>,
+    ) -> std::task::Poll<Result<(), Self::Error>> {
+        self.inner.poll_ready(cx)
+    }
+    fn call(&mut self, request: engine_web::Request) -> Self::Future {
+        let count = self.count.fetch_add(1, std::sync::atomic::Ordering::SeqCst) + 1;
+        let future = self.inner.call(request);
+        Box::pin(async move {
+            let mut response = future.await?;
+            response
+                .headers_mut()
+                .insert("x-service-count", count.to_string().parse().unwrap());
+            Ok(response)
+        })
+    }
+}
+
 #[simple_server::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let router = Router::new()?.route(
@@ -180,7 +221,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             response
         },
     ))?;
-    let router = router.with_state("engine".to_owned())?;
+    let router = router.layer(CountLayer)?.with_state("engine".to_owned())?;
     let listener = engine_web::bind("127.0.0.1:0").await?;
     let address = listener.local_addr();
     let url = format!("http://{}/echo/engine", listener.local_addr());
@@ -219,6 +260,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     );
     assert_eq!(response.text().await?, "prefix=engine&word=a+b%2Bc");
     let client = Client::builder().no_proxy().build()?;
+    for expected in [1, 2] {
+        let response = client
+            .get(format!("http://{address}/count-missing"))
+            .send()
+            .await?;
+        assert_eq!(response.status().as_u16(), 404);
+        assert_eq!(response.headers()["x-service-count"], expected.to_string());
+        response.bytes().await?;
+    }
     let response = client
         .get(format!("http://{address}/middleware"))
         .send()

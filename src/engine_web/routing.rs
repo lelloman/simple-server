@@ -3,7 +3,7 @@ use serde_json::json;
 use simple_server_sys::{Callback, Reply, Resource};
 use std::{future::Future, io, sync::Arc};
 
-fn callback<F, Fut>(handler: F) -> io::Result<Callback>
+pub(super) fn callback<F, Fut>(handler: F) -> io::Result<Callback>
 where
     F: Fn(Request) -> Fut + Clone + Send + Sync + 'static,
     Fut: Future<Output = Response> + Send + 'static,
@@ -78,6 +78,41 @@ impl<S: Clone + Send + Sync + 'static> Plan<S> {
         })
     }
 }
+fn layered<S, L, B>(
+    plan: Plan<S>,
+    layer: L,
+    kind: u32,
+    operation: &'static str,
+) -> io::Result<Plan<S>>
+where
+    S: Clone + Send + Sync + 'static,
+    L: tower_layer::Layer<super::Route> + Clone + Send + Sync + 'static,
+    L::Service: super::Service<Request, Response = http::Response<B>, Error = std::convert::Infallible>
+        + Clone
+        + Send
+        + Sync
+        + 'static,
+    <L::Service as super::Service<Request>>::Future: Send + 'static,
+    B: http_body::Body<Data = super::Bytes> + Send + 'static,
+    B::Error: Into<super::body::BoxError>,
+{
+    let factory = super::service::layer_factory(layer)?;
+    let apply = move |base: &Resource, validate: bool| {
+        let mut command = json!({"op":operation,"factory":factory.id(),"validate":validate});
+        command[if kind == 8 { "router" } else { "methods" }] = json!(base.id());
+        wire::resource(kind, command)
+    };
+    if plan.bind.is_none() {
+        return Ok(Plan::ready(apply(&plan.preview, false)?));
+    }
+    // Validate native route scope eagerly without constructing user services
+    // around placeholder handlers. Construct the actual layer only when bound.
+    let preview = apply(&plan.preview, true)?;
+    Ok(Plan {
+        preview,
+        bind: Some(Arc::new(move |state| apply(&plan.resolve(state)?, false))),
+    })
+}
 fn placeholder() -> io::Result<Callback> {
     callback(|_| async {
         super::IntoResponse::into_response(super::StatusCode::INTERNAL_SERVER_ERROR)
@@ -149,51 +184,46 @@ impl<S: Clone + Send + Sync + 'static> Router<S> {
             wire::resource(8, json!({"op":"router_route","router":router.id(),"path":path,"methods":methods.id()}))
         })? })
     }
-    /// Apply owned async middleware to routes and fallback already registered.
+    /// Apply a Tower layer to routes and fallback already registered.
     /// Native 404/405 responses are included; routes added later are not wrapped.
-    /// Requires an engine with router continuation support. Arbitrary Tower layers
-    /// are not accepted yet; use middleware::from_fn/from_fn_with_state/map_response.
-    pub fn layer<F, Local, T>(
-        self,
-        layer: super::middleware::FromFnLayer<F, Local, T>,
-    ) -> io::Result<Self>
+    /// The layer wraps the opaque Route service; its constructed service is cloned
+    /// per request and readiness is awaited on that clone. Requires a Tower-capable
+    /// engine. Pending state defers layer construction until binding.
+    pub fn layer<L, B>(self, layer: L) -> io::Result<Self>
     where
-        F: super::middleware::Middleware<T, Local>,
-        Local: Clone + Send + Sync + 'static,
-        T: 'static,
+        L: tower_layer::Layer<super::Route> + Clone + Send + Sync + 'static,
+        L::Service: super::Service<Request, Response = http::Response<B>, Error = std::convert::Infallible>
+            + Clone
+            + Send
+            + Sync
+            + 'static,
+        <L::Service as super::Service<Request>>::Future: Send + 'static,
+        B: http_body::Body<Data = super::Bytes> + Send + 'static,
+        B::Error: Into<super::body::BoxError>,
     {
-        let callback = super::middleware::router_callback(layer)?;
         Ok(Self {
-            plan: self.plan.map(move |router| {
-                wire::resource(
-                    8,
-                    json!({"op":"router_layer","router":router.id(),"handler":callback.id()}),
-                )
-            })?,
+            plan: layered(self.plan, layer, 8, "router_tower_layer")?,
         })
     }
-    /// Apply owned async middleware only to existing matched paths.
+    /// Apply a Tower layer only to existing matched paths.
     /// Leaves the 404 fallback alone but includes each matched path's 405.
     /// Add routes first: an empty router is rejected eagerly, including before
     /// state binding.
-    /// Requires an engine supporting router_route_layer.
-    pub fn route_layer<F, Local, T>(
-        self,
-        layer: super::middleware::FromFnLayer<F, Local, T>,
-    ) -> io::Result<Self>
+    /// Requires an engine supporting router_tower_route_layer.
+    pub fn route_layer<L, B>(self, layer: L) -> io::Result<Self>
     where
-        F: super::middleware::Middleware<T, Local>,
-        Local: Clone + Send + Sync + 'static,
-        T: 'static,
+        L: tower_layer::Layer<super::Route> + Clone + Send + Sync + 'static,
+        L::Service: super::Service<Request, Response = http::Response<B>, Error = std::convert::Infallible>
+            + Clone
+            + Send
+            + Sync
+            + 'static,
+        <L::Service as super::Service<Request>>::Future: Send + 'static,
+        B: http_body::Body<Data = super::Bytes> + Send + 'static,
+        B::Error: Into<super::body::BoxError>,
     {
-        let callback = super::middleware::router_callback(layer)?;
         Ok(Self {
-            plan: self.plan.map(move |router| {
-                wire::resource(
-                    8,
-                    json!({"op":"router_route_layer","router":router.id(),"handler":callback.id()}),
-                )
-            })?,
+            plan: layered(self.plan, layer, 8, "router_tower_route_layer")?,
         })
     }
     pub fn merge(self, other: Self) -> io::Result<Self> {
@@ -316,44 +346,43 @@ impl<S: Clone + Send + Sync + 'static> MethodRouter<S> {
             plan: Plan::ready(wire::resource(9, json!({"op":"method_new"}))?),
         })
     }
-    /// Wrap existing methods and their fallback with owned async middleware.
+    /// Wrap existing methods and their fallback with a Tower layer.
     /// Includes native 405 replies. Methods added later are not wrapped.
-    /// Requires an engine supporting method_layer.
-    pub fn layer<F, Local, T>(
-        self,
-        layer: super::middleware::FromFnLayer<F, Local, T>,
-    ) -> io::Result<Self>
+    /// Requires an engine supporting method_tower_layer.
+    pub fn layer<L, B>(self, layer: L) -> io::Result<Self>
     where
-        F: super::middleware::Middleware<T, Local>,
-        Local: Clone + Send + Sync + 'static,
-        T: 'static,
+        L: tower_layer::Layer<super::Route> + Clone + Send + Sync + 'static,
+        L::Service: super::Service<Request, Response = http::Response<B>, Error = std::convert::Infallible>
+            + Clone
+            + Send
+            + Sync
+            + 'static,
+        <L::Service as super::Service<Request>>::Future: Send + 'static,
+        B: http_body::Body<Data = super::Bytes> + Send + 'static,
+        B::Error: Into<super::body::BoxError>,
     {
-        let callback = super::middleware::router_callback(layer)?;
         Ok(Self {
-            plan: self.plan.map(move |methods| {
-                wire::resource(
-                    9,
-                    json!({"op":"method_layer","methods":methods.id(),"handler":callback.id()}),
-                )
-            })?,
+            plan: layered(self.plan, layer, 9, "method_tower_layer")?,
         })
     }
     /// Wrap only existing matched methods, leaving the native 405 fallback alone.
     /// An empty or fallback-only method group is rejected eagerly. Methods added
-    /// later are not wrapped. Requires an engine supporting method_route_layer.
-    pub fn route_layer<F, Local, T>(
-        self,
-        layer: super::middleware::FromFnLayer<F, Local, T>,
-    ) -> io::Result<Self>
+    /// later are not wrapped. Requires an engine supporting method_tower_route_layer.
+    pub fn route_layer<L, B>(self, layer: L) -> io::Result<Self>
     where
-        F: super::middleware::Middleware<T, Local>,
-        Local: Clone + Send + Sync + 'static,
-        T: 'static,
+        L: tower_layer::Layer<super::Route> + Clone + Send + Sync + 'static,
+        L::Service: super::Service<Request, Response = http::Response<B>, Error = std::convert::Infallible>
+            + Clone
+            + Send
+            + Sync
+            + 'static,
+        <L::Service as super::Service<Request>>::Future: Send + 'static,
+        B: http_body::Body<Data = super::Bytes> + Send + 'static,
+        B::Error: Into<super::body::BoxError>,
     {
-        let callback = super::middleware::router_callback(layer)?;
-        Ok(Self { plan: self.plan.map(move |methods| {
-            wire::resource(9, json!({"op":"method_route_layer","methods":methods.id(),"handler":callback.id()}))
-        })? })
+        Ok(Self {
+            plan: layered(self.plan, layer, 9, "method_tower_route_layer")?,
+        })
     }
     pub fn on<F, Fut>(self, method: super::Method, handler: F) -> io::Result<Self>
     where

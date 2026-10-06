@@ -66,6 +66,27 @@ pub fn resource_new(command: &Value) -> Result<Vec<u8>, String> {
     if operation.starts_with("router_") {
         let result = match operation {
             "router_new" => Router::new(),
+            "router_tower_layer" | "router_tower_route_layer" => {
+                // Resolve native unit state before layering: factories must not
+                // be deferred to connection/request dispatch. Host state is separate.
+                let router = router(number(command, "router")?)?.with_state::<()>(());
+                if command["validate"] == true {
+                    let layer = tower::layer::util::Identity::new();
+                    if operation == "router_tower_layer" {
+                        router.layer(layer)
+                    } else {
+                        router.route_layer(layer)
+                    }
+                } else {
+                    let layer =
+                        crate::tower_bridge::HostLayer(callback::get(number(command, "factory")?)?);
+                    if operation == "router_tower_layer" {
+                        router.layer(layer)
+                    } else {
+                        router.route_layer(layer)
+                    }
+                }
+            }
             "router_layer" | "router_route_layer" => {
                 let callback = callback::get(number(command, "handler")?)?;
                 let layer = axum::middleware::from_fn(
@@ -105,6 +126,25 @@ pub fn resource_new(command: &Value) -> Result<Vec<u8>, String> {
     }
     let result = match operation {
         "method_new" => MethodRouter::new(),
+        "method_tower_layer" | "method_tower_route_layer" => {
+            let methods = method_router(number(command, "methods")?)?.with_state::<()>(());
+            if command["validate"] == true {
+                let layer = tower::layer::util::Identity::new();
+                if operation == "method_tower_layer" {
+                    methods.layer(layer)
+                } else {
+                    methods.route_layer(layer)
+                }
+            } else {
+                let layer =
+                    crate::tower_bridge::HostLayer(callback::get(number(command, "factory")?)?);
+                if operation == "method_tower_layer" {
+                    methods.layer(layer)
+                } else {
+                    methods.route_layer(layer)
+                }
+            }
+        }
         "method_layer" | "method_route_layer" => {
             let callback = callback::get(number(command, "handler")?)?;
             let layer = axum::middleware::from_fn(

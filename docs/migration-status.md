@@ -1,5 +1,68 @@
 # Service migration status
 
+## Engine general Tower layers — 2026-10-06
+
+The Tower-layer compatibility increment is implemented; the overall engine
+remains **Partial**, production adoption **Pending**. Start: clean local master
+`93b9d9f`; isolated branch `implementation/engine-tower-layers`, worktree
+`target/worktrees/engine-tower-layers`. No consumer repository changes.
+
+All four Router/MethodRouter layer APIs now accept general Tower layers over
+opaque `engine_web::Route`, with the source facade's Clone/Send/Sync/infallible
+service and streaming byte-body bounds. Native routes are resolved before layer
+construction, so layer-created service state survives across requests and
+connections. Each request awaits readiness on the exact service clone it calls.
+Pending state validates scope with identity layers, avoiding user constructors
+on placeholder handlers; actual construction occurs when state is bound.
+
+Native extension snapshots preserve matching/peer metadata during forwarding.
+A layer can replace the whole request or clear extensions and still call its
+inner Route; removed metadata remains absent. Custom extensions remain host-owned.
+The existing streaming/trailer/context lifecycle contracts apply to this bridge.
+The standalone HTTP consumer now constructs a custom stateful Tower layer using
+only the re-exported contracts and verifies repeated requests to a native 404.
+
+Baseline: 20 middleware/scope contracts pass
+(`/tmp/simple-server-tower-layers-baseline.log`). Seven new contracts pass
+(`/tmp/simple-server-tower-layers-contracts.log`), covering per-route state,
+independent state binding, readiness reservation and cancellation, full request
+replacement, real tower-http gzip compression with a different streaming body,
+constructor panic/resource cleanup, and source HTTP parity with an explicitly
+state-bound source router. The source binding avoids comparing services rebuilt
+per connection against persistent services. Initial middleware/scope/HTTP
+regressions also passed 28 tests before the final eager-construction adjustment.
+
+Full `scripts/check` passes (`/tmp/simple-server-tower-layers-full.log`):
+workspace and native strict Clippy, source feature matrix, strict rustdoc, seven
+all-feature/six engine-only Tower contracts, all middleware/scope/HTTP regressions,
+seven standalone engine binaries, dependency guards and their regression tests,
+C ABI smoke and five installer tests. The final HTTP fixture verifies persistent
+custom-layer state without Tower utilities. Diff whitespace checks pass.
+
+New local x86_64 debug artifact:
+`/tmp/simple-server-tower-layers-engine/debug/libsimple_server_engine.so`, SHA256
+`39e675dfa2bb16a0c3519fae31bba13a7d04824f5dc856a17e3f6f868d75635a`.
+Build log: `/tmp/simple-server-tower-layers-build.log`. New wire commands are
+router_tower_layer, router_tower_route_layer, method_tower_layer,
+method_tower_route_layer, tower_route_clone, tower_extensions_clone and
+tower_route_call; new resource kinds are 16 (Route) and 17 (extension snapshot).
+C ABI signatures/layout are unchanged and legacy async-layer commands remain
+available. Tower is added directly to the native manifest, already present in
+its lockfile graph; host dependencies are unchanged.
+
+The normal/build HTTP consumer graph is verified at 30 packages excluding the
+fixture and library, with no Axum/Tokio/Hyper/Hyperlocal/Tower/Reqwest/SQLx/Rustls
+(`/tmp/simple-server-tower-layers-graph.txt`). Against the previous layer-scopes
+artifact, the new standalone fixture fails construction with `unknown method
+router command`, before serving (`/tmp/simple-server-tower-layers-old-engine.log`;
+exit 1). Tracker scripts and linked Markdown anchors pass validation.
+
+Layers tied to a source body/runtime still require adaptation. Source-free
+correlation/tracing/static-file integration, other recorded protocol/API gaps,
+artifact release and production adoption remain pending. No new performance
+claim, push, publication or deployment. Release/Bookworm distribution, ARM and
+non-Unix targets are not retested.
+
 ## Engine route and method layer scopes — 2026-10-06
 
 Implementation remains **Partial**, production adoption **Pending**. Start:

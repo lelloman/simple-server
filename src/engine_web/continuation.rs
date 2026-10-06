@@ -58,15 +58,22 @@ pub(super) fn response_extensions(id: u64, extensions: http::Extensions) {
     }
 }
 #[derive(Clone)]
-pub(super) struct Continuation(pub Resource);
-impl Continuation {
+pub(super) struct NativeExtensions(pub Resource);
+
+/// A cloneable native route used as the inner service of a Tower layer.
+/// Constructed by router/method layer registration; its native routing state
+/// remains in the engine. Readiness is immediate; calls return streaming bodies.
+#[derive(Clone)]
+pub struct Route(pub(super) Resource);
+impl Route {
     async fn run(self, request: Request) -> io::Result<Response> {
-        let (parts, body) = request.into_parts();
+        let (mut parts, body) = request.into_parts();
+        let native = parts.extensions.remove::<NativeExtensions>();
         let guard = Guard::new(parts.extensions);
         let hint = body.size_hint();
         let callback = body::export(body)?;
         let resource = wire::resource(6, json!({"op":"server_body_slot"}))?;
-        let output = Operation::new(&wire::encode(json!({"op":"middleware_next","continuation":self.0.id(),"context":guard.id,"response":resource.id(),"method":parts.method.as_str(),"uri":parts.uri.to_string(),"version":format!("{:?}",parts.version),"headers":wire::headers(&parts.headers),"body":callback.id(),"lower":hint.lower(),"upper":hint.upper()}), &[])?)?.await?;
+        let output = Operation::new(&wire::encode(json!({"op":"tower_route_call","route":self.0.id(),"extensions":native.as_ref().map(|extensions| extensions.0.id()),"context":guard.id,"response":resource.id(),"method":parts.method.as_str(),"uri":parts.uri.to_string(),"version":format!("{:?}",parts.version),"headers":wire::headers(&parts.headers),"body":callback.id(),"lower":hint.lower(),"upper":hint.upper()}), &[])?)?.await?;
         let (header, _) = wire::decode(&output)?;
         wire::check(&header)?;
         let status = header["status"]
@@ -82,7 +89,7 @@ impl Continuation {
         Ok(response)
     }
 }
-impl Service<Request> for Continuation {
+impl Service<Request> for Route {
     type Response = Response;
     type Error = Infallible;
     type Future = Pin<Box<dyn Future<Output = Result<Response, Infallible>> + Send>>;

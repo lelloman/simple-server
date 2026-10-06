@@ -107,6 +107,12 @@ pub(super) fn request(bytes: &[u8]) -> io::Result<Request> {
     *request.extensions_mut() =
         super::continuation::request_extensions(header["context"].as_u64().unwrap_or(0));
     request.extensions_mut().insert(metadata);
+    if let Some(id) = header["native_extensions"].as_u64() {
+        let resource = resource(17, json!({"op":"tower_extensions_clone","extensions":id}))?;
+        request
+            .extensions_mut()
+            .insert(super::continuation::NativeExtensions(resource));
+    }
     Ok(request)
 }
 

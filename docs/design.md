@@ -694,8 +694,7 @@ Axum routing: existing routes and fallback are wrapped, native 404/405 responses
 are included, and later-added routes remain outside the layer. Pending typed
 state plans replay layer construction when bound. Source comparisons verify
 status, headers and bodies including HEAD, 404/405, custom methods and URI edits.
-Arbitrary third-party Tower layers remain unsupported; route/method scope APIs
-are described below. This does not finish ScT's middleware migration.
+General Tower layers and route/method scope APIs are described below. This does not finish ScT's middleware migration.
 
 Each native middleware invocation retains an Axum Next and native request
 extensions behind continuation resource kind 15. A borrowed registration lasts
@@ -738,8 +737,8 @@ native Axum placement and preserve the source backend's scope:
 | MethodRouter::layer | Wrapped | Wrapped | Outside its scope |
 | MethodRouter::route_layer | Wrapped | Unwrapped | Outside its scope |
 
-These APIs accept from_fn/from_fn_with_state/map_response. They are not general
-Tower Layer adapters. Later-added routes/methods are outside the layer. Empty
+These APIs accept from_fn/from_fn_with_state/map_response and compatible general
+Tower layers through the stable Route bridge described below. Later-added routes/methods are outside the layer. Empty
 Router::route_layer and empty/fallback-only MethodRouter::route_layer calls
 return construction errors, including for pending typed state. An empty
 MethodRouter::layer can still wrap its method fallback. Native construction
@@ -761,3 +760,36 @@ body), including HEAD/custom methods, later additions and Allow headers. Nested
 captures, layer order, custom extensions, independent pending-state bindings,
 empty construction and short-circuit scope are covered. The standalone HTTP
 consumer composes all three new APIs with Router::layer and service middleware.
+
+
+## Engine general Tower layers (development)
+
+All four router/method layer APIs accept `Layer<engine_web::Route>` using the
+same service/body bounds as `web`: Clone + Send + Sync services, infallible
+responses, Send futures and streaming byte bodies. Runtime- or backend-specific
+layers still need compatible adapters. No additional host dependency is needed.
+
+Native unit state is resolved before applying a host layer. A synchronous host
+factory constructs its service once per native route; subsequent requests clone
+that service and await readiness on the exact clone they call. This preserves
+layer-created shared state across requests and connections. Pending host state
+uses identity layers to validate placement without running user constructors on
+placeholder handlers. Actual constructors run when state is bound. Constructor
+panics return construction errors through the existing ABI panic guards.
+
+The public opaque Route holds native resource kind 16. Each request carries a
+private host extension referencing native extension snapshot kind 17. Normal
+forwarding preserves captures and peer metadata. Replacing the whole request or
+clearing extensions intentionally removes that metadata while retaining a usable
+inner Route. Custom Rust extension values stay host-owned via guarded contexts;
+bodies, trailers and cancellation use the existing streaming callback bridge.
+
+The wire adds router_tower_layer, router_tower_route_layer, method_tower_layer,
+method_tower_route_layer, tower_route_clone, tower_extensions_clone and
+tower_route_call. C ABI signatures/layout remain unchanged. Old native async
+layer commands remain available; new hosts require the rebuilt engine. Tower is
+now a direct native dependency (already transitively present); the standalone
+host graph remains 30 packages. Third-party gzip compression tests exercise a
+different response-body type, alongside state, readiness/cancellation, request
+replacement, constructor cleanup and HTTP comparisons against an explicitly
+state-bound source router. No new compile/runtime performance claim is made.
