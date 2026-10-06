@@ -53,6 +53,12 @@ checkpoint; build log `/tmp/simple-server-unix-client-engine-build.log`.
 SHA256 `98d4cff50e4237d50e6235b3c1fb84b8a775bd86e8c3b929df9d099989db3fc7`.
 Bookworm/release distribution, ARM and non-Unix targets are not retested.
 
+Implementation commit `2bf12ef` was integrated by rebasing local master onto
+`implementation/engine-unix-client`. The original checkout remained clean at
+`fc2ce03` before integration; no concurrent commits or edits appeared. Ancestry
+and exact tree equality with the tested implementation branch passed. Temporary
+worktree/branch cleanup follows integration of this evidence-only update.
+
 TLS, WebSocket, external listener descriptors, peer credentials, router layers,
 Route/make-service exposure and public test-harness parity remain pending.
 No push, publication or deployment.
