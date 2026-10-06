@@ -51,6 +51,13 @@ Bookworm/release distribution and ARM are not retested. Router-wide layers,
 Route service exposure, make-service and protocol adapters remain pending.
 No push, publication or deployment.
 
+Implementation commit **`f4c87cb`** is integrated into local `master` by rebasing
+master onto the implementation branch. Original master remained clean at
+`436c87c`; no intervening commits or unrelated edits appeared. Ancestry and exact
+tree equality were verified, so the integrated code is the tested tree. This
+evidence update is integrated the same way; the temporary worktree and merged
+branch are then removed after verification.
+
 ## Engine method and fallback services — 2026-10-06
 
 Engine implementation remains **Partial** and all production adoption remains
