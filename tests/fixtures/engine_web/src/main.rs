@@ -103,6 +103,19 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         "/mounted/{name}",
         Router::new()?.nest_service("/echo", EchoService)?,
     )?;
+    let router = router.route(
+        "/events",
+        MethodRouter::new()?.on_handler(Method::GET, || async {
+            use engine_web::sse::{Event, KeepAlive, Sse};
+            Sse::new(futures_util::stream::iter([Ok::<
+                _,
+                std::convert::Infallible,
+            >(
+                Event::default().event("update").id("1").data("ready"),
+            )]))
+            .keep_alive(KeepAlive::default())
+        })?,
+    )?;
     let router = router.with_state("engine".to_owned())?;
     let listener = engine_web::bind("127.0.0.1:0").await?;
     let address = listener.local_addr();
@@ -189,6 +202,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .send()
         .await?;
     assert_eq!(response.text().await?, "mounted service");
+    let response = client
+        .get(format!("http://{address}/events"))
+        .send()
+        .await?;
+    assert_eq!(response.headers()["content-type"], "text/event-stream");
+    assert_eq!(response.headers()["cache-control"], "no-cache");
+    assert_eq!(
+        response.text().await?,
+        "event: update\nid: 1\ndata: ready\n\n"
+    );
     shutdown.request();
     server.await??;
     println!("public engine HTTP consumer passed");

@@ -1,5 +1,47 @@
 # Service migration status
 
+## Engine server-sent events — 2026-10-06
+
+Engine implementation remains **Partial** and production adoption remains
+**Pending**. Work starts from clean local `master` `90d7309`, in isolated branch
+`implementation/engine-sse`, worktree `target/worktrees/engine-sse`. No consumer
+repository is changed. Router-wide layers need routing continuation and host
+extension preservation; this checkpoint instead closes the independent SSE gap.
+
+`engine_web::sse` supplies Sse, Event, EventDataWriter, EventError and KeepAlive
+under engine-web alone. Encoding preserves source field order, multiline and
+chunked data, Unicode, retry hints, JSON errors and builder validation. The
+encoder is adapted from pinned Axum 0.8.9 with its MIT notice retained. Lazy body
+polling supports non-Unpin streams, propagates producer errors and releases the
+stream on drop. Keepalives use engine timers, remain opt-in and default to empty
+comments after 15 idle seconds. Ready events reset the timer; ready events,
+errors and completion take priority over heartbeats. Authorization, subscriptions,
+replay and reconnect policy remain application-owned.
+
+Baseline: 25 tests pass (source SSE 11, engine HTTP 8, engine services 6), recorded
+in `/tmp/simple-server-sse-baseline.log`. Eleven focused engine SSE contracts
+pass (`/tmp/simple-server-sse-contracts.log`), including byte/header comparison
+with the source encoder, paused engine-clock timing tests, producer-error and
+drop checks, and a real HTTP test for authorization, reconnect IDs, heartbeat
+delivery and stream release after disconnect. The standalone HTTP consumer
+executes SSE alongside its existing routes (`/tmp/simple-server-sse-fixture.log`).
+Its added direct futures-util dependency is already in the graph: 29 normal/build
+packages beyond fixture and library, with no Axum, Tokio, Hyper, Reqwest, SQLx or
+Rustls (`/tmp/simple-server-sse-graph.txt`). No speedup is claimed.
+
+The full `bash scripts/check` passes (`/tmp/simple-server-sse-full.log`): strict
+workspace/native Clippy, source feature matrix and protocol regressions, rustdoc,
+eleven all-feature and ten engine-only SSE contracts, all seven standalone engine
+binaries, dependency guards, C ABI smoke and five artifact installer tests.
+Tracker scripts and evidence links pass validation.
+
+No native source or ABI changes are needed. Tests reuse the x86_64 debug engine
+built at checkpoint `f4c87cb`, at `/tmp/simple-server-nested-services-engine/debug`,
+SHA256 `8a66f5cb8ecf760ef0e5d1ca8dfc515e8dfe3f32ed85afd93ac053dfc2adcc4c`.
+Bookworm/release distribution and ARM are not retested. Router layers, Route
+service exposure, make-service, WebSocket/multipart, TLS/Unix transport and test
+harness parity remain pending. No push, publication or deployment.
+
 ## Engine nested services — 2026-10-06
 
 Engine implementation remains **Partial** and production adoption remains

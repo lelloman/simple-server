@@ -26,6 +26,7 @@ mod path_de;
 pub mod response;
 mod routing;
 mod service;
+pub mod sse;
 pub use crate::extract::{Extract, FromRequestParts, IntoRejectionResponse, RejectionResponse};
 pub use extract::{
     BodyLimit, ConnectInfo, Extension, Form, FromRequest, FromState, Json, MatchedPath, Path,

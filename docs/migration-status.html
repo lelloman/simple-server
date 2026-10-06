@@ -73,6 +73,15 @@
   </header>
   <main>
     <section class="note" id="shared-engine">
+      <p><strong>Engine server-sent events (2026-10-06): implementation Partial; adoption Pending.</strong>
+      SSE encoding, lazy streaming and opt-in keepalives now use the engine body
+      and clock. Source encoding comparisons, paused-clock contracts and socket
+      tests verify heartbeat delivery and disconnect cleanup. The standalone
+      HTTP consumer exercises SSE with the same 29-package graph, without Axum
+      or Tokio. Full source/engine checks and standalone consumers pass.
+      No native source or ABI changes. Router layers, WebSocket/multipart
+      and transport adapters remain pending. See the
+      <a href="migration-status.md#engine-server-sent-events--2026-10-06">scope and verification evidence</a>.</p>
       <p><strong>Engine nested services (2026-10-06): implementation Partial; adoption Pending.</strong>
       Router nest_service preserves native prefix/query matching, original URI,
       parent captures, typed state, readiness, cancellation and streaming. The

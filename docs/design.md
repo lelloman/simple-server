@@ -454,3 +454,31 @@ updated together when adopting this method. No new dependencies are introduced;
 the standalone HTTP consumer retains its 29-package normal/build graph and now
 executes a mounted echo under a captured parent prefix. Router layers, Route
 service exposure, make-service and protocol adapters remain separate work.
+
+## Engine server-sent events (development)
+
+`engine_web::sse` exposes Sse, Event, EventDataWriter, EventError and KeepAlive
+without enabling the source backend's sse feature. The event encoder is adapted
+from the pinned Axum 0.8.9 implementation with its MIT notice retained; it uses
+only existing host dependencies. Multiline/chunked data, builder field order,
+Unicode, JSON serialization errors, duplicate-field rejection and retry hints
+retain source behavior. The source web::sse implementation is unchanged.
+
+SSE responses set text/event-stream and no-cache, polling the application stream
+lazily and forwarding each event as one body frame. Non-Unpin streams are supported
+through a pinned box; no producer task is spawned. Producer failures propagate as
+body errors, not synthetic SSE events or replacement HTTP statuses. Dropping the
+body releases its stream and timer.
+
+Keepalives remain opt-in: by default they emit an empty comment after 15 idle
+seconds, with custom comments or complete events supported. Engine timers start
+when the response is converted, requiring an engine runtime only when keepalive
+is enabled. Ready events reset the deadline and win over due timers; errors and
+completion also take priority. Paused engine-clock tests cover these rules.
+Applications retain authorization, subscriptions, replay and reconnect IDs.
+
+The existing streaming-body and timer ABI supports this adapter unchanged. The
+standalone HTTP fixture now calls the SSE API and still has 29 normal/build
+packages beyond the fixture and library, without Axum or Tokio. Router layers,
+Route service exposure, make-service, WebSocket/multipart, TLS/Unix transport and
+test-harness parity remain separate work. No production adoption is implied.

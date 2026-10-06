@@ -236,6 +236,7 @@ dependencies = [
 name = "simple-server-engine-web-consumer"
 version = "0.0.0"
 dependencies = [
+ "futures-util",
  "lelloman-simple-server",
  "serde_json",
 ]

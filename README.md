@@ -148,8 +148,15 @@ original URI and parent captures. Mounting at `/` is rejected; use a fallback
 service for root dispatch. `nest_service` requires a rebuilt engine with the
 `router_nest_service` operation; older libraries return a construction error.
 
+`engine_web::sse::{Sse, Event, EventDataWriter, KeepAlive}` supports lazy SSE
+responses, JSON events and opt-in idle heartbeats using engine timers. It is
+included in `engine-web`; do not enable the source backend's `sse` feature for
+an engine-only consumer. Ready events, errors and completion take priority over
+heartbeats. Keepalive timers start at response conversion inside an engine
+runtime; IDs, subscriptions, authorization and replay remain application-owned.
+
 This API is not yet interchangeable with `web`: router layers, TLS/Unix serving
-and WebSocket/multipart/SSE
+and WebSocket/multipart
 adapters still need migration. The existing `web` API and default backend remain
 source-based, and no production service has adopted the engine.
 
