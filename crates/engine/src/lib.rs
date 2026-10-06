@@ -20,6 +20,8 @@ mod operations;
 mod routing;
 mod server;
 mod signals;
+#[cfg(unix)]
+mod unix_client;
 
 thread_local! { static ERROR: RefCell<String> = const { RefCell::new(String::new()) }; }
 

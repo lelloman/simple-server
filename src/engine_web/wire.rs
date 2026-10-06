@@ -74,14 +74,7 @@ pub(super) fn request(bytes: &[u8]) -> io::Result<Request> {
         )
         .body(body)
         .map_err(io::Error::other)?;
-    *request.version_mut() = match header["version"].as_str() {
-        Some("HTTP/0.9") => Version::HTTP_09,
-        Some("HTTP/1.0") => Version::HTTP_10,
-        Some("HTTP/1.1") => Version::HTTP_11,
-        Some("HTTP/2.0") => Version::HTTP_2,
-        Some("HTTP/3.0") => Version::HTTP_3,
-        _ => return Err(io::Error::other("invalid HTTP version")),
-    };
+    *request.version_mut() = version(&header)?;
     *request.headers_mut() = read_headers(&header["headers"])?;
     let metadata = RequestMetadata {
         peer: header["peer"]
@@ -113,4 +106,15 @@ pub(super) fn request(bytes: &[u8]) -> io::Result<Request> {
     };
     request.extensions_mut().insert(metadata);
     Ok(request)
+}
+
+pub(super) fn version(header: &Value) -> io::Result<Version> {
+    Ok(match header["version"].as_str() {
+        Some("HTTP/0.9") => Version::HTTP_09,
+        Some("HTTP/1.0") => Version::HTTP_10,
+        Some("HTTP/1.1") => Version::HTTP_11,
+        Some("HTTP/2.0") => Version::HTTP_2,
+        Some("HTTP/3.0") => Version::HTTP_3,
+        _ => return Err(io::Error::other("invalid HTTP version")),
+    })
 }

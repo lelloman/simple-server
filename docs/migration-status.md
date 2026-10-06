@@ -1,5 +1,62 @@
 # Service migration status
 
+## Engine Unix HTTP client — 2026-10-06
+
+Engine implementation remains **Partial** and production adoption remains
+**Pending**. Work starts from clean local master `fc2ce03`, in isolated branch
+`implementation/engine-unix-client`, worktree `target/worktrees/engine-unix-client`.
+No consumer repository is changed.
+
+UnixClient::new now creates a native pooled HTTP/1 client, returning io::Result.
+Clones share the same pool. Requests stream through body callbacks and preserve
+method, encoded path/query, headers, Host, version and trailers. Responses retain
+status, headers, version and streaming bodies. Socket selection is independent
+of the original URI authority. InvalidRequest versus Transport classification
+matches the source contract; socket paths must be nonempty UTF-8 and request
+paths origin-form. Error sources are host-owned diagnostics; native Rust error
+objects and arbitrary extensions do not cross the ABI. Protocol upgrades and
+application deadlines/forwarding policy remain caller-owned or unsupported.
+
+Response body slots are allocated before asynchronous request work and released
+by host guards, preventing unclaimed registrations on cancellation. Request body
+size hints preserve fixed-length framing. Responses remain readable after client
+drop. Hyperlocal 0.9.1 and Hyper transport/pooling are compiled only into the
+engine; the consumer graph remains 29 normal/build packages beyond fixture and
+library, without Hyper, Hyperlocal, Axum, Tokio, Reqwest, SQLx, Rustls or Multer
+(`/tmp/simple-server-unix-client-graph.txt`). No speedup is claimed.
+
+Baseline: 20 tests pass (engine Unix 5, source Unix 7, engine HTTP 8), recorded in
+`/tmp/simple-server-unix-client-baseline.log`. Nine new client contracts plus five
+Unix-serving and eight TCP HTTP regressions pass
+(`/tmp/simple-server-unix-client-contracts.log`). Tests cover invalid inputs and
+transport errors, bidirectional incremental streaming, trailers, upload/late
+response failures, cancelled uploads and dropped responses. A raw socket test
+verifies two cloned clients reuse one accepted connection and send fixed-length
+requests. Source-client comparisons use real sockets for HTTP/1.0, HTTP/1.1,
+HEAD, encoded paths/queries, duplicate headers and binary bodies, excluding Date.
+
+Full `scripts/check` passes (`/tmp/simple-server-unix-client-full.log`):
+workspace/native strict Clippy, source feature matrix and protocol regressions,
+rustdoc, engine contracts (nine all-feature and eight engine-only Unix-client
+cases), seven standalone engine consumers, dependency guards, C ABI smoke and
+five installer tests. The HTTP fixture exercises TCP, raw Unix sockets and the
+public Unix client.
+
+The standalone HTTP consumer now exercises public UnixClient requests alongside
+raw sockets. Against the previous library it fails client creation with
+`unknown engine resource`, as expected
+(`/tmp/simple-server-unix-client-old-engine.log`). New commands and client kind 14
+require an updated artifact; response slots reuse body kind 6. C ABI signatures
+and layout are unchanged. Verification uses the newly built local x86_64 debug
+engine at `/tmp/simple-server-unix-client-engine/debug`, built from this
+checkpoint; build log `/tmp/simple-server-unix-client-engine-build.log`.
+SHA256 `98d4cff50e4237d50e6235b3c1fb84b8a775bd86e8c3b929df9d099989db3fc7`.
+Bookworm/release distribution, ARM and non-Unix targets are not retested.
+
+TLS, WebSocket, external listener descriptors, peer credentials, router layers,
+Route/make-service exposure and public test-harness parity remain pending.
+No push, publication or deployment.
+
 ## Engine Unix-socket serving — 2026-10-06
 
 Engine implementation remains **Partial** and production adoption remains

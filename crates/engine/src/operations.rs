@@ -68,7 +68,9 @@ pub fn resource_new(command: Value, _: Vec<u8>) -> Result<Vec<u8>, String> {
     match command["op"].as_str() {
         Some("shutdown_signals") => crate::signals::install(),
         Some("multipart_new" | "multipart_field_slot") => crate::multipart::resource_new(&command),
-        Some("server_body_clone") => crate::server::resource_new(&command),
+        #[cfg(unix)]
+        Some("unix_client") => crate::unix_client::new(),
+        Some("server_body_clone" | "server_body_slot") => crate::server::resource_new(&command),
         Some(operation) if operation.starts_with("router_") || operation.starts_with("method_") => {
             crate::routing::resource_new(&command)
         }
@@ -103,6 +105,8 @@ pub fn resource_new(command: Value, _: Vec<u8>) -> Result<Vec<u8>, String> {
 pub fn resource_release(kind: u32, id: u64) {
     match kind {
         crate::multipart::PARSER | crate::multipart::FIELD => crate::multipart::release(kind, id),
+        #[cfg(unix)]
+        crate::unix_client::CLIENT => crate::unix_client::release(id),
         crate::signals::SIGNALS => crate::signals::release(id),
         1 => {
             clients().lock().unwrap().remove(&id);
@@ -124,6 +128,8 @@ pub fn resource_release(kind: u32, id: u64) {
 pub fn operation(command: Value, body: Vec<u8>) -> Result<FutureBytes, String> {
     match command["op"].as_str() {
         Some(op) if op.starts_with("multipart_") => crate::multipart::operation(command),
+        #[cfg(unix)]
+        Some("unix_request") => crate::unix_client::request(command),
         Some("shutdown_signal_wait") => crate::signals::wait(number(&command, "id")?),
         Some(
             "server_bind" | "server_serve" | "server_body_frame" | "server_unix_bind"

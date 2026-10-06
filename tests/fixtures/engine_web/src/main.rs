@@ -266,6 +266,7 @@ async fn unix_smoke() -> Result<(), Box<dyn std::error::Error>> {
     std::fs::create_dir(&directory)?;
     let directory = SocketDir(directory);
     let path = directory.0.join("http.sock");
+    let client = unix::UnixClient::new()?;
     let listener = unix::bind(&path).await?;
     assert_eq!(listener.path(), path);
     let router = Router::new()?.route(
@@ -285,6 +286,14 @@ async fn unix_smoke() -> Result<(), Box<dyn std::error::Error>> {
     .await??;
     assert!(response.starts_with("HTTP/1.1 200"));
     assert!(response.ends_with("unix engine"));
+    let response = client
+        .request(
+            directory.0.join("http.sock"),
+            engine_web::Request::new(engine_web::Body::empty()),
+        )
+        .await?;
+    assert_eq!(response.status().as_u16(), 200);
+    assert_eq!(response.into_body().collect(128).await?, "unix engine");
     stop.request();
     simple_server::time::timeout(Duration::from_secs(3), server).await???;
     assert!(

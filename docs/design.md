@@ -552,3 +552,37 @@ HTTP consumer graph stays at 29 packages beyond the library and fixture. Unix
 client requests, importing externally bound descriptors, peer credentials,
 WebSocket upgrades, TLS, router layers and public test-harness parity remain
 separate work. This checkpoint does not imply production consumer adoption.
+
+## Engine Unix HTTP client (development)
+
+UnixClient::new creates a native HTTP/1 pool and returns io::Result because engine
+resource creation is fallible. Clones share resource kind 14 and the same pool.
+Hyperlocal 0.9.1 and Hyper's legacy client run only inside the engine. Requests
+select the socket independently of the original URI authority and retain Host,
+method, path/query, duplicate/binary headers, version and body. Nonempty UTF-8
+socket paths and origin-form paths match the source client's input contract.
+Request and response trailers remain observable through the body frame interface.
+Received HTTP versions are decoded explicitly; this does not change the separate
+server-side response-version override limitation.
+
+Bodies remain lazy: the host exports its request body with a size hint, and the
+engine installs the response stream into a body resource allocated before the
+request starts. This reuses body kind 6 via server_body_slot. Preallocation and
+host ownership avoid unclaimed native response registrations on cancellation.
+The response remains readable after its client handle is dropped. Tests verify
+streaming before upload completion, request cancellation, response producer drop,
+late response errors, upload errors and pool reuse across cloned handles.
+
+UnixHttpError distinguishes InvalidRequest from Transport and exposes a source.
+Native failures become host-owned diagnostics; native Rust error identities and
+arbitrary request/response extensions do not cross the ABI. Protocol upgrades,
+application timeout/retry policy and forwarding-header policy are not supplied
+by this adapter. Client construction itself fails explicitly on older artifacts.
+
+The new commands require a rebuilt engine while leaving C ABI signatures/layout
+unchanged. The standalone HTTP fixture now uses the public client as well as raw
+Unix sockets. Its normal/build graph stays at 29 packages beyond fixture and
+library, without Hyper, Hyperlocal, Axum or Tokio. Remaining gaps include TLS,
+WebSocket, external listener descriptors, peer credentials, router layers,
+Route/make-service exposure and public test-harness parity. No production
+adoption or runtime speedup is claimed.

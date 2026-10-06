@@ -168,8 +168,17 @@ Unix sockets inside the engine. Paths retain non-UTF-8 bytes; existing paths are
 never removed or replaced. Applications own permissions, stale-socket handling
 and cleanup after shutdown. Serving drains active responses on explicit shutdown
 and reports no TCP peer address for Unix requests. This requires an engine with
-Unix listener operations. The Unix HTTP client and externally supplied listener
-file descriptors are not supported by this adapter yet.
+Unix listener operations. Externally supplied listener file descriptors are not
+supported by this adapter yet.
+
+`engine_web::unix::UnixClient::new()?` creates an engine-owned HTTP/1 connection
+pool shared by clones. `request(socket_path, request)` streams both bodies and
+trailers, retaining methods, paths/queries, headers and HTTP versions. It matches
+the source client's nonempty UTF-8 socket-path and origin-form path requirements.
+Errors distinguish invalid requests from transport failures. Callers own deadlines
+and forwarding policy; arbitrary Rust extensions and protocol upgrades do not
+cross this ABI. The client requires a newly built engine; older artifacts reject
+client creation.
 
 This API is not yet interchangeable with `web`: router layers, TLS serving
 and WebSocket

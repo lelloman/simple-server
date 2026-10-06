@@ -28,7 +28,7 @@ pub const BODY: u32 = 6;
 pub const LISTENER: u32 = 7;
 #[cfg(unix)]
 pub const UNIX_LISTENER: u32 = 13;
-type SharedBody = Arc<tokio::sync::Mutex<Body>>;
+pub(crate) type SharedBody = Arc<tokio::sync::Mutex<Body>>;
 static BODIES: OnceLock<Mutex<HashMap<u64, SharedBody>>> = OnceLock::new();
 static LISTENERS: OnceLock<Mutex<HashMap<u64, TcpListener>>> = OnceLock::new();
 fn bodies() -> &'static Mutex<HashMap<u64, SharedBody>> {
@@ -99,13 +99,20 @@ impl Drop for BorrowedBody {
     }
 }
 
-pub fn resource_new(command: &Value) -> Result<Vec<u8>, String> {
-    let body = bodies()
+pub(crate) fn body(id: u64) -> Result<SharedBody, String> {
+    bodies()
         .lock()
         .unwrap()
-        .get(&number(command, "body")?)
+        .get(&id)
         .cloned()
-        .ok_or("body released")?;
+        .ok_or_else(|| "body released".into())
+}
+pub fn resource_new(command: &Value) -> Result<Vec<u8>, String> {
+    let body = if command["op"] == "server_body_slot" {
+        Arc::new(tokio::sync::Mutex::new(Body::empty()))
+    } else {
+        body(number(command, "body")?)?
+    };
     let id = id();
     bodies().lock().unwrap().insert(id, body);
     Ok(encode(json!({"ok":true,"id":id}), &[]))
@@ -118,7 +125,7 @@ pub fn headers_to_wire(headers: &HeaderMap) -> Value {
             .collect::<Vec<_>>()
     )
 }
-fn headers_from_wire(value: &Value) -> Result<HeaderMap, String> {
+pub(crate) fn headers_from_wire(value: &Value) -> Result<HeaderMap, String> {
     let mut headers = HeaderMap::new();
     for pair in value.as_array().ok_or("headers must be an array")? {
         let name =
@@ -132,10 +139,13 @@ fn headers_from_wire(value: &Value) -> Result<HeaderMap, String> {
 }
 
 pub(crate) fn callback_body(id: u64) -> Result<Body, String> {
+    callback_body_with_hint(id, SizeHint::new())
+}
+pub(crate) fn callback_body_with_hint(id: u64, hint: SizeHint) -> Result<Body, String> {
     Ok(Body::new(CallbackBody {
         callback: Some(callback::get(id)?),
         pending: None,
-        hint: SizeHint::new(),
+        hint,
     }))
 }
 

@@ -73,6 +73,15 @@
   </header>
   <main>
     <section class="note" id="shared-engine">
+      <p><strong>Engine Unix HTTP client (2026-10-06): implementation Partial; adoption Pending.</strong>
+      Pooled client requests now run in the engine with streaming bodies/trailers,
+      preserved HTTP metadata and explicit error kinds. Contracts verify source
+      parity, clone pooling, cancellation and body cleanup. The consumer graph
+      stays at 29 packages without a transport stack. Full repository checks,
+      standalone consumers and C ABI smoke pass. New commands require an
+      updated engine; older libraries reject client creation. TLS, WebSocket,
+      router layers and external listener descriptors remain pending. See the
+      <a href="migration-status.md#engine-unix-http-client--2026-10-06">scope and verification evidence</a>.</p>
       <p><strong>Engine Unix-socket serving (2026-10-06): implementation Partial; adoption Pending.</strong>
       Unix bind/serve now run in the engine with byte-preserving paths, streamed
       bodies and explicit shutdown. Tests cover source parity, path ownership,
