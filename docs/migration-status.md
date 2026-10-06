@@ -2,35 +2,103 @@
 
 ## ScT engine canary — 2026-10-06
 
-In progress from clean ScT master `9e118e6` and simple-server master `16203f8`.
-Isolated branches: ScT `migration/shared-engine` and library
-`implementation/sct-engine`. ScT uses real routing, custom correlation UUIDs,
-header-time metrics/tracing, static files and graceful shutdown. SQLx/PostgreSQL,
-Reqwest/OIDC and application Tokio remain application dependencies.
+ScT engine adoption is **Done locally** for its production HTTP entry points.
+The overall engine remains **Partial** beyond this canary. Start:
+clean ScT master `9e118e6` and simple-server master `16203f8`. Isolated branches:
+ScT `migration/shared-engine`, library `implementation/sct-engine`. The ScT
+worktree began at `/tmp/sct-shared-engine`, then moved to the sibling
+`sct-engine-migration` for the final relative dependency layout. No unrelated
+original worktree edits existed.
 
-The library now supplies native static-directory fallback, source-free tracing,
+Production `sct-server` startup, router/handlers, custom UUID correlation,
+header-time metrics/tracing, native disk fallback and shutdown now use the engine.
+The local `sct-server::web` module wraps static route declarations and converts
+the existing lifecycle shutdown signal. SQLx/PostgreSQL, Reqwest/OIDC and the
+application Tokio runtime remain intentionally application-owned. ScT pins
+shared source `cf3aa18cf9879b70ee556e05e2140917710e9342` in `simple-server.rev`;
+the local Cargo dependency is `../simple-server` until these bindings/artifacts
+are published. Docker exports that exact commit rather than arbitrary edits.
+
+Shared prerequisites: native static-directory fallback, source-free tracing,
 `correlation-core`, explicit external-executor runtime scopes, and optional
-`engine-tokio` context restoration. Context applies to polling AND destruction
-of callback-owned values. The first canary exposed a stream-drop bug: a download
-destructor could not schedule release of a PostgreSQL read pin outside its host
-Tokio context, leaving tree cleanup stuck. An exact content-length/body-drop
-regression and the previously failing ScT tree workflow now pass. Tracing
-subscribers/spans and trusted correlation scopes propagate across callbacks;
-untrusted request headers do not establish task-local context.
+`engine-tokio` context restoration. Polling AND destruction of callback-owned
+values run with the retained application context. The canary caught a stream-drop
+bug: a destructor could not schedule PostgreSQL read-pin release outside its
+host Tokio context, leaving tree cleanup stuck. An exact content-length/drop
+regression and the original tree workflow now pass. Trusted correlation scopes
+and tracing spans/subscribers survive callbacks without trusting incoming IDs.
+Native operation polling/drop also enters its own runtime. C ABI layout and
+signatures are unchanged; the new adapter set requires a rebuilt engine.
 
-Baseline workspace tests pass; library baseline covers Tower, source tracing
-and static files. Four new engine host-adapter contracts pass, as do strict ScT
-workspace Clippy and its regular server HTTP tests. ScT database verification
-and packaging/measurement are still being finalized; adoption is not yet marked
-Done. Logs use `/tmp/sct-engine-*.log`.
+Verification:
 
-Native debug artifact `/tmp/sct-shared-engine-native/debug/libsimple_server_engine.so`
-has SHA256 `ce981a84b866028aae057483bce473732a93063b5eafee23d20e13fb7c451eec`.
-The engine adds tower-http filesystem support and router_static_dir; native
-operation polling/drop enters its own runtime. C ABI signatures/layout are
-unchanged. Legacy engines must be rebuilt for this adapter set. The minimal
-engine consumer still excludes source HTTP/runtime libraries; ScT intentionally
-retains its application runtime and clients. No push, publication or deployment.
+- Baseline workspace: 61 passed, 92 existing ignores
+  (`/tmp/sct-engine-baseline.log`). Final: the same 61/92
+  (`/tmp/sct-engine-workspace-final.log`). Moving the worktree initially left old
+  compiled fixture paths; rebuilding the five local crates resolved that setup
+  issue. No fixture source was changed to bypass it.
+- Four new library adapter contracts and full `scripts/check` pass, including
+  source feature matrix, engine-only regressions, strict Clippy/rustdoc,
+  standalone consumers, dependency guards, ABI smoke and installer checks
+  (`/tmp/sct-engine-host-adapters.log`, `/tmp/sct-engine-library-verified.log`).
+- All 12 database-backed server contracts pass on both source and engine,
+  including OIDC/auth, observability, archive/management/storage/trees and
+  streaming cleanup (`/tmp/sct-engine-server-baseline-db.log`,
+  `/tmp/sct-engine-server-db-final.log`).
+- With four test threads, 65 core database contracts pass; the confirmed
+  pre-existing archive migration-name mismatch is explicitly skipped
+  (`/tmp/sct-engine-core-final.log`). The ordinary integration script fails on
+  that mismatch (`draft_names` vs `draft names`) on both source and engine.
+  Unrestricted baseline runs additionally show pool/timing failures; an engine
+  checkpoint timing failure passes in isolation. Logs:
+  `/tmp/sct-engine-integration.log`, `/tmp/sct-engine-baseline-integration.log`,
+  `/tmp/sct-engine-checkpoint-retry.log`. This is not a fully green qualification
+  claim; the complete crash/S3/browser qualification matrix was not rerun.
+- Strict workspace Clippy, formatting, generated protocol contracts and
+  standalone client packaging pass (`/tmp/sct-engine-clippy-final.log`,
+  `/tmp/sct-engine-contracts-check.log`, `/tmp/sct-engine-client-check.log`).
+- Real-process SIGINT/SIGTERM HTTP drain, writer release/restart and lease-loss
+  exits pass (`/tmp/sct-engine-lifecycle.log`).
+- The normal/build graph goes from 225 to 221 unique package names, removing
+  Axum/Axum Core and native static-file dependencies; client/runtime transport
+  remains. An ELF/dependency CI guard verifies the actual server requires
+  `libsimple_server_engine.so.1` and has no Axum package
+  (`/tmp/sct-engine-link-check.log`, `/tmp/sct-engine-consumer-graph.txt`).
+
+Three isolated eight-job debug-build trials give median clean builds
+**36.493s source / 33.768s engine (~7.5% faster)**. Timestamp-only rebuilds are
+**1.131s / 1.152s**, effectively unchanged. Native prebuilding is excluded;
+no request-throughput/runtime speedup is claimed. Raw environment/trials:
+[ScT measurements](measurements/sct-engine-build-2026-10-06.json), mirrored in
+ScT and reproducible with its `scripts/benchmark-engine-builds`.
+
+Packaging uses a reusable local `sct-engine:cf3aa18cf987` image and
+`sct-engine-canary:local`, with the same checksum-verified `.so` in builder and
+runtime. Production Docker builds retain Cargo registry/target caches through
+BuildKit. Qualification wiring exports the same pinned source and rejects a
+stale development-overlay image. The local Bookworm x86_64 release container
+passes dynamic loading, static/API/health responses and graceful shutdown
+(`/tmp/sct-engine-image-final-smoke.log`). No image was pushed or deployed; ARM and
+non-Unix targets are not tested.
+
+Release `.so` SHA256:
+`05cbe80258d3e6bf72a62a41d1c75197f4612bb2e5162410a0803d95cb2ca7e7`.
+Debug artifact `/tmp/sct-shared-engine-native/debug/libsimple_server_engine.so`:
+`ce981a84b866028aae057483bce473732a93063b5eafee23d20e13fb7c451eec`.
+Library implementation `cf3aa18` and ScT consumer `b3cf795` are integrated into
+their local master branches by rebasing each original development branch onto
+its isolated implementation branch. The original branches were still clean at
+`16203f8` and `9e118e6` respectively; no concurrent edits/commits appeared.
+Ancestry and exact tested-tree equality passed for both repositories. ScT's
+migration worktree and branch have been removed. Library evidence-worktree
+cleanup is the final operation after integration of this record.
+
+Final Docker build log: `/tmp/sct-engine-image-final-build.log`; runtime image
+ID `sha256:8ea5e906126632f78689372655c82129cce08fabd733c74b6eb40d6579e7fb4c`.
+A disposable source-edit build recompiled only sct-server using the Cargo target
+cache (`/tmp/sct-engine-cache-probe.log`). The final builder also retains the
+pinned Rust toolchain as a separate image layer. The untouched runtime image
+was smoke-tested again after these packaging changes.
 
 ## Engine general Tower layers — 2026-10-06
 

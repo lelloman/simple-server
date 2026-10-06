@@ -229,7 +229,12 @@ require a rebuilt engine with native operation context and static-directory supp
 This API is not yet interchangeable with `web`: TLS serving
 and WebSocket
 adapters still need migration. The existing `web` API and default backend remain
-source-based, and no production service has adopted the engine.
+source-based. ScT's production server entry points now use the engine on its
+local development branch, with verified HTTP/database/shutdown behavior and a
+working local Docker image. Its clean build improves about 7.5%; small rebuilds
+are unchanged because application SQLx, Reqwest and Tokio remain. See the
+[canary evidence](docs/migration-status.md#sct-engine-canary--2026-10-06).
+The canary has not been published or deployed.
 
 The engine contains TCP HTTP/1 and HTTP/2 transport, streaming bodies and
 basic route assembly. The standalone fixture's `http` binary exercises this

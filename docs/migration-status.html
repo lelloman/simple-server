@@ -73,12 +73,17 @@
   </header>
   <main>
     <section class="note" id="shared-engine">
-      <p><strong>ScT engine canary (2026-10-06): integration in progress.</strong>
-      Native static files, engine tracing/correlation and an explicit bridge for
-      application Tokio callbacks are implemented. Four contracts include
-      destructor-driven read-pin cleanup; the ScT tree workflow now passes.
-      Packaging, measurements and final adoption evidence are being completed.
-      See <a href="migration-status.md#sct-engine-canary--2026-10-06">canary evidence</a>.</p>
+      <p><strong>ScT engine canary (2026-10-06): adoption Done locally; overall engine Partial.</strong>
+      Production HTTP, static files, correlation/tracing and shutdown now use the
+      shared engine. SQLx, Reqwest and application Tokio remain. Four new library
+      contracts, 61 workspace tests, 12 server database tests, 65 core database
+      contracts (known baseline failure excluded), strict Clippy, process shutdown
+      and the local release-container smoke pass. Median clean builds improve
+      from 36.49s to 33.77s (~7.5%); small rebuilds are unchanged. The ordinary core
+      integration suite has documented baseline failures. Nothing was published
+      or deployed. ScT <code>b3cf795</code> and library <code>cf3aa18</code> are
+      integrated into local master; consumer worktree/branch cleanup is complete.
+      See <a href="migration-status.md#sct-engine-canary--2026-10-06">scope, measurements and verification evidence</a>.</p>
       <p><strong>Engine general Tower layers (2026-10-06): overall implementation Partial; adoption Pending.</strong>
       All four router/method layer APIs accept compatible Tower layers over an
       opaque Route. Constructed service state persists across requests; readiness,
