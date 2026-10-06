@@ -104,6 +104,8 @@ pub(super) fn request(bytes: &[u8]) -> io::Result<Request> {
             )
         }),
     };
+    *request.extensions_mut() =
+        super::continuation::request_extensions(header["context"].as_u64().unwrap_or(0));
     request.extensions_mut().insert(metadata);
     Ok(request)
 }

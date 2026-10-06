@@ -225,6 +225,13 @@ async fn forward(
     request: Request,
     callback: Arc<ForeignCallback>,
 ) -> Result<Response<Body>, String> {
+    forward_with_next(request, callback, None).await
+}
+pub(crate) async fn forward_with_next(
+    request: Request,
+    callback: Arc<ForeignCallback>,
+    continuation: Option<u64>,
+) -> Result<Response<Body>, String> {
     let (mut parts, body) = request.into_parts();
     let matched_path = parts
         .extensions
@@ -254,7 +261,7 @@ async fn forward(
         .get::<ConnectInfo<SocketAddr>>()
         .map(|peer| peer.0.to_string());
     let request = encode(
-        json!({"method":parts.method.as_str(),"uri":parts.uri.to_string(),"version":format!("{:?}",parts.version),"headers":headers_to_wire(&parts.headers),"peer":peer,"body":body_id,"lower":hint.lower(),"upper":hint.upper(),"matched_path":matched_path,"original_uri":original_uri,"path_params":path_params.as_ref().ok(),"path_error":path_params.as_ref().err().map(ToString::to_string),"path_status":path_params.as_ref().err().map(|error| error.status().as_u16())}),
+        json!({"continuation":continuation,"context":parts.extensions.get::<crate::middleware::HostContext>().map(|context| context.0),"method":parts.method.as_str(),"uri":parts.uri.to_string(),"version":format!("{:?}",parts.version),"headers":headers_to_wire(&parts.headers),"peer":peer,"body":body_id,"lower":hint.lower(),"upper":hint.upper(),"matched_path":matched_path,"original_uri":original_uri,"path_params":path_params.as_ref().ok(),"path_error":path_params.as_ref().err().map(ToString::to_string),"path_status":path_params.as_ref().err().map(|error| error.status().as_u16())}),
         &[],
     );
     let reply = callback.call(&request).await?;

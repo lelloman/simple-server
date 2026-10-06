@@ -1,5 +1,55 @@
 # Service migration status
 
+## Engine router async middleware — 2026-10-06
+
+Implementation remains **Partial**, production adoption **Pending**. Start:
+clean local master `c4f5988`; isolated branch `implementation/engine-router-middleware`,
+worktree `target/worktrees/engine-router-middleware`. No consumer repository changes.
+
+Router::layer now accepts owned from_fn/from_fn_with_state/map_response layers.
+Native route placement covers existing routes and fallback (including 404/405),
+but not later-added routes. Native continuations retain routing state; guarded
+host contexts preserve custom request/response extensions without serializing
+Rust objects. RequestMetadata is refreshed from native routing at each callback.
+Bodies and trailers stay streaming; short circuits, panics and cancellation
+release owned context/continuation registrations. Pending state can be bound
+independently after layers are added.
+
+Arbitrary Tower layers, route_layer and method-router layers remain pending,
+as do source-free correlation/tracing/static-file integration for ScT and other
+previously recorded protocol/API gaps. This is no production migration.
+
+Baseline: middleware 7, router state 5, HTTP 8 tests pass
+(`/tmp/simple-server-router-middleware-baseline.log`). Initial routing contracts
+and those regressions pass (`/tmp/simple-server-router-middleware-tests.log`).
+Eight final router contracts pass
+(`/tmp/simple-server-router-middleware-contracts.log`): nested routing, extensions,
+layer ordering, state cloning, native errors/later route scope, real source HTTP
+parity, incremental duplex/trailers, cancellation, concurrent isolation, panic
+and short-circuit cleanup. Capture-release checks verify that completed servers
+do not retain continuation-owned handlers.
+
+Full `scripts/check` passes (`/tmp/simple-server-router-middleware-full.log`):
+workspace/native strict Clippy, source feature matrix and rustdoc, eight
+all-feature/seven engine-only router middleware contracts, all engine regressions,
+seven standalone consumers, dependency guards, C ABI smoke and five installer
+tests. Public module documentation is then refreshed and formatting/rustdoc
+rechecked. Tracker scripts/anchors and the 30-package graph are validated.
+
+Against the previous Unix-client engine, the standalone fixture rejects layer
+construction with `unknown router command`, before binding/serving
+(`/tmp/simple-server-router-middleware-old-engine.log`).
+
+New local x86_64 debug artifact:
+`/tmp/simple-server-router-middleware-engine/debug/libsimple_server_engine.so`,
+SHA256 `9ba691d380b203642bc4f13790fd203c4be5d3946c90bdbd558518f54d0bd406`.
+Build log: `/tmp/simple-server-router-middleware-build.log`. The wire adds
+router_layer/middleware_next_clone/middleware_next and continuation resource 15;
+C ABI signatures/layout stay unchanged. No Cargo dependencies added; standalone
+HTTP graph stays at 30 packages without Axum/Tokio/Hyper/Tower utilities.
+Release/Bookworm distribution, ARM and non-Unix targets are not retested.
+No speedup claim, push, artifact publication or deployment.
+
 ## Engine host service middleware — 2026-10-06
 
 Implementation remains **Partial**, production adoption **Pending**. Start:

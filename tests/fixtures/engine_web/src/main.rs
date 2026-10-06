@@ -147,6 +147,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         "/middleware",
         MethodRouter::new()?.on_service(Method::GET, service)?,
     )?;
+    let router = router.layer(middleware::map_response(
+        |mut response: Response| async move {
+            response
+                .headers_mut()
+                .insert("x-router-layer", "yes".parse().unwrap());
+            response
+        },
+    ))?;
     let router = router.with_state("engine".to_owned())?;
     let listener = engine_web::bind("127.0.0.1:0").await?;
     let address = listener.local_addr();
@@ -191,6 +199,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .send()
         .await?;
     assert_eq!(response.headers()["x-middleware"], "host");
+    assert_eq!(response.headers()["x-router-layer"], "yes");
     assert_eq!(response.bytes().await?.as_ref(), b"middleware state");
     let response = client
         .get(format!("http://{address}/items/7/a%252Fb+c"))

@@ -66,6 +66,14 @@ pub fn resource_new(command: &Value) -> Result<Vec<u8>, String> {
     if operation.starts_with("router_") {
         let result = match operation {
             "router_new" => Router::new(),
+            "router_layer" => {
+                let callback = callback::get(number(command, "handler")?)?;
+                router(number(command, "router")?)?.layer(axum::middleware::from_fn(
+                    move |request: axum::extract::Request, next: axum::middleware::Next| {
+                        crate::middleware::run(request, next, callback.clone())
+                    },
+                ))
+            }
             "router_route" => router(number(command, "router")?)?.route(
                 text(command, "path")?,
                 method_router(number(command, "methods")?)?,

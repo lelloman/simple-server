@@ -2,7 +2,7 @@
 //! in the consumer graph. Handlers accept an owned `Request` and return `Response`.
 //!
 //! This is an explicit development API, not yet a drop-in replacement for `web`:
-//! layers, TLS and protocol
+//! arbitrary Tower layers, TLS and protocol
 //! upgrades remain unimplemented. Bind application state with `with_state`.
 //! Register handlers and serve inside the application's engine runtime.
 //! Typed handlers allow body extraction only in the final position:
@@ -18,6 +18,7 @@
 //! let _ = MethodRouter::new().unwrap().on_handler(Method::POST, invalid);
 //! ```
 pub mod body;
+mod continuation;
 pub mod extract;
 #[allow(clippy::duplicate_mod)]
 #[path = "../web/handler.rs"]

@@ -196,8 +196,9 @@ impl HttpBody for Incoming {
     }
 }
 
-pub(super) fn response(response: super::Response) -> io::Result<Reply> {
+pub(super) fn response_context(response: super::Response, context: u64) -> io::Result<Reply> {
     let (parts, body) = response.into_parts();
+    super::continuation::response_extensions(context, parts.extensions);
     let hint = body.size_hint();
     let callback = export(body)?;
     let bytes = wire::encode(

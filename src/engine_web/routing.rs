@@ -11,7 +11,12 @@ where
     Callback::with_reply(move |bytes| {
         let handler = handler.clone();
         async move {
-            let result = async { body::response(handler(wire::request(&bytes)?).await) }.await;
+            let result = async {
+                let (header, _) = wire::decode(&bytes)?;
+                let response = handler(wire::request(&bytes)?).await;
+                body::response_context(response, header["context"].as_u64().unwrap_or(0))
+            }
+            .await;
             result.unwrap_or_else(|_| {
                 Reply::new(
                     wire::encode(json!({"status":500,"headers":[]}), b"internal server error")
@@ -143,6 +148,29 @@ impl<S: Clone + Send + Sync + 'static> Router<S> {
         Ok(Self { plan: self.plan.combine(methods.plan, move |router, methods| {
             wire::resource(8, json!({"op":"router_route","router":router.id(),"path":path,"methods":methods.id()}))
         })? })
+    }
+    /// Apply owned async middleware to routes and fallback already registered.
+    /// Native 404/405 responses are included; routes added later are not wrapped.
+    /// Requires an engine with router continuation support. Arbitrary Tower layers
+    /// are not accepted yet; use middleware::from_fn/from_fn_with_state/map_response.
+    pub fn layer<F, Local, T>(
+        self,
+        layer: super::middleware::FromFnLayer<F, Local, T>,
+    ) -> io::Result<Self>
+    where
+        F: super::middleware::Middleware<T, Local>,
+        Local: Clone + Send + Sync + 'static,
+        T: 'static,
+    {
+        let callback = super::middleware::router_callback(layer)?;
+        Ok(Self {
+            plan: self.plan.map(move |router| {
+                wire::resource(
+                    8,
+                    json!({"op":"router_layer","router":router.id(),"handler":callback.id()}),
+                )
+            })?,
+        })
     }
     pub fn merge(self, other: Self) -> io::Result<Self> {
         Ok(Self {

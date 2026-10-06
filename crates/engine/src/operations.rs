@@ -66,6 +66,7 @@ fn number(command: &Value, key: &str) -> Result<u64, String> {
 
 pub fn resource_new(command: Value, _: Vec<u8>) -> Result<Vec<u8>, String> {
     match command["op"].as_str() {
+        Some("middleware_next_clone") => crate::middleware::resource_new(&command),
         Some("shutdown_signals") => crate::signals::install(),
         Some("multipart_new" | "multipart_field_slot") => crate::multipart::resource_new(&command),
         #[cfg(unix)]
@@ -119,6 +120,7 @@ pub fn resource_release(kind: u32, id: u64) {
         crate::server::UNIX_LISTENER => crate::server::release(kind, id),
         crate::server::BODY | crate::server::LISTENER => crate::server::release(kind, id),
         crate::routing::ROUTER | crate::routing::METHODS => crate::routing::release(kind, id),
+        crate::middleware::CONTINUATION => crate::middleware::release(id),
         _ => {
             crate::database::release(kind, id);
         }
@@ -127,6 +129,7 @@ pub fn resource_release(kind: u32, id: u64) {
 
 pub fn operation(command: Value, body: Vec<u8>) -> Result<FutureBytes, String> {
     match command["op"].as_str() {
+        Some("middleware_next") => crate::middleware::operation(command),
         Some(op) if op.starts_with("multipart_") => crate::multipart::operation(command),
         #[cfg(unix)]
         Some("unix_request") => crate::unix_client::request(command),

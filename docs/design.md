@@ -684,3 +684,43 @@ and library; Axum, Tokio, Hyper, Tower utilities and other native transport
 implementations remain absent. Existing build measurements describe the previous
 29-package graph; they are not rerun or projected onto this checkpoint. Native
 engine code, wire protocol and artifact requirements are unchanged.
+
+
+## Engine router async middleware (development)
+
+Router::layer accepts the owned async middleware produced by from_fn,
+from_fn_with_state and map_response. It delegates layer placement to native
+Axum routing: existing routes and fallback are wrapped, native 404/405 responses
+are included, and later-added routes remain outside the layer. Pending typed
+state plans replay layer construction when bound. Source comparisons verify
+status, headers and bodies including HEAD, 404/405, custom methods and URI edits.
+Arbitrary third-party Tower layers, route_layer and method-router layers remain
+unsupported; this does not finish ScT's middleware migration.
+
+Each native middleware invocation retains an Axum Next and native request
+extensions behind continuation resource kind 15. A borrowed registration lasts
+through the host callback; the host clones a registration for its owned Next.
+Running Next allocates a guarded host context and a response body slot before
+asynchronous work. Only opaque IDs, HTTP metadata and body callbacks cross the
+ABI. Host extensions are moved into the downstream callback and back from its
+response through the context; native matching/peer/path extensions stay native.
+RequestMetadata is regenerated from native metadata at each callback; middleware
+changes to this metadata object are not forwarded as changes to native routing.
+Custom extension values remain host-owned. Continuation clones can run separate
+requests, each with its own context. Context/continuation registrations are
+released on completion, short circuit, panic or cancellation; destructor work
+runs outside registry locks. Received response bodies outlive their context via
+independent resource ownership and remain lazy, including trailers and errors.
+
+Tests cover layered extension order, cloned pending state, nested original URI
+and captures, short circuit, native errors and later-added route scope, HTTP
+source parity, concurrent context isolation, client cancellation, panic cleanup
+and route-capture release. A duplex Unix HTTP test receives the first response
+frame before releasing the upload and verifies its trailer through two layers.
+The standalone HTTP consumer executes router and service layers together.
+
+The wire adds router_layer, middleware_next_clone and middleware_next; the public
+C ABI layout/signatures remain unchanged. Older artifacts fail router-layer
+construction rather than silently skipping middleware. A newly built engine is
+required. Consumer dependencies remain 30 beyond fixture/library; no new host
+or native Cargo dependencies were added. No build/runtime speedup is claimed.

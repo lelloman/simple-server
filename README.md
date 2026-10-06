@@ -130,7 +130,8 @@ without compiling a source HTTP framework. Header arrays and
 locations produce the source-compatible plain-text 500 response. Forms preserve source behavior: GET
 reads the query; other methods, including HEAD, read the bounded body. Extensions
 are host-local values installed before typed extraction; they do not cross the ABI.
-Tower extension layers are not yet available on the engine router.
+Router async middleware can install host extensions; arbitrary Tower extension
+layers are not yet accepted by the engine router.
 
 `engine_web::middleware` provides host service middleware: `from_fn`,
 `from_fn_with_state`, `Next`, `map_response`, and `handler_service` for binding
@@ -139,7 +140,16 @@ then register it with `on_service`, `any_service`, `fallback_service` or
 `nest_service`. Request and response extensions stay in the host chain; bodies
 remain streaming. These layers apply only to that service. They do not intercept
 native 404/405 responses or wrap the whole router. The sole added dependency is
-`tower-layer` (an interface crate); no new engine artifact is required.
+`tower-layer` (an interface crate); service-local layers need no new engine artifact.
+
+`Router::layer(middleware::from_fn(...))?`, `from_fn_with_state` and
+`map_response` apply async middleware to existing routes and their fallback,
+including native 404/405 responses. Routes added afterwards are not wrapped.
+Nested routing, typed state, headers and host extensions survive the continuation;
+bodies remain streaming. `RequestMetadata` is refreshed from native routing at
+each callback. Router layers require a rebuilt engine with continuation support;
+older artifacts reject construction. Arbitrary third-party Tower layers and
+`route_layer`/method-router layers remain unsupported.
 
 `Path<T>` reads already-decoded engine captures using source-compatible scalar,
 tuple, struct, map, sequence and unit-enum semantics. Invalid UTF-8 and parsing
@@ -190,7 +200,7 @@ and forwarding policy; arbitrary Rust extensions and protocol upgrades do not
 cross this ABI. The client requires a newly built engine; older artifacts reject
 client creation.
 
-This API is not yet interchangeable with `web`: router layers, TLS serving
+This API is not yet interchangeable with `web`: arbitrary Tower layers, TLS serving
 and WebSocket
 adapters still need migration. The existing `web` API and default backend remain
 source-based, and no production service has adopted the engine.

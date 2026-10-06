@@ -73,6 +73,14 @@
   </header>
   <main>
     <section class="note" id="shared-engine">
+      <p><strong>Engine router async middleware (2026-10-06): implementation Partial; adoption Pending.</strong>
+      Router layers now include native 404/405 replies and preserve host extensions
+      through guarded continuations. Eight contracts cover source parity, scope,
+      streaming, state and cleanup. Arbitrary Tower layers and service adoption
+      remain pending. A new engine artifact is required; the host graph stays at
+      30 packages. Full repository checks and standalone consumers pass; older
+      engines reject layer construction. See the
+      <a href="migration-status.md#engine-router-async-middleware--2026-10-06">scope and verification evidence</a>.</p>
       <p><strong>Engine host service middleware (2026-10-06): implementation Partial; adoption Pending.</strong>
       Async middleware, typed state, response mapping and handler-service adapters
       now compose within host callbacks, preserving extensions and streaming.
