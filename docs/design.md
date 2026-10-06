@@ -288,7 +288,7 @@ serve future alone retains the native server's cancellation semantics and does
 not promise to stop all connections. Dropped client connections cancel pending
 response work and release host bodies. Collection always requires a byte limit.
 
-The remaining response conversions, Tower middleware,
+Tower middleware,
 TLS/Unix listeners, protocol upgrades and the public test harness remain parity
 work. No stable release or production adoption is implied. This checkpoint needs
 no engine ABI or native implementation change.
@@ -318,8 +318,8 @@ types to 415. Head extraction failure returns before polling the body.
 
 Common response conversion covers text/binary bodies, JSON, HTML, status codes,
 HeaderMap, status/header tuples, Result and custom rejection responses. JSON
-serialization failure returns a plain-text 500 response. Header arrays, redirects,
-and the full source conversion surface are not yet implemented.
+serialization failure returns a plain-text 500 response. Header arrays and
+redirects are now implemented as described below.
 Response extensions still remain host-side and do not cross the existing ABI.
 The native engine and ABI do not change in this checkpoint.
 
@@ -361,7 +361,7 @@ wire's raw UTF-8 error receives the typed Path `Invalid URL: ` prefix; missing
 path metadata retains the source missing-parameter rejection.
 
 All values and errors remain behind the existing HTTP/metadata boundary. No
-native or ABI changes are needed. This closes the typed Path gap; Tower layers, response helpers and protocol
+native or ABI changes are needed. This closes the typed Path gap; Tower layers and protocol
 adapters remain separate work.
 
 ## Generic engine router state (development)
@@ -387,5 +387,26 @@ This introduces host-side storage for pending construction plans and additional
 native construction during binding. It does not add per-request routing work or
 claim a measured performance improvement. Failures propagate through io::Result;
 partially constructed resources and captured state follow RAII ownership. Tower
-layers/services, remaining response helpers and protocol adapters are still
+layers/services and protocol adapters are still
 separate work. The source backend's APIs and default execution are unchanged.
+
+## Engine header arrays and redirects (development)
+
+The remaining helpers exposed by the source response module now have engine
+implementations: standalone header arrays, `(headers, response)`,
+`(status, headers, response)` and Redirect. Json and Response are also publicly
+available through `engine_web::response`, matching the source module paths.
+Header arrays convert in order and replace earlier values. Conversion failure
+discards the original response and any partial headers, drops the body without
+polling it, and returns the source-compatible plain-text 500 response. An explicit
+status in the three-element tuple applies only after successful header conversion;
+a separate outer status wrapper retains its existing override behavior.
+
+Redirect constructors retain their URI and 303/307/308 status. Location header
+validation occurs during response conversion; invalid values produce a 500
+rather than panic during construction. These helpers preserve source status,
+headers and body behavior. Existing host-local response extensions and versions
+are preserved by successful array conversion, but arbitrary extensions still do
+not cross the native ABI and response-version overrides remain outside that wire
+contract. No native/ABI or dependency changes are needed. Tower services/layers
+and protocol response adapters remain separate work.

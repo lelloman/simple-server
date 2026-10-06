@@ -51,6 +51,26 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         "/items/{id}/{name}",
         MethodRouter::new()?.on_handler(Method::GET, path)?,
     )?;
+    let router = router
+        .route(
+            "/redirect",
+            MethodRouter::new()?.on_handler(Method::GET, || async {
+                (
+                    [("x-engine-helper", "redirect")],
+                    engine_web::response::Redirect::temporary("/typed"),
+                )
+            })?,
+        )?
+        .route(
+            "/invalid-headers",
+            MethodRouter::new()?.on_handler(Method::GET, || async {
+                (
+                    engine_web::StatusCode::CREATED,
+                    [("x-value", "bad\nvalue")],
+                    "body",
+                )
+            })?,
+        )?;
     let router = router.with_state("engine".to_owned())?;
     let listener = engine_web::bind("127.0.0.1:0").await?;
     let address = listener.local_addr();
@@ -116,6 +136,21 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         response.text().await?,
         "Invalid URL: Invalid UTF-8 in `name`"
     );
+    let client = Client::builder().no_proxy().no_redirect().build()?;
+    let response = client
+        .get(format!("http://{address}/redirect"))
+        .send()
+        .await?;
+    assert_eq!(response.status().as_u16(), 307);
+    assert_eq!(response.headers()["location"], "/typed");
+    assert_eq!(response.headers()["x-engine-helper"], "redirect");
+    assert!(response.bytes().await?.is_empty());
+    let response = client
+        .get(format!("http://{address}/invalid-headers"))
+        .send()
+        .await?;
+    assert_eq!(response.status().as_u16(), 500);
+    assert_eq!(response.text().await?, "failed to parse header value");
     shutdown.request();
     server.await??;
     println!("public engine HTTP consumer passed");

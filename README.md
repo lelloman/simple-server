@@ -124,7 +124,10 @@ connection/route metadata extractors are available alongside the shared custom
 `Extract` contract. Body-consuming
 extractors default to 2 MiB; a `BodyLimit` request extension overrides that limit.
 Common text/binary/JSON/HTML/Form, status, HeaderMap, tuple and Result responses work
-without compiling a source HTTP framework. Forms preserve source behavior: GET
+without compiling a source HTTP framework. Header arrays and
+`response::Redirect` are also supported. Arrays replace repeated values; use
+`HeaderMap::append` when repetition is intentional. Invalid headers or redirect
+locations produce the source-compatible plain-text 500 response. Forms preserve source behavior: GET
 reads the query; other methods, including HEAD, read the bounded body. Extensions
 are host-local values installed before typed extraction; they do not cross the ABI.
 Tower extension layers are not yet available on the engine router.
@@ -132,8 +135,8 @@ Tower extension layers are not yet available on the engine router.
 tuple, struct, map, sequence and unit-enum semantics. Invalid UTF-8 and parsing
 errors retain the existing rejection status and text.
 
-This API is not yet interchangeable with `web`: remaining response helpers,
-layers, TLS/Unix serving and WebSocket/multipart/SSE
+This API is not yet interchangeable with `web`: layers/services, TLS/Unix serving
+and WebSocket/multipart/SSE
 adapters still need migration. The existing `web` API and default backend remain
 source-based, and no production service has adopted the engine.
 

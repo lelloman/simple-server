@@ -73,6 +73,15 @@
   </header>
   <main>
     <section class="note" id="shared-engine">
+      <p><strong>Engine header arrays and redirects (2026-10-06): implementation Partial; adoption Pending.</strong>
+      Header arrays and redirects now preserve source response behavior, including
+      replacement, malformed-header errors and status precedence. The standalone
+      consumer exercises redirects and error responses. The previous temporary
+      engine artifact was missing; verification uses an unchanged, locally rebuilt
+      host library. No ABI/dependency additions or production adoption. Services,
+      layers and protocol adapters remain pending. Full checks and standalone execution
+      pass; the HTTP graph remains 28 packages without Axum or Tokio. See the
+      <a href="migration-status.md#engine-header-arrays-and-redirects--2026-10-06">scope and verification evidence</a>.</p>
       <p><strong>Generic engine router state (2026-10-05): implementation Partial; adoption Pending.</strong>
       Router and method groups now bind typed host state with with_state, preserving
       local bindings, nesting, merging and fallback behavior. Unbound state cannot

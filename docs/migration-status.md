@@ -1,5 +1,51 @@
 # Service migration status
 
+## Engine header arrays and redirects — 2026-10-06
+
+Engine implementation remains **Partial** and all production adoption remains
+**Pending**. Work starts from clean local `master` `be16158`, in isolated branch
+`implementation/engine-responses` and worktree `target/worktrees/engine-responses`.
+No consumer repository is changed.
+
+Standalone header arrays, array/body and status/array/body responses, Redirect
+constructors/getters/conversion, and response-module Json/Response exports now
+match the source response helper surface. Arrays replace duplicate values;
+HeaderMap::append remains the mechanism for repeated fields. Failed conversion
+returns a fresh 500 response without partial headers or the original body.
+Status precedence, conversion order and lazy body disposal are preserved.
+Redirects retain 303/307/308 statuses and validate Location during conversion.
+
+The previous `/tmp/simple-server-lifecycle-artifact-amd64` artifact was absent,
+so the initial baseline stopped at the build script before running tests. The
+unchanged native engine was rebuilt with the locked dependencies from `be16158`
+into `/tmp/simple-server-responses-engine/debug` (build log
+`/tmp/simple-server-responses-engine-build.log`, SHA256
+`c3f7c9c9556ebdfa4718bac3501423f7da735fb8624fc30ca2927b385687a110`).
+Verification here uses this host-built x86_64 debug library, not the prior
+Bookworm artifact. Release distribution, Bookworm compatibility and ARM are not
+retested; there are no native source or ABI changes.
+
+The rerun pre-edit baseline passed 27 tests: engine extractors (8), forms (5),
+source web core (14), recorded in `/tmp/simple-server-responses-baseline.log`.
+Five focused contracts pass (`/tmp/simple-server-responses-contracts.log`): array
+replacement, empty responses, preservation of host response metadata, invalid
+header disposal without body polling, status precedence, redirects and exact
+source comparisons covering relative/absolute/Unicode/invalid locations and
+header conversion failures. The standalone public HTTP fixture now executes a
+redirect with array headers and an invalid-header 500 response through the `.so`.
+
+The full `bash scripts/check` passes (`/tmp/simple-server-responses-full.log`):
+strict workspace/native Clippy, source feature matrix and protocol regressions,
+rustdoc, all five response contracts and three engine-only contracts, all seven
+standalone engine binaries, graph guards, C ABI smoke and artifact installer tests.
+The HTTP consumer graph remains 28 packages beyond library and fixture, without
+Axum, Tokio, Hyper, Reqwest, SQLx or Rustls (`/tmp/simple-server-responses-graph.txt`).
+Tracker script syntax and evidence links pass validation.
+
+No dependency additions or compile/runtime speedup claims. Layers/services,
+TLS/Unix serving and protocol adapters remain pending. No push, publication or
+deployment is performed.
+
 ## Generic engine router state — 2026-10-05
 
 Engine implementation remains **Partial** and all production adoption remains
