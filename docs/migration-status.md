@@ -50,6 +50,11 @@ HTTP graph stays at 30 packages without Axum/Tokio/Hyper/Tower utilities.
 Release/Bookworm distribution, ARM and non-Unix targets are not retested.
 No speedup claim, push, artifact publication or deployment.
 
+Implementation `a06e394` was integrated by rebasing local master onto the
+implementation branch. Original master remained clean at `c4f5988`; no concurrent
+local commits or edits appeared. Ancestry and exact tested-tree equality passed.
+Temporary branch/worktree cleanup follows integration of this evidence update.
+
 ## Engine host service middleware — 2026-10-06
 
 Implementation remains **Partial**, production adoption **Pending**. Start:
