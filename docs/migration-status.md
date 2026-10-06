@@ -45,6 +45,12 @@ Router-wide Tower layers, Route service exposure, nested services, make-service
 adapters and protocol adapters remain pending. No push, publication or deployment
 is performed.
 
+Reviewed implementation `e577be9` is integrated into local `master` by rebasing
+the clean original branch onto the isolated implementation branch. Ancestry and
+exact tree equality pass, with no concurrent edits or conflict resolutions.
+The temporary worktree and merged branch are removed after this verification
+record is integrated.
+
 ## Engine header arrays and redirects — 2026-10-06
 
 Engine implementation remains **Partial** and all production adoption remains
