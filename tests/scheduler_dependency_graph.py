@@ -2,6 +2,8 @@
 from pathlib import Path
 import subprocess
 
+from engine_dependency_graph import is_native_dependency
+
 root = Path(__file__).resolve().parent.parent
 graph = subprocess.check_output([
     "cargo", "tree", "--locked", "--manifest-path",
@@ -14,7 +16,8 @@ for line in graph.splitlines():
     package, features = line.split("|", 1)
     name = package.split()[0]
     packages.add(tuple(package.split()[:2]))
-    assert name not in {"axum", "reqwest", "hyper", "sqlx", "rustls", "mio", "socket2"}, line
+    assert name not in {"mio", "socket2"}, line
+    assert name in {"tokio", "tokio-macros"} or not is_native_dependency(name), line
     if name == "tokio":
         found = True
         enabled = set(features.removesuffix(" (*)").split(","))

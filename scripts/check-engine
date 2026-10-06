@@ -22,13 +22,8 @@ cargo fmt --manifest-path tests/fixtures/engine_tasks/Cargo.toml --check
 cargo run --locked --manifest-path tests/fixtures/engine_tasks/Cargo.toml
 cargo fmt --manifest-path tests/fixtures/engine_web/Cargo.toml --check
 cargo run --locked --manifest-path tests/fixtures/engine_web/Cargo.toml
-for fixture in engine_consumer engine_drivers engine_lifecycle engine_tasks engine_web; do
-  graph=$(cargo tree --locked --manifest-path "tests/fixtures/$fixture/Cargo.toml" --edges normal,build --prefix none)
-  if printf '%s\n' "$graph" | rg '^(axum|tokio|reqwest|hyper|sqlx|rustls|multer)(-| )'; then
-    echo "Native engine dependency leaked into $fixture" >&2
-    exit 1
-  fi
-done
+python3 tests/engine_dependency_graph_test.py
+python3 tests/engine_dependency_graph.py
 cargo fmt --manifest-path tests/fixtures/engine_scheduler/Cargo.toml --check
 cargo run --locked --manifest-path tests/fixtures/engine_scheduler/Cargo.toml
 python3 tests/scheduler_dependency_graph.py

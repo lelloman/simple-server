@@ -1,5 +1,28 @@
 # Service migration status
 
+## Engine dependency isolation guard — 2026-10-06
+
+Engine implementation remains **Partial**; production adoption remains **Pending**.
+No consumer repository or runtime code is changed. Work starts from clean local
+master `49af123`, in isolated branch `implementation/engine-dependency-guard`
+and worktree `target/worktrees/engine-dependency-guard`.
+
+Baseline reproduces a hole in the shell guard: `hyperlocal v0.9.1` is accepted
+while Hyper and hyper-util are rejected. A shared Python package-name check now
+rejects Hyperlocal alongside Axum, Tokio, Reqwest, Hyper, SQLx, Rustls and Multer,
+including their hyphenated subcrates. Paths and duplicate graph entries do not
+change the result. `scripts/check-engine` runs this guard on all five standalone
+engine fixture graphs using locked normal/build dependencies. Cargo errors fail
+the check. The scheduler uses the same family policy while retaining its existing
+explicit Tokio sync/macros feature allowlist and mio/socket2 exclusions.
+
+Verification: five guard regression tests pass, all five real standalone graphs
+pass, and the real scheduler graph passes with 26 dependencies beyond fixture
+and library. Shell syntax and diff whitespace checks pass. The baseline scheduler
+graph also passed. These are check-script changes only: the Rust suites and native
+artifact build are not rerun, and the previous Unix-client artifact remains
+applicable. No compilation-speed claim, production adoption, push or deployment.
+
 ## Engine Unix HTTP client — 2026-10-06
 
 Engine implementation remains **Partial** and production adoption remains
