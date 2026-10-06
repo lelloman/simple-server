@@ -103,7 +103,7 @@ fallible, and handler registration requires the caller's engine runtime. Request
 extensions provide `RequestMetadata` with peer, matched/original paths and path
 parameters. Bodies support collection limits, lazy streams and trailer frames.
 See the runnable [public HTTP consumer](tests/fixtures/engine_web/src/main.rs).
-With the engine client enabled, its graph has 29 dependencies beyond simple-server,
+With the engine client enabled, its graph has 30 dependencies beyond simple-server,
 without Axum, Tokio, Hyper, Reqwest, SQLx or Rustls. The `.so` is supplied separately;
 this is not a measured performance claim.
 
@@ -131,6 +131,16 @@ locations produce the source-compatible plain-text 500 response. Forms preserve 
 reads the query; other methods, including HEAD, read the bounded body. Extensions
 are host-local values installed before typed extraction; they do not cross the ABI.
 Tower extension layers are not yet available on the engine router.
+
+`engine_web::middleware` provides host service middleware: `from_fn`,
+`from_fn_with_state`, `Next`, `map_response`, and `handler_service` for binding
+state to a typed handler. Use its re-exported `Layer` trait to wrap a service,
+then register it with `on_service`, `any_service`, `fallback_service` or
+`nest_service`. Request and response extensions stay in the host chain; bodies
+remain streaming. These layers apply only to that service. They do not intercept
+native 404/405 responses or wrap the whole router. The sole added dependency is
+`tower-layer` (an interface crate); no new engine artifact is required.
+
 `Path<T>` reads already-decoded engine captures using source-compatible scalar,
 tuple, struct, map, sequence and unit-enum semantics. Invalid UTF-8 and parsing
 errors retain the existing rejection status and text.

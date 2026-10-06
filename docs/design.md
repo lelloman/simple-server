@@ -651,3 +651,36 @@ runtime-integration work is required; the existing SQLite engine API does not
 cover PostgreSQL. TLS serving and WebSockets are not used by the inspected ScT
 HTTP startup/routes, so they are lower priorities for this particular service.
 No service migration or ScT build speedup is claimed.
+
+
+## Engine host middleware (development)
+
+The engine backend now supports async middleware around host services through
+`engine_web::middleware`. `from_fn` and `from_fn_with_state` accept head
+extractors followed by Request and Next, mirroring the source API. `map_response`
+sees downstream responses, including typed-handler extraction failures.
+`handler_service(handler, state)` binds typed handlers into cloneable services.
+The middleware module re-exports the runtime-independent Tower Layer trait.
+
+Next owns a host closure. Running it clones the inner service before awaiting
+readiness, then calls that exact instance without cloning after readiness.
+Short-circuit responses and failed middleware extraction do not poll the inner
+service. Cancellation drops the pending readiness/call future and owned request.
+Host request/response extensions survive all middleware/handler transitions;
+requests enter from the existing native callback once and responses leave once.
+Bodies are never collected by this layer; frames, trailers, errors and producer
+lifetimes retain the existing streaming contracts.
+
+This is a service-level building block for router middleware, not Router::layer.
+Native-generated 404/405 responses and unrelated routes are deliberately outside
+its scope. A router-wide native continuation must still preserve scope/order,
+routing metadata, host extensions and cancellation across additional callbacks.
+ScT cannot yet replace its router-wide correlation/observation layers with this
+API. Source-free correlation/tracing/static-file support remains pending too.
+
+The standalone HTTP fixture exercises a mapped typed handler with explicit state.
+The consumer graph adds only tower-layer, becoming 30 packages beyond fixture
+and library; Axum, Tokio, Hyper, Tower utilities and other native transport
+implementations remain absent. Existing build measurements describe the previous
+29-package graph; they are not rerun or projected onto this checkpoint. Native
+engine code, wire protocol and artifact requirements are unchanged.

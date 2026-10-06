@@ -1,5 +1,50 @@
 # Service migration status
 
+## Engine host service middleware — 2026-10-06
+
+Implementation remains **Partial**, production adoption **Pending**. Start:
+clean local master `26c1b68`; isolated branch `implementation/engine-host-middleware`,
+worktree `target/worktrees/engine-host-middleware`. No consumer repository changes.
+
+The engine API now exposes from_fn/from_fn_with_state, Next, map_response and
+handler_service. Typed middleware state and head extraction precede the request
+and continuation; handler state is bound explicitly. Layers wrap existing host
+services before on_service/any_service/fallback_service/nest_service registration.
+Request/response extensions remain in one host callback. Short circuits skip
+inner readiness; continued calls await readiness on the exact clone they call.
+Streaming, trailers and late errors stay lazy; cancellation releases owned work.
+
+This is not router-wide middleware. Tests explicitly verify native 404/405
+responses are outside service-local layers. Router continuations, ScT's global
+correlation/tracing middleware and source-free static-file integration remain
+pending. TLS, WebSockets and the previously recorded remaining gaps are unchanged.
+No production adoption or new compilation/performance claim is made.
+
+Baseline engine services 6 and HTTP 8 tests pass
+(`/tmp/simple-server-host-middleware-baseline.log`). Focused middleware tests 6,
+service regressions 6 and HTTP regressions 8 pass
+(`/tmp/simple-server-host-middleware-tests.log`); an additional body-producer
+drop/cancellation contract is included in the full check run. Contracts cover
+real HTTP routing metadata, independent handler/middleware state, request and
+response extensions, layer order, extraction rejections, readiness, streaming
+trailers/late errors, plus a source-backend middleware comparison.
+
+Full `scripts/check` passes (`/tmp/simple-server-host-middleware-full.log`):
+workspace/native strict Clippy, source feature matrix, rustdoc, seven all-feature
+and six engine-only middleware contracts, all engine regressions, seven
+standalone engine binaries, dependency guards and their five regression tests,
+C ABI smoke and five artifact installer tests. The standalone HTTP middleware
+route passes using the previously verified native artifact. Tracker scripts and
+anchors, graph counts and diff whitespace checks also pass.
+
+Only the tower-layer interface dependency is added: the standalone HTTP graph
+is now 30 packages beyond fixture/library, with no native transport stack or
+Tower utilities. The HTTP fixture calls a mapped stateful handler through its
+public service API. No native code, C ABI or wire changes; verification reuses
+`/tmp/simple-server-unix-client-engine/debug/libsimple_server_engine.so`
+(SHA256 `98d4cff50e4237d50e6235b3c1fb84b8a775bd86e8c3b929df9d099989db3fc7`).
+The older 29-package benchmark remains historical. No push/publication/deployment.
+
 ## Engine downstream build measurement — 2026-10-06
 
 Implementation remains **Partial**, production adoption **Pending**. Start:

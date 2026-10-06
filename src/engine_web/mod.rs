@@ -22,6 +22,7 @@ pub mod extract;
 #[allow(clippy::duplicate_mod)]
 #[path = "../web/handler.rs"]
 mod handler;
+pub mod middleware;
 pub mod multipart;
 mod path_de;
 pub mod response;
