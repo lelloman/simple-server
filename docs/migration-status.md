@@ -51,6 +51,13 @@ Unix client requests, externally supplied listener descriptors, peer credentials
 TLS, WebSocket, router layers, Route/make-service exposure and public test-harness
 parity remain pending. No push, publication or deployment.
 
+Implementation commit **`9be8f9b`** is integrated into local `master` by rebasing
+master onto the implementation branch. Original master remained clean at
+`26314cc`; no intervening commits or unrelated edits appeared. Ancestry and exact
+tree equality were verified, so the integrated implementation is the tested tree.
+This evidence update is integrated the same way; the temporary worktree and merged
+branch are then removed after verification.
+
 ## Engine multipart uploads — 2026-10-06
 
 Engine implementation remains **Partial** and production adoption remains
