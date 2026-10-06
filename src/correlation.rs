@@ -10,8 +10,50 @@ use std::{fmt, future::Future};
 
 use http::{HeaderName, HeaderValue};
 
-tokio::task_local! {
-    static CURRENT: Context;
+std::thread_local! {static CONTEXT: std::cell::RefCell<Option<Context>> = const { std::cell::RefCell::new(None) };}
+struct Local;
+static CURRENT: Local = Local;
+struct Enter(Option<Context>);
+impl Enter {
+    fn new(context: Context) -> Self {
+        Self(CONTEXT.with(|c| c.replace(Some(context))))
+    }
+}
+impl Drop for Enter {
+    fn drop(&mut self) {
+        CONTEXT.with(|c| c.replace(self.0.take()));
+    }
+}
+impl Local {
+    fn try_with<R>(&self, f: impl FnOnce(&Context) -> R) -> Result<R, ()> {
+        CONTEXT.with(|c| c.borrow().as_ref().map(f).ok_or(()))
+    }
+    fn scope<F: Future>(&self, context: Context, future: F) -> impl Future<Output = F::Output> {
+        struct Scoped<F> {
+            context: Context,
+            future: Option<std::pin::Pin<Box<F>>>,
+        }
+        impl<F: Future> Future for Scoped<F> {
+            type Output = F::Output;
+            fn poll(
+                mut self: std::pin::Pin<&mut Self>,
+                cx: &mut std::task::Context<'_>,
+            ) -> std::task::Poll<Self::Output> {
+                let _enter = Enter::new(self.context.clone());
+                self.future.as_mut().unwrap().as_mut().poll(cx)
+            }
+        }
+        impl<F> Drop for Scoped<F> {
+            fn drop(&mut self) {
+                let _enter = Enter::new(self.context.clone());
+                drop(self.future.take());
+            }
+        }
+        Scoped {
+            context,
+            future: Some(Box::pin(future)),
+        }
+    }
 }
 
 #[derive(Clone)]

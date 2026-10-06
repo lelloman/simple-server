@@ -78,13 +78,20 @@ pub fn resource_new(command: Value, _: Vec<u8>) -> Result<Vec<u8>, String> {
         Some(operation) if operation.starts_with("router_") || operation.starts_with("method_") => {
             crate::routing::resource_new(&command)
         }
+        Some("postgres_pool") => crate::postgres::connect_lazy(command),
         Some("client") => {
             let mut builder = reqwest::Client::builder();
+            if let Some(value) = command["https_only"].as_bool() {
+                builder = builder.https_only(value);
+            }
             if let Some(timeout) = command["timeout_ms"].as_u64() {
                 builder = builder.timeout(Duration::from_millis(timeout));
             }
             if let Some(timeout) = command["connect_timeout_ms"].as_u64() {
                 builder = builder.connect_timeout(Duration::from_millis(timeout));
+            }
+            if let Some(timeout) = command["read_timeout_ms"].as_u64() {
+                builder = builder.read_timeout(Duration::from_millis(timeout));
             }
             if let Some(agent) = command["user_agent"].as_str() {
                 builder = builder.user_agent(agent);
@@ -129,6 +136,7 @@ pub fn resource_release(kind: u32, id: u64) {
         }
         _ => {
             crate::database::release(kind, id);
+            crate::postgres::release(kind, id);
         }
     }
 }
@@ -154,6 +162,7 @@ pub fn operation(command: Value, body: Vec<u8>) -> Result<FutureBytes, String> {
                 }
             }))
         }
+        Some("postgres") => Ok(Box::pin(crate::postgres::run(command, body))),
         Some("sqlite") => Ok(Box::pin(crate::database::run(command, body))),
         Some("http_send") => {
             let client = clients()

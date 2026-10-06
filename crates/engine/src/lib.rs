@@ -1,4 +1,5 @@
 //! Privately linked implementation of the simple-server binary interface.
+mod postgres;
 use simple_server_abi::{Api, Buffer, RuntimeOptions, Task, Wake, *};
 use std::{
     cell::RefCell,

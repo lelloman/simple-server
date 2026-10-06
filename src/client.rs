@@ -1,6 +1,7 @@
 //! Outbound HTTP with a prebuilt engine implementation.
 use bytes::Bytes;
-use http::{HeaderMap, HeaderValue, Method, StatusCode, header::HeaderName};
+use http::{HeaderMap, HeaderValue, header::HeaderName};
+pub use http::{Method, StatusCode};
 use serde::{Serialize, de::DeserializeOwned};
 use serde_json::{Value, json};
 use simple_server_sys::Resource;
@@ -121,12 +122,20 @@ impl ClientBuilder {
         self.config["timeout_ms"] = millis(value).into();
         self
     }
+    pub fn read_timeout(mut self, value: Duration) -> Self {
+        self.config["read_timeout_ms"] = json!(millis(value));
+        self
+    }
     pub fn connect_timeout(mut self, value: Duration) -> Self {
         self.config["connect_timeout_ms"] = millis(value).into();
         self
     }
     pub fn user_agent(mut self, value: impl AsRef<str>) -> Self {
         self.config["user_agent"] = value.as_ref().into();
+        self
+    }
+    pub fn https_only(mut self, value: bool) -> Self {
+        self.config["https_only"] = json!(value);
         self
     }
     pub fn no_proxy(mut self) -> Self {
@@ -329,6 +338,11 @@ impl Response {
         let header = checked(header)?;
         self.eof = header["eof"] == true;
         Ok((!self.eof).then(|| Bytes::from(body)))
+    }
+    pub fn bytes_stream(self) -> impl futures_util::Stream<Item = Result<Bytes, Error>> + Send {
+        futures_util::stream::try_unfold(self, |mut response| async move {
+            Ok(response.chunk().await?.map(|bytes| (bytes, response)))
+        })
     }
     pub async fn bytes(mut self) -> Result<Bytes, Error> {
         let mut bytes = Vec::new();

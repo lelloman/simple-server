@@ -1,5 +1,62 @@
 # Service migration status
 
+## ScT runtime migration — 2026-10-06
+
+**Implementation verified; local integration pending.** This completes the
+application-runtime boundary left outside the earlier HTTP-only canary. Start:
+clean simple-server master `4197fd6`, ScT master `b3cf795`. Isolated sibling
+worktrees: `/tmp/sct-runtime-migration/simple-server` on
+`implementation/sct-runtime`, and `/tmp/sct-runtime-migration/sct` on
+`migration/engine-runtime`.
+
+Production ScT now uses `#[simple_server::main]`, engine lifecycle/tasks/timers,
+shared filesystem/streaming interfaces, engine PostgreSQL and outbound HTTP.
+Its separate global HTTP runtime and `engine-tokio` compatibility feature are
+removed. OIDC keeps application-owned verification, with engine HTTP transport.
+The server normal/build graph contains no Tokio, SQLx, Reqwest, Axum or Hyper;
+the ELF/dependency guard rejects all five families. Independent SDK/offline
+recovery tools retain their own runtimes; the recovery graph does not acquire an
+engine dependency. Test fixtures explicitly scope application work on the engine
+while retaining independent Tokio clients.
+
+Shared additions and contracts are documented in
+[engine application runtime](engine-application-runtime.md). PostgreSQL retains
+bound values, transactions, rollback and native migration locking/checksums.
+SQL NULL and JSON null remain distinct. Callback registration and retained reply
+buffer destruction restore engine context, so streaming body destruction can
+spawn read-pin cleanup without an EOF poll. Source correlation now uses
+executor-independent scopes.
+
+Evidence so far:
+
+- Baseline workspace tests pass (`/tmp/sct-runtime-baseline.log`); four baseline
+  host-adapter contracts pass (`/tmp/simple-runtime-baseline.log`). Initial
+  sandbox socket denials were resolved by rerunning with loopback access.
+- All 65 bounded core database contracts pass with the existing migration-name
+  mismatch and large qualification workloads explicitly excluded
+  (`/tmp/runtime-sct-core-db-final.log`). The ordinary historical mismatch remains
+  `draft_names` versus `draft names`; no schema/history workaround was added.
+- New PostgreSQL contracts pass on native and external executors, including
+  cancellation/rollback, NULLs, SQLSTATE and changed-migration rejection
+  (`/tmp/runtime-pg-final.log`). Filesystem/child cleanup and engine-only callback
+  cleanup pass (`/tmp/runtime-library-engine-check.log`).
+- Source feature matrix and rustdoc pass in `/tmp/runtime-library-full-check.log`;
+  its final engine stage stopped at a stale fixture lockfile. After updating that
+  lockfile, the complete engine stage passes separately in
+  `/tmp/runtime-library-engine-check.log`, including native Clippy, standalone
+  consumers, dependency guards, ABI smoke and installer checks. Final host
+  Clippy passes in `/tmp/runtime-library-clippy-final.log`.
+- The first service database run exposed missing engine context on final body
+  destruction; the regression is fixed in the shared callback layer, and ScT's
+  original tree workflow passes in `/tmp/runtime-sct-tree-retry.log`.
+- Real S3 conformance is blocked before execution: the pinned MinIO image returns
+  an authorization error from quay.io and no matching local image exists
+  (`/tmp/runtime-sct-s3.log`). No production S3 endpoint was used.
+
+Final consumer verification, artifact pin, measurements, local commits and
+integration/cleanup evidence will be recorded here before marking adoption done.
+No artifacts have been pushed or deployed.
+
 ## ScT engine canary — 2026-10-06
 
 ScT engine adoption is **Done locally** for its production HTTP entry points.

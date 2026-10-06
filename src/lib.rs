@@ -24,7 +24,12 @@ pub mod runtime {
 #[cfg(feature = "runtime")]
 pub use simple_server_macros::{main, test};
 
-#[cfg(any(feature = "client", feature = "process", feature = "sqlite-client"))]
+#[cfg(any(
+    feature = "client",
+    feature = "process",
+    feature = "sqlite-client",
+    feature = "postgres-client"
+))]
 mod engine_wire;
 
 /// Outbound HTTP executed by the engine, without a downstream HTTP client stack.
@@ -38,6 +43,27 @@ pub mod process;
 /// Timers owned by the engine runtime.
 #[cfg(feature = "runtime")]
 pub mod time {
+    /// Fixed-period timer; the first tick is immediate and missed ticks catch up.
+    pub struct Interval {
+        next: Instant,
+        period: std::time::Duration,
+    }
+    pub fn interval(period: std::time::Duration) -> Interval {
+        assert!(!period.is_zero());
+        Interval {
+            next: Instant::now(),
+            period,
+        }
+    }
+    impl Interval {
+        pub async fn tick(&mut self) -> Instant {
+            let now = self.next;
+            sleep_until(now).await;
+            self.next += self.period;
+            now
+        }
+    }
+
     pub use simple_server_sys::{
         Elapsed, Instant, Sleep, advance, sleep, sleep_until, timeout, timeout_at,
     };
@@ -49,6 +75,7 @@ pub mod engine_web;
 /// Optional, driver-independent database contracts.
 #[cfg(any(
     feature = "database-sqlite",
+    feature = "postgres-client",
     feature = "database-migrations",
     feature = "database-blocking"
 ))]
@@ -145,3 +172,14 @@ pub mod rate_limit;
 /// Optional HTTP fixtures using owned routers, requests and responses.
 #[cfg(feature = "test-harness")]
 pub mod testing;
+
+#[cfg(feature = "engine-io")]
+pub mod fs;
+#[cfg(feature = "engine-io")]
+pub mod io {
+    pub use futures_util::io::*;
+}
+#[cfg(feature = "engine-io")]
+pub mod sync {
+    pub use async_lock::{Mutex, OnceCell, Semaphore, SemaphoreGuardArc};
+}

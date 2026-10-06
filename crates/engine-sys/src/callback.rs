@@ -49,14 +49,22 @@ fn discard_panic(panic: Box<dyn Any + Send>) {
         std::mem::forget(second_panic);
     }
 }
-fn output_buffer(reply: Reply) -> Buffer {
+struct ScopedReply {
+    reply: Reply,
+    runtime: Weak<Inner>,
+}
+fn output_buffer(reply: Reply, runtime: Weak<Inner>) -> Buffer {
     unsafe extern "C" fn release(context: *mut c_void) {
-        release_safely(|| drop(unsafe { Box::from_raw(context.cast::<Reply>()) }));
+        release_safely(|| {
+            let reply = unsafe { Box::from_raw(context.cast::<ScopedReply>()) };
+            let _entered = Enter::new(reply.runtime.clone());
+            drop(reply);
+        });
     }
-    let reply = Box::new(reply);
+    let reply = Box::new(ScopedReply { reply, runtime });
     Buffer {
-        data: reply.bytes.as_ptr(),
-        len: reply.bytes.len(),
+        data: reply.reply.bytes.as_ptr(),
+        len: reply.reply.bytes.len(),
         context: Box::into_raw(reply).cast(),
         release,
     }
@@ -74,7 +82,7 @@ unsafe extern "C" fn poll(context: *mut c_void, wake: Wake, output: *mut Buffer)
         {
             Poll::Pending => PENDING,
             Poll::Ready(bytes) => {
-                unsafe { output.write(output_buffer(bytes)) };
+                unsafe { output.write(output_buffer(bytes, future.runtime.clone())) };
                 READY
             }
         }
@@ -118,7 +126,11 @@ where
     }
 }
 unsafe extern "C" fn release_callback<F>(context: *mut c_void) {
-    release_safely(|| drop(unsafe { Box::from_raw(context.cast::<ContextData<F>>()) }));
+    release_safely(|| {
+        let context = unsafe { Box::from_raw(context.cast::<ContextData<F>>()) };
+        let _entered = Enter::new(context.runtime.clone());
+        drop(context);
+    });
 }
 impl Callback {
     /// Register on the active engine runtime. Each call enters that runtime's

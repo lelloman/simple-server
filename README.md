@@ -221,7 +221,7 @@ I/O drivers run independently; this does not drive a current-thread engine.
 `engine-tracing` provides `engine_web::tracing` with the same observer and lazy
 body lifecycle as the source facade. Spans/subscribers and `correlation-core`
 request scopes survive callbacks without compiling Axum. `correlation-core`
-retains Tokio task-local support, but does not enable the source HTTP backend.
+uses executor-independent task-local scopes and does not compile Tokio.
 `Router::fallback_static_dir(path)?` serves trusted disk roots inside the engine,
 including GET/HEAD, ranges, conditionals and directory redirects. These APIs
 require a rebuilt engine with native operation context and static-directory support.
@@ -231,9 +231,9 @@ and WebSocket
 adapters still need migration. The existing `web` API and default backend remain
 source-based. ScT's production server entry points now use the engine on its
 local development branch, with verified HTTP/database/shutdown behavior and a
-working local Docker image. Its clean build improves about 7.5%; small rebuilds
-are unchanged because application SQLx, Reqwest and Tokio remain. See the
-[canary evidence](docs/migration-status.md#sct-engine-canary--2026-10-06).
+working local Docker image. The subsequent runtime migration removes Tokio,
+SQLx, Reqwest, Axum and Hyper from the production server graph. See the
+[runtime migration evidence](docs/migration-status.md#sct-runtime-migration--2026-10-06).
 The canary has not been published or deployed.
 
 The engine contains TCP HTTP/1 and HTTP/2 transport, streaming bodies and
@@ -567,3 +567,31 @@ native operations or release their capacity early; close/drain observes actual
 completion. See the [07d contract](docs/step-07d-database-blocking.md).
 
 Both APIs are new in 0.1.7. Consumer adoption is tracked independently.
+
+### Engine-owned application runtime and storage
+
+Use `#[simple_server::main]` for the service entry point, `runtime` for tasks,
+`time` for timers, `engine-lifecycle` for shutdown and `engine-tasks` for owned
+workers. An application using only these interfaces needs no Tokio dependency.
+
+`postgres-client` provides `database::postgres`: typed parameters, owned rows,
+pools, transactions and forward migrations executed by SQLx inside the engine.
+ScT keeps its SQL and migration definitions; the driver stays prebuilt. Supported
+parameters/columns include text, integers, booleans, finite floating-point numbers,
+byte arrays, text arrays and JSON. SQL NULL and JSON null are distinct parameters.
+Unsupported column types can be present in a row but return a decoding error
+when accessed. Dropped transactions roll back, including when the host uses an
+external executor. Migration execution retains native SQLx locking/checksums.
+The filename loader supports forward numbered `.sql` migrations only.
+
+`engine-io` exposes futures I/O traits, asynchronous files scheduled on the
+engine's blocking workers, and executor-independent synchronization primitives.
+`process::ManagedCommand` (with `process,engine-io`) supports explicit stdio,
+kill-on-drop and child reaping; `process::Command` remains the native buffered
+output interface. `client` supports streaming responses and connection/read/total
+timeouts, redirects disabled explicitly, and HTTPS-only policy.
+
+For independent Tokio-based **test fixtures**, `#[simple_server::test(host_runtime = true)]`
+requires Tokio as a dev-dependency and polls the test in an engine scope. Spawned
+fixture tasks must explicitly carry `Runtime::try_current()?.scope(future)`.
+Production entry points should use the engine directly, not this test bridge.

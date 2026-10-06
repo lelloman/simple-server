@@ -141,6 +141,10 @@ fn current() -> io::Result<Arc<Inner>> {
 #[derive(Clone)]
 pub struct Runtime(Arc<Inner>);
 impl Runtime {
+    /// Retain the engine runtime active in this callback or scope.
+    pub fn try_current() -> io::Result<Self> {
+        current().map(Self)
+    }
     pub fn new() -> io::Result<Self> {
         Builder::new_multi_thread().build()
     }

@@ -7,7 +7,7 @@ description = "A modular foundation for Axum-based Rust services"
 repository = "https://github.com/lelloman/simple-server"
 readme = "README.md"
 publish = ["crates-io"]
-include = ["/src/**", "/tests/**", "!/tests/**/target/**", "/examples/**", "/Cargo.toml", "/Cargo.lock", "/README.md", "/LICENSE-MIT", "/LICENSE-APACHE", "/docs/publishing.md", "/docs/unix-http.md", "/docs/step-07c-sqlite-backup.md", "/docs/step-07d-database-blocking.md"]
+include = ["/src/**", "/tests/**", "!/tests/**/target/**", "/examples/**", "/Cargo.toml", "/Cargo.lock", "/README.md", "/LICENSE-MIT", "/LICENSE-APACHE", "/docs/publishing.md", "/docs/engine-application-runtime.md", "/docs/unix-http.md", "/docs/step-07c-sqlite-backup.md", "/docs/step-07d-database-blocking.md"]
 
 [lib]
 name = "simple_server"
@@ -19,6 +19,7 @@ default-members = ["."]
 resolver = "2"
 
 [features]
+engine-io = ["runtime", "dep:futures-util", "futures-util/io", "dep:async-lock"]
 source-runtime = ["dep:tokio", "tokio/macros", "tokio/net", "tokio/signal", "tokio/sync", "tokio/time"]
 task-policy-core = []
 engine-scheduling = ["engine-tasks", "task-policy-core", "dep:tokio", "tokio/sync", "tokio/macros", "dep:cron", "dep:chrono", "dep:rand"]
@@ -27,11 +28,12 @@ task-drivers = ["runtime"]
 engine-tasks = ["runtime"]
 engine-tokio = ["engine-web", "source-runtime", "tokio/rt"]
 engine-tracing = ["engine-web", "dep:tracing"]
-correlation-core = ["dep:http", "source-runtime", "dep:rand"]
+correlation-core = ["dep:http", "dep:rand"]
 engine-web = ["dep:tower-layer", "dep:tower-service", "extract", "dep:serde", "dep:serde_urlencoded", "dep:serde_path_to_error", "dep:form_urlencoded", "dep:mime", "engine-lifecycle", "dep:bytes", "dep:http", "dep:http-body", "dep:http-body-util", "dep:serde_json"]
 engine-lifecycle = ["runtime", "dep:futures-util"]
-client = ["runtime", "dep:serde", "dep:serde_json", "dep:serde_urlencoded", "dep:bytes", "dep:http"]
+client = ["runtime", "dep:serde", "dep:serde_json", "dep:serde_urlencoded", "dep:bytes", "dep:http", "dep:futures-util"]
 process = ["runtime", "dep:serde_json"]
+postgres-client = ["runtime", "dep:serde", "dep:serde_json", "dep:sha2"]
 sqlite-client = ["runtime", "database-sqlite", "dep:serde_json"]
 unix-http = ["web", "lifecycle", "dep:hyper", "dep:hyper-util", "dep:hyperlocal"]
 compression = ["web", "dep:tower-http", "tower-http/compression-gzip", "dep:pin-project-lite"]
@@ -73,6 +75,8 @@ ws = ["http", "axum/ws", "futures-util?/sink"]
 sse = ["web", "axum/json"]
 
 [dependencies]
+async-lock = { version = "3.4", optional = true }
+sha2 = { version = "0.10", optional = true }
 simple-server-sys = { package = "lelloman-simple-server-sys", path = "crates/engine-sys", version = "=0.2.0", optional = true }
 simple-server-macros = { package = "lelloman-simple-server-macros", path = "crates/macros", version = "=0.2.0", optional = true }
 reqwest = { version = "=0.12.28", default-features = false, features = ["json"], optional = true }

@@ -21,6 +21,7 @@ fn entry(options: TokenStream, item: TokenStream, test: bool) -> TokenStream {
     let mut current_thread = test;
     let mut paused = false;
     let mut workers = None;
+    let mut host_runtime = false;
     for option in options {
         let Meta::NameValue(ref value) = option else {
             return syn::Error::new_spanned(option, "expected name = value")
@@ -33,6 +34,7 @@ fn entry(options: TokenStream, item: TokenStream, test: bool) -> TokenStream {
                 .into();
         };
         match (&value.path, &literal.lit) {
+            (path, Lit::Bool(b)) if path.is_ident("host_runtime") && test => host_runtime = b.value,
             (path, Lit::Str(s)) if path.is_ident("flavor") && s.value() == "current_thread" => {
                 current_thread = true
             }
@@ -57,29 +59,47 @@ fn entry(options: TokenStream, item: TokenStream, test: bool) -> TokenStream {
             }
         }
     }
-    if paused && !current_thread || current_thread && workers.is_some() {
+    if paused && (!current_thread || host_runtime) || current_thread && workers.is_some() {
         return syn::Error::new_spanned(
             &function.sig,
-            "paused time requires current_thread; worker_threads requires multi_thread",
+            "paused time requires native current_thread; worker_threads requires multi_thread",
         )
         .into_compile_error()
         .into();
+    }
+    if host_runtime {
+        current_thread = false;
     }
     let builder = if current_thread {
         quote!(new_current_thread)
     } else {
         quote!(new_multi_thread)
     };
+    let workers = if host_runtime {
+        Some(workers.unwrap_or(2))
+    } else {
+        workers
+    };
     let configure_workers = workers.map(|n| quote!(builder.worker_threads(#n);));
     let body = function.block;
+    let execute = if host_runtime {
+        quote!(runtime.scope(async #body).await)
+    } else {
+        quote!(runtime.block_on(async #body))
+    };
     function.block = syn::parse_quote!({
         let mut builder = ::simple_server::runtime::Builder::#builder();
         builder.start_paused(#paused);
         #configure_workers
         let runtime = builder.build().expect("cannot create simple-server engine runtime");
-        runtime.block_on(async #body)
+        #execute
     });
-    let attr = test.then(|| quote!(#[::core::prelude::v1::test]));
+    let attr = if host_runtime {
+        function.sig.asyncness = Some(Default::default());
+        Some(quote!(#[::tokio::test]))
+    } else {
+        test.then(|| quote!(#[::core::prelude::v1::test]))
+    };
     quote!(#attr #function).into()
 }
 
@@ -88,6 +108,8 @@ pub fn main(options: TokenStream, item: TokenStream) -> TokenStream {
     entry(options, item, false)
 }
 
+/// Execute a test on the engine. `host_runtime = true` uses a caller-provided
+/// Tokio dev-dependency for independent test clients, with an engine scope.
 #[proc_macro_attribute]
 pub fn test(options: TokenStream, item: TokenStream) -> TokenStream {
     entry(options, item, true)

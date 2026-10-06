@@ -13,3 +13,7 @@ pub mod sqlite;
 
 #[cfg(feature = "database-blocking")]
 pub mod blocking;
+
+/// PostgreSQL execution through the shared engine.
+#[cfg(feature = "postgres-client")]
+pub mod postgres;

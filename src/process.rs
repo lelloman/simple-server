@@ -64,3 +64,98 @@ impl Command {
         })
     }
 }
+
+/// Child process with explicit stdio and kill-on-drop ownership.
+/// Waiting uses engine timers and never occupies an executor thread with waitpid.
+pub struct ManagedCommand {
+    command: std::process::Command,
+    kill_on_drop: bool,
+}
+impl ManagedCommand {
+    pub fn new(program: impl AsRef<OsStr>) -> Self {
+        Self {
+            command: std::process::Command::new(program),
+            kill_on_drop: false,
+        }
+    }
+    pub fn arg(&mut self, arg: impl AsRef<OsStr>) -> &mut Self {
+        self.command.arg(arg);
+        self
+    }
+    pub fn args<I, S>(&mut self, args: I) -> &mut Self
+    where
+        I: IntoIterator<Item = S>,
+        S: AsRef<OsStr>,
+    {
+        self.command.args(args);
+        self
+    }
+    pub fn stdin(&mut self, v: std::process::Stdio) -> &mut Self {
+        self.command.stdin(v);
+        self
+    }
+    pub fn stdout(&mut self, v: std::process::Stdio) -> &mut Self {
+        self.command.stdout(v);
+        self
+    }
+    pub fn stderr(&mut self, v: std::process::Stdio) -> &mut Self {
+        self.command.stderr(v);
+        self
+    }
+    pub fn kill_on_drop(&mut self, v: bool) -> &mut Self {
+        self.kill_on_drop = v;
+        self
+    }
+    #[cfg(feature = "engine-io")]
+    pub fn spawn(&mut self) -> io::Result<Child> {
+        let runtime = crate::runtime::Runtime::try_current()?;
+        let mut child = self.command.spawn()?;
+        let stdout = child.stdout.take().map(|s| {
+            let fd: std::os::fd::OwnedFd = s.into();
+            crate::fs::File::from_std(fd.into())
+        });
+        Ok(Child {
+            child: Some(child),
+            stdout,
+            kill_on_drop: self.kill_on_drop,
+            runtime,
+        })
+    }
+}
+#[cfg(feature = "engine-io")]
+pub struct Child {
+    runtime: crate::runtime::Runtime,
+    child: Option<std::process::Child>,
+    pub stdout: Option<crate::fs::File>,
+    kill_on_drop: bool,
+}
+#[cfg(feature = "engine-io")]
+impl Child {
+    pub fn id(&self) -> u32 {
+        self.child.as_ref().unwrap().id()
+    }
+    pub async fn wait(&mut self) -> io::Result<ExitStatus> {
+        loop {
+            if let Some(status) = self.child.as_mut().unwrap().try_wait()? {
+                return Ok(status);
+            }
+            crate::time::sleep(std::time::Duration::from_millis(10)).await;
+        }
+    }
+}
+#[cfg(feature = "engine-io")]
+impl Drop for Child {
+    fn drop(&mut self) {
+        if let Some(mut child) = self.child.take() {
+            if matches!(child.try_wait(), Ok(Some(_))) {
+                return;
+            }
+            if self.kill_on_drop {
+                let _ = child.kill();
+            }
+            self.runtime.handle().spawn_blocking(move || {
+                let _ = child.wait();
+            });
+        }
+    }
+}

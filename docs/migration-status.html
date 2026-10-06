@@ -73,6 +73,15 @@
   </header>
   <main>
     <section class="note" id="shared-engine">
+      <p><strong>ScT runtime migration (2026-10-06): implementation verified; local integration pending.</strong>
+      Production uses <code>#[simple_server::main]</code> and engine-backed PostgreSQL,
+      outbound HTTP, tasks, timers and storage I/O. Its normal/build graph excludes
+      Tokio, SQLx, Reqwest, Axum and Hyper. The 65 bounded core database contracts and
+      engine-only streaming cleanup pass. The independent SDK/recovery tools and
+      test clients remain separate. S3 verification is blocked by the pinned MinIO
+      image registry authorization error. Artifact pinning, final consumer checks,
+      measurements and integration are pending; nothing is published or deployed.
+      <a href="migration-status.md#sct-runtime-migration--2026-10-06">Detailed evidence</a>.</p>
       <p><strong>ScT engine canary (2026-10-06): adoption Done locally; overall engine Partial.</strong>
       Production HTTP, static files, correlation/tracing and shutdown now use the
       shared engine. SQLx, Reqwest and application Tokio remain. Four new library
