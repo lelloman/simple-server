@@ -73,6 +73,12 @@
   </header>
   <main>
     <section class="note" id="shared-engine">
+      <p><strong>Meteonesto weather-api engine migration (2026-10-07): Pending integration.</strong>
+      The weather-api worktree passes 75 Rust and 15 Python tests using engine
+      HTTP, runtime, filesystem and workers. New shared watch/interval contracts
+      and engine checks pass. Gateway and pipeline remain unchanged. Packaging,
+      timings and integration are pending.
+      <a href="migration-status.md#meteonesto-weather-api-engine-migration--2026-10-07">Scope and evidence</a>.</p>
       <p><strong>ScT OIDC migration (2026-10-07): production adoption Done locally; overall engine Partial.</strong>
       Discovery, PKCE, token exchange and ID-token verification now execute inside
       the engine. ScT keeps browser-bound flow storage, sessions and permissions.

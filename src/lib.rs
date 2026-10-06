@@ -48,23 +48,57 @@ pub mod process;
 /// Timers owned by the engine runtime.
 #[cfg(feature = "runtime")]
 pub mod time {
-    /// Fixed-period timer; the first tick is immediate and missed ticks catch up.
+    /// Policy for a periodic timer whose scheduled tick is more than 5ms late.
+    #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+    pub enum MissedTickBehavior {
+        /// Catch up using the original scheduled ticks.
+        #[default]
+        Burst,
+        /// Schedule the next tick one period after the late tick is observed.
+        Delay,
+        /// Skip missed ticks while preserving the original interval alignment.
+        Skip,
+    }
+    /// Fixed-period timer; the first tick is immediate. Default policy is Burst.
     pub struct Interval {
         next: Instant,
         period: std::time::Duration,
+        behavior: MissedTickBehavior,
     }
     pub fn interval(period: std::time::Duration) -> Interval {
         assert!(!period.is_zero());
         Interval {
             next: Instant::now(),
             period,
+            behavior: MissedTickBehavior::Burst,
         }
     }
     impl Interval {
+        pub fn set_missed_tick_behavior(&mut self, behavior: MissedTickBehavior) {
+            self.behavior = behavior;
+        }
         pub async fn tick(&mut self) -> Instant {
             let now = self.next;
             sleep_until(now).await;
-            self.next += self.period;
+            let observed = Instant::now();
+            self.next = if observed > now + std::time::Duration::from_millis(5) {
+                match self.behavior {
+                    MissedTickBehavior::Burst => now + self.period,
+                    MissedTickBehavior::Delay => observed + self.period,
+                    MissedTickBehavior::Skip => {
+                        let remainder = (observed - now).as_nanos() % self.period.as_nanos();
+                        let remainder = std::time::Duration::new(
+                            (remainder / 1_000_000_000)
+                                .try_into()
+                                .expect("duration seconds"),
+                            (remainder % 1_000_000_000) as u32,
+                        );
+                        observed + (self.period - remainder)
+                    }
+                }
+            } else {
+                now + self.period
+            };
             now
         }
     }
@@ -185,6 +219,10 @@ pub mod io {
     pub use futures_util::io::*;
 }
 #[cfg(feature = "engine-io")]
+#[path = "watch.rs"]
+pub mod watch;
+#[cfg(feature = "engine-io")]
 pub mod sync {
-    pub use async_lock::{Mutex, OnceCell, Semaphore, SemaphoreGuardArc};
+    pub use crate::watch;
+    pub use async_lock::{Mutex, MutexGuardArc, OnceCell, Semaphore, SemaphoreGuardArc};
 }

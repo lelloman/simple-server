@@ -97,3 +97,21 @@ cancellation. There is no global application session state inside the engine.
 `tests/engine_oidc.rs` checks discovery policy, generated flows and clone lifetime;
 the standalone engine consumer and dependency guard ensure no host OIDC stack.
 ScT's real login fixture covers token verification, PKCE, replay, sessions and CSRF.
+
+## Latest-value notifications and missed ticks
+
+`engine-io` exposes `sync::watch::{channel, Sender, Receiver}` without Tokio.
+It coalesces sends, tracks each receiver's seen version, unregisters cancelled
+waiters, and delivers an unseen final value before asynchronous closure. As in
+Tokio, `has_changed` reports closure even when a final value remains unseen.
+`borrow_and_update` returns a short-lived locking borrow; do not hold it across
+an await or reenter the channel while holding it. This is a deliberately limited
+API, not a complete Tokio watch replacement. The existing async-lock mutex and
+semaphore exports include owned guards (`MutexGuardArc`, `SemaphoreGuardArc`).
+
+Engine intervals retain an immediate first tick and default Burst behavior.
+`MissedTickBehavior::{Burst, Delay, Skip}` controls ticks more than 5ms late.
+Skip retains the original schedule while discarding missed ticks; cancellation
+of a pending tick preserves its deadline. Weather API uses Skip for publication
+polling and popularity persistence. These helpers execute with engine timers and
+runtime-independent synchronization; no new native ABI operation is needed.

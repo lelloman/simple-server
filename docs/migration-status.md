@@ -1,5 +1,24 @@
 # Service migration status
 
+## Meteonesto weather-api engine migration — 2026-10-07
+
+**Pending integration and release verification.** Scope is weather-api only;
+gateway and pipeline are unchanged. Clean baseline master: shared `f52c4a2`,
+Meteonesto `7729bec`. Isolated sibling worktrees use branches
+`implementation/weather-api-engine` and `migration/weather-api-engine`.
+
+Weather API uses HTTP, filesystem I/O, tasks, timers, latest-value worker
+notifications and bounded concurrency. The migration adopts the engine entry
+point and shared implementations; weather decoding/caching and logging stay in
+the service. Shared additions provide owned mutex guards, cancellation-safe
+watch notifications and Burst/Delay/Skip interval policies. No native ABI change.
+Baseline and migrated suites pass 75 Rust tests and 15 Python tests, including
+real HTTP, cache/auth contracts and process signals. Shared strict all-feature
+Clippy, rustdoc and engine checks pass; three watch and two interval contracts
+pass. Production graph/ELF guard confirms no host Tokio/Axum/Hyper/Reqwest.
+Release artifact verification, timings and development-branch integration remain
+pending at this implementation checkpoint. Nothing pushed or deployed.
+
 ## ScT OIDC migration — 2026-10-07
 
 **OIDC production adoption Done locally; overall engine Partial.** Production ScT uses OIDC for
