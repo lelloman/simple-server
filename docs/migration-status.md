@@ -2,22 +2,83 @@
 
 ## Meteonesto weather-api engine migration — 2026-10-07
 
-**Pending integration and release verification.** Scope is weather-api only;
-gateway and pipeline are unchanged. Clean baseline master: shared `f52c4a2`,
-Meteonesto `7729bec`. Isolated sibling worktrees use branches
-`implementation/weather-api-engine` and `migration/weather-api-engine`.
+**Weather API production adoption Done locally; Meteonesto engine Partial.**
+Gateway and pipeline retain their source implementations. Clean baseline master:
+shared `f52c4a2`, Meteonesto `7729bec`. Work used isolated sibling worktrees under
+`/tmp/weather-api-engine-migration`, on `implementation/weather-api-engine` and
+`migration/weather-api-engine`.
 
 Weather API uses HTTP, filesystem I/O, tasks, timers, latest-value worker
-notifications and bounded concurrency. The migration adopts the engine entry
-point and shared implementations; weather decoding/caching and logging stay in
-the service. Shared additions provide owned mutex guards, cancellation-safe
-watch notifications and Burst/Delay/Skip interval policies. No native ABI change.
-Baseline and migrated suites pass 75 Rust tests and 15 Python tests, including
-real HTTP, cache/auth contracts and process signals. Shared strict all-feature
-Clippy, rustdoc and engine checks pass; three watch and two interval contracts
-pass. Production graph/ELF guard confirms no host Tokio/Axum/Hyper/Reqwest.
-Release artifact verification, timings and development-branch integration remain
-pending at this implementation checkpoint. Nothing pushed or deployed.
+notifications and bounded concurrency. Its production entry point now uses
+`#[simple_server::main]`; lifecycle, HTTP, filesystem and background work use the
+engine APIs. Weather decoding/caching, logging and application policies remain
+in the service. No database/outbound client exists in its production path.
+Shared additions provide owned mutex guards, cancellation-safe watch notifications
+and Burst/Delay/Skip interval policies; no native ABI change. See the
+[runtime contract](engine-application-runtime.md#latest-value-notifications-and-missed-ticks).
+
+The normal/build graph drops **103 → 95 package/version entries**, or **101 → 93
+unique names**, excluding the application. No host Tokio, Axum, Hyper or Reqwest
+remains. A dependency/ELF guard verifies those exclusions and the `.so.1` link.
+Tests use engine test macros and real loopback HTTP rather than a Tower harness.
+
+Baseline component checks pass **75 Rust and 15 Python tests**. Migrated default
+checks pass **75 Rust and 18 Python tests**, strict Clippy, formatting, production
+build, systemd units and unchanged-publication synchronization. Three added
+Python release tests cover legacy/new manifests and missing, altered, unpinned
+engines and unsupported schemas. Shared all-target/all-feature Clippy, strict
+rustdoc and full engine checks pass; final watch refinements pass three focused
+watch tests, two virtual-time interval tests and strict all-feature Clippy.
+Logs: `/tmp/weather-api-engine-baseline.log`,
+`/tmp/weather-api-engine-library-checks.log`,
+`/tmp/weather-api-engine-contracts-final.log`,
+`/tmp/weather-api-engine-full-check.log`, `/tmp/weather-api-engine-package.log`.
+
+Shared implementation/source pin: `84e8589eb91c8ac14931539bf04eb13f2b858643`.
+Consumer implementation: `3cd7d0f52c02e4b959b9dc22dbb55ed1263e197b`;
+measurement/report commit: `fa25b7627a026594cd56d82412ca198bb99c9908`.
+Both original masters were rebased onto their migration branches. Ancestry and
+exact tested-tree comparisons pass; original worktrees stayed clean with no
+concurrent commits. The consumer temporary worktree/branch is removed. Shared
+evidence integration and temporary worktree/branch cleanup follow this final
+tracker commit. Gateway, pipeline and other components were not rebuilt.
+
+Three alternating paired fresh-target builds per profile, Rust 1.97.1, eight
+jobs and offline cached downloads compare original published source 0.1.0 with
+the engine migration. Native prebuild cost is excluded:
+
+| Profile | Clean before | Clean engine | Saving | Timestamp-only rebuild before / engine |
+| --- | ---: | ---: | ---: | ---: |
+| Dev | 11.986s | 10.212s | 14.81% | 0.457s / 0.924s |
+| Release | 22.152s | 19.115s | 13.71% | 1.141s / 4.844s |
+
+These are medians. Clean-build savings are modest; timestamp-only incremental
+rebuilds regress in both profiles. This is not ScT's much larger saving and does
+not establish an improvement for every edit or for runtime throughput.
+[Raw paired results](measurements/weather-api-engine-build-2026-10-07.json) are
+mirrored in Meteonesto's `docs/measurements`; its report is
+`docs/weather-api-engine-migration.md`.
+
+Pinned engine SHA256:
+`dd4c99a862b763387456ce3d503937fc9b1ed6ba36e444e9853ad557541f124f`.
+The approximately 17 MiB Linux x86-64/glibc engine is prebuilt separately and
+includes unused capabilities. Build helpers verify sibling bindings and artifact
+revision/checksum metadata; no remote engine publication is implied. Schema-2
+release bundles include `lib/libsimple_server_engine.so.1` with source/checksum;
+legacy schema-1 self-contained bundles remain valid for rollback. `$ORIGIN/lib`
+selects the release's engine without a system-wide library install.
+
+Local bundle: `/tmp/weather-api-engine-release/weather-api-v0.1.0-gfa25b7627a02.tar.zst`.
+Bundle SHA256: `6338defb7e637b7f00cb6874b15915057d5211ca098f8376454d52f5e1b16f89`.
+Extracted release verification and two real process tests pass through the
+production-style executable/current symlinks with no loader environment override:
+HTTP, worker draining, SIGINT/SIGTERM, configuration and occupied-port failures.
+The initial smoke harness used ldd on the symlink, which resolves ORIGIN differently;
+inspecting the resolved ELF and actually executing the symlink both pass.
+Release automation tests pass. Logs: `/tmp/weather-api-engine-release-smoke.log`,
+`/tmp/weather-api-release-automation.log`. A reusable native artifact and metadata
+are retained under `/tmp/weather-api-engine-artifact`. Nothing was published,
+pushed or deployed; no provider/production data was accessed.
 
 ## ScT OIDC migration — 2026-10-07
 
