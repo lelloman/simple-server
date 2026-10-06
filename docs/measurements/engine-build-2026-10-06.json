@@ -1,0 +1,183 @@
+{
+  "revision": "63da31243f85bb57c6123aefcb135bcea30f5765",
+  "rustc": "rustc 1.96.0 (ac68faa20 2026-05-25)\nbinary: rustc\ncommit-hash: ac68faa20c58cbccd01ee7208bf3b6e93a7d7f96\ncommit-date: 2026-05-25\nhost: x86_64-unknown-linux-gnu\nrelease: 1.96.0\nLLVM version: 22.1.2\n",
+  "platform": "Linux-6.8.0-142-generic-x86_64-with-glibc2.39",
+  "cpu_count": 32,
+  "cpuinfo": "processor\t: 0\nvendor_id\t: AuthenticAMD\ncpu family\t: 25\nmodel\t\t: 33\nmodel name\t: AMD Ryzen 9 5950X 16-Core Processor\nstepping\t: 2\nmicrocode\t: 0xa201211\ncpu MHz\t\t: 3101.075\ncache size\t: 512 KB\nphysical id\t: 0\nsiblings\t: 32\ncore id\t\t: 0\ncpu cores\t: 16\napicid\t\t: 0\ninitial apicid\t: 0\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 16\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good nopl nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 sse4_1 sse4_2 movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpb cat_l3 cdp_l3 hw_pstate ssbd mba ibrs ibpb stibp vmmcall fsgsbase bmi1 avx2 smep bmi2 erms invpcid cqm rdt_a rdseed adx smap clflushopt clwb sha_ni xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local user_shstk clzero irperf xsaveerptr rdpru wbnoinvd arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif v_spec_ctrl umip pku ospke vaes vpclmulqdq rdpid overflow_recov succor smca fsrm debug_swap ibpb_exit_to_user\nbugs\t\t: sysret_ss_attrs spectre_v1 spectre_v2 spec_store_bypass srso ibpb_no_ret tsa vmscape\nbogomips\t: 6787.62\nTLB size\t: 2560 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 48 bits physical, 48 bits virtual\npower management: ts ttp tm hwpstate cpb eff_freq_ro [13] [14]",
+  "jobs": 8,
+  "profile": "dev",
+  "incremental": true,
+  "fixture_sha256": {},
+  "engine": "/tmp/simple-server-unix-client-engine/debug/libsimple_server_engine.so",
+  "engine_bytes": 108660824,
+  "engine_sha256": "98d4cff50e4237d50e6235b3c1fb84b8a775bd86e8c3b929df9d099989db3fc7",
+  "scope": "fresh Cargo targets, warm OS/source cache; engine prebuild/download excluded; no runtime benchmark",
+  "rows": [
+    {
+      "trial": 1,
+      "backend": "source",
+      "phase": "clean",
+      "seconds": 7.46664187299757,
+      "binary_bytes": 30944176,
+      "smoke": "passed"
+    },
+    {
+      "trial": 1,
+      "backend": "source",
+      "phase": "noop",
+      "seconds": 0.08831642000222928,
+      "binary_bytes": 30944176,
+      "smoke": "passed"
+    },
+    {
+      "trial": 1,
+      "backend": "source",
+      "phase": "edit",
+      "seconds": 0.30862006499955896,
+      "binary_bytes": 30944176,
+      "smoke": "passed"
+    },
+    {
+      "trial": 1,
+      "backend": "engine",
+      "phase": "clean",
+      "seconds": 3.345047668997722,
+      "binary_bytes": 13695168,
+      "smoke": "passed"
+    },
+    {
+      "trial": 1,
+      "backend": "engine",
+      "phase": "noop",
+      "seconds": 0.0810630099986156,
+      "binary_bytes": 13695168,
+      "smoke": "passed"
+    },
+    {
+      "trial": 1,
+      "backend": "engine",
+      "phase": "edit",
+      "seconds": 0.23806859600153985,
+      "binary_bytes": 13695168,
+      "smoke": "passed"
+    },
+    {
+      "trial": 2,
+      "backend": "engine",
+      "phase": "clean",
+      "seconds": 3.395006688002468,
+      "binary_bytes": 13695168,
+      "smoke": "passed"
+    },
+    {
+      "trial": 2,
+      "backend": "engine",
+      "phase": "noop",
+      "seconds": 0.08171927900184528,
+      "binary_bytes": 13695168,
+      "smoke": "passed"
+    },
+    {
+      "trial": 2,
+      "backend": "engine",
+      "phase": "edit",
+      "seconds": 0.2363301559998945,
+      "binary_bytes": 13695168,
+      "smoke": "passed"
+    },
+    {
+      "trial": 2,
+      "backend": "source",
+      "phase": "clean",
+      "seconds": 7.483829875000083,
+      "binary_bytes": 30944176,
+      "smoke": "passed"
+    },
+    {
+      "trial": 2,
+      "backend": "source",
+      "phase": "noop",
+      "seconds": 0.09141402800014475,
+      "binary_bytes": 30944176,
+      "smoke": "passed"
+    },
+    {
+      "trial": 2,
+      "backend": "source",
+      "phase": "edit",
+      "seconds": 0.3172436370005016,
+      "binary_bytes": 30944176,
+      "smoke": "passed"
+    },
+    {
+      "trial": 3,
+      "backend": "source",
+      "phase": "clean",
+      "seconds": 7.355341842001508,
+      "binary_bytes": 30944176,
+      "smoke": "passed"
+    },
+    {
+      "trial": 3,
+      "backend": "source",
+      "phase": "noop",
+      "seconds": 0.09130451199962408,
+      "binary_bytes": 30944176,
+      "smoke": "passed"
+    },
+    {
+      "trial": 3,
+      "backend": "source",
+      "phase": "edit",
+      "seconds": 0.30692473399903974,
+      "binary_bytes": 30944176,
+      "smoke": "passed"
+    },
+    {
+      "trial": 3,
+      "backend": "engine",
+      "phase": "clean",
+      "seconds": 3.2464780469999823,
+      "binary_bytes": 13695168,
+      "smoke": "passed"
+    },
+    {
+      "trial": 3,
+      "backend": "engine",
+      "phase": "noop",
+      "seconds": 0.0804298570001265,
+      "binary_bytes": 13695168,
+      "smoke": "passed"
+    },
+    {
+      "trial": 3,
+      "backend": "engine",
+      "phase": "edit",
+      "seconds": 0.2296213789995818,
+      "binary_bytes": 13695168,
+      "smoke": "passed"
+    }
+  ],
+  "dependency_packages_excluding_consumer_and_library": {
+    "source": 50,
+    "engine": 29
+  },
+  "medians_seconds": {
+    "source": {
+      "clean": 7.46664187299757,
+      "noop": 0.09130451199962408,
+      "edit": 0.30862006499955896
+    },
+    "engine": {
+      "clean": 3.345047668997722,
+      "noop": 0.0810630099986156,
+      "edit": 0.2363301559998945
+    }
+  },
+  "service_review": {
+    "repository": "sct",
+    "branch": "master",
+    "revision": "9e118e6c73db6f80b15f85fc525a1d254096a05b",
+    "status": "clean; read-only assessment, not migrated or benchmarked"
+  }
+}

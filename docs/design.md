@@ -586,3 +586,68 @@ library, without Hyper, Hyperlocal, Axum or Tokio. Remaining gaps include TLS,
 WebSocket, external listener descriptors, peer credentials, router layers,
 Route/make-service exposure and public test-harness parity. No production
 adoption or runtime speedup is claimed.
+
+
+## Downstream build measurement (2026-10-06)
+
+The same small HTTP application now has source and engine configurations in
+`tests/fixtures/build_comparison`. It exercises health/HEAD, JSON echo, typed
+path extraction, a 404 and graceful shutdown through real loopback sockets.
+This represents the HTTP slice of a service, not a database-backed application.
+Run the opt-in benchmark with an existing development engine:
+
+```sh
+python3 scripts/benchmark-builds.py \
+  --engine-dir /absolute/path/to/engine/debug \
+  --output /tmp/simple-server-build-measurement-new --trials 3 --jobs 8
+```
+
+The output directory must not already exist. The runner copies the fixture into
+independent directories, rewrites only its library path, uses its committed lock,
+and creates a fresh Cargo target per backend/trial. It alternates build order,
+uses offline builds and eight jobs, disables compiler wrappers, and keeps dev
+incremental compilation enabled. Source and engine use two runtime workers.
+Each trial times clean, no-change and application-only rebuilds (a constant is
+changed from 1 to 2); endpoint checks run after every build and outside timings.
+Targets/logs stay in the selected directory for inspection. The runner installs
+the engine's `.so.1` SONAME symlink there for direct executable smoke checks.
+
+On a Ryzen 9 5950X, Rust 1.96.0, Linux x86_64, three trials yielded:
+
+| Dev build | Source median | Engine median | Reduction |
+| --- | ---: | ---: | ---: |
+| Fresh target | 7.467 s | 3.345 s | 55.2% |
+| No change | 0.091 s | 0.081 s | 0.010 s |
+| Application edit | 0.309 s | 0.236 s | 0.072 s |
+
+Fresh-target ranges were 7.355–7.484 s and 3.246–3.395 s respectively.
+Normal/build dependencies excluding fixture and library were 50 versus 29.
+All 18 smoke checks passed. Raw measurements, fixture hashes and environment are
+in [the measurement record](measurements/engine-build-2026-10-06.json).
+These are warm-filesystem-cache measurements with empty Cargo targets, not
+cold-machine timings. The application is deliberately small and has no custom
+profile settings; numbers are local observations, not service-wide guarantees.
+Release builds, runtime latency/throughput, peak memory, artifact download and
+engine prebuild cost were not measured. The unstripped debug executable shrank
+from 30,944,176 to 13,695,168 bytes, but the engine additionally requires the
+108,660,824-byte debug `.so`: this is not a total deployment-size reduction.
+The artifact is the previously tested Unix-client engine (hash in the record).
+
+A read-only assessment of ScT master `9e118e6` identifies middleware/continuation
+support as the next HTTP adoption priority. `sct-server/src/lib.rs::application`
+installs correlation middleware, `observability.rs::install` installs request
+observation, and `api.rs::routes` adds body-limit and response-header layers.
+The engine must preserve middleware order, matched paths, host request/response
+extensions and streaming/cancellation behavior. StaticDir fallback is also a
+source-web service today and needs an engine-compatible adapter/implementation.
+Correlation and tracing feature dependencies must be split or adapted so their
+reuse does not re-enable the source backend.
+
+Even after those HTTP gaps are addressed, ScT's `sct-core` uses PostgreSQL via
+SQLx and direct Tokio filesystem/I/O/time/process APIs. Its OIDC implementation
+stores a Reqwest client; the core also uses Reqwest streaming. It cannot obtain
+the fixture's 29-package graph from an HTTP-only change. Separate driver and
+runtime-integration work is required; the existing SQLite engine API does not
+cover PostgreSQL. TLS serving and WebSockets are not used by the inspected ScT
+HTTP startup/routes, so they are lower priorities for this particular service.
+No service migration or ScT build speedup is claimed.

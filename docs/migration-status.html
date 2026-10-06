@@ -73,6 +73,13 @@
   </header>
   <main>
     <section class="note" id="shared-engine">
+      <p><strong>Engine build measurement (2026-10-06): implementation Partial; adoption Pending.</strong>
+      Three local dev-build trials of an equivalent HTTP fixture measured clean
+      medians of 7.467 s source and 3.345 s engine (55.2% less time), excluding
+      engine prebuild/download. All 18 build smoke checks passed. ScT's actual
+      middleware/static-file and PostgreSQL/Tokio/Reqwest usage means this is not
+      a service-wide result. See the
+      <a href="migration-status.md#engine-downstream-build-measurement--2026-10-06">measurement and adoption priorities</a>.</p>
       <p><strong>Engine dependency isolation guard (2026-10-06): implementation Partial; adoption Pending.</strong>
       The consumer graph check now catches Hyperlocal and native dependency
       subcrates consistently, including the scheduler's restricted Tokio policy.

@@ -1,5 +1,43 @@
 # Service migration status
 
+## Engine downstream build measurement — 2026-10-06
+
+Implementation remains **Partial**, production adoption **Pending**. Start:
+clean local master `63da312`; isolated branch `implementation/engine-build-benchmark`,
+worktree `target/worktrees/engine-build-benchmark`. Runtime/library code is unchanged.
+
+Added an equivalent source/engine JSON HTTP fixture and an opt-in reproducible
+benchmark. Three alternating trials use fresh Cargo targets, offline dev builds,
+eight jobs, incremental compilation and warm filesystem caches. The installed
+Unix-client engine is prebuilt; its build/download cost is excluded. Clean-build
+medians are 7.467 s source versus 3.345 s engine (55.2% reduction, 2.23x ratio).
+No-op medians are 0.091 versus 0.081 s; leaf-edit medians 0.309 versus 0.236 s.
+Normal/build package counts excluding fixture/library are 50 versus 29.
+All 18 builds pass actual endpoint/shutdown checks. Initial preflight exposed a
+missing loader SONAME path in the runner; fixed before the measured trials,
+then a complete preflight passed. No runtime performance or real-service speedup
+is claimed. Debug engine packaging is larger in total despite a smaller binary.
+
+See [design and reproduction](design.md#downstream-build-measurement-2026-10-06)
+and [raw results](measurements/engine-build-2026-10-06.json). Logs and targets:
+`/tmp/simple-server-build-measurement-20261006`; console log has the same prefix
+with `.log`. Engine hash, source baseline revision and fixture hashes are recorded.
+
+Both fixture configurations pass strict Clippy; fixture formatting, benchmark
+syntax/help, recorded fixture hashes, all measured engine dependency graphs,
+tracker anchors/scripts and diff whitespace checks pass. Full Rust suites and
+engine rebuild were not rerun because no runtime/library code changed.
+
+ScT was inspected read-only on its active, clean master
+`9e118e6c73db6f80b15f85fc525a1d254096a05b` (not remote HEAD). Actual production
+startup uses web::serve, application-level correlation/observation middleware,
+body-limit/header layers and a StaticDir fallback. Middleware and source-free
+correlation/tracing/static-file adapters are the next relevant HTTP gaps.
+PostgreSQL SQLx, direct Tokio APIs and Reqwest/OIDC remain independent build-cost
+contributors. No ScT files were changed, built or migrated. TLS/WebSocket serving
+was not found in the inspected startup/routes, so it is not this service's next
+blocker. No push, artifact publication or deployment.
+
 ## Engine dependency isolation guard — 2026-10-06
 
 Engine implementation remains **Partial**; production adoption remains **Pending**.
