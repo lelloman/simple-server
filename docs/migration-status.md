@@ -2,7 +2,7 @@
 
 ## Meteonesto weather-gateway engine migration — 2026-10-07
 
-**Pending integration.** Isolated branches `implementation/gateway-engine-support`
+**Done locally for Weather Gateway; overall Meteonesto engine migration remains partial.** Isolated branches `implementation/gateway-engine-support`
 and `migration/weather-gateway-engine` start from clean shared master `03e1ad3`
 and Meteonesto master `936a0fb`. Production gateway startup, server/client,
 synchronization, timers, tasks, lifecycle and logging migrate to native-backed
@@ -61,7 +61,13 @@ Retained logs: `/tmp/weather-gateway-component-check.log`,
 `/tmp/weather-gateway-engine-check.log`, `/tmp/weather-gateway-shared-clippy.log`,
 `/tmp/weather-gateway-doc.log`, `/tmp/weather-gateway-benchmark-retry.log`,
 `/tmp/weather-gateway-package.log`, `/tmp/weather-gateway-release-smoke.log`.
-No push or deployment. Branch integration follows.
+Both original master branches were rebased onto the migration branches and
+verified with ancestry and exact tested-tree equality; there were no intervening
+commits or unrelated edits. Shared implementation `a89ff24` and evidence `0ffc39b`,
+and consumer final source/evidence `a8c911d`, are integrated locally. Consumer
+temporary worktree/branch removed. Final shared tracker integration and temporary
+worktree cleanup follow this documentation-only commit. HTML local links and
+embedded JavaScript syntax pass. No push or deployment.
 
 ## Weather API SHA-256 extraction — 2026-10-07
 
