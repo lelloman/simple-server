@@ -740,3 +740,6 @@ impl fmt::Display for Elapsed {
     }
 }
 impl std::error::Error for Elapsed {}
+
+#[cfg(unix)]
+pub use signals::{UnixSignal, UnixSignalKind};

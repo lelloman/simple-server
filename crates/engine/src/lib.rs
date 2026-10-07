@@ -29,6 +29,8 @@ mod signals;
 mod tower_bridge;
 #[cfg(unix)]
 mod unix_client;
+#[cfg(unix)]
+mod unix_signals;
 
 thread_local! { static ERROR: RefCell<String> = const { RefCell::new(String::new()) }; }
 

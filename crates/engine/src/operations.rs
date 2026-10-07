@@ -73,6 +73,8 @@ pub fn resource_new(command: Value, payload: Vec<u8>) -> Result<Vec<u8>, String>
             crate::tower_bridge::resource_new(&command)
         }
         Some("middleware_next_clone") => crate::middleware::resource_new(&command),
+        #[cfg(unix)]
+        Some("unix_signal") => crate::unix_signals::install(&command),
         Some("shutdown_signals") => crate::signals::install(),
         Some("multipart_new" | "multipart_field_slot") => crate::multipart::resource_new(&command),
         #[cfg(unix)]
@@ -103,6 +105,9 @@ pub fn resource_new(command: Value, payload: Vec<u8>) -> Result<Vec<u8>, String>
             if command["no_proxy"].as_bool() == Some(true) {
                 builder = builder.no_proxy();
             }
+            if command["no_decompression"].as_bool() == Some(true) {
+                builder = builder.no_gzip().no_brotli().no_deflate().no_zstd();
+            }
             if command["no_redirect"].as_bool() == Some(true) {
                 builder = builder.redirect(reqwest::redirect::Policy::none());
             }
@@ -125,6 +130,8 @@ pub fn resource_release(kind: u32, id: u64) {
         crate::multipart::PARSER | crate::multipart::FIELD => crate::multipart::release(kind, id),
         #[cfg(unix)]
         crate::unix_client::CLIENT => crate::unix_client::release(id),
+        #[cfg(unix)]
+        crate::unix_signals::SIGNAL => crate::unix_signals::release(id),
         crate::signals::SIGNALS => crate::signals::release(id),
         1 => {
             clients().lock().unwrap().remove(&id);
@@ -155,6 +162,8 @@ pub fn operation(command: Value, body: Vec<u8>) -> Result<FutureBytes, String> {
         Some(op) if op.starts_with("multipart_") => crate::multipart::operation(command),
         #[cfg(unix)]
         Some("unix_request") => crate::unix_client::request(command),
+        #[cfg(unix)]
+        Some("unix_signal_wait") => crate::unix_signals::wait(number(&command, "id")?),
         Some("shutdown_signal_wait") => crate::signals::wait(number(&command, "id")?),
         Some(
             "server_bind" | "server_serve" | "server_body_frame" | "server_unix_bind"

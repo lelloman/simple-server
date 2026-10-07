@@ -224,7 +224,8 @@ pub mod watch;
 #[cfg(feature = "engine-io")]
 pub mod sync {
     pub use crate::watch;
-    pub use async_lock::{Mutex, MutexGuardArc, OnceCell, Semaphore, SemaphoreGuardArc};
+    pub use async_lock::{Mutex, MutexGuardArc, OnceCell, RwLock, Semaphore, SemaphoreGuardArc};
+    pub use futures_channel::oneshot;
 }
 
 /// Synchronous Zstd byte-buffer codecs implemented in the native engine.
@@ -239,3 +240,8 @@ mod logging_options;
 
 #[cfg(feature = "hashing")]
 pub mod hashing;
+
+#[cfg(all(feature = "runtime", unix))]
+pub mod signal {
+    pub use simple_server_sys::{UnixSignal, UnixSignalKind};
+}

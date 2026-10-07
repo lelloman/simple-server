@@ -22,7 +22,7 @@ resolver = "2"
 hashing = ["dep:simple-server-sys", "dep:serde_json"]
 engine-logging = ["dep:simple-server-sys", "dep:serde_json", "dep:tracing", "dep:tracing-log", "dep:tracing-core"]
 zstd = ["dep:simple-server-sys", "dep:serde_json"]
-engine-io = ["runtime", "dep:futures-util", "futures-util/io", "dep:async-lock"]
+engine-io = ["dep:futures-channel", "runtime", "dep:futures-util", "futures-util/io", "dep:async-lock"]
 source-runtime = ["dep:tokio", "tokio/macros", "tokio/net", "tokio/signal", "tokio/sync", "tokio/time"]
 task-policy-core = []
 engine-scheduling = ["engine-tasks", "task-policy-core", "dep:tokio", "tokio/sync", "tokio/macros", "dep:cron", "dep:chrono", "dep:rand"]
@@ -79,6 +79,7 @@ ws = ["http", "axum/ws", "futures-util?/sink"]
 sse = ["web", "axum/json"]
 
 [dependencies]
+futures-channel = { version = "0.3", optional = true }
 tracing-core = { version = "0.1", optional = true }
 tracing-log = { version = "0.2", optional = true }
 async-lock = { version = "3.4", optional = true }

@@ -1,5 +1,17 @@
 # Service migration status
 
+## Meteonesto weather-gateway engine migration — 2026-10-07
+
+**Pending integration.** Isolated branches `implementation/gateway-engine-support`
+and `migration/weather-gateway-engine` start from clean shared master `03e1ad3`
+and Meteonesto master `936a0fb`. Production gateway startup, server/client,
+synchronization, timers, tasks, lifecycle and logging migrate to native-backed
+interfaces. JWT/JWKS validation, rate/access policy, deadlines and response limits
+remain application-owned. Shared additions cover repeatable Unix signals,
+reader/writer locks, one-shot channels and explicit client no-decompression.
+See [compatibility contract](engine-application-runtime.md#gateway-runtime-and-client-compatibility).
+Baseline and final verification, packaging, measurements and integration follow.
+
 ## Weather API SHA-256 extraction — 2026-10-07
 
 **Done locally for Weather API; other consumers unchanged.** Isolated branches `implementation/engine-hashing` and

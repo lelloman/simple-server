@@ -195,3 +195,24 @@ The implementation adds commands and resource kind 22 without changing the ABI
 table. Use matching pinned engine/source artifacts; older engines return an
 unsupported-command error through the fallible APIs. This migration covers
 Weather API only, not other services or existing host postgres-client hashing.
+
+## Gateway runtime and client compatibility
+
+The `runtime` feature exports `signal::UnixSignal` / `UnixSignalKind` on Unix.
+Install a repeatable Hangup, Interrupt or Terminate receiver inside an engine
+runtime; `recv` returns an I/O error if the receiver closes. Cancelled waits can
+be followed by another wait. Dropping a receiver releases it but does not restore
+the process-wide default signal disposition (matching Tokio). These additive
+commands use resource kind 23 without an ABI table change. Existing one-shot
+shutdown `Signals` remain unchanged.
+
+`engine-io` also exports runtime-independent `sync::RwLock` and `sync::oneshot`.
+`client::ClientBuilder::no_decompression` explicitly disables gzip, Brotli,
+deflate and Zstd response decoding, preserving bytes even if native dependency
+features later enable those codecs. This is separate from redirect/proxy policy,
+which remains configured by the application.
+
+Weather Gateway uses these alongside the existing engine HTTP server/client,
+entry point, synchronization, timers, tasks, lifecycle and logging. Access-token
+JWT/JWKS verification and issuer/audience/key-refresh policy remain application
+code; this is not the authorization-code OIDC helper used by ScT.

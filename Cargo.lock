@@ -1089,6 +1089,7 @@ dependencies = [
  "cron",
  "flate2",
  "form_urlencoded",
+ "futures-channel",
  "futures-util",
  "governor 0.10.4",
  "governor 0.6.3",

@@ -142,6 +142,11 @@ impl ClientBuilder {
         self.config["no_proxy"] = true.into();
         self
     }
+    /// Disable automatic response decompression, preserving upstream bytes.
+    pub fn no_decompression(mut self) -> Self {
+        self.config["no_decompression"] = true.into();
+        self
+    }
     pub fn no_redirect(mut self) -> Self {
         self.config["no_redirect"] = true.into();
         self
