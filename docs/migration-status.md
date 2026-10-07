@@ -6,7 +6,7 @@ The prebuilt `.so` experiment is abandoned. Its build savings did not justify
 maintaining the ABI, artifact distribution and runtime loading machinery.
 The ordinary source-linked simple-server library remains supported.
 
-Rollback integration and verification are in progress in isolated worktrees:
+The removal is verified and integrated locally from isolated worktrees:
 
 | Repository | Development branch | Restored source baseline |
 | --- | --- | --- |
@@ -27,6 +27,38 @@ Earlier engine implementation checkpoints are available in Git history.
 Raw build measurements remain in [measurements](measurements/) as historical
 experimental evidence, not current adoption or current performance claims.
 The source-library adoption records below remain applicable.
+
+Shared-library removal `38b2ea8` and Meteonesto rollback `fad131d` are
+integrated into local `master`. ScT rollback `bc936ef` is also integrated into
+local `master`. Both consumer development trees equal their tested rollback
+trees and exact pre-engine baselines, with rollback ancestry verified. Their
+temporary worktrees and branches have been removed. The shared tracker-only
+follow-up is integrated after validation; shared worktree cleanup follows.
+
+Verification:
+
+- Shared library: complete source-only `scripts/check` passes, including feature
+  matrices, formatting, strict Clippy, tests/examples/fixtures and strict rustdoc.
+- Weather API: complete component checks pass (75 Rust and 15 Python tests,
+  build, lint, sync and systemd validation).
+- Weather Gateway: complete component checks pass (33 Rust tests, one ignored
+  serving E2E); that serving E2E passes when explicitly run against Weather API.
+- ScT: formatting, strict all-target/all-feature Clippy, workspace build and
+  workspace tests pass (61 passed, 92 intentionally ignored).
+- ScT's broader PostgreSQL run: 64 passed and two failed. The exact restored
+  baseline contains a migration-name mismatch (`draft_names` versus SQLx's
+  `draft names`); another test timed out acquiring a database connection.
+  The timeout test passes when retried alone. All 12 applicable server integration
+tests pass in a separate disposable PostgreSQL run using the repository's
+qualification/real-transfer exclusions. An initial follow-up accidentally
+included four qualification tests without their required fixture environment;
+that invocation was corrected before recording the passing server result.
+- ScT S3 conformance could not start: the pinned MinIO image pull returns
+  `unauthorized`. Frontend/browser and full production packaging checks were
+  not rerun. This is not a claim that ScT's complete check script passes.
+- Rebuilt ScT, Weather API and Gateway executables have no engine dependency
+  or custom RPATH/RUNPATH. Active source/build references to the engine are
+  removed. Tracker local links and embedded JavaScript validate.
 
 No publication, push or deployment is part of this removal.
 
