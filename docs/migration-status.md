@@ -2,7 +2,7 @@
 
 ## Pezzottify native engine migration — 2026-10-07
 
-**Pending integration; implementation and scoped verification complete.** Active development branch is `dev`,
+**Done locally for Pezzottify runtime/HTTP/logging; SQLite/search and OIDC verification remain local.** Active development branch is `dev`,
 initially clean at `7f54cb6e`. Baseline default-feature tests pass **1,561**, with
 38 existing ignores. Formatting passes. Initial strict Clippy was interrupted
 when the user accidentally removed both temporary worktrees; no source finding
@@ -30,7 +30,19 @@ full browser/Android Docker E2E is not run. Source pin `f21dbfe`.
 Normal/build graph: 361 → 328 package/version entries (340 → 307 names).
 Consumer implementation `0b666437`; final release wrapper, graph/link checks and
 relocated bundle loading without LD_LIBRARY_PATH pass. Synchronous cli-auth and
-query_search_index do not link an unused engine. Branch integration remains pending.
+query_search_index do not link an unused engine.
+
+Both original development branches were rebased onto their migration branches;
+ancestry and exact tested-tree equality passed, with clean original checkouts.
+Pezzottify dev ends at `d9c4c293` (implementation `0b666437`, packaging/measurements
+`ced628ea`). Shared implementation is `f21dbfe`, verification record `e99e6ac`.
+The concurrent frontend commit `5fab6e4f` is preserved. The consumer temporary
+worktree and fully integrated branch have been removed. The shared tracker
+worktree remains only until this final tracker commit is integrated and verified,
+then is removed with its fully integrated temporary branch. Pre-existing
+worktrees are untouched. Native artifact and relocated binaries remain at
+`/tmp/pezzottify-engine-artifact` and `/tmp/pezzottify-engine-release`; raw build logs
+remain under `/tmp/pezzottify-benchmark`.
 No push/deployment.
 
 Three alternating paired fresh-target builds per profile, eight jobs, Rust 1.96.0,
