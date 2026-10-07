@@ -2,7 +2,7 @@
 
 ## Weather API logging extraction — 2026-10-07
 
-**Pending integration.** Isolated branches `implementation/engine-logging` and
+**Done locally for Weather API; other consumers unchanged.** Isolated branches `implementation/engine-logging` and
 `migration/weather-api-logging` start from shared master `44f51d1` and
 Meteonesto master `115d8a5`. Production startup actually switches from source
 logging to `engine_logging`; tracing-subscriber remains only a dev dependency
@@ -11,9 +11,36 @@ tracing macros and the lightweight log bridge remain host-side.
 The 288-case comparison covers production lossy parsing and the strict test
 policy, formats, destinations, colours, log messages and span-field filters.
 Shared contracts cover values, parent lifetimes, clones, threads and global
-initialization. Full checks and measurements are recorded below; integration remains pending.
+initialization. Full checks and measurements are recorded below.
 See [contract and limits](engine-application-runtime.md#engine-owned-logging).
 
+
+Production adoption is integrated into both original master branches by rebase,
+with ancestry and exact tested-tree verification. Neither original checkout had
+concurrent commits or unrelated edits. Shared implementation pin is
+`1eea6d9dc56f1279374b653e0476b2fd69899ca9`; shared measurements commit `fc59eea`.
+Consumer implementation is `f0f75cf`, final evidence/release source
+`adefda9f8961991a5a36211960dbdb4d7937ab09`. The consumer temporary worktree and
+branch have been removed; final shared tracker integration and cleanup follow
+this evidence commit. No push or deployment was performed.
+
+The clean-source package is retained at
+`/tmp/weather-logging-release/weather-api-v0.1.0-gadefda9f8961.tar.zst`.
+Bundle SHA256: `839d8beb27674686fe10807456f59e9f973b7c8da26e7f85f18c75ea2d7c1685`.
+Native artifact/metadata: `/tmp/weather-logging-artifact`, SHA256
+`3590387a1f87bd03fabc03ac4440fed19c91fd43d44436cc9389ad42987bca61`.
+Extracted schema-2 release verification and both lifecycle tests pass: real HTTP,
+cache-worker drain, SIGINT/SIGTERM, invalid configuration and bind failure. The
+production symlink topology loads the bundled `.so.1` with loader overrides
+unset. Release scripts reran all component checks successfully.
+
+Retained logs: `/tmp/weather-logging-baseline.log`,
+`/tmp/weather-logging-service-check.log`, `/tmp/weather-logging-engine-check.log`,
+`/tmp/weather-logging-contracts.log`, `/tmp/weather-logging-source-tests.log`,
+`/tmp/weather-logging-clippy.log`, `/tmp/weather-logging-native-clippy.log`,
+`/tmp/weather-logging-doc.log`, `/tmp/weather-logging-package.log`,
+`/tmp/weather-logging-release-smoke.log`, `/tmp/weather-logging-benchmark.log`.
+Tracker relative links and embedded JavaScript syntax were checked.
 
 ## Native logging follow-up — 2026-10-07
 
@@ -48,8 +75,7 @@ Release paired clean savings range from 1.004s to 3.217s; baseline timing varies
 so the median percentage is not a universal guarantee. Incremental release
 rebuilds are slightly slower. This primarily benefits clean downstream builds.
 [Raw measurements](measurements/weather-api-logging-build-2026-10-07.json) are mirrored in both repositories.
-Release packaging and final development-branch integration evidence are recorded
-in the central simple-server migration tracker.
+Release packaging and development-branch integration evidence appear above.
 
 ## Weather API Zstd extraction — 2026-10-07
 
