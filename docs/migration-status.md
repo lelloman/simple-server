@@ -9,7 +9,52 @@ manifest/grid digests, ETags, map assets and edge-token handling. The native
 implementation retains sha2 0.10.9 and exposes buffer and buffered incremental
 hashing. Authentication uses fallible hashing and rejects backend failure.
 Other consumers are unchanged. See [contract and limits](engine-application-runtime.md#engine-owned-sha-256).
-Verification, measurements and integration evidence follow.
+Verification and measurements appear below; integration remains pending.
+
+
+## Native SHA-256 follow-up — 2026-10-07
+
+All production SHA-256 sites use simple-server's native hashing: artifact and
+manifest integrity, grid fingerprints, map names, ETags and edge tokens.
+Canonical JSON and grid byte ordering remain application-owned. Incremental
+hashing coalesces small writes into 8 KiB chunks; the existing manifest
+memory-bound test passes. Authentication rejects backend hashing failure; config
+and streaming manifest validation propagate errors. Convenience methods panic
+on an incompatible/failed engine rather than fabricate a digest. Gateway and
+pipeline are unchanged. The same sha2 0.10.9 algorithm lives inside the engine;
+normal/build dependencies fall 76 → 67 package/version entries (74 → 65 names).
+The SHA-256 stack is removed from the service lockfile, not just hidden in tests.
+
+Shared source pin: `86110e7822b771d61640085a6ae860be52ffe898`.
+Consumer implementation: `9f5060a74131e1ccb53fdff13d7cb464370356d2`.
+Baseline component checks pass 75 Rust and 18 Python tests; final checks pass
+76 Rust and 18 Python tests, strict Clippy/formatting, native dependency/ELF
+guards, systemd verification and unchanged-publication sync fixtures.
+Shared tests were observed failing against the previous engine, then pass with
+the implementation: standard SHA-256 vectors, independent sha256sum references,
+padding/buffer boundaries, Write/flush, concurrent independent states and drops.
+Host failure poisoning and native stale-handle/finalize/release tests also pass.
+Full engine checks, all-feature/all-target Clippy and warnings-denied rustdoc
+pass. Three external PostgreSQL-fixture tests remain ignored. Golden grid hashes
+were independently generated with Python hashlib over big-endian f64 bytes.
+
+Three alternating paired fresh-target builds per profile, eight jobs, Rust
+1.97.1, cached offline downloads and the same prebuilt engine on both sides;
+no concurrent verification builds. Baseline already uses native runtime, HTTP,
+Zstd and logging. Engine prebuild cost is excluded. Edit means main.rs timestamp
+only, not a semantic edit. Native engine build uses Rust 1.96.0.
+
+| Profile | Clean before | Clean native hashing | Saving | Timestamp-only rebuild before / after |
+| --- | ---: | ---: | ---: | ---: |
+| dev | 8.702s | 8.554s | 1.70% | 0.802s / 0.810s |
+| release | 10.336s | 10.014s | 3.12% | 4.522s / 4.308s |
+
+These are small changes: the release median saves about 0.32s, dev about 0.15s;
+normal run-to-run variation limits conclusions. This is a reusable shared hashing
+boundary, not a major additional compile-time win. Buffer copies and ABI calls
+add runtime overhead; runtime throughput has not been benchmarked.
+[Raw measurements](measurements/weather-api-hashing-build-2026-10-07.json) are mirrored in both repositories.
+Release and final integration evidence are recorded in the central migration tracker.
 
 ## Weather API logging extraction — 2026-10-07
 

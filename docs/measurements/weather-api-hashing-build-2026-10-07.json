@@ -1,0 +1,146 @@
+{
+  "dev": {
+    "profile": "dev",
+    "trials": [
+      {
+        "trial": 1,
+        "backend": "before",
+        "clean_seconds": 8.561762124998495,
+        "edit_seconds": 0.7938893550017383
+      },
+      {
+        "trial": 1,
+        "backend": "after",
+        "clean_seconds": 8.537766003006254,
+        "edit_seconds": 0.7959260539937532
+      },
+      {
+        "trial": 2,
+        "backend": "after",
+        "clean_seconds": 8.852254946003086,
+        "edit_seconds": 0.8375449179875432
+      },
+      {
+        "trial": 2,
+        "backend": "before",
+        "clean_seconds": 9.017264526002691,
+        "edit_seconds": 0.866316067011212
+      },
+      {
+        "trial": 3,
+        "backend": "before",
+        "clean_seconds": 8.701846452007885,
+        "edit_seconds": 0.8021319730032701
+      },
+      {
+        "trial": 3,
+        "backend": "after",
+        "clean_seconds": 8.554184407999855,
+        "edit_seconds": 0.8100264079985209
+      }
+    ],
+    "cargo_build_jobs": 8,
+    "baseline_revision": "adefda9f8961991a5a36211960dbdb4d7937ab09",
+    "library_revision": "86110e7822b771d61640085a6ae860be52ffe898",
+    "consumer_revision": "9f5060a74131e1ccb53fdff13d7cb464370356d2",
+    "system": "Linux-6.8.0-142-generic-x86_64-with-glibc2.39",
+    "rustc": "rustc 1.97.1 (8bab26f4f 2026-07-14)\nbinary: rustc\ncommit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452\ncommit-date: 2026-07-14\nhost: x86_64-unknown-linux-gnu\nrelease: 1.97.1\nLLVM version: 22.1.6\n",
+    "prebuilt_engine_cost_included": false,
+    "engine_sha256": "3f9ac1525de5b3a2a4df199990718be86faba621df589cd7e58c96eb7b306687",
+    "method": "Three alternating paired fresh-target builds, cached offline downloads, eight jobs; no concurrent verification builds. Hashing-only migration: both versions already use the engine runtime, HTTP, Zstd and logging; both link the same new engine artifact.",
+    "edit": "main.rs timestamp only; no semantic change",
+    "dependency_packages": {
+      "before": {
+        "package_version_entries": 76,
+        "unique_names": 74
+      },
+      "after": {
+        "package_version_entries": 67,
+        "unique_names": 65
+      }
+    },
+    "medians": {
+      "before": {
+        "clean_seconds": 8.701846452007885,
+        "edit_seconds": 0.8021319730032701
+      },
+      "after": {
+        "clean_seconds": 8.554184407999855,
+        "edit_seconds": 0.8100264079985209
+      }
+    },
+    "clean_reduction_percent": 1.6969047296158335
+  },
+  "release": {
+    "profile": "release",
+    "trials": [
+      {
+        "trial": 1,
+        "backend": "before",
+        "clean_seconds": 10.18895269400673,
+        "edit_seconds": 4.5221824159962125
+      },
+      {
+        "trial": 1,
+        "backend": "after",
+        "clean_seconds": 9.899309104002896,
+        "edit_seconds": 4.313915164995706
+      },
+      {
+        "trial": 2,
+        "backend": "after",
+        "clean_seconds": 10.013613165006973,
+        "edit_seconds": 4.308019390999107
+      },
+      {
+        "trial": 2,
+        "backend": "before",
+        "clean_seconds": 10.936848988989368,
+        "edit_seconds": 4.568335404997924
+      },
+      {
+        "trial": 3,
+        "backend": "before",
+        "clean_seconds": 10.335703203003504,
+        "edit_seconds": 4.487243358002161
+      },
+      {
+        "trial": 3,
+        "backend": "after",
+        "clean_seconds": 10.041649662001873,
+        "edit_seconds": 4.2758670979965245
+      }
+    ],
+    "cargo_build_jobs": 8,
+    "baseline_revision": "adefda9f8961991a5a36211960dbdb4d7937ab09",
+    "library_revision": "86110e7822b771d61640085a6ae860be52ffe898",
+    "consumer_revision": "9f5060a74131e1ccb53fdff13d7cb464370356d2",
+    "system": "Linux-6.8.0-142-generic-x86_64-with-glibc2.39",
+    "rustc": "rustc 1.97.1 (8bab26f4f 2026-07-14)\nbinary: rustc\ncommit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452\ncommit-date: 2026-07-14\nhost: x86_64-unknown-linux-gnu\nrelease: 1.97.1\nLLVM version: 22.1.6\n",
+    "prebuilt_engine_cost_included": false,
+    "engine_sha256": "3f9ac1525de5b3a2a4df199990718be86faba621df589cd7e58c96eb7b306687",
+    "method": "Three alternating paired fresh-target builds, cached offline downloads, eight jobs; no concurrent verification builds. Hashing-only migration: both versions already use the engine runtime, HTTP, Zstd and logging; both link the same new engine artifact.",
+    "edit": "main.rs timestamp only; no semantic change",
+    "dependency_packages": {
+      "before": {
+        "package_version_entries": 76,
+        "unique_names": 74
+      },
+      "after": {
+        "package_version_entries": 67,
+        "unique_names": 65
+      }
+    },
+    "medians": {
+      "before": {
+        "clean_seconds": 10.335703203003504,
+        "edit_seconds": 4.5221824159962125
+      },
+      "after": {
+        "clean_seconds": 10.013613165006973,
+        "edit_seconds": 4.308019390999107
+      }
+    },
+    "clean_reduction_percent": 3.116285671815089
+  }
+}
