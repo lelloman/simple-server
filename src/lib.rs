@@ -236,3 +236,6 @@ pub mod zstd;
 pub mod engine_logging;
 #[cfg(any(feature = "logging", feature = "engine-logging"))]
 mod logging_options;
+
+#[cfg(feature = "hashing")]
+pub mod hashing;

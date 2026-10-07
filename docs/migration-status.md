@@ -1,5 +1,16 @@
 # Service migration status
 
+## Weather API SHA-256 extraction — 2026-10-07
+
+**Pending integration.** Isolated branches `implementation/engine-hashing` and
+`migration/weather-api-hashing` start from clean shared master `0279af5` and
+Meteonesto master `adefda9`. Actual production hashes cover artifact checks,
+manifest/grid digests, ETags, map assets and edge-token handling. The native
+implementation retains sha2 0.10.9 and exposes buffer and buffered incremental
+hashing. Authentication uses fallible hashing and rejects backend failure.
+Other consumers are unchanged. See [contract and limits](engine-application-runtime.md#engine-owned-sha-256).
+Verification, measurements and integration evidence follow.
+
 ## Weather API logging extraction — 2026-10-07
 
 **Done locally for Weather API; other consumers unchanged.** Isolated branches `implementation/engine-logging` and

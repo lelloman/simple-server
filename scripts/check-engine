@@ -16,6 +16,8 @@ cargo test --locked --no-default-features --features runtime,client,process,sqli
 cargo test --locked --no-default-features --features engine-io,process,postgres-client --lib --test engine_files --test engine_postgres
 cargo test --locked --no-default-features --features oidc,engine-web --test engine_oidc
 cargo test --locked --no-default-features --features zstd --test engine_zstd
+cargo test --locked --no-default-features --features hashing --lib --test engine_hashing
+cargo test --locked --manifest-path crates/engine/Cargo.toml --target-dir target/engine hashing::tests
 cargo test --locked --no-default-features --features engine-logging,logging --test engine_logging
 cargo test --locked --no-default-features --features engine-web,client --test engine_callback_drop
 cargo test --locked --no-default-features --features engine-tokio,engine-tracing,correlation-core,client --test engine_host_adapters
@@ -23,6 +25,7 @@ cargo run --locked --manifest-path tests/fixtures/engine_consumer/Cargo.toml
 cargo run --locked --manifest-path tests/fixtures/engine_consumer/Cargo.toml --bin http
 cargo run --locked --manifest-path tests/fixtures/engine_consumer/Cargo.toml --bin oidc
 cargo run --locked --manifest-path tests/fixtures/engine_consumer/Cargo.toml --bin zstd
+cargo run --locked --manifest-path tests/fixtures/engine_consumer/Cargo.toml --bin hashing
 cargo run --locked --manifest-path tests/fixtures/engine_consumer/Cargo.toml --bin logging
 cargo fmt --manifest-path tests/fixtures/engine_drivers/Cargo.toml --check
 cargo run --locked --manifest-path tests/fixtures/engine_drivers/Cargo.toml

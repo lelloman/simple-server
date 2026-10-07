@@ -166,3 +166,32 @@ The engine requires the logging commands added by this change; older native
 artifacts return an initialization error. No ABI table layout change is required.
 Applications should pin matching source/artifact revisions. Weather API is the
 first migrated consumer; other services are unchanged.
+
+## Engine-owned SHA-256
+
+The optional `hashing` feature exposes `hashing::Sha256` without a host crypto
+implementation. The native engine retains SHA-256 from sha2 0.10.9; only framed
+bytes, numeric resource IDs and the 32-byte result cross the stable C ABI. No
+runtime is required. `Digest` converts to `[u8; 32]`, exposes a byte slice and
+supports lowercase hex formatting.
+
+`try_digest`, `try_new`, `try_update` and `try_finalize` return backend errors.
+The `std::io::Write` implementation is also fallible. `digest`, `new`, `update`
+and `finalize` are convenience methods that panic if the engine cannot perform
+the operation; they never substitute an empty/partial digest. Authentication
+callers should use the fallible methods and reject on failure. Once an update
+fails, the state is poisoned and cannot be finalized or retried.
+
+Incremental updates coalesce small writes into an 8 KiB buffer, preserving their
+byte order. `flush` sends pending bytes without finalizing. Finalization consumes
+the hasher; drop releases unfinished native state without hashing pending bytes.
+Independent hashers do not share digest state or a lock during hashing. The
+host does not retain the complete input when used as a streaming writer. Whole
+buffer calls and large updates copy their input across the ABI; these APIs are
+synchronous and not zero-copy. Use blocking workers for large async workloads.
+No runtime throughput improvement is claimed.
+
+The implementation adds commands and resource kind 22 without changing the ABI
+table. Use matching pinned engine/source artifacts; older engines return an
+unsupported-command error through the fallible APIs. This migration covers
+Weather API only, not other services or existing host postgres-client hashing.

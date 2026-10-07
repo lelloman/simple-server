@@ -609,3 +609,8 @@ Production entry points should use the engine directly, not this test bridge.
 
 The optional `engine-logging` feature puts filtering and formatting in the shared
 engine while retaining host tracing callsites. See [logging semantics and limits](docs/engine-application-runtime.md#engine-owned-logging).
+
+### Native SHA-256
+
+The optional `hashing` feature provides buffer and buffered incremental SHA-256
+through the shared engine. See [API, errors and memory behavior](docs/engine-application-runtime.md#engine-owned-sha-256).

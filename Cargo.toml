@@ -19,6 +19,7 @@ default-members = ["."]
 resolver = "2"
 
 [features]
+hashing = ["dep:simple-server-sys", "dep:serde_json"]
 engine-logging = ["dep:simple-server-sys", "dep:serde_json", "dep:tracing", "dep:tracing-log", "dep:tracing-core"]
 zstd = ["dep:simple-server-sys", "dep:serde_json"]
 engine-io = ["runtime", "dep:futures-util", "futures-util/io", "dep:async-lock"]

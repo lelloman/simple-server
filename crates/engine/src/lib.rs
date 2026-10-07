@@ -1,4 +1,5 @@
 //! Privately linked implementation of the simple-server binary interface.
+mod hashing;
 mod logging;
 mod oidc;
 mod postgres;

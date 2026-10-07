@@ -13,6 +13,7 @@ name = "simple_server_engine"
 crate-type = ["cdylib"]
 
 [dependencies]
+sha2 = "=0.10.9"
 tracing = "0.1"
 tracing-core = "0.1"
 tracing-log = "0.2"
