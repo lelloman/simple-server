@@ -73,10 +73,21 @@
   </header>
   <main>
     <section class="note" id="shared-engine">
-      <p><strong>Weather API Zstd extraction (2026-10-07): Pending verification/integration.</strong>
-      Native buffer codecs replace three production decode sites and fixture encoding.
-      Baseline: 75 Rust and 18 Python tests pass. Weather-pipeline is a future
-      buffer-codec consumer; streaming backups/archive extraction remain outside scope.
+      <p><strong>Weather API Zstd extraction (2026-10-07): Done locally.</strong>
+      Three production decode sites and fixture encoding use native buffer codecs;
+      the host graph drops 95 → 86 package/version entries with no Zstd/C build stack.
+      Baseline and final 75 Rust/18 Python tests, strict checks, five new codec
+      contracts and full engine checks pass (three external PostgreSQL fixtures
+      remain ignored). Standalone codec calls and packaged-release HTTP/signals
+      pass, including execution against the extracted engine. Three paired builds
+      per profile show dev 9.97s → 9.38s (5.96%) and release 18.50s → 11.22s
+      (39.34%), excluding prebuild. Timestamp rebuilds: 0.86s → 0.85s dev,
+      4.53s → 4.25s release. Shared <code>7a628d9</code> and consumer
+      <code>115d8a5</code> are integrated into local master; consumer cleanup is
+      complete and shared evidence cleanup follows this commit. Weather-pipeline
+      buffer operations are a future reuse candidate; streaming backups/agent
+      archives require an extension. Other consumers are unchanged; no deployment.
+      <a href="measurements/weather-api-zstd-build-2026-10-07.json">Measurements</a>.
       <a href="migration-status.md#weather-api-zstd-extraction--2026-10-07">Evidence</a>.</p>
       <p><strong>Meteonesto weather-api engine migration (2026-10-07): Weather API Done locally; overall Meteonesto engine Partial.</strong>
       Production entry point, HTTP, lifecycle, filesystem and workers use the shared
@@ -554,7 +565,7 @@
       {name: 'fausto', databaseSchema: 'done', databaseMigrations: 'done', databaseSqlite: 'done', routing: 'done', axumObservations: "None.", rateLimit: 'done', auth: 'done', tasks: 'done', scheduling: 'done', taskPolicies: 'na', health: 'done', cors: 'done', responseHeaders: 'done', bodyLimit: 'na', tracing: 'done', logging: 'done', correlation: 'done', components: 'server · HTTP, WebSockets, event workers, jobs and plugin cleanup', axum: 'done', lifecycle: 'done'},
       {name: 'lello-auth', databaseSchema: 'na', databaseMigrations: 'done', databaseSqlite: 'done', routing: 'done', axumObservations: "None.", rateLimit: 'done', auth: 'done', tasks: 'done', scheduling: 'done', taskPolicies: 'done', health: 'done', cors: 'na', responseHeaders: 'done', bodyLimit: 'done', tracing: 'na', correlation: 'na', logging: 'done', components: 'server · axum · examples (CORS: Caddy-owned; no Rust migration)', axum: 'done', lifecycle: 'done'},
       {name: 'lellostore', databaseSchema: 'na', databaseMigrations: 'done', databaseSqlite: 'na', routing: 'done', axumObservations: "None.", rateLimit: 'na', auth: 'done', tasks: 'done', scheduling: 'na', taskPolicies: 'na', health: 'done', cors: 'done', responseHeaders: 'na', bodyLimit: 'done', tracing: 'done', correlation: 'na', logging: 'done', components: 'backend (lifecycle: local adoption)', axum: 'done', lifecycle: 'done'},
-      {name: 'meteonesto', databaseSchema: 'na', databaseMigrations: 'done', databaseSqlite: 'done', routing: 'done', axumObservations: "None.", rateLimit: 'done', auth: 'done', tasks: 'na', scheduling: 'done', taskPolicies: 'done', health: 'done', cors: 'na', responseHeaders: 'done', bodyLimit: 'done', tracing: 'na', logging: 'done', correlation: 'done', components: 'weather API/cache (engine HTTP/runtime) · gateway/refresh · ordered pipeline drain (03b: pipeline/gateway)', axum: 'done', lifecycle: 'done'},
+      {name: 'meteonesto', databaseSchema: 'na', databaseMigrations: 'done', databaseSqlite: 'done', routing: 'done', axumObservations: "None.", rateLimit: 'done', auth: 'done', tasks: 'na', scheduling: 'done', taskPolicies: 'done', health: 'done', cors: 'na', responseHeaders: 'done', bodyLimit: 'done', tracing: 'na', logging: 'done', correlation: 'done', components: 'weather API/cache (engine HTTP/runtime/Zstd) · gateway/refresh · ordered pipeline drain (03b: pipeline/gateway)', axum: 'done', lifecycle: 'done'},
       {name: 'observo', databaseSchema: 'done', databaseMigrations: 'na', databaseSqlite: 'done', routing: 'done', axumObservations: "None.", rateLimit: 'na', auth: 'done', tasks: 'done', scheduling: 'done', taskPolicies: 'na', health: 'na', cors: 'done', responseHeaders: 'na', bodyLimit: 'done', tracing: 'na', correlation: 'na', logging: 'done', components: 'HTTP · scheduler · server tasks · webhook drain; extractor logging', axum: 'done', lifecycle: 'done'},
       {name: 'paranza', databaseSchema: 'done', databaseMigrations: 'na', databaseSqlite: 'na', routing: 'done', axumObservations: "None.", rateLimit: 'na', auth: 'done', tasks: 'na', scheduling: 'na', taskPolicies: 'na', health: 'done', cors: 'na', responseHeaders: 'na', bodyLimit: 'na', tracing: 'na', correlation: 'na', logging: 'na', components: 'HTTP · runner sessions · PCM maintenance', axum: 'done', lifecycle: 'done'},
       {name: 'peerlo', databaseSchema: 'done', databaseMigrations: 'na', databaseSqlite: 'na', routing: 'done', axumObservations: "None.", rateLimit: 'done', auth: 'done', tasks: 'na', scheduling: 'na', taskPolicies: 'done', health: 'done', cors: 'done', responseHeaders: 'na', bodyLimit: 'na', tracing: 'done', correlation: 'na', components: 'HTTP · ordered subsystem cleanup', axum: 'done', lifecycle: 'done', logging: 'done'},

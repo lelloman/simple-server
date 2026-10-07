@@ -594,6 +594,12 @@ kill-on-drop and child reaping; `process::Command` remains the native buffered
 output interface. `client` supports streaming responses and connection/read/total
 timeouts, redirects disabled explicitly, and HTTPS-only policy.
 
+The optional `zstd` feature provides synchronous buffer compression/decompression
+through the engine, including an explicit decoded-output limit. No host Zstd
+crate or runtime is needed. It requires the Zstd-enabled engine source pinned by
+the consumer; older published engines do not implement these commands.
+See [codec semantics and reuse scope](docs/engine-application-runtime.md#zstd-buffer-codecs).
+
 For independent Tokio-based **test fixtures**, `#[simple_server::test(host_runtime = true)]`
 requires Tokio as a dev-dependency and polls the test in an engine scope. Spawned
 fixture tasks must explicitly carry `Runtime::try_current()?.scope(future)`.

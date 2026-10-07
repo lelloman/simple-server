@@ -2,14 +2,93 @@
 
 ## Weather API Zstd extraction — 2026-10-07
 
-**Pending verification/integration.** From clean shared master `d14db1f` and
-Meteonesto master `fa25b76`, isolated sibling worktrees under
-`/tmp/weather-zstd-migration` implement native buffer codecs and migrate Weather
-API's three production decompression sites and test fixture encoding. Baseline
-component checks pass 75 Rust and 18 Python tests. Weather-pipeline uses matching
-buffer operations and is a future consumer; streaming backups/agent archives need
-a separate streaming API. Other services are not migrated. Build/release evidence
-and final integration remain pending.
+**Weather API Zstd adoption Done locally; other consumers not migrated.** From
+clean shared master `d14db1f` and Meteonesto master `fa25b76`, isolated sibling
+worktrees under `/tmp/weather-zstd-migration` used branches
+`implementation/engine-zstd` and `migration/weather-api-zstd`.
+
+Shared `zstd` exposes synchronous `encode_all`, `decode_all` and
+`decode_all_limited` buffer APIs, with no runtime requirement or host codec
+implementation. The native lock retains the existing zstd 0.13.3 / zstd-safe
+7.2.4 / zstd-sys 2.0.16 (Zstd 1.5.7). Binary payloads use the existing framed ABI;
+no function-table change. Calls copy buffers and are not streaming/zero-copy.
+The optional bound limits expanded output length, not decoder window memory or
+CPU. See [codec semantics](engine-application-runtime.md#zstd-buffer-codecs).
+
+Weather API's three production decompression sites and fixture encoder now call
+the native codec. Application artifact length/hash checks, JSON/schema validation
+and its existing unbounded expanded-output policy are preserved. Compression
+continues on the existing blocking paths. Production normal/build package/version
+entries fall **95 → 86**, unique names **93 → 84**; the Zstd family and its C build
+tools leave the host graph. The service and standalone shared dependency guards
+reject Zstd implementations leaking back into the host.
+
+Baseline and migrated complete component checks pass **75 Rust and 18 Python
+tests**, strict Clippy/formatting, native linking, systemd verification and the
+unchanged-publication synchronization fixture. Shared all-target/all-feature
+Clippy, warnings-denied rustdoc and complete engine checks pass; the three
+PostgreSQL external-fixture tests remain explicitly ignored. New codec contracts
+were observed failing against the old engine, then all **five** pass: independent
+CLI reference data, levels/empty/binary buffers, concatenated/skippable frames,
+corruption/truncation/trailing data, exact output limits and concurrent calls
+without a runtime. A standalone consumer calls the codec with no host Zstd stack.
+Logs: `/tmp/weather-zstd-baseline.log`, `/tmp/weather-zstd-red.log`,
+`/tmp/weather-zstd-contracts.log`, `/tmp/weather-zstd-service-tests.log`,
+`/tmp/weather-zstd-full-check.log`. The full shared check run completed with exit
+zero in the tool session; it was not redirected into a retained full log.
+
+Shared source pin/implementation: `7a628d9c985dd32b8a626c301ca553acffa009a3`.
+Consumer implementation: `717ebadf304ed86aecd761ecd25803c6d0e564f0`;
+consumer evidence/release source: `115d8a57356e4520c4598bb12b22dd288eec6e27`.
+Both original master branches were rebased onto their migrations, with ancestry
+and exact tested-tree checks passing. Original worktrees stayed clean and had no
+concurrent commits. The consumer temporary worktree/branch is removed; shared
+final-evidence integration and cleanup follow this tracker commit.
+
+Three alternating paired fresh-target builds per profile, eight jobs, Rust 1.97.1
+and cached offline downloads isolate the Zstd change. Both sides already use the
+engine runtime/HTTP and link the same new engine, prebuilt with Rust 1.96.0.
+Engine prebuild cost is excluded; no concurrent verification builds ran.
+
+| Profile | Clean before | Clean native Zstd | Saving | Timestamp-only rebuild before / after |
+| --- | ---: | ---: | ---: | ---: |
+| Dev | 9.971s | 9.377s | 5.96% | 0.860s / 0.852s |
+| Release | 18.497s | 11.219s | 39.34% | 4.527s / 4.253s |
+
+These are medians, not a universal semantic-edit or runtime-throughput claim.
+[Raw paired measurements](measurements/weather-api-zstd-build-2026-10-07.json)
+are mirrored in Meteonesto, with a follow-up in
+`docs/weather-api-engine-migration.md`. The large release saving is consistent
+with removing the C compiler work from the critical path; dev compilation had
+more overlap with other dependencies. Codec algorithms are unchanged and the
+ABI copies buffers, so no runtime speedup is claimed.
+
+Engine SHA256: `92fc2ec27661b3b1f1f969e355d40d42aac7fa7203745b45cee15319dc40cdce`.
+Reusable engine/metadata: `/tmp/weather-zstd-artifact`.
+Local bundle: `/tmp/weather-zstd-release/weather-api-v0.1.0-g115d8a57356e.tar.zst`.
+Bundle SHA256: `8f927d805b59ae934d37019e35d7f46e9803a62b98b4a29c914ed77f8427c209`.
+The package script passes full checks and release compilation. The extracted
+release passes checksum verification and two real process tests through the
+production-style symlinks: HTTP, worker drain, SIGINT/SIGTERM, configuration and
+occupied-port failures. The standalone codec consumer additionally runs against
+the extracted packaged engine, with its actual loader path verified. Logs:
+`/tmp/weather-zstd-package.log`, `/tmp/weather-zstd-release-smoke.log`,
+`/tmp/weather-zstd-packaged-codec.log`.
+
+Reuse assessment, with source calls inspected rather than Cargo declarations:
+
+- Meteonesto weather-pipeline uses buffer compression/decompression in
+  `src/artifacts.rs` and publication decoding, so it is a direct future candidate.
+  Its streaming backup Reader/Writer and examples need a separate streaming API.
+- Simple Agents delivery streams Zstd into a tar reader in `src/shell.rs`; this
+  is a reuse opportunity after a streaming extension, not a drop-in migration.
+- PV Estimator's `pv-data` decodes an embedded catalogue and `xtask` encodes it;
+  buffer operations fit, but native-target packaging needs assessment.
+- Observo declares Zstd but no source call was found in the inspected server;
+  declaration alone does not establish applicability/adoption.
+
+These other components were not modified or rebuilt. No publication, push,
+deployment, provider access or production-data changes occurred.
 
 ## Meteonesto weather-api engine migration — 2026-10-07
 
