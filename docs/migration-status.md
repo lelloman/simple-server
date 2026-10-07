@@ -10,7 +10,58 @@ interfaces. JWT/JWKS validation, rate/access policy, deadlines and response limi
 remain application-owned. Shared additions cover repeatable Unix signals,
 reader/writer locks, one-shot channels and explicit client no-decompression.
 See [compatibility contract](engine-application-runtime.md#gateway-runtime-and-client-compatibility).
-Baseline and final verification, packaging, measurements and integration follow.
+Shared implementation/source pin: `a89ff24`; consumer implementation: `8af66d2`,
+measurement commit: `a8c911d`. Normal/build dependencies drop 151 → 121
+package/version entries (149 → 119 names), with no host Tokio/Axum/Hyper/Reqwest/
+Rustls/subscriber/regex stack. JWT crypto and URL handling remain local.
+
+Three alternating paired builds per profile, eight jobs, Rust 1.97.1, cached
+offline dependencies and fresh targets, excluding engine prebuild:
+
+| Profile | Clean before | Clean after | Reduction | Touch before | Touch after |
+|---|---:|---:|---:|---:|---:|
+| dev | 12.315s | 8.609s | 30.10% | 0.559s | 0.622s |
+| release | 18.956s | 11.410s | 39.81% | 1.505s | 2.548s |
+
+Clean builds improve; timestamp-only rebuilds regress. No runtime speedup claimed.
+An initial partial batch was discarded after baseline compiler crashes (SIGILL
+in regex-automata and a resolver panic in syn); the table uses a complete fresh
+rerun. [Raw measurements](measurements/weather-gateway-engine-build-2026-10-07.json).
+
+Baseline gateway: 33 Rust tests; migrated gateway: 35 Rust and three Python
+release-verifier tests, plus the explicitly run serving E2E. Strict formatting,
+Clippy, build, native graph/link and systemd asset checks pass. Logging compares
+288 configurations. Proxy tests preserve raw encoded bytes and redirects, enforce
+header/body deadlines, and release capacity after cancellation. E2E covers signed
+tokens, rate/access policy, valid/invalid SIGHUP reloads and graceful drain.
+Successful HTTPS issuer discovery is not exercised; E2E seeds ephemeral keys.
+Weather API's source pin/lock are synchronized without application changes; its
+76 Rust and 18 Python tests and full component checks pass. Pipeline unchanged.
+Shared full engine suite, all-feature strict Clippy and warnings-denied rustdoc
+pass; three external PostgreSQL fixtures remain ignored. Repeatable/cancelled
+Unix signal waits pass outside the sandbox; the old engine rejects the new call.
+Schema-2 release verification rejects missing/modified engines and unknown schema
+versions, while preserving schema-1 rollback.
+
+Clean-source packaging reran the component checks and produced
+`/tmp/weather-gateway-release/weather-gateway-v0.1.0-ga8c911db56c5.tar.zst`
+from consumer `a8c911db56c5172da9f15df7482febfc1739ce33`.
+Bundle SHA256: `2d01d8fd07b4e15d1605734af5686de7a7c7437aa379559879de3ca799ffe778`.
+Reusable artifact/metadata: `/tmp/weather-gateway-artifact`; engine SHA256:
+`64319fadfa32ecc3a3e5a4087315e5c15ba8074751d761ba4cc9c01c1f93dc81`.
+Extracted schema-2 verification and installed symlink-topology loading pass with
+loader overrides unset. The actual packaged executable validates config and
+reaches fail-closed TLS discovery against a local rejecting fixture. The compiled
+serving E2E separately passes against the extracted engine, with real systemd
+READY/WATCHDOG/STOPPING notifications, proxying, reloads and drain. Successful
+HTTPS discovery/full serving by the packaged executable is not claimed.
+
+Retained logs: `/tmp/weather-gateway-component-check.log`,
+`/tmp/weather-gateway-api-compatibility.log`, `/tmp/weather-gateway-e2e.log`,
+`/tmp/weather-gateway-engine-check.log`, `/tmp/weather-gateway-shared-clippy.log`,
+`/tmp/weather-gateway-doc.log`, `/tmp/weather-gateway-benchmark-retry.log`,
+`/tmp/weather-gateway-package.log`, `/tmp/weather-gateway-release-smoke.log`.
+No push or deployment. Branch integration follows.
 
 ## Weather API SHA-256 extraction — 2026-10-07
 

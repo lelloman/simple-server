@@ -1,0 +1,148 @@
+{
+  "dev": {
+    "profile": "dev",
+    "trials": [
+      {
+        "trial": 1,
+        "backend": "before",
+        "clean_seconds": 12.445653347007465,
+        "edit_seconds": 0.5518813949893229
+      },
+      {
+        "trial": 1,
+        "backend": "after",
+        "clean_seconds": 8.356248083000537,
+        "edit_seconds": 0.621655228009331
+      },
+      {
+        "trial": 2,
+        "backend": "after",
+        "clean_seconds": 8.645863388999715,
+        "edit_seconds": 0.6264034890045878
+      },
+      {
+        "trial": 2,
+        "backend": "before",
+        "clean_seconds": 12.279039546992863,
+        "edit_seconds": 0.55925007800397
+      },
+      {
+        "trial": 3,
+        "backend": "before",
+        "clean_seconds": 12.31528970799991,
+        "edit_seconds": 0.558809686001041
+      },
+      {
+        "trial": 3,
+        "backend": "after",
+        "clean_seconds": 8.608752441999968,
+        "edit_seconds": 0.6124415590020362
+      }
+    ],
+    "cargo_build_jobs": 8,
+    "baseline_revision": "936a0fb9cf5a3661f2cf1eadb63722a57ac25060",
+    "library_revision": "a89ff2482a561f72ce6c18838ca7ede161f1f4aa",
+    "consumer_revision": "8af66d20bd19ac62295e8797f811407abe9d87be",
+    "system": "Linux-6.8.0-142-generic-x86_64-with-glibc2.39",
+    "rustc": "rustc 1.97.1 (8bab26f4f 2026-07-14)\nbinary: rustc\ncommit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452\ncommit-date: 2026-07-14\nhost: x86_64-unknown-linux-gnu\nrelease: 1.97.1\nLLVM version: 22.1.6\n",
+    "prebuilt_engine_cost_included": false,
+    "engine_sha256": "64319fadfa32ecc3a3e5a4087315e5c15ba8074751d761ba4cc9c01c1f93dc81",
+    "method": "Three alternating paired fresh-target builds, cached offline downloads, eight jobs; no concurrent verification builds. Gateway runtime/HTTP/logging migration: baseline compiles source infrastructure, migrated consumer links the prebuilt engine. JWT verification remains local.",
+    "edit": "main.rs timestamp only; no semantic change",
+    "dependency_packages": {
+      "before": {
+        "package_version_entries": 151,
+        "unique_names": 149
+      },
+      "after": {
+        "package_version_entries": 121,
+        "unique_names": 119
+      }
+    },
+    "medians": {
+      "before": {
+        "clean_seconds": 12.31528970799991,
+        "edit_seconds": 0.558809686001041
+      },
+      "after": {
+        "clean_seconds": 8.608752441999968,
+        "edit_seconds": 0.621655228009331
+      }
+    },
+    "clean_reduction_percent": 30.097036723319682,
+    "discarded_attempt": "Initial batch stopped after baseline rustc SIGILL (regex-automata) and resolver panic (syn). This complete fresh-target rerun excludes failed/partial batch timings."
+  },
+  "release": {
+    "profile": "release",
+    "trials": [
+      {
+        "trial": 1,
+        "backend": "before",
+        "clean_seconds": 18.530982447002316,
+        "edit_seconds": 1.4980293179978617
+      },
+      {
+        "trial": 1,
+        "backend": "after",
+        "clean_seconds": 11.346217824000632,
+        "edit_seconds": 2.5476481480000075
+      },
+      {
+        "trial": 2,
+        "backend": "after",
+        "clean_seconds": 11.409628701003385,
+        "edit_seconds": 2.649961123999674
+      },
+      {
+        "trial": 2,
+        "backend": "before",
+        "clean_seconds": 20.632886360996054,
+        "edit_seconds": 1.5184255670028506
+      },
+      {
+        "trial": 3,
+        "backend": "before",
+        "clean_seconds": 18.955896589002805,
+        "edit_seconds": 1.5054855280031916
+      },
+      {
+        "trial": 3,
+        "backend": "after",
+        "clean_seconds": 11.481725251986063,
+        "edit_seconds": 2.5451954970048973
+      }
+    ],
+    "cargo_build_jobs": 8,
+    "baseline_revision": "936a0fb9cf5a3661f2cf1eadb63722a57ac25060",
+    "library_revision": "a89ff2482a561f72ce6c18838ca7ede161f1f4aa",
+    "consumer_revision": "8af66d20bd19ac62295e8797f811407abe9d87be",
+    "system": "Linux-6.8.0-142-generic-x86_64-with-glibc2.39",
+    "rustc": "rustc 1.97.1 (8bab26f4f 2026-07-14)\nbinary: rustc\ncommit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452\ncommit-date: 2026-07-14\nhost: x86_64-unknown-linux-gnu\nrelease: 1.97.1\nLLVM version: 22.1.6\n",
+    "prebuilt_engine_cost_included": false,
+    "engine_sha256": "64319fadfa32ecc3a3e5a4087315e5c15ba8074751d761ba4cc9c01c1f93dc81",
+    "method": "Three alternating paired fresh-target builds, cached offline downloads, eight jobs; no concurrent verification builds. Gateway runtime/HTTP/logging migration: baseline compiles source infrastructure, migrated consumer links the prebuilt engine. JWT verification remains local.",
+    "edit": "main.rs timestamp only; no semantic change",
+    "dependency_packages": {
+      "before": {
+        "package_version_entries": 151,
+        "unique_names": 149
+      },
+      "after": {
+        "package_version_entries": 121,
+        "unique_names": 119
+      }
+    },
+    "medians": {
+      "before": {
+        "clean_seconds": 18.955896589002805,
+        "edit_seconds": 1.5054855280031916
+      },
+      "after": {
+        "clean_seconds": 11.409628701003385,
+        "edit_seconds": 2.5476481480000075
+      }
+    },
+    "clean_reduction_percent": 39.80960674989839,
+    "discarded_attempt": "Initial batch stopped after baseline rustc SIGILL (regex-automata) and resolver panic (syn). This complete fresh-target rerun excludes failed/partial batch timings."
+  }
+}
