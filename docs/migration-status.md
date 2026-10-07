@@ -32,8 +32,8 @@ Shared-library removal `38b2ea8` and Meteonesto rollback `fad131d` are
 integrated into local `master`. ScT rollback `bc936ef` is also integrated into
 local `master`. Both consumer development trees equal their tested rollback
 trees and exact pre-engine baselines, with rollback ancestry verified. Their
-temporary worktrees and branches have been removed. The shared tracker-only
-follow-up is integrated after validation; shared worktree cleanup follows.
+temporary worktrees and branches have been removed. Shared tracker follow-up
+`46441cb` was integrated and its temporary worktree and branch were removed.
 
 Verification:
 
@@ -49,16 +49,43 @@ Verification:
   baseline contains a migration-name mismatch (`draft_names` versus SQLx's
   `draft names`); another test timed out acquiring a database connection.
   The timeout test passes when retried alone. All 12 applicable server integration
-tests pass in a separate disposable PostgreSQL run using the repository's
-qualification/real-transfer exclusions. An initial follow-up accidentally
-included four qualification tests without their required fixture environment;
-that invocation was corrected before recording the passing server result.
+  tests pass in a separate disposable PostgreSQL run using the repository's
+  qualification/real-transfer exclusions. An initial follow-up accidentally
+  included four qualification tests without their required fixture environment;
+  that invocation was corrected before recording the passing server result.
 - ScT S3 conformance could not start: the pinned MinIO image pull returns
   `unauthorized`. Frontend/browser and full production packaging checks were
   not rerun. This is not a claim that ScT's complete check script passes.
 - Rebuilt ScT, Weather API and Gateway executables have no engine dependency
   or custom RPATH/RUNPATH. Active source/build references to the engine are
   removed. Tracker local links and embedded JavaScript validate.
+
+### Complete consumer audit — 2026-10-07
+
+A follow-up audit checked 64 local Git repositories with committed histories
+(two additional repositories have no HEAD). It scanned HEAD and every existing
+local master/dev/main branch for engine identifiers across tracked source,
+lockfiles, CI, Docker, scripts and documentation, excluding raw measurement
+files. All-ref commit-subject searches cross-checked historical adoption.
+Unrelated agent/model engines and Talia's MCP test filename were inspected and
+excluded. Homelab has no remaining tracked engine requirement.
+
+Exactly four services in three consumer repositories adopted this experiment:
+
+| Service | Active branch / rollback commit | Current locked source package | Baseline tree equality |
+| --- | --- | --- | --- |
+| ScT | master / `bc936ef` | crates.io simple-server 0.1.6 | Exact match to `9e118e6` |
+| Meteonesto Weather API | master / `fad131d` | crates.io simple-server 0.1.0 | Repository matches `7729bec` |
+| Meteonesto Weather Gateway | master / `fad131d` | crates.io simple-server 0.1.0 | Repository matches `7729bec` |
+| Pezzottify server | dev / `8bda3b15` | crates.io simple-server 0.1.3 | Exact match to `5fab6e4f` |
+
+All three consumer working trees are clean. Their lockfiles contain the registry
+package and no engine/sys package; native pins, loaders and engine build paths
+are absent. Weather Pipeline still uses source package 0.1.0 and was not an
+engine consumer. No additional consumer rollback is necessary. This audit
+reuses the preceding test evidence because no application source changed.
+Deployment state, published images and remote branch contents were not changed
+or verified; the audit establishes the local development/build configuration.
 
 No publication, push or deployment is part of this removal.
 
