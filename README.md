@@ -604,3 +604,8 @@ For independent Tokio-based **test fixtures**, `#[simple_server::test(host_runti
 requires Tokio as a dev-dependency and polls the test in an engine scope. Spawned
 fixture tasks must explicitly carry `Runtime::try_current()?.scope(future)`.
 Production entry points should use the engine directly, not this test bridge.
+
+### Native logging backend
+
+The optional `engine-logging` feature puts filtering and formatting in the shared
+engine while retaining host tracing callsites. See [logging semantics and limits](docs/engine-application-runtime.md#engine-owned-logging).

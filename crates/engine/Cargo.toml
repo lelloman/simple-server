@@ -13,6 +13,10 @@ name = "simple_server_engine"
 crate-type = ["cdylib"]
 
 [dependencies]
+tracing = "0.1"
+tracing-core = "0.1"
+tracing-log = "0.2"
+tracing-subscriber = { version = "=0.3.23", default-features = false, features = ["fmt", "env-filter", "ansi", "json", "tracing-log"] }
 zstd = "=0.13.3"
 openidconnect = { version = "=4.0.1", default-features = false }
 simple-server-abi = { package = "lelloman-simple-server-abi", path = "../engine-abi", version = "=0.2.0" }

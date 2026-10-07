@@ -8,6 +8,7 @@ default-run = "simple-server-engine-consumer"
 [workspace]
 
 [dependencies]
-simple-server = { package = "lelloman-simple-server", path = "../../..", default-features = false, features = ["runtime", "client", "sqlite-client", "process", "oidc", "zstd"] }
+simple-server = { package = "lelloman-simple-server", path = "../../..", default-features = false, features = ["runtime", "client", "sqlite-client", "process", "oidc", "zstd", "engine-logging"] }
 simple-server-sys = { package = "lelloman-simple-server-sys", path = "../../../crates/engine-sys" }
 serde_json = "1"
+tracing = "0.1"

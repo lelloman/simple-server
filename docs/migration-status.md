@@ -1,5 +1,19 @@
 # Service migration status
 
+## Weather API logging extraction — 2026-10-07
+
+**Pending integration.** Isolated branches `implementation/engine-logging` and
+`migration/weather-api-logging` start from shared master `44f51d1` and
+Meteonesto master `115d8a5`. Production startup actually switches from source
+logging to `engine_logging`; tracing-subscriber remains only a dev dependency
+for differential tests. Filtering, formatting and output are engine-owned;
+tracing macros and the lightweight log bridge remain host-side.
+The 288-case comparison covers production lossy parsing and the strict test
+policy, formats, destinations, colours, log messages and span-field filters.
+Shared contracts cover values, parent lifetimes, clones, threads and global
+initialization. Full checks, measurements and integration evidence follow.
+See [contract and limits](engine-application-runtime.md#engine-owned-logging).
+
 ## Weather API Zstd extraction — 2026-10-07
 
 **Weather API Zstd adoption Done locally; other consumers not migrated.** From

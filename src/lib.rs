@@ -230,3 +230,9 @@ pub mod sync {
 /// Synchronous Zstd byte-buffer codecs implemented in the native engine.
 #[cfg(feature = "zstd")]
 pub mod zstd;
+
+/// Native filtering and formatting behind a thin host tracing subscriber.
+#[cfg(feature = "engine-logging")]
+pub mod engine_logging;
+#[cfg(any(feature = "logging", feature = "engine-logging"))]
+mod logging_options;

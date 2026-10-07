@@ -137,3 +137,32 @@ not migrated here. PV Estimator's embedded catalogue also uses buffer decoding,
 but adopting a dynamic native library there needs a target/packaging assessment.
 Observo declares Zstd but this scan found no source call; declaration alone is
 not evidence of adoption. No other consumers change in this migration.
+
+## Engine-owned logging
+
+Enable `engine-logging` with default features disabled to keep the formatter,
+subscriber, EnvFilter and regex implementation in the prebuilt engine. The host
+retains `tracing`, `tracing-core`, a lightweight `tracing-log` adapter and framed
+event/span serialization. Install with
+`engine_logging::try_init(LoggingOptions, FilterMode)`, then optionally
+`engine_logging::init_log_bridge()`. No async runtime is required.
+
+The caller owns environment lookup. Strict rejects malformed/empty filters;
+Lossy preserves `EnvFilter::new` (invalid directives discarded, ERROR fallback);
+StrictOrInfo preserves `EnvFilter::try_new` with INFO fallback on parse failure.
+Text/pretty/compact/JSON, stdout/stderr, ANSI, targets, typed fields, span
+parents/records/clones and lifecycle events are supported. Native dispatch stays
+on the caller thread. Initialization is once per process; configuration/backend
+errors remain distinguishable. Existing global subscribers/loggers are preserved.
+
+This is fixed configuration; source `logging` reload APIs remain unchanged and
+are not exposed through the engine. Static callsite metadata is retained for the
+process lifetime, matching tracing's static metadata contract. Span references
+are released separately. Each enabled event crosses a synchronous framed ABI and
+copies/serializes fields before formatting; this reduces downstream compilation,
+not necessarily logging CPU time. No runtime speedup is claimed.
+
+The engine requires the logging commands added by this change; older native
+artifacts return an initialization error. No ABI table layout change is required.
+Applications should pin matching source/artifact revisions. Weather API is the
+first migrated consumer; other services are unchanged.

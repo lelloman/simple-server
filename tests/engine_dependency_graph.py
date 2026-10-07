@@ -4,7 +4,7 @@ import subprocess
 import sys
 
 ROOT = Path(__file__).resolve().parent.parent
-NATIVE_FAMILIES = ("axum", "tokio", "reqwest", "hyper", "hyperlocal", "sqlx", "rustls", "multer", "openidconnect", "oauth2", "rsa", "p256", "p384", "ed25519-dalek", "zstd")
+NATIVE_FAMILIES = ("axum", "tokio", "reqwest", "hyper", "hyperlocal", "sqlx", "rustls", "multer", "openidconnect", "oauth2", "rsa", "p256", "p384", "ed25519-dalek", "zstd", "tracing-subscriber", "regex", "regex-automata", "regex-syntax", "matchers")
 FIXTURES = ("engine_consumer", "engine_drivers", "engine_lifecycle", "engine_tasks", "engine_web")
 
 

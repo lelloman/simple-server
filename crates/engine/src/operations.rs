@@ -66,6 +66,7 @@ fn number(command: &Value, key: &str) -> Result<u64, String> {
 
 pub fn resource_new(command: Value, payload: Vec<u8>) -> Result<Vec<u8>, String> {
     match command["op"].as_str() {
+        Some(op) if op.starts_with("logging_") => crate::logging::execute(&command),
         Some("zstd_encode" | "zstd_decode") => crate::zstd_codec::execute(&command, &payload),
         Some("tower_route_clone" | "tower_extensions_clone") => {
             crate::tower_bridge::resource_new(&command)
@@ -117,6 +118,7 @@ pub fn resource_new(command: Value, payload: Vec<u8>) -> Result<Vec<u8>, String>
 }
 pub fn resource_release(kind: u32, id: u64) {
     match kind {
+        crate::logging::LOGGER => crate::logging::release(id),
         crate::oidc::CLIENT => crate::oidc::release(id),
         crate::multipart::PARSER | crate::multipart::FIELD => crate::multipart::release(kind, id),
         #[cfg(unix)]
