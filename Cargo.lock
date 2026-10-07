@@ -54,17 +54,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "async-lock"
-version = "3.4.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "290f7f2596bd5b78a9fec8088ccd89180d7f9f55b94b0576823bbbdc72ee8311"
-dependencies = [
- "event-listener",
- "event-listener-strategy",
- "pin-project-lite",
-]
-
-[[package]]
 name = "atomic-waker"
 version = "1.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -431,26 +420,6 @@ checksum = "39cab71617ae0d63f51a36d69f866391735b51691dbda63cf6f96d042b63efeb"
 dependencies = [
  "libc",
  "windows-sys 0.61.2",
-]
-
-[[package]]
-name = "event-listener"
-version = "5.4.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5a23add41df1562121a9393cb065eab5146a1242410f23a644851e90cfd669d2"
-dependencies = [
- "parking",
- "pin-project-lite",
-]
-
-[[package]]
-name = "event-listener-strategy"
-version = "0.5.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8be9f3dfaaffdae2972880079a491a1a8bb7cbed0b8dd7a347f668b4150a3b93"
-dependencies = [
- "event-listener",
- "pin-project-lite",
 ]
 
 [[package]]
@@ -1079,7 +1048,6 @@ checksum = "bbd2bcb4c963f2ddae06a2efc7e9f3591312473c50c6685e1f298068316e66fe"
 name = "lelloman-simple-server"
 version = "0.1.7"
 dependencies = [
- "async-lock",
  "axum",
  "axum-extra",
  "axum-server",
@@ -1088,9 +1056,6 @@ dependencies = [
  "cookie",
  "cron",
  "flate2",
- "form_urlencoded",
- "futures-channel",
- "futures-executor",
  "futures-util",
  "governor 0.10.4",
  "governor 0.6.3",
@@ -1101,10 +1066,7 @@ dependencies = [
  "hyper",
  "hyper-util",
  "hyperlocal",
- "lelloman-simple-server-macros",
- "lelloman-simple-server-sys",
  "log",
- "mime",
  "pin-project-lite",
  "rand 0.8.8",
  "rcgen",
@@ -1112,9 +1074,6 @@ dependencies = [
  "rusqlite",
  "serde",
  "serde_json",
- "serde_path_to_error",
- "serde_urlencoded",
- "sha2",
  "tempfile",
  "tokio",
  "tokio-tungstenite",
@@ -1125,31 +1084,7 @@ dependencies = [
  "tower-layer",
  "tower-service",
  "tracing",
- "tracing-core",
- "tracing-log",
  "tracing-subscriber",
-]
-
-[[package]]
-name = "lelloman-simple-server-abi"
-version = "0.2.0"
-
-[[package]]
-name = "lelloman-simple-server-macros"
-version = "0.2.0"
-dependencies = [
- "quote",
- "syn 2.0.119",
-]
-
-[[package]]
-name = "lelloman-simple-server-sys"
-version = "0.2.0"
-dependencies = [
- "futures-executor",
- "lelloman-simple-server-abi",
- "serde_json",
- "socket2",
 ]
 
 [[package]]
@@ -1339,12 +1274,6 @@ name = "once_cell"
 version = "1.21.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9f7c3e4beb33f85d45ae3e3a1792185706c8e16d043238c593331cc7cd313b50"
-
-[[package]]
-name = "parking"
-version = "2.2.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f38d5652c16fde515bb1ecef450ab0f6a219d619a7274976324d5e377f7dceba"
 
 [[package]]
 name = "parking_lot"
@@ -1768,17 +1697,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "sha2"
-version = "0.10.9"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a7507d819769d01a365ab707794a4084392c824f54a7a6a7862f8c3d0892b283"
-dependencies = [
- "cfg-if",
- "cpufeatures",
- "digest",
-]
-
-[[package]]
 name = "sharded-slab"
 version = "0.1.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2164,17 +2082,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "tracing-log"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ee855f1f400bd0e5c02d150ae5de3840039a3f54b025156404e34c23c03f47c3"
-dependencies = [
- "log",
- "once_cell",
- "tracing-core",
-]
-
-[[package]]
 name = "tracing-serde"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2200,7 +2107,6 @@ dependencies = [
  "thread_local",
  "tracing",
  "tracing-core",
- "tracing-log",
  "tracing-serde",
 ]
 

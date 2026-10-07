@@ -1,4 +1,0 @@
-# engine 0.2.0 -- unpublished development ABI
-# Format: sha256 target-triple
-# Populate only from the reviewed Bookworm release builds for BOTH targets.
-# Do not pin a host-built development library as a portable release artifact.

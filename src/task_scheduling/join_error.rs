@@ -1,10 +1,9 @@
-use super::execution::{Id, JoinError as BackendJoinError};
 use std::{any::Any, error::Error, fmt};
 
 /// Identity of a spawned batch task. Identifiers are comparable and printable;
 /// applications must not infer ordering of execution from their values.
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-pub struct BatchTaskId(Id);
+pub struct BatchTaskId(tokio::task::Id);
 impl fmt::Display for BatchTaskId {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.0.fmt(f)
@@ -13,7 +12,7 @@ impl fmt::Display for BatchTaskId {
 
 /// An owned batch-task failure, preserving the original panic payload.
 #[derive(Debug)]
-pub struct JoinError(pub(super) BackendJoinError);
+pub struct JoinError(pub(super) tokio::task::JoinError);
 impl JoinError {
     pub fn is_cancelled(&self) -> bool {
         self.0.is_cancelled()

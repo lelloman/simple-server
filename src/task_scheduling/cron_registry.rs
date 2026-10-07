@@ -282,7 +282,7 @@ impl CronRegistry {
             }
             match self.next_deadline() {
                 Some(deadline) => {
-                    super::clock::sleep(
+                    tokio::time::sleep(
                         deadline
                             .duration_since(now)
                             .unwrap_or_default()

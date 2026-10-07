@@ -2,11 +2,6 @@
 set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 
-if [[ -z ${SIMPLE_SERVER_ENGINE_DIR:-} ]]; then
-  cargo build --locked --manifest-path crates/engine/Cargo.toml --target-dir target/engine
-  export SIMPLE_SERVER_ENGINE_DIR="$PWD/target/engine/debug"
-fi
-
 cargo fmt --check
 cargo clippy --locked --all-targets --all-features -- -D warnings
 cargo test --locked
@@ -38,4 +33,3 @@ cargo test --locked --no-default-features --features unix-http,correlation --tes
 cargo test --locked --no-default-features --features unix-http,ws --test web_unix
 cargo check --locked --no-default-features
 RUSTDOCFLAGS="-D warnings" cargo doc --locked --no-deps --all-features
-bash scripts/check-engine

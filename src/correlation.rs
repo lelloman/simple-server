@@ -10,50 +10,8 @@ use std::{fmt, future::Future};
 
 use http::{HeaderName, HeaderValue};
 
-std::thread_local! {static CONTEXT: std::cell::RefCell<Option<Context>> = const { std::cell::RefCell::new(None) };}
-struct Local;
-static CURRENT: Local = Local;
-struct Enter(Option<Context>);
-impl Enter {
-    fn new(context: Context) -> Self {
-        Self(CONTEXT.with(|c| c.replace(Some(context))))
-    }
-}
-impl Drop for Enter {
-    fn drop(&mut self) {
-        CONTEXT.with(|c| c.replace(self.0.take()));
-    }
-}
-impl Local {
-    fn try_with<R>(&self, f: impl FnOnce(&Context) -> R) -> Result<R, ()> {
-        CONTEXT.with(|c| c.borrow().as_ref().map(f).ok_or(()))
-    }
-    fn scope<F: Future>(&self, context: Context, future: F) -> impl Future<Output = F::Output> {
-        struct Scoped<F> {
-            context: Context,
-            future: Option<std::pin::Pin<Box<F>>>,
-        }
-        impl<F: Future> Future for Scoped<F> {
-            type Output = F::Output;
-            fn poll(
-                mut self: std::pin::Pin<&mut Self>,
-                cx: &mut std::task::Context<'_>,
-            ) -> std::task::Poll<Self::Output> {
-                let _enter = Enter::new(self.context.clone());
-                self.future.as_mut().unwrap().as_mut().poll(cx)
-            }
-        }
-        impl<F> Drop for Scoped<F> {
-            fn drop(&mut self) {
-                let _enter = Enter::new(self.context.clone());
-                drop(self.future.take());
-            }
-        }
-        Scoped {
-            context,
-            future: Some(Box::pin(future)),
-        }
-    }
+tokio::task_local! {
+    static CURRENT: Context;
 }
 
 #[derive(Clone)]
@@ -291,7 +249,6 @@ impl Correlation {
         F: FnOnce(http::Request<B>) -> Fut,
         Fut: Future<Output = http::Response<R>>,
     {
-        request.extensions_mut().insert(context.clone());
         request.extensions_mut().remove::<RequestId>();
         if let Some(id) = &context.validated {
             request.extensions_mut().insert(id.clone());
@@ -327,18 +284,5 @@ impl Correlation {
         }
         response.extensions_mut().insert(final_id);
         response
-    }
-}
-
-// Restore only a context installed by Correlation, never an incoming header.
-#[cfg(feature = "engine-web")]
-pub(crate) async fn resume<B, F, Fut, R>(request: http::Request<B>, next: F) -> R
-where
-    F: FnOnce(http::Request<B>) -> Fut,
-    Fut: Future<Output = R>,
-{
-    match request.extensions().get::<Context>().cloned() {
-        Some(context) => CURRENT.scope(context, async { next(request).await }).await,
-        None => next(request).await,
     }
 }
