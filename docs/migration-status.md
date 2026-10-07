@@ -11,8 +11,45 @@ tracing macros and the lightweight log bridge remain host-side.
 The 288-case comparison covers production lossy parsing and the strict test
 policy, formats, destinations, colours, log messages and span-field filters.
 Shared contracts cover values, parent lifetimes, clones, threads and global
-initialization. Full checks, measurements and integration evidence follow.
+initialization. Full checks and measurements are recorded below; integration remains pending.
 See [contract and limits](engine-application-runtime.md#engine-owned-logging).
+
+
+## Native logging follow-up — 2026-10-07
+
+Production startup uses engine_logging with application-owned RUST_LOG lookup,
+lossy filtering and JSON/stdout policy. Tracing callsites and the lightweight log
+adapter remain in the host; subscriber/regex implementations leave normal/build
+dependencies (86 → 76 package/version entries, 84 → 74 unique names).
+Gateway and pipeline are unchanged. Reload is not offered by this native API.
+Enabled events incur synchronous framed serialization; no runtime gain is claimed.
+
+Shared pin: `1eea6d9dc56f1279374b653e0476b2fd69899ca9`.
+Consumer implementation: `f0f75cf797a9a8d7ba6c3342c737ded18a530997`.
+Baseline and final component checks pass 75 Rust and 18 Python tests, strict
+Clippy/formatting, dependency/ELF guards, systemd validation and sync fixtures.
+Logging comparisons cover 288 configurations using both production lossy parsing
+and the strict fixture policy; span fields, formats, destinations, colours and
+log-facade targets match. Shared logging lifetime/initialization contracts,
+source logging/reload regression tests, full engine checks, all-feature Clippy
+and warnings-denied rustdoc pass. Three external PostgreSQL tests remain ignored.
+
+Three alternating paired fresh-target builds per profile, eight jobs, Rust
+1.97.1, offline cached downloads and the same prebuilt engine on both sides;
+no concurrent verification builds. The baseline already uses native Zstd.
+Engine prebuild cost excluded. Edit timing changes main.rs timestamp only.
+
+| Profile | Clean before | Clean native logging | Saving | Timestamp-only rebuild before / after |
+| --- | ---: | ---: | ---: | ---: |
+| dev | 9.424s | 8.879s | 5.79% | 0.865s / 0.823s |
+| release | 13.491s | 10.438s | 22.63% | 4.488s / 4.606s |
+
+Release paired clean savings range from 1.004s to 3.217s; baseline timing varies,
+so the median percentage is not a universal guarantee. Incremental release
+rebuilds are slightly slower. This primarily benefits clean downstream builds.
+[Raw measurements](measurements/weather-api-logging-build-2026-10-07.json) are mirrored in both repositories.
+Release packaging and final development-branch integration evidence are recorded
+in the central simple-server migration tracker.
 
 ## Weather API Zstd extraction — 2026-10-07
 
