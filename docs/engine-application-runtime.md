@@ -216,3 +216,36 @@ Weather Gateway uses these alongside the existing engine HTTP server/client,
 entry point, synchronization, timers, tasks, lifecycle and logging. Access-token
 JWT/JWKS verification and issuer/audience/key-refresh policy remain application
 code; this is not the authorization-code OIDC helper used by ScT.
+
+## Pezzottify transport and blocking callers
+
+`engine_web::ws` owns upgrade/message APIs while native Axum/Tungstenite perform
+handshakes, framing, validation and socket I/O. Reads and writes have separate
+native locks. Cancelling a host receive retains its pending operation for the
+next receive. Applications continue to own authenticated session policy, tracked
+upgrade tasks and graceful close/drain. Resource kinds 24 and 25 hold pending
+upgrades and sockets; callbacks retain native sockets only for their lifetime.
+
+`client::multipart` accepts byte parts and `Read + Send` readers with a known
+length. The engine performs multipart encoding; callbacks read at most 64 KiB
+on blocking workers. Reader destruction occurs after completion/cancellation of
+all references. A blocked OS read itself cannot be interrupted. No entire-file
+buffer is needed. `client::blocking` reuses an active native runtime or owns one
+when called from an ordinary thread. Never invoke blocking clients or
+`runtime::Handle::block_on` on asynchronous workers. The handle method is for
+application-owned threads/blocking workers; it restores the captured engine
+context without creating a host Tokio runtime.
+
+`runtime-primitives` provides synchronization, select/join macros and hierarchical
+cancellation through shared imports. This feature deliberately retains Tokio's
+sync/macros code in the consumer, without its executor, network, timers or I/O.
+Parent cancellation reaches descendants; child cancellation does not reach
+parents or siblings. `ManagedCommand::output/status` (with `engine-io`) preserve
+stdio, reuse and kill-on-drop ownership; output drains stdout/stderr concurrently.
+
+`Router::into_service` supports in-process fixtures and preserves owned request
+extensions. Real native connection metadata also populates owned `ConnectInfo`
+for middleware that reads extensions. `fallback_static_dir_with_index` provides
+SPA fallback through native ServeDir/ServeFile. LossyOrInfo logging preserves
+applications that previously used EnvFilter's INFO default. Library and engine
+must be built/pinned together: these commands are unavailable in older `.so`s.

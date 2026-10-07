@@ -253,6 +253,12 @@ impl Handle {
     pub fn current() -> Self {
         Self::try_current().expect("no active simple-server engine runtime")
     }
+    /// Drive engine work from an ordinary/blocking-pool thread. Never call from
+    /// an asynchronous worker: blocking all workers would prevent progress.
+    pub fn block_on<F: Future>(&self, future: F) -> F::Output {
+        let runtime = Runtime(self.0.upgrade().expect("engine runtime has been dropped"));
+        futures_executor::block_on(runtime.scope(future))
+    }
     /// Spawn from any thread. Panics if the owning runtime has been dropped.
     pub fn spawn<F>(&self, future: F) -> JoinHandle<F::Output>
     where
@@ -368,11 +374,17 @@ impl fmt::Debug for JoinError {
 }
 impl fmt::Display for JoinError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str(if self.is_panic() {
-            "task panicked"
+        if let Some(panic) = &self.panic {
+            f.write_str("task panicked")?;
+            if let Some(message) = panic.downcast_ref::<String>() {
+                write!(f, ": {message}")?;
+            } else if let Some(message) = panic.downcast_ref::<&str>() {
+                write!(f, ": {message}")?;
+            }
+            Ok(())
         } else {
-            "task cancelled"
-        })
+            f.write_str("task cancelled")
+        }
     }
 }
 impl std::error::Error for JoinError {}

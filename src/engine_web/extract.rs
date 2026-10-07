@@ -168,6 +168,7 @@ impl<S: Sync> FromRequestParts<S> for ConnectInfo<std::net::SocketAddr> {
             .extensions
             .get::<RequestMetadata>()
             .and_then(|m| m.peer)
+            .or_else(|| parts.extensions.get::<Self>().map(|v| v.0))
             .map(Self)
             .ok_or_else(|| {
                 rejection(
@@ -349,3 +350,41 @@ macro_rules! deref {
 deref!(State);
 deref!(Json);
 deref!(Form);
+
+impl BodyLimit {
+    pub const fn max(bytes: usize) -> Self {
+        Self(bytes)
+    }
+}
+impl<S> tower_layer::Layer<S> for BodyLimit {
+    type Service = BodyLimitService<S>;
+    fn layer(&self, inner: S) -> Self::Service {
+        BodyLimitService {
+            inner,
+            limit: *self,
+        }
+    }
+}
+#[derive(Clone)]
+pub struct BodyLimitService<S> {
+    inner: S,
+    limit: BodyLimit,
+}
+impl<S, B> super::Service<http::Request<B>> for BodyLimitService<S>
+where
+    S: super::Service<http::Request<B>>,
+{
+    type Response = S::Response;
+    type Error = S::Error;
+    type Future = S::Future;
+    fn poll_ready(
+        &mut self,
+        cx: &mut std::task::Context<'_>,
+    ) -> std::task::Poll<Result<(), Self::Error>> {
+        self.inner.poll_ready(cx)
+    }
+    fn call(&mut self, mut request: http::Request<B>) -> Self::Future {
+        request.extensions_mut().insert(self.limit);
+        self.inner.call(request)
+    }
+}

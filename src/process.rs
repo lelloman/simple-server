@@ -70,12 +70,14 @@ impl Command {
 pub struct ManagedCommand {
     command: std::process::Command,
     kill_on_drop: bool,
+    explicit_stdio: [bool; 3],
 }
 impl ManagedCommand {
     pub fn new(program: impl AsRef<OsStr>) -> Self {
         Self {
             command: std::process::Command::new(program),
             kill_on_drop: false,
+            explicit_stdio: [false; 3],
         }
     }
     pub fn arg(&mut self, arg: impl AsRef<OsStr>) -> &mut Self {
@@ -91,20 +93,70 @@ impl ManagedCommand {
         self
     }
     pub fn stdin(&mut self, v: std::process::Stdio) -> &mut Self {
+        self.explicit_stdio[0] = true;
         self.command.stdin(v);
         self
     }
     pub fn stdout(&mut self, v: std::process::Stdio) -> &mut Self {
+        self.explicit_stdio[1] = true;
         self.command.stdout(v);
         self
     }
     pub fn stderr(&mut self, v: std::process::Stdio) -> &mut Self {
+        self.explicit_stdio[2] = true;
         self.command.stderr(v);
         self
     }
     pub fn kill_on_drop(&mut self, v: bool) -> &mut Self {
         self.kill_on_drop = v;
         self
+    }
+    /// Capture output, preserving explicit stdio and kill-on-drop behavior.
+    #[cfg(feature = "engine-io")]
+    pub async fn output(&mut self) -> io::Result<Output> {
+        use crate::io::AsyncReadExt;
+        if !self.explicit_stdio[0] {
+            self.command.stdin(std::process::Stdio::null());
+        }
+        if !self.explicit_stdio[1] {
+            self.command.stdout(std::process::Stdio::piped());
+        }
+        if !self.explicit_stdio[2] {
+            self.command.stderr(std::process::Stdio::piped());
+        }
+        let child = self.spawn();
+        // Preserve default inherited stdio for subsequent spawn/status calls.
+        if !self.explicit_stdio[0] {
+            self.command.stdin(std::process::Stdio::inherit());
+        }
+        if !self.explicit_stdio[1] {
+            self.command.stdout(std::process::Stdio::inherit());
+        }
+        if !self.explicit_stdio[2] {
+            self.command.stderr(std::process::Stdio::inherit());
+        }
+        let mut child = child?;
+        let stdout = child.stdout.take();
+        let stderr = child.stderr.take();
+        async fn read(pipe: Option<crate::fs::File>) -> io::Result<Vec<u8>> {
+            let mut bytes = Vec::new();
+            if let Some(mut pipe) = pipe {
+                pipe.read_to_end(&mut bytes).await?;
+            }
+            Ok(bytes)
+        }
+        let (status, stdout, stderr) =
+            futures_util::future::try_join3(child.wait(), read(stdout), read(stderr)).await?;
+        Ok(Output {
+            status,
+            stdout,
+            stderr,
+        })
+    }
+    /// Wait with the configured stdio (inherited by default).
+    #[cfg(feature = "engine-io")]
+    pub async fn status(&mut self) -> io::Result<ExitStatus> {
+        self.spawn()?.wait().await
     }
     #[cfg(feature = "engine-io")]
     pub fn spawn(&mut self) -> io::Result<Child> {
@@ -114,9 +166,14 @@ impl ManagedCommand {
             let fd: std::os::fd::OwnedFd = s.into();
             crate::fs::File::from_std(fd.into())
         });
+        let stderr = child.stderr.take().map(|s| {
+            let fd: std::os::fd::OwnedFd = s.into();
+            crate::fs::File::from_std(fd.into())
+        });
         Ok(Child {
             child: Some(child),
             stdout,
+            stderr,
             kill_on_drop: self.kill_on_drop,
             runtime,
         })
@@ -127,6 +184,7 @@ pub struct Child {
     runtime: crate::runtime::Runtime,
     child: Option<std::process::Child>,
     pub stdout: Option<crate::fs::File>,
+    pub stderr: Option<crate::fs::File>,
     kill_on_drop: bool,
 }
 #[cfg(feature = "engine-io")]
@@ -135,6 +193,7 @@ impl Child {
         self.child.as_ref().unwrap().id()
     }
     pub async fn wait(&mut self) -> io::Result<ExitStatus> {
+        self.child.as_mut().unwrap().stdin.take();
         loop {
             if let Some(status) = self.child.as_mut().unwrap().try_wait()? {
                 return Ok(status);

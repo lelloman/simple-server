@@ -66,10 +66,11 @@ fn number(command: &Value, key: &str) -> Result<u64, String> {
 
 pub fn resource_new(command: Value, payload: Vec<u8>) -> Result<Vec<u8>, String> {
     match command["op"].as_str() {
+        Some(op) if op.starts_with("ws_") => crate::websocket::resource_new(&command),
         Some(op) if op.starts_with("sha256_") => crate::hashing::execute(&command, &payload),
         Some(op) if op.starts_with("logging_") => crate::logging::execute(&command),
         Some("zstd_encode" | "zstd_decode") => crate::zstd_codec::execute(&command, &payload),
-        Some("tower_route_clone" | "tower_extensions_clone") => {
+        Some("tower_route_clone" | "tower_extensions_clone" | "tower_router_service") => {
             crate::tower_bridge::resource_new(&command)
         }
         Some("middleware_next_clone") => crate::middleware::resource_new(&command),
@@ -124,6 +125,7 @@ pub fn resource_new(command: Value, payload: Vec<u8>) -> Result<Vec<u8>, String>
 }
 pub fn resource_release(kind: u32, id: u64) {
     match kind {
+        24 | 25 => crate::websocket::release(kind, id),
         crate::hashing::HASHER => crate::hashing::release(id),
         crate::logging::LOGGER => crate::logging::release(id),
         crate::oidc::CLIENT => crate::oidc::release(id),
@@ -157,6 +159,7 @@ pub fn resource_release(kind: u32, id: u64) {
 
 pub fn operation(command: Value, body: Vec<u8>) -> Result<FutureBytes, String> {
     match command["op"].as_str() {
+        Some(op) if op.starts_with("ws_") => crate::websocket::operation(command, body),
         Some("tower_route_call") => crate::tower_bridge::operation(command),
         Some("middleware_next") => crate::middleware::operation(command),
         Some(op) if op.starts_with("multipart_") => crate::multipart::operation(command),
@@ -210,6 +213,50 @@ pub fn operation(command: Value, body: Vec<u8>) -> Result<FutureBytes, String> {
             if let Some(timeout) = command["timeout_ms"].as_u64() {
                 request = request.timeout(Duration::from_millis(timeout));
             }
+            if let Some(parts) = command["multipart"].as_array() {
+                let mut form = reqwest::multipart::Form::new();
+                for part in parts {
+                    let callback = crate::callback::get(number(part, "callback")?)?;
+                    let stream =
+                        futures_util::stream::try_unfold(callback, |callback| async move {
+                            let reply = callback.call(&[]).await.map_err(std::io::Error::other)?;
+                            let (header, bytes) = decode(&reply).map_err(std::io::Error::other)?;
+                            if header["ok"] != true {
+                                return Err(std::io::Error::other(
+                                    header["message"]
+                                        .as_str()
+                                        .unwrap_or("multipart read failed"),
+                                ));
+                            }
+                            if header["eof"] == true {
+                                Ok(None)
+                            } else {
+                                Ok(Some((bytes.to_vec(), callback)))
+                            }
+                        });
+                    let body = reqwest::Body::wrap_stream(stream);
+                    let mut native = if let Some(length) = part["length"].as_u64() {
+                        reqwest::multipart::Part::stream_with_length(body, length)
+                    } else {
+                        reqwest::multipart::Part::stream(body)
+                    };
+                    if let Some(name) = part["file_name"].as_str() {
+                        native = native.file_name(name.to_owned());
+                    }
+                    if let Some(mime) = part["mime"].as_str() {
+                        native = native.mime_str(mime).map_err(|e| e.to_string())?;
+                    }
+                    form = form.part(
+                        part["name"]
+                            .as_str()
+                            .ok_or("missing multipart name")?
+                            .to_owned(),
+                        native,
+                    );
+                }
+                request = request.multipart(form);
+            }
+
             Ok(Box::pin(async move {
                 match request.send().await {
                     Err(error) => failure(error),

@@ -1,5 +1,30 @@
 # Service migration status
 
+## Pezzottify native engine migration — 2026-10-07
+
+**Pending consumer verification and integration; shared support implemented.** Active development branch is `dev`,
+initially clean at `7f54cb6e`. Baseline default-feature tests pass **1,561**, with
+38 existing ignores. Formatting passes. Initial strict Clippy was interrupted
+when the user accidentally removed both temporary worktrees; no source finding
+was reported before the missing-directory error. Worktrees were recreated and
+the consumer migration branch rebased onto the new frontend-only `5fab6e4f`.
+Shared baseline is clean master `92df460`. Branches:
+`implementation/pezzottify-engine-support` and
+`migration/pezzottify-native-engine`, under `/tmp/pezzottify-engine-migration`.
+
+Scope: engine runtime/HTTP client/server, WebSockets, SSE, uploads, streaming,
+lifecycle and logging. Database/query/search and OIDC verification policy remain
+local. Shared additions cover WebSocket upgrades, streaming outbound multipart,
+blocking HTTP callers, cancellation trees, INFO-default lossy logging and native
+router service access for extension-preserving fixtures. The native runtime owns
+execution; host synchronization/select primitives retain only Tokio sync/macros.
+Shared full engine verification passes after updating standalone fixture locks;
+strict all-feature/all-target Clippy passes. Additional contracts cover cancelled
+WebSocket receive with a concurrent writer, close codes/reasons, bounded multipart
+readers, process output/stdio/reuse and preserved panic diagnostics. Pezzottify's
+1,215 enabled library tests pass; the full suite remains in progress. No build-time
+savings or integrated adoption claimed yet. No push/deployment.
+
 ## Meteonesto weather-gateway engine migration — 2026-10-07
 
 **Done locally for Weather Gateway; overall Meteonesto engine migration remains partial.** Isolated branches `implementation/gateway-engine-support`

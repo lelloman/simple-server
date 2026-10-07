@@ -2,7 +2,7 @@
 //! in the consumer graph. Handlers accept an owned `Request` and return `Response`.
 //!
 //! This is an explicit development API, not yet a drop-in replacement for `web`:
-//! TLS and protocol upgrades remain unimplemented. Tower layers wrap the opaque
+//! TLS remains unimplemented. WebSocket upgrades use the native transport. Tower layers wrap the opaque
 //! `Route` service with infallible responses and streaming byte bodies. Bind application state with `with_state`.
 //! Register handlers and serve inside the application's engine runtime.
 //! Typed handlers allow body extraction only in the final position:
@@ -33,6 +33,7 @@ mod service;
 pub mod sse;
 #[cfg(unix)]
 pub mod unix;
+pub mod ws;
 pub use crate::extract::{Extract, FromRequestParts, IntoRejectionResponse, RejectionResponse};
 pub use extract::{
     BodyLimit, ConnectInfo, Extension, Form, FromRequest, FromState, Json, MatchedPath, Path,

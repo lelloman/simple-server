@@ -1090,6 +1090,7 @@ dependencies = [
  "flate2",
  "form_urlencoded",
  "futures-channel",
+ "futures-executor",
  "futures-util",
  "governor 0.10.4",
  "governor 0.6.3",
@@ -1145,6 +1146,7 @@ dependencies = [
 name = "lelloman-simple-server-sys"
 version = "0.2.0"
 dependencies = [
+ "futures-executor",
  "lelloman-simple-server-abi",
  "serde_json",
  "socket2",

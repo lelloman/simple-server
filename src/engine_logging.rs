@@ -19,6 +19,8 @@ pub enum FilterMode {
     /// Preserve `EnvFilter::new` behavior: discard invalid directives and use ERROR
     /// when no directives remain.
     Lossy,
+    /// Discard invalid directives; use INFO when no valid directive remains.
+    LossyOrInfo,
     /// Preserve `EnvFilter::try_new`, falling back to info on a parse error.
     StrictOrInfo,
 }

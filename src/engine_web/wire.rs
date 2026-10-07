@@ -115,6 +115,11 @@ pub(super) fn request(bytes: &[u8]) -> io::Result<Request> {
             .extensions_mut()
             .remove::<super::extract::MatchedPath>();
     }
+    if let Some(peer) = metadata.peer {
+        request
+            .extensions_mut()
+            .insert(super::extract::ConnectInfo(peer));
+    }
     request.extensions_mut().insert(metadata);
     if let Some(id) = header["native_extensions"].as_u64() {
         let resource = resource(17, json!({"op":"tower_extensions_clone","extensions":id}))?;

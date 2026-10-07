@@ -10,6 +10,7 @@ links = "simple_server_engine"
 name = "simple_server_sys"
 
 [dependencies]
+futures-executor = "0.3"
 simple-server-abi = { package = "lelloman-simple-server-abi", path = "../engine-abi", version = "=0.2.0" }
 
 [lints.rust]

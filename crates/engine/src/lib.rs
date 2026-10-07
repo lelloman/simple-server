@@ -334,3 +334,5 @@ unsafe extern "C" fn callback_new(callback: simple_server_abi::Callback) -> u64 
 pub extern "C" fn simple_server_engine_v1() -> *const Api {
     &API
 }
+
+mod websocket;

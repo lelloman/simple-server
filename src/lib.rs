@@ -245,3 +245,15 @@ pub mod hashing;
 pub mod signal {
     pub use simple_server_sys::{UnixSignal, UnixSignalKind};
 }
+
+/// Runtime-independent synchronization and selection primitives.
+/// This enables only Tokio's sync/macros features, not its executor or I/O.
+#[cfg(feature = "runtime-primitives")]
+pub mod primitives {
+    pub use crate::cancellation::CancellationToken;
+    pub use tokio::sync::*;
+    pub use tokio::{join, pin, select, try_join};
+}
+
+#[cfg(feature = "runtime-primitives")]
+mod cancellation;

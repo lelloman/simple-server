@@ -16,3 +16,21 @@ async fn owned_entry_point_propagates_results() -> Result<(), Box<dyn std::error
     assert_eq!(simple_server::runtime::spawn(async { 3 }).await?, 3);
     Ok(())
 }
+
+#[simple_server::test]
+async fn join_errors_preserve_application_panic_diagnostics() {
+    let literal = simple_server::runtime::spawn(async { panic!("literal panic") })
+        .await
+        .unwrap_err();
+    assert!(literal.to_string().contains("literal panic"));
+    let owned = simple_server::runtime::spawn_blocking(|| {
+        std::panic::panic_any(String::from("owned panic"))
+    })
+    .await
+    .unwrap_err();
+    assert!(owned.to_string().contains("owned panic"));
+    assert_eq!(
+        *owned.into_panic().downcast::<String>().unwrap(),
+        "owned panic"
+    );
+}

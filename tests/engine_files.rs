@@ -87,3 +87,32 @@ async fn cancelled_pipe_read_keeps_bytes_for_the_next_reader() {
     reader.read_to_end(&mut rest).await.unwrap();
     assert_eq!(&rest, b"cdef");
 }
+
+#[cfg(feature = "process")]
+#[simple_server::test]
+async fn managed_output_drains_both_pipes_and_reuses_configuration() {
+    use simple_server::process::ManagedCommand;
+    let mut command = ManagedCommand::new("/bin/sh");
+    command.args([
+        "-c",
+        "head -c 200000 /dev/zero; head -c 200000 /dev/zero >&2; exit 7",
+    ]);
+    for _ in 0..2 {
+        let output =
+            simple_server::time::timeout(std::time::Duration::from_secs(5), command.output())
+                .await
+                .unwrap()
+                .unwrap();
+        assert_eq!(output.status.code(), Some(7));
+        assert_eq!(output.stdout.len(), 200000);
+        assert_eq!(output.stderr.len(), 200000);
+    }
+    let output = ManagedCommand::new("/bin/sh")
+        .args(["-c", "printf ignored; printf error >&2"])
+        .stdout(std::process::Stdio::null())
+        .output()
+        .await
+        .unwrap();
+    assert!(output.stdout.is_empty());
+    assert_eq!(output.stderr, b"error");
+}

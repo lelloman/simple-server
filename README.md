@@ -21,9 +21,12 @@ including applicability checks and updates to both adoption trackers.
 
 An unpublished shared-engine implementation is under development. The opt-in
 `runtime`, `client`, `process`, and `sqlite-client` features use a Rust-built
-`libsimple_server_engine.so.1` through a C ABI. The public HTTP server and existing
-source lifecycle/scheduling modules still use the source backend. This is not yet the
-planned complete engine release, and no production consumer has migrated.
+`libsimple_server_engine.so.1` through a C ABI. `engine-web`, `engine-lifecycle`,
+`engine-tasks` and `engine-scheduling` select native execution; the corresponding
+source modules remain available. Several consumer development branches have
+adopted the engine locally; publication and deployment are separate. See the
+[adoption evidence](docs/migration-status.md) and
+[runtime/transport contracts](docs/engine-application-runtime.md).
 
 The unpublished migration also owns the public networking and task-error
 contracts: `http::bind` returns `net::TcpListener`, HTTP/TLS serving accepts that

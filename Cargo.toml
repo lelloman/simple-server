@@ -19,6 +19,7 @@ default-members = ["."]
 resolver = "2"
 
 [features]
+runtime-primitives = ["engine-lifecycle","dep:tokio", "tokio/sync", "tokio/macros"]
 hashing = ["dep:simple-server-sys", "dep:serde_json"]
 engine-logging = ["dep:simple-server-sys", "dep:serde_json", "dep:tracing", "dep:tracing-log", "dep:tracing-core"]
 zstd = ["dep:simple-server-sys", "dep:serde_json"]
@@ -32,9 +33,9 @@ engine-tasks = ["runtime"]
 engine-tokio = ["engine-web", "source-runtime", "tokio/rt"]
 engine-tracing = ["engine-web", "dep:tracing"]
 correlation-core = ["dep:http", "dep:rand"]
-engine-web = ["dep:tower-layer", "dep:tower-service", "extract", "dep:serde", "dep:serde_urlencoded", "dep:serde_path_to_error", "dep:form_urlencoded", "dep:mime", "engine-lifecycle", "dep:bytes", "dep:http", "dep:http-body", "dep:http-body-util", "dep:serde_json"]
+engine-web = ["futures-util/sink","dep:tower-layer", "dep:tower-service", "extract", "dep:serde", "dep:serde_urlencoded", "dep:serde_path_to_error", "dep:form_urlencoded", "dep:mime", "engine-lifecycle", "dep:bytes", "dep:http", "dep:http-body", "dep:http-body-util", "dep:serde_json"]
 engine-lifecycle = ["runtime", "dep:futures-util"]
-client = ["runtime", "dep:serde", "dep:serde_json", "dep:serde_urlencoded", "dep:bytes", "dep:http", "dep:futures-util"]
+client = ["dep:mime", "dep:futures-executor","runtime", "dep:serde", "dep:serde_json", "dep:serde_urlencoded", "dep:bytes", "dep:http", "dep:futures-util"]
 process = ["runtime", "dep:serde_json"]
 oidc = ["runtime", "dep:serde_json"]
 postgres-client = ["runtime", "dep:serde", "dep:serde_json", "dep:sha2"]
@@ -79,6 +80,7 @@ ws = ["http", "axum/ws", "futures-util?/sink"]
 sse = ["web", "axum/json"]
 
 [dependencies]
+futures-executor = { version = "0.3", optional = true }
 futures-channel = { version = "0.3", optional = true }
 tracing-core = { version = "0.1", optional = true }
 tracing-log = { version = "0.2", optional = true }
@@ -105,7 +107,7 @@ pin-project-lite = { version = "0.2", optional = true }
 tower-http = { version = "0.6", default-features = false, optional = true }
 http = { version = "1", optional = true }
 tower-layer = { version = "0.3", optional = true }
-http-body = { version = "1", optional = true }
+http-body = { version = "1.1", optional = true }
 rand = { version = "0.8", optional = true }
 axum = { version = "=0.8.9", optional = true }
 axum-server = { version = "0.7", features = ["tls-rustls"], optional = true }

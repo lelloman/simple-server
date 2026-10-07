@@ -1,7 +1,9 @@
 //! Outbound HTTP with a prebuilt engine implementation.
 use bytes::Bytes;
 use http::{HeaderMap, HeaderValue, header::HeaderName};
-pub use http::{Method, StatusCode};
+pub use http::{Method, StatusCode, header};
+pub mod blocking;
+pub mod multipart;
 use serde::{Serialize, de::DeserializeOwned};
 use serde_json::{Value, json};
 use simple_server_sys::Resource;
@@ -91,6 +93,7 @@ impl Client {
                 url: url.as_ref().to_owned(),
                 headers: HeaderMap::new(),
                 body: Vec::new(),
+                multipart: None,
                 timeout: None,
             }),
         }
@@ -169,6 +172,7 @@ struct RequestData {
     url: String,
     headers: HeaderMap,
     body: Vec<u8>,
+    multipart: Option<multipart::Form>,
     timeout: Option<Duration>,
 }
 pub struct RequestBuilder {
@@ -216,6 +220,7 @@ impl RequestBuilder {
     }
     pub fn body(self, bytes: impl Into<Vec<u8>>) -> Self {
         self.change(|r| {
+            r.multipart = None;
             r.body = bytes.into();
             Ok(())
         })
@@ -223,6 +228,7 @@ impl RequestBuilder {
     pub fn json<T: Serialize + ?Sized>(self, value: &T) -> Self {
         self.change(|r| {
             r.body = serde_json::to_vec(value).map_err(Error::local)?;
+            r.multipart = None;
             r.headers
                 .entry(http::header::CONTENT_TYPE)
                 .or_insert(HeaderValue::from_static("application/json"));
@@ -244,14 +250,25 @@ impl RequestBuilder {
             Ok(())
         })
     }
+    pub fn multipart(self, form: multipart::Form) -> Self {
+        self.change(|r| {
+            r.body.clear();
+            r.multipart = Some(form);
+            Ok(())
+        })
+    }
     pub async fn send(self) -> Result<Response, Error> {
         let request = self.request?;
+        let (multipart, _callbacks) = match request.multipart {
+            Some(form) => form.encode()?,
+            None => (Value::Null, Vec::new()),
+        };
         let headers: Vec<_> = request
             .headers
             .iter()
             .map(|(k, v)| json!([k.as_str(), v.as_bytes()]))
             .collect();
-        let (header, _) = crate::engine_wire::command(json!({"op":"http_send", "client": self.client.resource.id(), "method": request.method.as_str(), "url": request.url, "headers": headers, "timeout_ms": request.timeout.map(millis)}), &request.body).await.map_err(Error::local)?;
+        let (header, _) = crate::engine_wire::command(json!({"op":"http_send", "multipart": multipart, "client": self.client.resource.id(), "method": request.method.as_str(), "url": request.url, "headers": headers, "timeout_ms": request.timeout.map(millis)}), &request.body).await.map_err(Error::local)?;
         let header = checked(header)?;
         let id = header["id"]
             .as_u64()

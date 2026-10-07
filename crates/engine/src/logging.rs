@@ -87,6 +87,11 @@ fn new(v: &Value) -> Result<Vec<u8>, String> {
     let filter = match text(v, "mode")? {
         "Strict" if !raw.trim().is_empty() => EnvFilter::try_new(raw).ok(),
         "Lossy" => Some(EnvFilter::new(raw)),
+        "LossyOrInfo" => Some(
+            EnvFilter::builder()
+                .with_default_directive(tracing::level_filters::LevelFilter::INFO.into())
+                .parse_lossy(raw),
+        ),
         "StrictOrInfo" => Some(EnvFilter::try_new(raw).unwrap_or_else(|_| EnvFilter::new("info"))),
         _ => None,
     };

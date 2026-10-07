@@ -256,24 +256,28 @@ impl<S: Clone + Send + Sync + 'static> Router<S> {
     /// Serve a directory as the native fallback, retaining GET/HEAD, ranges,
     /// conditionals and directory redirects. Symlinks are followed; use a trusted root.
     pub fn fallback_static_dir(self, path: impl AsRef<std::path::Path>) -> io::Result<Self> {
+        self.fallback_static_dir_with_index(path, None::<&std::path::Path>)
+    }
+    /// Serve a directory with an optional SPA fallback file using native range/conditional handling.
+    pub fn fallback_static_dir_with_index(
+        self,
+        path: impl AsRef<std::path::Path>,
+        index: Option<impl AsRef<std::path::Path>>,
+    ) -> io::Result<Self> {
         let path = path
             .as_ref()
             .to_str()
-            .ok_or_else(|| {
-                io::Error::new(
-                    io::ErrorKind::InvalidInput,
-                    "static directory path must be UTF-8",
-                )
-            })?
+            .ok_or_else(|| io::Error::other("static directory path must be UTF-8"))?
             .to_owned();
-        Ok(Self {
-            plan: self.plan.map(move |router| {
-                wire::resource(
-                    8,
-                    json!({"op":"router_static_dir","router":router.id(),"path":path}),
-                )
-            })?,
-        })
+        let index = index
+            .map(|p| {
+                p.as_ref()
+                    .to_str()
+                    .map(str::to_owned)
+                    .ok_or_else(|| io::Error::other("static fallback path must be UTF-8"))
+            })
+            .transpose()?;
+        Ok(Self{plan:self.plan.map(move |router|wire::resource(8,json!({"op":"router_static_dir","router":router.id(),"path":path,"fallback_file":index})))?})
     }
     pub fn merge(self, other: Self) -> io::Result<Self> {
         Ok(Self {
@@ -379,6 +383,14 @@ impl<S: Clone + Send + Sync + 'static> Router<S> {
     }
 }
 impl Router {
+    /// Expose the complete router as an owned service, preserving local extensions.
+    pub fn into_service(self) -> io::Result<super::Route> {
+        let router = self.into_resource()?;
+        Ok(super::Route(wire::resource(
+            16,
+            json!({"op":"tower_router_service","router":router.id()}),
+        )?))
+    }
     pub(super) fn into_resource(self) -> io::Result<Resource> {
         self.plan.resolve(())
     }

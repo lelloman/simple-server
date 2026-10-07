@@ -25,9 +25,10 @@ use std::{
 use tower::{Layer, Service, ServiceExt};
 pub const ROUTE: u32 = 16;
 pub const EXTENSIONS: u32 = 17;
-static ROUTES: OnceLock<Mutex<HashMap<u64, Route>>> = OnceLock::new();
+type StoredRoute = tower::util::BoxCloneSyncService<Request, Response<Body>, Infallible>;
+static ROUTES: OnceLock<Mutex<HashMap<u64, StoredRoute>>> = OnceLock::new();
 static SNAPSHOTS: OnceLock<Mutex<HashMap<u64, Arc<Extensions>>>> = OnceLock::new();
-fn routes() -> &'static Mutex<HashMap<u64, Route>> {
+fn routes() -> &'static Mutex<HashMap<u64, StoredRoute>> {
     ROUTES.get_or_init(Default::default)
 }
 fn snapshots() -> &'static Mutex<HashMap<u64, Arc<Extensions>>> {
@@ -57,7 +58,7 @@ pub(crate) fn capture(extensions: Extensions) -> Borrowed {
     snapshots().lock().unwrap().insert(id, Arc::new(extensions));
     Borrowed(EXTENSIONS, id)
 }
-fn route(id: u64) -> Result<Route, String> {
+fn route(id: u64) -> Result<StoredRoute, String> {
     routes()
         .lock()
         .unwrap()
@@ -65,7 +66,7 @@ fn route(id: u64) -> Result<Route, String> {
         .cloned()
         .ok_or_else(|| "route released".into())
 }
-fn snapshot(id: u64) -> Result<Arc<Extensions>, String> {
+pub(crate) fn snapshot(id: u64) -> Result<Arc<Extensions>, String> {
     snapshots()
         .lock()
         .unwrap()
@@ -78,7 +79,13 @@ fn number(value: &Value, key: &str) -> Result<u64, String> {
 }
 pub fn resource_new(command: &Value) -> Result<Vec<u8>, String> {
     let id = id();
-    if command["op"] == "tower_route_clone" {
+    if command["op"] == "tower_router_service" {
+        let router = crate::routing::router(number(command, "router")?)?;
+        routes()
+            .lock()
+            .unwrap()
+            .insert(id, StoredRoute::new(router));
+    } else if command["op"] == "tower_route_clone" {
         let value = route(number(command, "route")?)?;
         routes().lock().unwrap().insert(id, value);
     } else {
@@ -93,7 +100,7 @@ impl Layer<Route> for HostLayer {
     type Service = HostService;
     fn layer(&self, inner: Route) -> Self::Service {
         let id = id();
-        routes().lock().unwrap().insert(id, inner);
+        routes().lock().unwrap().insert(id, StoredRoute::new(inner));
         let _borrowed = Borrowed(ROUTE, id);
         let result = (|| -> Result<HostService, String> {
             // Layer::layer is synchronous. The host factory never awaits; do not
