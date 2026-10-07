@@ -19,6 +19,7 @@ default-members = ["."]
 resolver = "2"
 
 [features]
+zstd = ["dep:simple-server-sys", "dep:serde_json"]
 engine-io = ["runtime", "dep:futures-util", "futures-util/io", "dep:async-lock"]
 source-runtime = ["dep:tokio", "tokio/macros", "tokio/net", "tokio/signal", "tokio/sync", "tokio/time"]
 task-policy-core = []

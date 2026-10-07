@@ -1,5 +1,16 @@
 # Service migration status
 
+## Weather API Zstd extraction — 2026-10-07
+
+**Pending verification/integration.** From clean shared master `d14db1f` and
+Meteonesto master `fa25b76`, isolated sibling worktrees under
+`/tmp/weather-zstd-migration` implement native buffer codecs and migrate Weather
+API's three production decompression sites and test fixture encoding. Baseline
+component checks pass 75 Rust and 18 Python tests. Weather-pipeline uses matching
+buffer operations and is a future consumer; streaming backups/agent archives need
+a separate streaming API. Other services are not migrated. Build/release evidence
+and final integration remain pending.
+
 ## Meteonesto weather-api engine migration — 2026-10-07
 
 **Weather API production adoption Done locally; Meteonesto engine Partial.**

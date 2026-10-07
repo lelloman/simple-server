@@ -64,8 +64,9 @@ fn number(command: &Value, key: &str) -> Result<u64, String> {
         .ok_or_else(|| format!("missing {key}"))
 }
 
-pub fn resource_new(command: Value, _: Vec<u8>) -> Result<Vec<u8>, String> {
+pub fn resource_new(command: Value, payload: Vec<u8>) -> Result<Vec<u8>, String> {
     match command["op"].as_str() {
+        Some("zstd_encode" | "zstd_decode") => crate::zstd_codec::execute(&command, &payload),
         Some("tower_route_clone" | "tower_extensions_clone") => {
             crate::tower_bridge::resource_new(&command)
         }

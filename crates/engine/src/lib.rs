@@ -1,6 +1,7 @@
 //! Privately linked implementation of the simple-server binary interface.
 mod oidc;
 mod postgres;
+mod zstd_codec;
 use simple_server_abi::{Api, Buffer, RuntimeOptions, Task, Wake, *};
 use std::{
     cell::RefCell,

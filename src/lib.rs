@@ -226,3 +226,7 @@ pub mod sync {
     pub use crate::watch;
     pub use async_lock::{Mutex, MutexGuardArc, OnceCell, Semaphore, SemaphoreGuardArc};
 }
+
+/// Synchronous Zstd byte-buffer codecs implemented in the native engine.
+#[cfg(feature = "zstd")]
+pub mod zstd;

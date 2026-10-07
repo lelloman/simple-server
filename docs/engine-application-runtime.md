@@ -115,3 +115,25 @@ Skip retains the original schedule while discarding missed ticks; cancellation
 of a pending tick preserves its deadline. Weather API uses Skip for publication
 polling and popularity persistence. These helpers execute with engine timers and
 runtime-independent synchronization; no new native ABI operation is needed.
+
+## Zstd buffer codecs
+
+The `zstd` feature provides synchronous `encode_all`, `decode_all` and
+`decode_all_limited` buffer APIs backed by the native engine. It requires no
+runtime; async callers schedule large work on blocking workers. Wire payloads
+are raw bytes in the existing framed ABI, so no base64/JSON byte arrays or new
+ABI table fields are needed. Calls allocate/copy across the ownership boundary;
+this is not a zero-copy or streaming API. Decode accepts concatenated/skippable
+frames and propagates malformed/truncated-frame errors. The optional limit
+bounds expanded output length, not decoder window allocation or CPU time.
+Unbounded decode preserves Weather API's existing trusted-publication policy.
+Compression level zero uses Zstd's default. The native lock retains the
+consumer's zstd 0.13.3 / zstd-safe 7.2.4 / zstd-sys 2.0.16 (Zstd 1.5.7).
+
+Existing consumers that could reuse this include weather-pipeline's buffered
+artifact encoding/decoding. Its streaming backup paths and Simple Agents'
+streaming archive extraction would require a separate streaming API; they are
+not migrated here. PV Estimator's embedded catalogue also uses buffer decoding,
+but adopting a dynamic native library there needs a target/packaging assessment.
+Observo declares Zstd but this scan found no source call; declaration alone is
+not evidence of adoption. No other consumers change in this migration.
