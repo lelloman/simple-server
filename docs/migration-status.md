@@ -2,15 +2,42 @@
 
 ## Weather API SHA-256 extraction — 2026-10-07
 
-**Pending integration.** Isolated branches `implementation/engine-hashing` and
+**Done locally for Weather API; other consumers unchanged.** Isolated branches `implementation/engine-hashing` and
 `migration/weather-api-hashing` start from clean shared master `0279af5` and
 Meteonesto master `adefda9`. Actual production hashes cover artifact checks,
 manifest/grid digests, ETags, map assets and edge-token handling. The native
 implementation retains sha2 0.10.9 and exposes buffer and buffered incremental
 hashing. Authentication uses fallible hashing and rejects backend failure.
 Other consumers are unchanged. See [contract and limits](engine-application-runtime.md#engine-owned-sha-256).
-Verification and measurements appear below; integration remains pending.
+Verification and measurements appear below.
 
+
+Both original master branches were rebased onto the tested migration branches;
+ancestry and exact tested-tree equality pass. Both original worktrees stayed
+clean with no concurrent commits. Shared implementation/source pin is `86110e7`,
+measurements commit `8b828cb`; consumer implementation is `9f5060a`, final
+consumer evidence/release source is
+`936a0fb9cf5a3661f2cf1eadb63722a57ac25060`. The consumer temporary worktree and
+branch are removed; final shared tracker integration and cleanup follow this
+commit. No push or deployment was performed.
+
+The local release is retained at
+`/tmp/weather-hashing-release/weather-api-v0.1.0-g936a0fb9cf5a.tar.zst`.
+Bundle SHA256: `789860c1e4e9307b381bafaad9c7341878dfd48ee162064434e1d77c4b02683f`.
+Reusable artifact/metadata: `/tmp/weather-hashing-artifact`; engine SHA256:
+`3f9ac1525de5b3a2a4df199990718be86faba621df589cd7e58c96eb7b306687`.
+The clean-source package reran all component checks and verified native linking.
+Extracted schema-2 verification and both lifecycle tests pass: real HTTP,
+cache-worker drain, SIGINT/SIGTERM, invalid config and bind failures. The installed
+symlink topology resolves its bundled `.so.1` with loader overrides unset.
+
+Retained evidence: `/tmp/weather-hashing-baseline.log`,
+`/tmp/weather-hashing-red.log`, `/tmp/weather-hashing-contracts.log`,
+`/tmp/weather-hashing-native-final-build.log`, `/tmp/weather-hashing-engine-check.log`,
+`/tmp/weather-hashing-clippy.log`, `/tmp/weather-hashing-doc.log`,
+`/tmp/weather-hashing-service-check.log`, `/tmp/weather-hashing-benchmark.log`,
+`/tmp/weather-hashing-package.log`, `/tmp/weather-hashing-release-smoke.log`.
+Tracker local links and embedded JavaScript syntax pass.
 
 ## Native SHA-256 follow-up — 2026-10-07
 
@@ -54,7 +81,7 @@ normal run-to-run variation limits conclusions. This is a reusable shared hashin
 boundary, not a major additional compile-time win. Buffer copies and ABI calls
 add runtime overhead; runtime throughput has not been benchmarked.
 [Raw measurements](measurements/weather-api-hashing-build-2026-10-07.json) are mirrored in both repositories.
-Release and final integration evidence are recorded in the central migration tracker.
+Release and final integration evidence appear above.
 
 ## Weather API logging extraction — 2026-10-07
 
