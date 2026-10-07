@@ -2,7 +2,31 @@
 
 ## Pezzottify native engine migration — 2026-10-07
 
-**Done locally for Pezzottify runtime/HTTP/logging; SQLite/search and OIDC verification remain local.** Active development branch is `dev`,
+**Reverted locally on 2026-10-07.** At the user's request, Pezzottify's three
+native-engine migration commits (`d9c4c293`, `ced628ea`, `0b666437`) were reverted
+in `8bda3b15` and integrated into `dev`. The complete tree exactly matches
+pre-migration `5fab6e4f`, preserving the frontend changes. The registry
+`lelloman-simple-server =0.1.3` dependency, source-backed runtime/HTTP stack,
+Docker/CI configuration and build instructions are restored. No engine sys
+crate or `.so` build/pin requirement remains in Pezzottify's dependency graph.
+
+The 14% debug and 8% release clean-build savings did not justify the added
+complexity for this service. Measurements below are retained as historical
+experimental evidence, not current adoption. Shared-library additions and other
+services' native-engine migrations are unchanged.
+
+Rollback verification: exact tree equality with `5fab6e4f`; backend equality with
+previously tested baseline `7f54cb6e` (1,561 passed, 38 ignored); formatting,
+database-boundary and locked/offline dependency checks pass. The full test suite
+was not rerun because the backend is byte-for-byte restored to that tested tree.
+Development branch ancestry and clean checkout were verified. The consumer
+rollback worktree and fully integrated branch were removed; the shared tracker
+worktree is removed after this record is integrated and verified. No push or
+deployment occurred.
+
+### Historical migration experiment
+
+The following records the now-reverted experiment. Its active development branch was `dev`,
 initially clean at `7f54cb6e`. Baseline default-feature tests pass **1,561**, with
 38 existing ignores. Formatting passes. Initial strict Clippy was interrupted
 when the user accidentally removed both temporary worktrees; no source finding
