@@ -2,7 +2,7 @@
 
 ## Pezzottify native engine migration — 2026-10-07
 
-**Pending consumer verification and integration; shared support implemented.** Active development branch is `dev`,
+**Pending integration; implementation and scoped verification complete.** Active development branch is `dev`,
 initially clean at `7f54cb6e`. Baseline default-feature tests pass **1,561**, with
 38 existing ignores. Formatting passes. Initial strict Clippy was interrupted
 when the user accidentally removed both temporary worktrees; no source finding
@@ -22,8 +22,30 @@ Shared full engine verification passes after updating standalone fixture locks;
 strict all-feature/all-target Clippy passes. Additional contracts cover cancelled
 WebSocket receive with a concurrent writer, close codes/reasons, bounded multipart
 readers, process output/stdio/reuse and preserved panic diagnostics. Pezzottify's
-1,215 enabled library tests pass; the full suite remains in progress. No build-time
-savings or integrated adoption claimed yet. No push/deployment.
+default and fast suites each pass **1,561 tests, 38 existing ignores**, including
+production process shutdown/WebSocket drain and 60 logging comparisons. Production
+strict Clippy, formatting and database boundaries pass. Broader all-target Clippy
+has failures reproduced on the baseline. Docker build and loader smoke pass;
+full browser/Android Docker E2E is not run. Source pin `f21dbfe`.
+Normal/build graph: 361 → 328 package/version entries (340 → 307 names).
+Consumer implementation `0b666437`; final release wrapper, graph/link checks and
+relocated bundle loading without LD_LIBRARY_PATH pass. Synchronous cli-auth and
+query_search_index do not link an unused engine. Branch integration remains pending.
+No push/deployment.
+
+Three alternating paired fresh-target builds per profile, eight jobs, Rust 1.96.0,
+offline cached dependencies; engine prebuild excluded:
+
+| Profile | Clean before | Clean after | Reduction | Main touch before | Main touch after |
+|---|---:|---:|---:|---:|---:|
+| dev | 66.214s | 56.872s | 14.11% | 1.736s | 1.592s |
+| release | 114.179s | 105.151s | 7.91% | 5.953s | 4.836s |
+
+Touch measurements change only `src/main.rs`'s timestamp, not library code.
+Release samples varied (before 110.9–114.4s; after 97.4–108.9s); the table reports
+medians, not the best pair. No runtime speedup is claimed.
+[Raw measurements](measurements/pezzottify-engine-build-2026-10-07.json).
+
 
 ## Meteonesto weather-gateway engine migration — 2026-10-07
 

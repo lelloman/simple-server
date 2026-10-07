@@ -1,0 +1,162 @@
+{
+  "baseline": "5fab6e4f6eb5b3e59ce80e94085f8bcc250e2d0e",
+  "engine_revision": "f21dbfeacf87c1108f7c3d4d1578b2017b201272",
+  "rustc": "rustc 1.96.0 (ac68faa20 2026-05-25)",
+  "jobs": 8,
+  "engine_prebuild_excluded": true,
+  "offline": true,
+  "binary": "pezzottify-server",
+  "samples": [
+    {
+      "profile": "dev",
+      "trial": 1,
+      "variant": "before",
+      "clean_seconds": 64.83303671699832,
+      "clean_exit": 0,
+      "touch_seconds": 1.7361243039922556,
+      "touch_exit": 0
+    },
+    {
+      "profile": "dev",
+      "trial": 1,
+      "variant": "after",
+      "clean_seconds": 56.8720385159977,
+      "clean_exit": 0,
+      "touch_seconds": 1.6800697239959845,
+      "touch_exit": 0
+    },
+    {
+      "profile": "dev",
+      "trial": 2,
+      "variant": "after",
+      "clean_seconds": 58.35862135999196,
+      "clean_exit": 0,
+      "touch_seconds": 1.592490576003911,
+      "touch_exit": 0
+    },
+    {
+      "profile": "dev",
+      "trial": 2,
+      "variant": "before",
+      "clean_seconds": 67.6381223990029,
+      "clean_exit": 0,
+      "touch_seconds": 1.7919763200043235,
+      "touch_exit": 0
+    },
+    {
+      "profile": "dev",
+      "trial": 3,
+      "variant": "before",
+      "clean_seconds": 66.21388308300811,
+      "clean_exit": 0,
+      "touch_seconds": 1.736148714000592,
+      "touch_exit": 0
+    },
+    {
+      "profile": "dev",
+      "trial": 3,
+      "variant": "after",
+      "clean_seconds": 56.304479872997035,
+      "clean_exit": 0,
+      "touch_seconds": 1.582696331999614,
+      "touch_exit": 0
+    },
+    {
+      "profile": "release",
+      "trial": 1,
+      "variant": "before",
+      "clean_seconds": 110.91924865600595,
+      "clean_exit": 0,
+      "touch_seconds": 5.845387440000195,
+      "touch_exit": 0
+    },
+    {
+      "profile": "release",
+      "trial": 1,
+      "variant": "after",
+      "clean_seconds": 97.37227990099927,
+      "clean_exit": 0,
+      "touch_seconds": 4.728169477006304,
+      "touch_exit": 0
+    },
+    {
+      "profile": "release",
+      "trial": 2,
+      "variant": "after",
+      "clean_seconds": 105.150770474007,
+      "clean_exit": 0,
+      "touch_seconds": 5.101091666001594,
+      "touch_exit": 0
+    },
+    {
+      "profile": "release",
+      "trial": 2,
+      "variant": "before",
+      "clean_seconds": 114.37587339399033,
+      "clean_exit": 0,
+      "touch_seconds": 5.953192347005825,
+      "touch_exit": 0
+    },
+    {
+      "profile": "release",
+      "trial": 3,
+      "variant": "before",
+      "clean_seconds": 114.17857570300112,
+      "clean_exit": 0,
+      "touch_seconds": 6.042333374003647,
+      "touch_exit": 0
+    },
+    {
+      "profile": "release",
+      "trial": 3,
+      "variant": "after",
+      "clean_seconds": 108.89320802901057,
+      "clean_exit": 0,
+      "touch_seconds": 4.835610662994441,
+      "touch_exit": 0
+    }
+  ],
+  "medians": {
+    "dev": {
+      "before_clean_seconds": 66.21388308300811,
+      "before_touch_seconds": 1.736148714000592,
+      "after_clean_seconds": 56.8720385159977,
+      "after_touch_seconds": 1.592490576003911,
+      "clean_reduction_percent": 14.10858891223633,
+      "touch_reduction_percent": 8.274529528386477
+    },
+    "release": {
+      "before_clean_seconds": 114.17857570300112,
+      "before_touch_seconds": 5.953192347005825,
+      "after_clean_seconds": 105.150770474007,
+      "after_touch_seconds": 4.835610662994441,
+      "clean_reduction_percent": 7.906741850132237,
+      "touch_reduction_percent": 18.77281328854551
+    }
+  },
+  "consumer_implementation": "0b66643723d6a50f661f08dc63cc027ae92e7bd6",
+  "dependencies": {
+    "before": {
+      "package_versions": 361,
+      "package_names": 340
+    },
+    "after": {
+      "package_versions": 328,
+      "package_names": 307
+    }
+  },
+  "architecture": "x86_64",
+  "rust_min_stack": 33554432,
+  "incremental_probe": "touch src/main.rs without changing contents; not a library-module edit",
+  "artifact_sha256": "051a0de83a3dcaba314be53aa9025c7fd5c1210cad2f8cd26bbe7c230ab5ca0e",
+  "date": "2026-10-07",
+  "notes": "Three alternating before/after pairs per profile; cached registry, offline Cargo, unique fresh targets, eight jobs. Engine prebuild excluded. No runtime speedup measured.",
+  "build_environment": {
+    "CARGO_BUILD_JOBS": "8",
+    "RUST_MIN_STACK": "33554432",
+    "GIT_HASH": "benchmark",
+    "GIT_DIRTY": "0",
+    "COMMIT_COUNT": "1000"
+  },
+  "cpu": "AMD Ryzen 9 5950X 16-Core Processor"
+}
