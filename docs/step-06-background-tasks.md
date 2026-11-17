@@ -121,6 +121,11 @@ Intervals use monotonic clocks. Fixed-rate intervals skip missed ticks;
 fixed-delay intervals restart after the scheduled run finishes, with one sampled
 positive jitter per occurrence. Manual runs do not reset schedules. Cron uses
 UTC, seconds-first six/seven-field expressions, and skips historical replay.
+Since 0.1.8 a built-in evaluator replaces the `cron` and `chrono` crates
+(`chrono` is unmaintained, RUSTSEC-2026-0543). It keeps the same dialect:
+values, ranges, `/` steps, lists, month and weekday names, `?` in the day
+fields, weekdays 1 (Sunday) to 7, years 1970 to 2100, and day of month AND day
+of week. A test compares both on generated expressions and instants.
 UTC deadlines are checked at least once a second for clock changes. There is no
 implicit catch-up burst. Invalid registrations fail before serving work.
 

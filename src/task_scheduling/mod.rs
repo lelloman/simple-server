@@ -14,6 +14,7 @@ pub use selection::{
 };
 mod capacity;
 pub use capacity::{CapacityError, ExecutionCapacity, ExecutionPermit};
+mod cron;
 mod cron_registry;
 pub use cron_registry::{
     CronEntryConfig, CronEntrySnapshot, CronRegistry, CronRegistryError, CronRevision,

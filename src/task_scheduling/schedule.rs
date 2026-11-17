@@ -1,31 +1,18 @@
 use super::ConfigError;
-use chrono::{DateTime, Utc};
-use std::{
-    str::FromStr,
-    time::{Duration, SystemTime},
-};
+use super::cron::Cron;
+use std::time::{Duration, SystemTime};
 
 /// Parsed UTC cron. Six fields (seconds first), with an optional seventh year.
 #[derive(Clone, Debug)]
-pub struct CronSchedule(Box<cron::Schedule>);
+pub struct CronSchedule(Box<Cron>);
 impl CronSchedule {
     pub fn parse(expression: &str) -> Result<Self, ConfigError> {
-        if !matches!(expression.split_whitespace().count(), 6 | 7) {
-            return Err(ConfigError("cron requires six or seven fields".into()));
-        }
-        cron::Schedule::from_str(expression)
+        Cron::parse(expression)
             .map(|schedule| Self(Box::new(schedule)))
-            .map_err(|e| ConfigError(e.to_string()))
+            .map_err(ConfigError)
     }
     pub fn next_after(&self, time: SystemTime) -> Option<SystemTime> {
-        let epoch = DateTime::<Utc>::UNIX_EPOCH;
-        let date = match time.duration_since(SystemTime::UNIX_EPOCH) {
-            Ok(delta) => epoch.checked_add_signed(chrono::Duration::from_std(delta).ok()?)?,
-            Err(delta) => {
-                epoch.checked_sub_signed(chrono::Duration::from_std(delta.duration()).ok()?)?
-            }
-        };
-        self.0.after(&date).next().map(Into::into)
+        self.0.next_after(time)
     }
 }
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
