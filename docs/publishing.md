@@ -34,6 +34,21 @@ overwritten. Record the source commit and archive checksum, then independently
 verify a consumer download and compile before migrating consumer lockfiles.
 A Git push and deployment are separate operations.
 
+## Verified crates.io release: 0.1.8 (17 November 2026)
+
+Replaces the `cron` and `chrono` dependencies of `task-scheduling` with a
+built-in UTC cron evaluator; `chrono` is unmaintained (RUSTSEC-2026-0543). The
+cron dialect is unchanged, and `tests/cron_equivalence.rs` compares acceptance
+and next occurrences with `cron` 0.15 (now a development dependency) over
+generated expressions and instants. No API change.
+
+Published with explicit user authorization from clean committed source
+`0b526d0`. Archive SHA256:
+``.
+
+Full `scripts/check` passes, including the equivalence suite; clean publish dry
+run and real upload pass. No Git push or deployment occurred.
+
 ## Verified crates.io release: 0.1.7 (4 October 2026)
 
 Adds optional driver-neutral SQLite backup coordination and bounded synchronous
