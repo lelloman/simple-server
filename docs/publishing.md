@@ -43,8 +43,8 @@ and next occurrences with `cron` 0.15 (now a development dependency) over
 generated expressions and instants. No API change.
 
 Published with explicit user authorization from clean committed source
-`0b526d0`. Archive SHA256:
-``.
+`0b526d0`. Archive SHA256 (crates.io index):
+`18a39d20b65dbe499e5ddc48f41ee868a613e5cc210a22818ec476057ef2a543`.
 
 Full `scripts/check` passes, including the equivalence suite; clean publish dry
 run and real upload pass. No Git push or deployment occurred.
